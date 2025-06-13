@@ -19,7 +19,13 @@
 > 🔥 **One command to rule them all**: `npx claude-flow` - Deploy a full AI agent coordination system in seconds!
 
 
-## 🎉 **What's New in v1.0.43**
+## 🎉 **What's New in v1.0.44**
+
+### 🆕 **Enhanced Claude Code Integration**
+- **📝 Improved Slash Commands**: Updated all Claude Code slash commands to use `./claude-flow` wrapper
+- **🎯 Detailed SPARC Descriptions**: Slash commands now include full role definitions and custom instructions from `.roomodes`
+- **🚀 Claude-Flow Focused**: Removed references to internal tools, focusing on Claude-Flow capabilities
+- **📊 Better Examples**: Enhanced command examples with memory integration and automation workflows
 
 ### 🚀 **Major Release: Enterprise-Grade Swarm System**
 - **🐝 Advanced Swarm Orchestration**: Complete multi-agent coordination system with timeout-free execution

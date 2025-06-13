@@ -4,7 +4,7 @@
  * This version avoids import assertion issues while maintaining functionality
  */
 
-const VERSION = '1.0.43';
+const VERSION = '1.0.44';
 
 function printHelp() {
   console.log(`
