@@ -104,7 +104,8 @@ function showHelpWithCommands() {
 }
 
 async function main() {
-  const args = Deno.args;
+  // Support both Deno and Node.js
+  const args = typeof Deno !== 'undefined' ? Deno.args : process.argv.slice(2);
   
   if (args.length === 0) {
     printHelp();
@@ -3162,6 +3163,9 @@ For more information about SPARC methodology, see: https://github.com/ruvnet/cla
 `;
 }
 
-if (import.meta.main) {
+// Support both Deno and Node.js
+if (typeof Deno !== 'undefined' && import.meta.main) {
+  await main();
+} else if (typeof process !== 'undefined' && process.argv[1] === import.meta.url.replace('file://', '')) {
   await main();
 }
