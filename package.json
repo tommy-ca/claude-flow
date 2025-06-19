@@ -61,6 +61,7 @@
     "SWARM_VISIBILITY.md"
   ],
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.0",
     "@types/better-sqlite3": "^7.6.13",
     "better-sqlite3": "^11.10.0",
     "blessed": "^0.1.81",

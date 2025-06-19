@@ -59,7 +59,7 @@ export function createClaudeFlowTools(logger: ILogger): MCPTool[] {
 
 function createSpawnAgentTool(logger: ILogger): MCPTool {
   return {
-    name: 'agents/spawn',
+    name: 'agents_spawn',
     description: 'Spawn a new Claude agent with specified configuration',
     inputSchema: {
       type: 'object',
@@ -137,7 +137,7 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
 
 function createListAgentsTool(logger: ILogger): MCPTool {
   return {
-    name: 'agents/list',
+    name: 'agents_list',
     description: 'List all active agents in the system',
     inputSchema: {
       type: 'object',
@@ -184,7 +184,7 @@ function createListAgentsTool(logger: ILogger): MCPTool {
 
 function createTerminateAgentTool(logger: ILogger): MCPTool {
   return {
-    name: 'agents/terminate',
+    name: 'agents_terminate',
     description: 'Terminate a specific agent',
     inputSchema: {
       type: 'object',
@@ -229,7 +229,7 @@ function createTerminateAgentTool(logger: ILogger): MCPTool {
 
 function createGetAgentInfoTool(logger: ILogger): MCPTool {
   return {
-    name: 'agents/info',
+    name: 'agents_info',
     description: 'Get detailed information about a specific agent',
     inputSchema: {
       type: 'object',
@@ -264,7 +264,7 @@ function createGetAgentInfoTool(logger: ILogger): MCPTool {
 
 function createCreateTaskTool(logger: ILogger): MCPTool {
   return {
-    name: 'tasks/create',
+    name: 'tasks_create',
     description: 'Create a new task for execution',
     inputSchema: {
       type: 'object',
@@ -344,7 +344,7 @@ function createCreateTaskTool(logger: ILogger): MCPTool {
 
 function createListTasksTool(logger: ILogger): MCPTool {
   return {
-    name: 'tasks/list',
+    name: 'tasks_list',
     description: 'List tasks with optional filtering',
     inputSchema: {
       type: 'object',
@@ -400,7 +400,7 @@ function createListTasksTool(logger: ILogger): MCPTool {
 
 function createGetTaskStatusTool(logger: ILogger): MCPTool {
   return {
-    name: 'tasks/status',
+    name: 'tasks_status',
     description: 'Get detailed status of a specific task',
     inputSchema: {
       type: 'object',
@@ -435,7 +435,7 @@ function createGetTaskStatusTool(logger: ILogger): MCPTool {
 
 function createCancelTaskTool(logger: ILogger): MCPTool {
   return {
-    name: 'tasks/cancel',
+    name: 'tasks_cancel',
     description: 'Cancel a pending or running task',
     inputSchema: {
       type: 'object',
@@ -472,7 +472,7 @@ function createCancelTaskTool(logger: ILogger): MCPTool {
 
 function createAssignTaskTool(logger: ILogger): MCPTool {
   return {
-    name: 'tasks/assign',
+    name: 'tasks_assign',
     description: 'Assign a task to a specific agent',
     inputSchema: {
       type: 'object',
@@ -509,7 +509,7 @@ function createAssignTaskTool(logger: ILogger): MCPTool {
 
 function createQueryMemoryTool(logger: ILogger): MCPTool {
   return {
-    name: 'memory/query',
+    name: 'memory_query',
     description: 'Query agent memory with filters and search',
     inputSchema: {
       type: 'object',
@@ -591,7 +591,7 @@ function createQueryMemoryTool(logger: ILogger): MCPTool {
 
 function createStoreMemoryTool(logger: ILogger): MCPTool {
   return {
-    name: 'memory/store',
+    name: 'memory_store',
     description: 'Store a new memory entry',
     inputSchema: {
       type: 'object',
@@ -661,7 +661,7 @@ function createStoreMemoryTool(logger: ILogger): MCPTool {
 
 function createDeleteMemoryTool(logger: ILogger): MCPTool {
   return {
-    name: 'memory/delete',
+    name: 'memory_delete',
     description: 'Delete a memory entry',
     inputSchema: {
       type: 'object',
@@ -693,7 +693,7 @@ function createDeleteMemoryTool(logger: ILogger): MCPTool {
 
 function createExportMemoryTool(logger: ILogger): MCPTool {
   return {
-    name: 'memory/export',
+    name: 'memory_export',
     description: 'Export memory entries to a file',
     inputSchema: {
       type: 'object',
@@ -749,7 +749,7 @@ function createExportMemoryTool(logger: ILogger): MCPTool {
 
 function createImportMemoryTool(logger: ILogger): MCPTool {
   return {
-    name: 'memory/import',
+    name: 'memory_import',
     description: 'Import memory entries from a file',
     inputSchema: {
       type: 'object',
@@ -796,7 +796,7 @@ function createImportMemoryTool(logger: ILogger): MCPTool {
 
 function createGetSystemStatusTool(logger: ILogger): MCPTool {
   return {
-    name: 'system/status',
+    name: 'system_status',
     description: 'Get comprehensive system status information',
     inputSchema: {
       type: 'object',
@@ -821,7 +821,7 @@ function createGetSystemStatusTool(logger: ILogger): MCPTool {
 
 function createGetMetricsTool(logger: ILogger): MCPTool {
   return {
-    name: 'system/metrics',
+    name: 'system_metrics',
     description: 'Get system performance metrics',
     inputSchema: {
       type: 'object',
@@ -854,7 +854,7 @@ function createGetMetricsTool(logger: ILogger): MCPTool {
 
 function createHealthCheckTool(logger: ILogger): MCPTool {
   return {
-    name: 'system/health',
+    name: 'system_health',
     description: 'Perform a comprehensive health check',
     inputSchema: {
       type: 'object',
@@ -885,7 +885,7 @@ function createHealthCheckTool(logger: ILogger): MCPTool {
 
 function createGetConfigTool(logger: ILogger): MCPTool {
   return {
-    name: 'config/get',
+    name: 'config_get',
     description: 'Get current system configuration',
     inputSchema: {
       type: 'object',
@@ -917,7 +917,7 @@ function createGetConfigTool(logger: ILogger): MCPTool {
 
 function createUpdateConfigTool(logger: ILogger): MCPTool {
   return {
-    name: 'config/update',
+    name: 'config_update',
     description: 'Update system configuration',
     inputSchema: {
       type: 'object',
@@ -962,7 +962,7 @@ function createUpdateConfigTool(logger: ILogger): MCPTool {
 
 function createValidateConfigTool(logger: ILogger): MCPTool {
   return {
-    name: 'config/validate',
+    name: 'config_validate',
     description: 'Validate a configuration object',
     inputSchema: {
       type: 'object',
@@ -993,7 +993,7 @@ function createValidateConfigTool(logger: ILogger): MCPTool {
 
 function createExecuteWorkflowTool(logger: ILogger): MCPTool {
   return {
-    name: 'workflow/execute',
+    name: 'workflow_execute',
     description: 'Execute a workflow from a file or definition',
     inputSchema: {
       type: 'object',
@@ -1039,7 +1039,7 @@ function createExecuteWorkflowTool(logger: ILogger): MCPTool {
 
 function createCreateWorkflowTool(logger: ILogger): MCPTool {
   return {
-    name: 'workflow/create',
+    name: 'workflow_create',
     description: 'Create a new workflow definition',
     inputSchema: {
       type: 'object',
@@ -1104,7 +1104,7 @@ function createCreateWorkflowTool(logger: ILogger): MCPTool {
 
 function createListWorkflowsTool(logger: ILogger): MCPTool {
   return {
-    name: 'workflow/list',
+    name: 'workflow_list',
     description: 'List available workflows',
     inputSchema: {
       type: 'object',
@@ -1135,7 +1135,7 @@ function createListWorkflowsTool(logger: ILogger): MCPTool {
 
 function createExecuteCommandTool(logger: ILogger): MCPTool {
   return {
-    name: 'terminal/execute',
+    name: 'terminal_execute',
     description: 'Execute a command in a terminal session',
     inputSchema: {
       type: 'object',
@@ -1195,7 +1195,7 @@ function createExecuteCommandTool(logger: ILogger): MCPTool {
 
 function createListTerminalsTool(logger: ILogger): MCPTool {
   return {
-    name: 'terminal/list',
+    name: 'terminal_list',
     description: 'List all terminal sessions',
     inputSchema: {
       type: 'object',
@@ -1227,7 +1227,7 @@ function createListTerminalsTool(logger: ILogger): MCPTool {
 
 function createCreateTerminalTool(logger: ILogger): MCPTool {
   return {
-    name: 'terminal/create',
+    name: 'terminal_create',
     description: 'Create a new terminal session',
     inputSchema: {
       type: 'object',

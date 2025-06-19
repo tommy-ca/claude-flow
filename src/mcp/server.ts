@@ -29,6 +29,7 @@ import { AuthManager, IAuthManager } from './auth.js';
 import { LoadBalancer, ILoadBalancer, RequestQueue } from './load-balancer.js';
 import { createClaudeFlowTools, ClaudeFlowToolContext } from './claude-flow-tools.js';
 import { createSwarmTools, SwarmToolContext } from './swarm-tools.js';
+import { createSparcTools, SparcToolContext } from './sparc-tools.js';
 import { platform, arch } from 'node:os';
 import { performance } from 'node:perf_hooks';
 
@@ -431,7 +432,7 @@ export class MCPServer implements IMCPServer {
   private registerBuiltInTools(): void {
     // System information tool
     this.registerTool({
-      name: 'system/info',
+      name: 'system_info',
       description: 'Get system information',
       inputSchema: {
         type: 'object',
@@ -450,7 +451,7 @@ export class MCPServer implements IMCPServer {
 
     // Health check tool
     this.registerTool({
-      name: 'system/health',
+      name: 'system_health',
       description: 'Get system health status',
       inputSchema: {
         type: 'object',
@@ -463,7 +464,7 @@ export class MCPServer implements IMCPServer {
 
     // List tools
     this.registerTool({
-      name: 'tools/list',
+      name: 'tools_list',
       description: 'List all available tools',
       inputSchema: {
         type: 'object',
@@ -476,7 +477,7 @@ export class MCPServer implements IMCPServer {
 
     // Tool schema
     this.registerTool({
-      name: 'tools/schema',
+      name: 'tools_schema',
       description: 'Get schema for a specific tool',
       inputSchema: {
         type: 'object',
@@ -549,6 +550,29 @@ export class MCPServer implements IMCPServer {
     } else {
       this.logger.warn('Swarm components not available - Swarm tools not registered');
     }
+
+    // Register SPARC mode tools
+    const sparcTools = createSparcTools(this.logger);
+    
+    for (const tool of sparcTools) {
+      // Wrap the handler to inject SPARC context
+      const originalHandler = tool.handler;
+      tool.handler = async (input: unknown, context?: MCPContext) => {
+        const sparcContext: SparcToolContext = {
+          ...context,
+          orchestrator: this.orchestrator,
+          taskExecutor: this.orchestrator?.taskExecutor,
+          memoryManager: this.orchestrator?.memoryManager,
+          eventBus: this.eventBus,
+        } as SparcToolContext;
+        
+        return await originalHandler(input, sparcContext);
+      };
+      
+      this.registerTool(tool);
+    }
+    
+    this.logger.info('Registered SPARC tools', { count: sparcTools.length });
   }
 
   private errorToMCPError(error: unknown): MCPError {

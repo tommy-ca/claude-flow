@@ -407,7 +407,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private registerOrchestratorTools(): void {
     const tools: MCPTool[] = [
       {
-        name: 'orchestrator/status',
+        name: 'orchestrator_status',
         description: 'Get orchestrator status and metrics',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -418,7 +418,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
       {
-        name: 'orchestrator/tasks',
+        name: 'orchestrator_tasks',
         description: 'List all tasks in the orchestrator',
         inputSchema: {
           type: 'object',
@@ -444,7 +444,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private registerSwarmTools(): void {
     const tools: MCPTool[] = [
       {
-        name: 'swarm/status',
+        name: 'swarm_status',
         description: 'Get swarm coordinator status',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -455,7 +455,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
       {
-        name: 'swarm/agents',
+        name: 'swarm_agents',
         description: 'List active swarm agents',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -475,7 +475,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private registerAgentTools(): void {
     const tools: MCPTool[] = [
       {
-        name: 'agents/list',
+        name: 'agents_list',
         description: 'List all managed agents',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -486,7 +486,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
       {
-        name: 'agents/spawn',
+        name: 'agents_spawn',
         description: 'Spawn a new agent',
         inputSchema: {
           type: 'object',
@@ -513,7 +513,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private registerResourceTools(): void {
     const tools: MCPTool[] = [
       {
-        name: 'resources/list',
+        name: 'resources_list',
         description: 'List available resources',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -524,7 +524,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
       {
-        name: 'resources/status',
+        name: 'resources_status',
         description: 'Get resource manager status',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -544,7 +544,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private registerMemoryTools(): void {
     const tools: MCPTool[] = [
       {
-        name: 'memory/query',
+        name: 'memory_query',
         description: 'Query memory bank',
         inputSchema: {
           type: 'object',
@@ -563,7 +563,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
       {
-        name: 'memory/store',
+        name: 'memory_store',
         description: 'Store data in memory bank',
         inputSchema: {
           type: 'object',
@@ -591,7 +591,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private registerMonitoringTools(): void {
     const tools: MCPTool[] = [
       {
-        name: 'monitoring/metrics',
+        name: 'monitoring_metrics',
         description: 'Get system monitoring metrics',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -602,7 +602,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
       {
-        name: 'monitoring/alerts',
+        name: 'monitoring_alerts',
         description: 'List active alerts',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -622,7 +622,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private registerTerminalTools(): void {
     const tools: MCPTool[] = [
       {
-        name: 'terminals/list',
+        name: 'terminals_list',
         description: 'List active terminal sessions',
         inputSchema: { type: 'object', properties: {} },
         handler: async () => {
@@ -633,7 +633,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         },
       },
       {
-        name: 'terminals/execute',
+        name: 'terminals_execute',
         description: 'Execute command in terminal',
         inputSchema: {
           type: 'object',

@@ -47,23 +47,98 @@ export function createMCPCommand() {
     .action(() => {
       printSuccess('MCP Server Management');
       console.log('\n🌐 Available MCP commands:');
-      console.log('  • mcp start - Start the MCP server');
+      console.log('  • mcp start - Start MCP server (stdio mode for Claude Code)');
+      console.log('  • mcp start --http - Start MCP server in HTTP mode');
       console.log('  • mcp status - Show MCP server status');
       console.log('  • mcp tools - List available MCP tools');
       console.log('  • mcp stop - Stop the MCP server');
-      console.log('\n💡 Use "mcp start --port 3001" to use a different port');
+      console.log('\n💡 Use "mcp start --http --port 3001" for HTTP mode on different port');
     });
 
   mcpCmd
     .command('start')
-    .description('Start the MCP server')
-    .option('--port <port>', 'Port for MCP server', '3000')
-    .option('--host <host>', 'Host for MCP server', 'localhost')
-    .option('--transport <transport>', 'Transport type (stdio, http)', 'http')
+    .description('Start the MCP server (stdio by default, use --http for HTTP transport)')
+    .option('--port <port>', 'Port for MCP server (HTTP mode only)', '3000')
+    .option('--host <host>', 'Host for MCP server (HTTP mode only)', 'localhost')
+    .option('--http', 'Use HTTP transport instead of stdio')
+    .option('--verbose', 'Enable verbose logging to stderr')
     .action(async (options) => {
-      // This is handled by the actual MCP implementation
-      console.log('Starting MCP server...');
-      console.log('(This command is handled by the MCP module)');
+      // Default to stdio mode (same as serve)
+      if (!options.http) {
+        // Use the dedicated stdio server (exact same as serve command)
+        const { spawn } = await import('child_process');
+        const serverPath = '/workspaces/claude-code-flow/src/cli/mcp-stdio-server.ts';
+        
+        const child = spawn('npx', ['tsx', serverPath], {
+          stdio: 'inherit',
+          env: {
+            ...process.env,
+            NODE_ENV: 'production'
+          }
+        });
+        
+        child.on('error', (err) => {
+          console.error('Failed to start MCP stdio server:', err);
+          process.exit(1);
+        });
+        
+        child.on('exit', (code) => {
+          process.exit(code || 0);
+        });
+        
+        return; // Exit early for stdio
+      }
+      
+      // HTTP mode - original code follows...
+      try {
+        const { MCPServer } = await import('../mcp/server.js');
+        const { EventBus } = await import('../core/event-bus.js');
+        const { Logger } = await import('../core/logger.js');
+        const { ConfigManager } = await import('../config/config-manager.js');
+        
+        const eventBus = new EventBus();
+        const logger = new Logger();
+        const configManager = new ConfigManager();
+        
+        try {
+          await configManager.load('claude-flow.config.json');
+        } catch (error) {
+          // Use defaults if config file doesn't exist
+          console.log('⚠️  Warning: Using default configuration');
+        }
+        const config = configManager.show();
+        
+        const mcpConfig = {
+          ...config.mcp,
+          port: parseInt(options.port),
+          host: options.host,
+          transport: options.transport as 'http' | 'stdio',
+          corsEnabled: true,
+          corsOrigins: ['*']
+        };
+
+        const server = new MCPServer(mcpConfig, eventBus, logger);
+        await server.start();
+
+        printSuccess(`MCP server started on ${options.host}:${options.port}`);
+        console.log(`📡 Server URL: http://${options.host}:${options.port}`);
+        console.log(`🔧 Transport: ${options.transport}`);
+        console.log(`🔧 Available tools: System, Tools`);
+        console.log('\n💡 Press Ctrl+C to stop the server');
+        
+        // Keep process alive
+        process.on('SIGINT', async () => {
+          console.log('\n⏹️  Stopping MCP server...');
+          await server.stop();
+          process.exit(0);
+        });
+        
+        // Prevent CLI from exiting
+        await new Promise(() => {}); // Keep running
+      } catch (error) {
+        printError(`Failed to start MCP server: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        process.exit(1);
+      }
     });
 
   mcpCmd
@@ -116,6 +191,110 @@ export function createMCPCommand() {
       printSuccess('Stopping MCP server...');
       console.log('🛑 MCP server stop requested');
       console.log('💡 Use Ctrl+C in the terminal running "mcp start" to stop');
+    });
+
+  mcpCmd
+    .command('serve')
+    .description('Start MCP server in stdio mode for Claude Code')
+    .option('--verbose', 'Enable verbose logging to stderr')
+    .action(async (options) => {
+      // Use the dedicated stdio server
+      const { spawn } = await import('child_process');
+      const serverPath = '/workspaces/claude-code-flow/src/cli/mcp-stdio-server.ts';
+      
+      const child = spawn('npx', ['tsx', serverPath], {
+        stdio: 'inherit',
+        env: {
+          ...process.env,
+          NODE_ENV: 'production'
+        }
+      });
+      
+      child.on('error', (err) => {
+        console.error('Failed to start MCP stdio server:', err);
+        process.exit(1);
+      });
+      
+      child.on('exit', (code) => {
+        process.exit(code || 0);
+      });
+    });
+
+  mcpCmd
+    .command('serve-old')
+    .description('Start MCP server in stdio mode (legacy)')
+    .option('--verbose', 'Enable verbose logging to stderr')
+    .action(async (options) => {
+      try {
+        const { MCPServer } = await import('../mcp/server.js');
+        const { EventBus } = await import('../core/event-bus.js');
+        const { Logger } = await import('../core/logger.js');
+        const { ConfigManager } = await import('../config/config-manager.js');
+        const { StdioTransport } = await import('../mcp/transports/stdio.js');
+        
+        const eventBus = new EventBus();
+        const logger = new Logger();
+        const configManager = new ConfigManager();
+        
+        // Configure logger to use stderr for logs to avoid polluting stdio
+        if (!options.verbose && typeof logger.setLevel === 'function') {
+          logger.setLevel('error');
+        }
+        
+        try {
+          await configManager.load('claude-flow.config.json');
+        } catch (error) {
+          // Use defaults if config file doesn't exist
+          if (options.verbose) {
+            console.error('⚠️  Using default configuration');
+          }
+        }
+        const config = configManager.show();
+        
+        // Force stdio transport for Claude Code
+        const mcpConfig = {
+          ...config.mcp,
+          transport: 'stdio' as const,
+          // Remove HTTP-specific settings
+          port: undefined,
+          host: undefined,
+          corsEnabled: false
+        };
+
+        const server = new MCPServer(mcpConfig, eventBus, logger);
+        
+        // Handle graceful shutdown
+        process.on('SIGINT', async () => {
+          await server.stop();
+          process.exit(0);
+        });
+        
+        process.on('SIGTERM', async () => {
+          await server.stop();
+          process.exit(0);
+        });
+        
+        // Start the server
+        await server.start();
+        
+        // Log to stderr if verbose
+        if (options.verbose) {
+          console.error('✅ MCP server started in stdio mode for Claude Code');
+        }
+        
+        // Keep process alive
+        await new Promise(() => {}); // Keep running
+      } catch (error) {
+        // Send error response in MCP format
+        console.log(JSON.stringify({
+          jsonrpc: '2.0',
+          error: {
+            code: -32603,
+            message: `Failed to start MCP server: ${error instanceof Error ? error.message : 'Unknown error'}`
+          }
+        }));
+        process.exit(1);
+      }
     });
 
   return mcpCmd;

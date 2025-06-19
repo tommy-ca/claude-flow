@@ -111,7 +111,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
 
     // === SWARM COORDINATION TOOLS ===
     {
-      name: 'swarm/create-objective',
+      name: 'swarm_create_objective',
       description: 'Create a new swarm objective with tasks and coordination',
       inputSchema: {
         type: 'object',
@@ -165,7 +165,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
     },
 
     {
-      name: 'swarm/execute-objective',
+      name: 'swarm_execute_objective',
       description: 'Execute a swarm objective',
       inputSchema: {
         type: 'object',
@@ -198,7 +198,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
     },
 
     {
-      name: 'swarm/get-status',
+      name: 'swarm_get_status',
       description: 'Get comprehensive swarm status',
       inputSchema: {
         type: 'object',
@@ -236,7 +236,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
 
     // === AGENT MANAGEMENT TOOLS ===
     {
-      name: 'agent/create',
+      name: 'agent_create',
       description: 'Create a new agent in the swarm',
       inputSchema: {
         type: 'object',
@@ -282,7 +282,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
     },
 
     {
-      name: 'agent/list',
+      name: 'agent_list',
       description: 'List all agents with their status',
       inputSchema: {
         type: 'object',
@@ -321,7 +321,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
 
     // === RESOURCE MANAGEMENT TOOLS ===
     {
-      name: 'resource/register',
+      name: 'resource_register',
       description: 'Register a new resource',
       inputSchema: {
         type: 'object',
@@ -369,7 +369,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
     },
 
     {
-      name: 'resource/get-statistics',
+      name: 'resource_get_statistics',
       description: 'Get resource manager statistics',
       inputSchema: {
         type: 'object',
@@ -395,7 +395,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
 
     // === MESSAGING TOOLS ===
     {
-      name: 'message/send',
+      name: 'message_send',
       description: 'Send a message through the message bus',
       inputSchema: {
         type: 'object',
@@ -453,7 +453,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
     },
 
     {
-      name: 'message/get-metrics',
+      name: 'message_get_metrics',
       description: 'Get message bus metrics',
       inputSchema: {
         type: 'object',
@@ -479,7 +479,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
 
     // === MONITORING TOOLS ===
     {
-      name: 'monitor/get-metrics',
+      name: 'monitor_get_metrics',
       description: 'Get system monitoring metrics',
       inputSchema: {
         type: 'object',
@@ -523,7 +523,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
     },
 
     {
-      name: 'monitor/get-alerts',
+      name: 'monitor_get_alerts',
       description: 'Get active alerts',
       inputSchema: {
         type: 'object',
@@ -564,7 +564,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
 
     // === UTILITY TOOLS ===
     {
-      name: 'swarm/get-comprehensive-status',
+      name: 'swarm_get_comprehensive_status',
       description: 'Get comprehensive status of the entire swarm system',
       inputSchema: {
         type: 'object',
@@ -619,7 +619,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
     },
 
     {
-      name: 'swarm/emergency-stop',
+      name: 'swarm_emergency_stop',
       description: 'Emergency stop of all swarm operations',
       inputSchema: {
         type: 'object',
