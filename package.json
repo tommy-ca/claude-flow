@@ -1,6 +1,6 @@
 {
   "name": "claude-flow",
-  "version": "1.0.71",
+  "version": "1.0.72",
   "description": "Advanced AI agent orchestration system for Claude Code",
   "main": "cli.js",
   "bin": {

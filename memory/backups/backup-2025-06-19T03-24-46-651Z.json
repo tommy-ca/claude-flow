@@ -1,0 +1,99 @@
+{
+  "timestamp": "2025-06-19T03:24:46.651Z",
+  "version": "1.0",
+  "entries": [
+    {
+      "id": "entry_mc2ti5rs_5rhtkp56x",
+      "key": "test-key",
+      "value": {
+        "data": "test value"
+      },
+      "type": "object",
+      "namespace": "test-namespace",
+      "tags": [
+        "test",
+        "demo"
+      ],
+      "metadata": {},
+      "owner": "system",
+      "accessLevel": "shared",
+      "createdAt": "2025-06-19T03:24:46.648Z",
+      "updatedAt": "2025-06-19T03:24:46.648Z",
+      "lastAccessedAt": "2025-06-19T03:24:46.648Z",
+      "version": 1,
+      "size": 50,
+      "compressed": false,
+      "checksum": "eee9ad0c23c54c98b836354da834f397021a040426a206f8e7fde150c9fcbff3",
+      "references": [],
+      "dependencies": []
+    }
+  ],
+  "statistics": {
+    "overview": {
+      "totalEntries": 1,
+      "totalSize": 50,
+      "compressedEntries": 0,
+      "compressionRatio": 1,
+      "indexSize": 50,
+      "memoryUsage": 9468064,
+      "diskUsage": 0
+    },
+    "distribution": {
+      "byNamespace": {
+        "test-namespace": {
+          "count": 1,
+          "size": 50
+        }
+      },
+      "byType": {
+        "object": {
+          "count": 1,
+          "size": 50
+        }
+      },
+      "byOwner": {
+        "system": {
+          "count": 1,
+          "size": 50
+        }
+      },
+      "byAccessLevel": {
+        "shared": {
+          "count": 1,
+          "size": 50
+        }
+      }
+    },
+    "temporal": {
+      "entriesCreatedLast24h": 1,
+      "entriesUpdatedLast24h": 1,
+      "entriesAccessedLast24h": 1,
+      "oldestEntry": "2025-06-19T03:24:46.648Z",
+      "newestEntry": "2025-06-19T03:24:46.648Z"
+    },
+    "performance": {
+      "averageQueryTime": 0,
+      "averageWriteTime": 1,
+      "cacheHitRatio": 0,
+      "indexEfficiency": 0.95
+    },
+    "health": {
+      "expiredEntries": 0,
+      "orphanedReferences": 0,
+      "duplicateKeys": 0,
+      "corruptedEntries": 0,
+      "recommendedCleanup": false
+    },
+    "optimization": {
+      "suggestions": [],
+      "potentialSavings": {
+        "compression": 0,
+        "cleanup": 0,
+        "deduplication": 0
+      },
+      "indexOptimization": [
+        "Consider periodic index rebuilding for optimal performance"
+      ]
+    }
+  }
+}

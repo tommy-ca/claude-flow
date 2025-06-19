@@ -13,7 +13,7 @@ import chalk from 'chalk';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const VERSION = '1.0.71';
+const VERSION = '1.0.72';
 
 // Simple in-memory storage for the session
 const memoryStore: Map<string, any> = new Map();
@@ -186,6 +186,283 @@ function simulateSwarmExecution(config: any) {
   }, (tasks.length + 1) * 500);
 }
 
+// Helper function to get primary tools for each SPARC mode
+function getModePrimaryTools(mode: string): string {
+  const modeTools: Record<string, string> = {
+    'orchestrator': 'TodoWrite, Task, Memory, Bash',
+    'coder': 'Read, Write, Edit, MultiEdit, Grep, Glob',
+    'researcher': 'WebSearch, WebFetch, Task, Memory',
+    'tdd': 'Write, Edit, Bash (for tests), TodoWrite',
+    'architect': 'Write, Edit, TodoWrite, Memory',
+    'reviewer': 'Read, Grep, TodoWrite, Task',
+    'debugger': 'Read, Edit, Bash, Grep',
+    'tester': 'Bash, Write, Edit, TodoWrite',
+    'analyzer': 'Read, Grep, Glob, Memory',
+    'optimizer': 'Read, Edit, Grep, Bash',
+    'documenter': 'Read, Write, TodoWrite',
+    'designer': 'Write, Edit, TodoWrite, Memory',
+    'innovator': 'Task, Memory, TodoWrite',
+    'swarm-coordinator': 'Task, TodoWrite, Memory',
+    'memory-manager': 'Memory, TodoWrite',
+    'batch-executor': 'MultiEdit, Task, TodoWrite',
+    'workflow-manager': 'TodoWrite, Task, Memory'
+  };
+  
+  return modeTools[mode] || 'TodoWrite, Task, Memory, Read, Write';
+}
+
+// Helper function to get mode descriptions
+function getModeDescription(mode: string): string {
+  const modeDescriptions: Record<string, string> = {
+    'orchestrator': 'Multi-agent task orchestration and coordination',
+    'coder': 'Code implementation with best practices',
+    'researcher': 'Information gathering and analysis',
+    'tdd': 'Test-driven development workflow',
+    'architect': 'System design and architecture planning',
+    'reviewer': 'Code review and quality assurance',
+    'debugger': 'Bug detection and resolution',
+    'tester': 'Comprehensive testing implementation',
+    'analyzer': 'Code analysis and metrics evaluation',
+    'optimizer': 'Performance and efficiency improvements',
+    'documenter': 'Documentation creation and maintenance',
+    'designer': 'UI/UX and API design',
+    'innovator': 'Creative problem solving and exploration',
+    'swarm-coordinator': 'Multi-agent swarm management',
+    'memory-manager': 'Persistent memory operations',
+    'batch-executor': 'Batch operations optimization',
+    'workflow-manager': 'Complex workflow automation'
+  };
+  
+  return modeDescriptions[mode] || 'General SPARC execution mode';
+}
+
+// Helper function to get architecture guidance for each mode
+function getArchitectureGuidance(mode: string): string {
+  const architectureGuides: Record<string, string> = {
+    'orchestrator': 'Design for parallel agent coordination with clear task boundaries',
+    'coder': 'Modular components with separation of concerns, max 500 lines per file',
+    'researcher': 'Information pipeline with validation and source tracking',
+    'tdd': 'Test-first architecture with isolated components for testability',
+    'architect': 'Scalable microservices or modular monolith patterns',
+    'reviewer': 'Quality gates and automated review checkpoints',
+    'debugger': 'Logging infrastructure and error tracking systems',
+    'tester': 'Test pyramid with unit, integration, and e2e coverage',
+    'analyzer': 'Metrics collection points and performance monitoring',
+    'optimizer': 'Profiling hooks and optimization measurement points',
+    'documenter': 'Living documentation with auto-generation capabilities',
+    'designer': 'Component-based design system with reusability',
+    'innovator': 'Experimental branches with rollback capabilities',
+    'swarm-coordinator': 'Message queue patterns for agent communication',
+    'memory-manager': 'Persistent storage with indexing and caching',
+    'batch-executor': 'Queue-based processing with progress tracking',
+    'workflow-manager': 'State machine patterns with rollback support'
+  };
+  
+  return architectureGuides[mode] || 'Standard modular architecture with clear boundaries';
+}
+
+// Helper function to map swarm strategies to SPARC modes
+function getSwarmStrategyMode(strategy: string): string {
+  const strategyModeMap: Record<string, string> = {
+    'research': 'researcher',
+    'development': 'coder',
+    'analysis': 'analyzer',
+    'testing': 'tester',
+    'optimization': 'optimizer',
+    'maintenance': 'workflow-manager',
+    'auto': 'orchestrator'
+  };
+  
+  return strategyModeMap[strategy] || 'orchestrator';
+}
+
+// Helper function to get strategy descriptions
+function getStrategyDescription(strategy: string): string {
+  const descriptions: Record<string, string> = {
+    'auto': 'Automatically determine best approach based on objective',
+    'research': 'Information gathering and analysis with source validation',
+    'development': 'Software development with TDD and best practices',
+    'analysis': 'Data analysis with insights and visualization',
+    'testing': 'Quality assurance with comprehensive test coverage',
+    'optimization': 'Performance improvements with measurable results',
+    'maintenance': 'System maintenance with safety and rollback'
+  };
+  
+  return descriptions[strategy] || 'General swarm execution';
+}
+
+// Helper function to get coordination descriptions
+function getCoordinationDescription(mode: string): string {
+  const descriptions: Record<string, string> = {
+    'centralized': 'Single coordinator manages all agents',
+    'distributed': 'Multiple coordinators for different aspects',
+    'hierarchical': 'Tree structure with team leads',
+    'mesh': 'Peer-to-peer self-organization',
+    'hybrid': 'Mixed patterns adapted to needs'
+  };
+  
+  return descriptions[mode] || 'Standard coordination';
+}
+
+// Helper function to get strategy-specific tools
+function getStrategyTools(strategy: string): string {
+  const strategyTools: Record<string, string> = {
+    'research': 'WebSearch (batch queries), WebFetch (parallel), Task, Memory (required), TodoWrite',
+    'development': 'Read (batch), MultiEdit (required), Write (batch), Task, Memory (required)',
+    'analysis': 'Read (batch), Grep (parallel), Glob (parallel), Memory (required), Task',
+    'testing': 'Bash (parallel tests), Read (batch), MultiEdit, Memory (required), Task',
+    'optimization': 'Read (batch), MultiEdit, Bash (profiling), Memory (required), Task',
+    'maintenance': 'TodoWrite, Task, Memory (required), MultiEdit, Bash',
+    'auto': 'TodoWrite, Task, Memory (required), Read (batch), MultiEdit'
+  };
+  
+  return strategyTools[strategy] || 'TodoWrite, Task, Memory (required)';
+}
+
+// Helper function to get strategy pseudocode
+function getStrategyPseudocode(strategy: string, objective: string): string {
+  const pseudocodes: Record<string, string> = {
+    'research': `**Research Pipeline Design:**
+- Phase 1: Query formulation and source identification
+- Phase 2: Parallel information gathering (WebSearch/WebFetch)
+- Phase 3: Source validation and credibility scoring
+- Phase 4: Information synthesis and report generation
+- Store findings progressively in Memory for analysis`,
+    
+    'development': `**Development Pipeline Design:**
+- Phase 1: Requirements analysis and architecture design
+- Phase 2: Component breakdown and interface definition
+- Phase 3: Parallel implementation with TDD approach
+- Phase 4: Integration testing and deployment prep
+- Use Memory for shared architecture decisions`,
+    
+    'analysis': `**Analysis Pipeline Design:**
+- Phase 1: Data collection and validation
+- Phase 2: Parallel processing and transformation
+- Phase 3: Statistical analysis and pattern detection
+- Phase 4: Insight generation and visualization
+- Store intermediate results in Memory`,
+    
+    'testing': `**Testing Pipeline Design:**
+- Phase 1: Test strategy and matrix definition
+- Phase 2: Test case generation and setup
+- Phase 3: Parallel test execution batches
+- Phase 4: Result aggregation and reporting
+- Track test results in Memory`,
+    
+    'optimization': `**Optimization Pipeline Design:**
+- Phase 1: Performance baseline measurement
+- Phase 2: Bottleneck identification (parallel profiling)
+- Phase 3: Optimization implementation
+- Phase 4: Result validation and rollback planning
+- Store metrics in Memory for comparison`,
+    
+    'maintenance': `**Maintenance Pipeline Design:**
+- Phase 1: System health assessment
+- Phase 2: Update planning with rollback strategy
+- Phase 3: Staged implementation with validation
+- Phase 4: Monitoring and incident response
+- Log all changes in Memory`
+  };
+  
+  return pseudocodes[strategy] || `**Generic Pipeline Design:**
+- Phase 1: Objective analysis
+- Phase 2: Task decomposition
+- Phase 3: Parallel execution
+- Phase 4: Result consolidation`;
+}
+
+// Helper function to get coordination architecture
+function getCoordinationArchitecture(mode: string, maxAgents: number): string {
+  const architectures: Record<string, string> = {
+    'centralized': `**Centralized Architecture:**
+- Single orchestrator manages all ${maxAgents} agents
+- TodoWrite as central task queue
+- Sequential task assignment and result collection
+- Memory for state management
+- Simple but potentially bottlenecked`,
+    
+    'distributed': `**Distributed Architecture:**
+- Multiple coordinator agents for different domains
+- Each coordinator manages subset of tasks
+- Memory-based inter-coordinator communication
+- Parallel domain-specific execution
+- Good for complex multi-faceted objectives`,
+    
+    'hierarchical': `**Hierarchical Architecture:**
+- Team lead agents for major components
+- Each lead manages 2-3 sub-agents
+- Tree structure with clear reporting lines
+- Memory for cross-team coordination
+- Scales well for large projects`,
+    
+    'mesh': `**Mesh Architecture:**
+- Agents self-organize via shared Memory
+- TodoWrite as decentralized task pool
+- Agents claim and complete tasks autonomously
+- Peer-to-peer result sharing
+- Highly resilient and adaptive`,
+    
+    'hybrid': `**Hybrid Architecture:**
+- Start with centralized coordination
+- Scale to distributed as complexity grows
+- Dynamic mode switching based on load
+- Memory for state synchronization
+- Best of all patterns`
+  };
+  
+  return architectures[mode] || 'Standard coordination architecture';
+}
+
+// Helper function to get strategy refinement approaches
+function getStrategyRefinement(strategy: string): string {
+  const refinements: Record<string, string> = {
+    'research': `**Research Quality Refinement:**
+- Source credibility validation
+- Cross-reference verification
+- Bias detection and mitigation
+- Gap analysis for missing information
+- Iterative depth exploration`,
+    
+    'development': `**Development Quality Refinement:**
+- Code review cycles with Task agents
+- Security vulnerability scanning
+- Performance profiling and optimization
+- Test coverage improvement
+- Refactoring for maintainability`,
+    
+    'analysis': `**Analysis Quality Refinement:**
+- Statistical validation checks
+- Outlier detection and handling
+- Result reproducibility testing
+- Visualization clarity improvements
+- Insight actionability assessment`,
+    
+    'testing': `**Testing Quality Refinement:**
+- Test coverage gap analysis
+- Flaky test identification
+- Performance test optimization
+- Test data quality improvement
+- Regression suite maintenance`,
+    
+    'optimization': `**Optimization Quality Refinement:**
+- Performance regression checks
+- Resource usage validation
+- Scalability testing
+- A/B comparison with baseline
+- Rollback safety verification`,
+    
+    'maintenance': `**Maintenance Quality Refinement:**
+- Change impact analysis
+- Rollback procedure testing
+- Documentation accuracy
+- Monitoring coverage gaps
+- Incident response drills`
+  };
+  
+  return refinements[strategy] || 'Standard quality refinement process';
+}
+
 // Helper function to launch SPARC execution with comprehensive configuration
 async function launchSparcExecution(mode: string, prompt: string, options: any) {
   const { spawn } = await import('child_process');
@@ -194,39 +471,117 @@ async function launchSparcExecution(mode: string, prompt: string, options: any) 
   const sparcPrompt = await loadSparcPrompt(mode);
   
   // Construct optimized SPARC prompt with clear action focus
+  const memoryKey = options.memoryKey || `sparc_${mode}_${Date.now()}`;
   const fullPrompt = sparcPrompt ? 
     `${sparcPrompt}
 
 ## TASK: ${prompt}
 
-## EXECUTION PLAN
-Execute this ${mode} task using coordinated agent patterns:
+# 🎯 SPARC METHODOLOGY EXECUTION FRAMEWORK
 
-**1. IMMEDIATE ACTION - TodoWrite Breakdown**
-- Create comprehensive TodoWrite with all subtasks
-- Set priorities, dependencies, and clear success criteria  
-- Track status: pending → in_progress → completed
+You are operating in **SPARC ${mode} mode**. Follow the SPARC Workflow precisely:
 
-**2. COORDINATION STRATEGY**
-- Mode: ${mode} (${options.parallel ? 'parallel' : 'sequential'} execution)
-- Memory Key: ${options.memoryKey || 'sparc_' + mode + '_' + Date.now()}
-- ${options.batch ? 'Batch operations enabled' : 'Standard file operations'}${options.monitor ? '\n- Progress monitoring enabled' : ''}
+## SPARC Workflow Steps
 
-**3. AGENT MANAGEMENT**${options.parallel ? `
-- Launch Task agents for independent work streams
-- Coordinate assignments via TodoWrite
-- Synchronize results through Memory` : `
-- Execute tasks sequentially with clear handoffs
-- Use Memory for state persistence`}${options.batch ? `
-- Use batch Read/Write/Edit for multiple files
-- Parallel Glob/Grep for comprehensive searches` : ''}
+### 1️⃣ SPECIFICATION - Clarify goals, scope, constraints
+**Your Task:** ${prompt}
 
-**4. COMPLETION REQUIREMENTS**
-- All TodoWrite tasks marked completed
-- Results stored in Memory for coordination
-- ${options.monitor ? 'Progress reported after each major step' : 'Final status reported'}
+**Analysis Required:**
+- Break down into clear, measurable objectives
+- Identify all requirements and constraints  
+- Define acceptance criteria
+- Never hard-code environment variables
 
-**START NOW** with TodoWrite task breakdown and proceed systematically through execution.` :
+**Use TodoWrite to capture specifications:**
+\`\`\`javascript
+TodoWrite([
+  {
+    id: "specification",
+    content: "Clarify goals, scope, and constraints for: ${prompt}",
+    status: "pending",
+    priority: "high"
+  },
+  {
+    id: "acceptance_criteria", 
+    content: "Define clear acceptance criteria and success metrics",
+    status: "pending",
+    priority: "high"
+  }
+]);
+\`\`\`
+
+### 2️⃣ PSEUDOCODE - High-level logic with TDD anchors
+**Design Approach:**
+- Identify core functions and data structures
+- Create TDD test anchors before implementation
+- Map out component interactions
+
+\`\`\`javascript
+// Add pseudocode planning task
+TodoWrite([
+  {
+    id: "pseudocode_design",
+    content: "Create high-level pseudocode with TDD anchors",
+    status: "pending", 
+    priority: "high"
+  }
+]);
+\`\`\`
+
+### 3️⃣ ARCHITECTURE - Design extensible systems
+**Architecture Requirements:**
+- Clear service boundaries
+- Define interfaces between components
+- Design for extensibility and maintainability
+- Mode-specific architecture: ${getArchitectureGuidance(mode)}
+
+### 4️⃣ REFINEMENT - Iterate with TDD and security
+**Refinement Process:**
+- TDD implementation cycles
+- Security vulnerability checks (injection, XSS, CSRF)
+- Performance optimization
+- Code review and refactoring
+- All files must be ≤ 500 lines
+
+### 5️⃣ COMPLETION - Integrate and verify
+**Completion Checklist:**
+- [ ] All acceptance criteria met
+- [ ] Tests passing (comprehensive test suite)
+- [ ] Security review completed
+- [ ] Documentation updated
+- [ ] Results stored in Memory: \`${memoryKey}\`
+- [ ] No hard-coded secrets or env vars
+- [ ] Proper error handling in all code paths
+
+## 🚀 Execution Configuration
+
+**Mode:** ${mode} (${getModeDescription(mode)})
+**Strategy:** ${options.parallel ? 'Parallel execution with Task agents' : 'Sequential execution'}
+**Memory Key:** \`${memoryKey}\`
+**Batch Operations:** ${options.batch ? 'Enabled for multi-file operations' : 'Standard operations'}
+**Primary Tools:** ${getModePrimaryTools(mode)}
+
+## 📋 Must Block (Non-negotiable)
+- Every file ≤ 500 lines
+- No hard-coded secrets or env vars
+- All user inputs validated
+- No security vulnerabilities
+- Proper error handling in all paths
+- Each subtask ends with completion check
+
+## 🎯 IMMEDIATE ACTION REQUIRED
+
+**START NOW with SPARC Step 1 - SPECIFICATION:**
+
+1. Create comprehensive TodoWrite task breakdown following SPARC workflow
+2. Set "specification" task to "in_progress"
+3. Analyze requirements and define acceptance criteria
+4. Store initial analysis in Memory: \`${memoryKey}\`
+
+**Remember:** You're in **${mode}** mode. Follow the SPARC workflow systematically:
+Specification → Pseudocode → Architecture → Refinement → Completion
+
+Use the appropriate tools for each phase and maintain progress in TodoWrite.` :
     `SPARC: ${mode}
 
 ## TASK: ${prompt}
@@ -1471,7 +1826,7 @@ async function createProgram() {
         
         // Create base configuration
         const claudeConfig = {
-          version: "1.0.70",
+          version: VERSION,
           project: {
             name: path.basename(process.cwd()),
             type: "claude-flow",
@@ -1491,6 +1846,83 @@ async function createProgram() {
           JSON.stringify(claudeConfig, null, 2)
         );
         console.log('   ✅ Created .claude/config.json');
+        
+        // Create Claude Code settings.json with optimized settings for automation
+        const claudeSettings = {
+          "permissions": {
+            "allow": [
+              "Bash(*)",
+              "Read(*)",
+              "Write(*)",
+              "Edit(*)",
+              "MultiEdit(*)",
+              "Glob(*)",
+              "Grep(*)",
+              "LS(*)",
+              "NotebookEdit(*)",
+              "NotebookRead(*)",
+              "WebFetch(*)",
+              "WebSearch(*)",
+              "TodoRead",
+              "TodoWrite",
+              "Agent(*)"
+            ],
+            "deny": []
+          },
+          "env": {
+            "BASH_DEFAULT_TIMEOUT_MS": "300000",
+            "BASH_MAX_TIMEOUT_MS": "600000",
+            "BASH_MAX_OUTPUT_LENGTH": "500000",
+            "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "true",
+            "MAX_THINKING_TOKENS": "20000",
+            "MCP_TIMEOUT": "60000",
+            "MCP_TOOL_TIMEOUT": "120000",
+            "DISABLE_COST_WARNINGS": "1",
+            "DISABLE_NON_ESSENTIAL_MODEL_CALLS": "0",
+            "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "8192"
+          },
+          "cleanupPeriodDays": 90,
+          "includeCoAuthoredBy": true,
+          "automation": {
+            "enabled": true,
+            "defaultTimeout": 300000,
+            "maxRetries": 3,
+            "retryBackoff": 2000,
+            "parallelExecution": true,
+            "batchOperations": true,
+            "autoSaveMemory": true,
+            "autoCommit": false
+          },
+          "claudeFlow": {
+            "version": VERSION,
+            "swarmDefaults": {
+              "maxAgents": 10,
+              "timeout": 3600000,
+              "parallel": true,
+              "monitor": true,
+              "outputFormat": "json"
+            },
+            "sparcDefaults": {
+              "timeout": 3600000,
+              "parallel": true,
+              "batch": true,
+              "memoryKey": "sparc_session"
+            },
+            "memoryDefaults": {
+              "maxSize": "1GB",
+              "autoCompress": true,
+              "autoCleanup": true,
+              "indexingEnabled": true,
+              "persistenceEnabled": true
+            }
+          }
+        };
+        
+        await fs.writeFile(
+          path.join(claudeDir, 'settings.json'),
+          JSON.stringify(claudeSettings, null, 2)
+        );
+        console.log('   ✅ Created .claude/settings.json with automation-optimized settings');
         
         // Create swarm command files
         const swarmCommands = {
@@ -2750,82 +3182,214 @@ Run 'claude-flow swarm <subcommand> --help' for subcommand help.
       // Launch Claude Code with swarm configuration
       const { spawn } = await import('child_process');
       
-      // Construct optimized swarm prompt with clear action focus
-      const swarmPrompt = `SPARC: swarm-${options.strategy}
+      // Load strategy-specific SPARC prompt
+      const strategyMode = getSwarmStrategyMode(options.strategy);
+      const swarmSparcPrompt = await loadSparcPrompt(strategyMode);
+      
+      // Construct optimized swarm prompt with SPARC methodology
+      const memoryKey = `swarm_${options.strategy}_${Date.now()}`;
+      const swarmPrompt = swarmSparcPrompt ? 
+        `${swarmSparcPrompt}
 
 ## OBJECTIVE: ${objective}
 
-## SWARM CONFIGURATION
-Strategy: ${options.strategy} | Mode: ${options.mode} | Agents: ${options.maxAgents} | ${options.parallel ? 'Parallel' : 'Sequential'}
+# 🎯 SWARM EXECUTION WITH SPARC METHODOLOGY
 
-## IMMEDIATE EXECUTION PLAN
+You are operating in **SWARM ${options.strategy} mode** with **${options.mode} coordination**.
 
-**1. START NOW - TodoWrite Task Breakdown**
-- Create comprehensive task list for: ${objective}
-- Set priorities and dependencies
-- Assign agent roles based on ${options.strategy} strategy
+## SPARC Workflow for ${options.strategy.toUpperCase()} Strategy
 
-**2. COORDINATION MODE: ${options.mode.toUpperCase()}**${
-  options.mode === 'centralized' ? `
-- You coordinate all ${options.maxAgents} agents directly
-- Maintain central task queue in TodoWrite
-- Collect results before next phase` :
-  options.mode === 'distributed' ? `
-- Create coordinator agents for different aspects
-- Use Memory for inter-coordinator communication
-- Parallel independent execution` :
-  options.mode === 'hierarchical' ? `
-- Create team leads for major components
-- Team leads manage sub-agents
-- Report progress via Memory` :
-  options.mode === 'mesh' ? `
-- Agents self-organize via Memory
-- Claim tasks from shared TodoWrite
-- Peer-to-peer coordination` :
-  options.mode === 'hybrid' ? `
-- Start centralized, scale to distributed
-- Adapt coordination to task needs
-- Mix patterns for efficiency` : ''}
+### 1️⃣ SPECIFICATION - Define swarm objectives
+**Swarm Objective:** ${objective}
+**Strategy:** ${options.strategy} - ${getStrategyDescription(options.strategy)}
+**Coordination:** ${options.mode} - ${getCoordinationDescription(options.mode)}
+**Agents:** Up to ${options.maxAgents} parallel agents
 
-**3. ${options.strategy.toUpperCase()} STRATEGY PHASES**${
-  options.strategy === 'research' ? `
-- GATHER: Parallel WebSearch/WebFetch (batch operations)
-- ANALYZE: Process findings in Memory
-- SYNTHESIZE: Generate insights and report` :
-  options.strategy === 'development' ? `
-- DESIGN: Architecture in Memory
-- BUILD: Parallel file creation/editing
-- TEST: Batch test execution
-- DEPLOY: Coordinated deployment` :
-  options.strategy === 'analysis' ? `
-- COLLECT: Parallel data gathering
-- PROCESS: Batch analysis operations
-- INSIGHTS: Store results in Memory` :
-  options.strategy === 'testing' ? `
-- PLAN: Test matrix in TodoWrite
-- EXECUTE: Parallel test batches
-- ANALYZE: Aggregate results in Memory` :
-  options.strategy === 'optimization' ? `
-- PROFILE: Parallel performance measurements
-- IDENTIFY: Batch bottleneck analysis
-- OPTIMIZE: Parallel improvements` :
-  options.strategy === 'maintenance' ? `
-- AUDIT: Parallel system checks
-- PLAN: Prioritize updates in TodoWrite
-- EXECUTE: Batch implementations` : ''}
+**Initial TodoWrite for swarm coordination:**
+\`\`\`javascript
+TodoWrite([
+  {
+    id: "swarm_specification",
+    content: "Define swarm objectives and success criteria for: ${objective}",
+    status: "pending",
+    priority: "high",
+    strategy: "${options.strategy}",
+    coordination: "${options.mode}",
+    requirements: ["Use batch tools", "Save to Memory"]
+  },
+  {
+    id: "agent_allocation",
+    content: "Plan agent allocation for ${options.strategy} strategy",
+    status: "pending",
+    priority: "high",
+    maxAgents: ${options.maxAgents},
+    batchTools: ["Read", "MultiEdit", "Glob", "Grep"],
+    memoryNamespace: "${swarmConfig.id}"
+  }
+]);
+\`\`\`
 
-**4. BATCH EXECUTION PATTERNS**
-- Launch ${options.maxAgents} agents simultaneously with Task tool
-- Read/Write/Edit multiple files in single operations
-- Parallel Glob/Grep searches for efficiency
-- Store all results in Memory namespace: swarm_${swarmConfig.id}
+### 2️⃣ PSEUDOCODE - ${options.strategy} strategy design
+${getStrategyPseudocode(options.strategy, objective)}
 
-**5. SUCCESS CRITERIA**
-- All TodoWrite tasks completed
-- Results consolidated in Memory
-- Final report generated
+### 3️⃣ ARCHITECTURE - ${options.mode} coordination pattern
+${getCoordinationArchitecture(options.mode, options.maxAgents)}
 
-**BEGIN IMMEDIATELY** with TodoWrite breakdown for: ${objective}
+### 4️⃣ REFINEMENT - Strategy-specific optimization
+${getStrategyRefinement(options.strategy)}
+
+### 5️⃣ COMPLETION - Swarm results consolidation
+**Completion Requirements:**
+- [ ] All swarm objectives achieved
+- [ ] Agent results consolidated in Memory: \`${memoryKey}\`
+- [ ] ${options.output} report generated in ${options.outputDir}
+- [ ] Performance metrics captured
+- [ ] Lessons learned documented
+
+## 🚀 Swarm Execution Configuration
+
+**Strategy:** ${options.strategy} (${getStrategyDescription(options.strategy)})
+**Coordination:** ${options.mode} (${getCoordinationDescription(options.mode)})
+**Max Agents:** ${options.maxAgents}
+**Parallel:** ${options.parallel ? 'Enabled' : 'Sequential'}
+**Monitoring:** ${options.monitor ? 'Real-time monitoring enabled' : 'Standard logging'}
+**Memory Key:** \`${memoryKey}\`
+**Output:** ${options.output} format to ${options.outputDir}
+**Timeout:** ${options.timeout} minutes
+
+## 🚀 EXECUTE THE OBJECTIVE: ${objective}
+
+You are the SWARM ORCHESTRATOR. Your mission is to **${objective}** by spawning and coordinating multiple specialized agents working in parallel.
+
+## IMMEDIATE ACTIONS - START NOW
+
+### 1️⃣ CREATE TASK BREAKDOWN (TodoWrite)
+Analyze "${objective}" and break it into parallel workstreams:
+
+\`\`\`javascript
+TodoWrite([
+  {
+    id: "analyze_objective",
+    content: "Break down: ${objective} into parallel tasks",
+    status: "in_progress",
+    priority: "critical"
+  },
+  // Add specific tasks based on the objective
+]);
+\`\`\`
+
+### 2️⃣ SPAWN AGENTS TO EXECUTE THE OBJECTIVE
+
+Based on "${objective}", spawn specialized agents NOW:
+
+\`\`\`javascript
+// Example for ${options.strategy} strategy
+${options.strategy === 'research' ? `
+Task("Research Lead", "Research current best practices for: ${objective}");
+Task("Data Analyst", "Analyze existing solutions and approaches for: ${objective}");
+Task("Tech Scout", "Identify tools and technologies relevant to: ${objective}");
+Task("Synthesizer", "Compile findings into actionable insights for: ${objective}");` :
+options.strategy === 'development' ? `
+Task("System Architect", "Design architecture for: ${objective}");
+Task("Backend Developer", "Implement server-side components for: ${objective}");
+Task("Frontend Developer", "Build user interface for: ${objective}");
+Task("QA Engineer", "Create comprehensive tests for: ${objective}");` :
+options.strategy === 'analysis' ? `
+Task("Data Collector", "Gather all relevant data for: ${objective}");
+Task("Statistical Analyst", "Perform quantitative analysis for: ${objective}");
+Task("Pattern Detector", "Identify trends and patterns in: ${objective}");
+Task("Report Generator", "Create visualizations and reports for: ${objective}");` :
+`Task("Specialist 1", "Handle first aspect of: ${objective}");
+Task("Specialist 2", "Handle second aspect of: ${objective}");
+Task("Specialist 3", "Handle third aspect of: ${objective}");`}
+\`\`\`
+
+### 3️⃣ COORDINATION PATTERN: ${options.mode.toUpperCase()}
+${options.mode === 'centralized' ? `
+**YOU are the central coordinator:**
+- Direct each agent with specific subtasks
+- Monitor progress via TodoRead
+- Collect results in Memory before proceeding` :
+options.mode === 'distributed' ? `
+**Create domain coordinators:**
+- Spawn coordinator agents for different aspects
+- Each coordinator manages their domain
+- Use Memory for cross-domain communication` :
+options.mode === 'hierarchical' ? `
+**Establish team hierarchy:**
+- Create team lead agents
+- Team leads spawn and manage specialists
+- Results flow up through hierarchy` :
+`**Enable self-organization:**
+- Agents coordinate via shared Memory
+- TodoWrite as shared task pool
+- Autonomous task selection`}
+
+## 🎯 EXECUTION REQUIREMENTS
+
+**EACH AGENT MUST:**
+
+1. **WORK ON THE ACTUAL OBJECTIVE**
+   - Focus on "${objective}" specifically
+   - Deliver concrete results, not plans
+   - Execute tasks, don't just describe them
+
+2. **USE BATCH TOOLS FOR EFFICIENCY**
+   - Read multiple files in ONE operation
+   - Use MultiEdit for bulk changes
+   - Parallel Glob/Grep searches
+   - Batch Write for multiple files
+
+3. **SAVE PROGRESS TO MEMORY**
+   \`\`\`javascript
+   Memory.store("${swarmConfig.id}/architect/api-design", {
+     objective: "${objective}",
+     component: "API Design",
+     decisions: ["REST", "JWT auth", "PostgreSQL"],
+     implementation: { /* actual code/config */ },
+     nextSteps: ["Implement endpoints", "Add validation"]
+   });
+   \`\`\`
+
+## 📋 SPECIFIC ACTIONS FOR: ${objective}
+
+${options.strategy === 'research' ? `
+**Research Actions:**
+1. Search for existing solutions to "${objective}"
+2. Analyze best practices and case studies
+3. Compare different approaches
+4. Synthesize findings into recommendations
+5. Store all research in Memory with sources` :
+options.strategy === 'development' ? `
+**Development Actions:**
+1. Design system architecture for "${objective}"
+2. Implement core functionality in parallel
+3. Create comprehensive test coverage
+4. Build user interfaces if needed
+5. Document all code and decisions` :
+options.strategy === 'analysis' ? `
+**Analysis Actions:**
+1. Collect all relevant data for "${objective}"
+2. Perform statistical analysis
+3. Identify patterns and insights
+4. Create visualizations
+5. Generate actionable recommendations` :
+`**Execution Actions:**
+1. Understand requirements for "${objective}"
+2. Break into manageable components
+3. Execute each component in parallel
+4. Integrate results
+5. Deliver complete solution`}
+
+## ✅ SUCCESS METRICS
+
+**The swarm succeeds when:**
+- ${objective} is fully completed, not just planned
+- All agents have contributed concrete deliverables
+- Results are consolidated in Memory
+- Final output directly addresses "${objective}"
+
+**BEGIN EXECUTION NOW** - Don't plan, DO!
 
 ## 📊 TASK TRACKING FORMAT
 Use this format when displaying task progress:
@@ -2850,7 +3414,207 @@ Use this format when displaying task progress:
 
 Use priority indicators: 🔴 HIGH/CRITICAL, 🟡 MEDIUM, 🟢 LOW
 Show dependencies with ↳ X deps notation
-Use ▶ to indicate actionable items`;
+Use ▶ to indicate actionable items
+
+**Primary Tools for ${options.strategy}:** ${getStrategyTools(options.strategy)}
+
+## 🚨 CRITICAL AGENT INSTRUCTIONS
+
+**EVERY AGENT IN THE SWARM MUST:**
+
+1. **USE BATCH TOOLS EXCLUSIVELY**
+   - ❌ WRONG: Reading files one by one with multiple Read calls
+   - ✅ RIGHT: Reading all files in ONE Read operation with array of paths
+   - ❌ WRONG: Multiple Edit calls for different files
+   - ✅ RIGHT: Single MultiEdit call with all file changes
+   - ❌ WRONG: Sequential Grep searches
+   - ✅ RIGHT: Parallel Glob/Grep operations
+
+2. **SAVE DETAILED SUMMARIES TO MEMORY**
+   Each agent MUST store comprehensive summaries:
+   \`\`\`javascript
+   // Example for researcher agent
+   Memory.store("${swarmConfig.id}/researcher/framework-analysis", {
+     timestamp: new Date().toISOString(),
+     agent: "researcher_1",
+     task: "Analyze web frameworks",
+     findings: {
+       frameworks: ["React", "Vue", "Angular"],
+       comparisons: { /* detailed data */ },
+       recommendations: "React for this use case because..."
+     },
+     sources: ["urls", "docs"],
+     nextSteps: ["Implement prototype", "Performance testing"]
+   });
+   \`\`\`
+
+3. **COORDINATE THROUGH MEMORY**
+   - Check Memory for related work before starting
+   - Store progress updates during execution
+   - Save final results with clear structure
+   - Reference other agents' Memory entries
+
+Remember: You're orchestrating a **${options.strategy} swarm** with **${options.mode} coordination**. 
+Use Task() to spawn specialized agents, batch tools for efficiency, and Memory for all coordination and results.` :
+        `# 🚀 SWARM EXECUTION: ${objective}
+
+You are the SWARM ORCHESTRATOR. **IMMEDIATELY SPAWN ${options.maxAgents} AGENTS** to execute: **${objective}**
+
+## 🧠 MEMORY SYSTEM - USE FOR ALL COORDINATION
+
+**EVERY AGENT MUST USE MEMORY TO:**
+1. Store detailed summaries after EACH step
+2. Save all findings, code, decisions, and results
+3. Enable cross-agent coordination
+
+**MEMORY COMMANDS:**
+- \`Memory.store("${swarmConfig.id}/agent/step", data)\` - Store results
+- \`Memory.get("${swarmConfig.id}/agent/step")\` - Retrieve data
+- \`Memory.query("${swarmConfig.id}")\` - Search all swarm data
+- \`Memory.list({ namespace: "${swarmConfig.id}" })\` - List all entries
+
+**REQUIRED AFTER EACH STEP:**
+\`\`\`javascript
+// Example: After completing any task or step
+Memory.store("${swarmConfig.id}/architect/requirements-analysis", {
+  step: "Requirements Analysis",
+  timestamp: new Date().toISOString(),
+  objective: "${objective}",
+  findings: {
+    requirements: ["req1", "req2", "req3"],
+    constraints: ["constraint1", "constraint2"],
+    decisions: ["decision1", "decision2"]
+  },
+  implementation: {
+    code: "// actual code here",
+    config: { /* actual config */ }
+  },
+  nextSteps: ["step1", "step2"],
+  blockers: [],
+  progress: "25%"
+});
+\`\`\`
+
+## 🎯 SPARC METHODOLOGY - EXECUTE WITH MEMORY
+
+### 1️⃣ SPECIFICATION (TodoWrite) - START IMMEDIATELY
+\`\`\`javascript
+TodoWrite([
+  {
+    id: "swarm_objective",
+    content: "Execute: ${objective}",
+    status: "in_progress",
+    priority: "critical",
+    agents: ${options.maxAgents}
+  },
+  {
+    id: "agent_tasks",
+    content: "Define specific tasks for ${options.maxAgents} agents",
+    status: "pending",
+    priority: "high"
+  }
+]);
+
+// SAVE SPECIFICATION TO MEMORY
+Memory.store("${swarmConfig.id}/orchestrator/specification", {
+  step: "Specification",
+  objective: "${objective}",
+  agents: ${options.maxAgents},
+  strategy: "${options.strategy}",
+  tasks: [/* list all tasks */]
+});
+\`\`\`
+
+### 2️⃣ PSEUDOCODE - SPAWN EXACTLY ${options.maxAgents} AGENTS NOW
+\`\`\`javascript
+// YOU MUST SPAWN EXACTLY ${options.maxAgents} AGENTS - NO MORE, NO LESS
+${options.strategy === 'auto' ? `
+// Auto strategy - Analyze objective and spawn ${options.maxAgents} specialized agents
+Task("Lead Coordinator", "Coordinate execution of: ${objective}");
+Task("Requirements Analyst", "Break down requirements for: ${objective}");
+Task("Solution Architect", "Design solution for: ${objective}");${options.maxAgents > 3 ? `
+Task("Implementation Specialist", "Implement core components for: ${objective}");` : ''}${options.maxAgents > 4 ? `
+Task("Quality Assurance", "Validate and test: ${objective}");` : ''}` :
+options.strategy === 'research' ? `
+// Research strategy - Spawn ${options.maxAgents} research agents
+Task("Research Lead", "Research best practices for: ${objective}");
+Task("Data Analyst", "Analyze existing solutions for: ${objective}");
+Task("Technology Scout", "Identify tools/tech for: ${objective}");${options.maxAgents > 3 ? `
+Task("Literature Reviewer", "Review academic sources for: ${objective}");` : ''}${options.maxAgents > 4 ? `
+Task("Synthesis Expert", "Compile findings for: ${objective}");` : ''}` :
+options.strategy === 'development' ? `
+// Development strategy - Spawn ${options.maxAgents} development agents
+Task("System Architect", "Design architecture for: ${objective}");
+Task("Backend Developer", "Build server components for: ${objective}");
+Task("Frontend Developer", "Create user interface for: ${objective}");${options.maxAgents > 3 ? `
+Task("Database Engineer", "Design data models for: ${objective}");` : ''}${options.maxAgents > 4 ? `
+Task("DevOps Engineer", "Setup deployment for: ${objective}");` : ''}` :
+`// ${options.strategy} strategy - Spawn ${options.maxAgents} specialized agents
+${Array.from({length: options.maxAgents}, (_, i) => 
+  `Task("${options.strategy} Agent ${i+1}", "Execute ${options.strategy} tasks for: ${objective}");`
+).join('\n')}`}
+
+// CRITICAL: You spawned ${options.maxAgents} agents as required
+\`\`\`
+
+### 3️⃣ ARCHITECTURE - BATCH TOOLS MANDATORY
+**EVERY AGENT MUST USE BATCH TOOLS:**
+- **Read**: Pass array of file paths, read ALL at once
+- **MultiEdit**: Edit multiple files in ONE operation
+- **Glob/Grep**: Run in parallel, not sequential
+- **Memory**: Store detailed results with key ${swarmConfig.id}/<agent>/<task>
+
+### 4️⃣ REFINEMENT - MEMORY INTEGRATION
+Each agent MUST save to Memory:
+\`\`\`javascript
+Memory.store("${swarmConfig.id}/agent-name/task", {
+  objective: "${objective}",
+  agent: "agent-name",
+  results: { /* concrete deliverables */ },
+  code: { /* actual implementation */ },
+  decisions: ["why", "what", "how"],
+  nextSteps: ["specific", "actionable", "items"]
+});
+\`\`\`
+
+### 5️⃣ COMPLETION - DELIVER RESULTS
+Success when:
+- ALL ${options.maxAgents} agents have completed their tasks
+- Each agent saved concrete results to Memory
+- "${objective}" is DONE, not just planned
+
+**CRITICAL REQUIREMENTS:**
+1. SPAWN EXACTLY ${options.maxAgents} AGENTS (you MUST spawn ${options.maxAgents}, not ${options.maxAgents - 1} or ${options.maxAgents + 1})
+2. USE BATCH TOOLS ONLY (no single file operations)
+3. SAVE TO MEMORY (every agent, every task)
+4. EXECUTE "${objective}" (deliver results, not plans)
+
+## 📊 TASK TRACKING FORMAT
+Use this format when displaying task progress:
+
+📊 Progress Overview
+   ├── Total Tasks: X
+   ├── ✅ Completed: X (X%)
+   ├── 🔄 In Progress: X (X%)
+   ├── ⭕ Todo: X (X%)
+   └── ❌ Blocked: X (X%)
+
+📋 Todo (X)
+   └── 🔴 001: [Task description] [PRIORITY] ▶
+
+🔄 In progress (X)
+   ├── 🟡 002: [Task description] ↳ X deps ▶
+   └── 🔴 003: [Task description] [PRIORITY] ▶
+
+✅ Completed (X)
+   ├── ✅ 004: [Task description]
+   └── ... (more completed tasks)
+
+Use priority indicators: 🔴 HIGH/CRITICAL, 🟡 MEDIUM, 🟢 LOW
+Show dependencies with ↳ X deps notation
+Use ▶ to indicate actionable items
+
+Strategy: ${options.strategy} | Mode: ${options.mode} | Agents: ${options.maxAgents}`;
 
       console.log('\n🚀 Launching swarm execution...\n');
       
@@ -2868,7 +3632,8 @@ Use ▶ to indicate actionable items`;
         console.log(`📏 Prompt length: ${swarmPrompt.length} characters`);
         
         // Launch claude with the prompt file
-        const claudeProcess = spawn('bash', ['-c', `cat "${promptFile}" | claude --dangerously-skip-permissions`], {
+        // Use echo "2" to automatically accept the warning prompt if it appears
+        const claudeProcess = spawn('bash', ['-c', `(echo "2"; cat "${promptFile}") | claude --dangerously-skip-permissions`], {
           stdio: 'inherit',
           shell: false
         });

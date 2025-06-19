@@ -1,9 +1,9 @@
-# 🌊 Claude-Flow v1.0.71: Advanced AI Agent Orchestration Platform
+# 🌊 Claude-Flow v1.0.72: Advanced AI Agent Orchestration Platform
 
 <div align="center">
 
 [![🌟 Star on GitHub](https://img.shields.io/github/stars/ruvnet/claude-code-flow?style=for-the-badge&logo=github&color=gold)](https://github.com/ruvnet/claude-code-flow)
-[![📦 NPX Ready](https://img.shields.io/npm/v/claude-flow?style=for-the-badge&logo=npm&color=blue&label=v1.0.71)](https://www.npmjs.com/package/claude-flow)
+[![📦 NPX Ready](https://img.shields.io/npm/v/claude-flow?style=for-the-badge&logo=npm&color=blue&label=v1.0.72)](https://www.npmjs.com/package/claude-flow)
 [![⚡ Claude Code](https://img.shields.io/badge/Claude%20Code-Ready-green?style=for-the-badge&logo=anthropic)](https://github.com/ruvnet/claude-code-flow)
 [![🦕 Multi-Runtime](https://img.shields.io/badge/Runtime-Node%20%7C%20Deno-blue?style=for-the-badge&logo=javascript)](https://github.com/ruvnet/claude-code-flow)
 [![⚡ TypeScript](https://img.shields.io/badge/TypeScript-Full%20Support-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
@@ -18,27 +18,27 @@
 > 🔥 **One command to rule them all**: `npx claude-flow@latest init --sparc` - Deploy a full AI agent coordination system in seconds!
 
 
-## 🚀 **What's New in v1.0.71**
+## 🚀 **What's New in v1.0.72**
 
-### 🎯 **Critical Fix: SPARC File Initialization**
-- **✅ Fixed SPARC Files**: `init --sparc` now properly copies all SPARC mode files to `.claude/commands/sparc/`
-- **✅ Swarm Strategies**: Also copies swarm strategy files to `.claude/commands/swarm/`
-- **✅ Config File**: Creates `.claude/config.json` with proper configuration
-- **✅ Complete Setup**: All 18 SPARC modes and 7 swarm strategies now included
-- **✅ Project-Focused**: Maintains v1.0.71's clear project-building focus
+### 🎯 **Claude Code Settings Optimization**
+- **✅ Auto-Settings Creation**: `init` command now creates `.claude/settings.json` with automation-optimized settings
+- **✅ Extended Timeouts**: 5-minute default, 10-minute max for Bash commands (300s/600s)
+- **✅ Full Tool Permissions**: All tools allowed with wildcards `(*)` for complete automation
+- **✅ Large Output Support**: 500KB character limit for handling extensive outputs
+- **✅ Automation Features**: Parallel execution, batch operations, and auto-save to memory enabled
 
-### 🔧 **Core Improvements**
-- **✅ Memory System**: Functional in-memory storage with export/import
-- **✅ Agent Management**: Added `info` and `terminate` commands
-- **✅ MCP Status Detection**: Real-time server status checking
-- **✅ UI Compatibility**: Graceful handling of terminal limitations
-- **✅ Error Recovery**: Better handling of port conflicts and missing dependencies
+### 🔧 **Enhanced SPARC Integration**
+- **✅ Better Prompts**: SPARC and swarm prompts now emphasize batch tools and memory usage
+- **✅ Memory First**: All modes now save to memory after each step for better coordination
+- **✅ Agent Clarity**: Swarm prompts specify exact agent counts and immediate execution
+- **✅ Task Tracking**: Added visual progress indicators and task format to all prompts
+- **✅ Action-Oriented**: Changed from planning to immediate execution language
 
 ### 🚀 **Developer Experience**
-- **✅ Simplified Setup**: One command initialization with local wrapper
-- **✅ Cross-Platform**: Windows, Mac, and Linux support
-- **✅ No Dependencies**: Works with just Node.js 18+
-- **✅ Backwards Compatible**: All existing commands preserved
+- **✅ Zero Configuration**: Optimal settings applied automatically on init
+- **✅ Long Operations**: Support for extended running tasks without timeouts
+- **✅ Better Reliability**: Auto-accept for Claude Code warnings in swarm mode
+- **✅ Version Consistency**: All components updated to v1.0.72
 
 ---
 
@@ -72,7 +72,7 @@ npx claude-flow@latest init --sparc
 ## 🏢 **Enterprise Features**
 
 ### 💼 **Enterprise-Grade Management**
-Claude-Flow v1.0.71 includes comprehensive enterprise features for production deployments:
+Claude-Flow v1.0.72 includes comprehensive enterprise features for production deployments:
 
 - **🗂️ Project Management**: Complete lifecycle tracking, team collaboration, and resource planning
 - **🚀 Deployment Automation**: Blue-green, canary, and rolling deployments with automated rollback
@@ -312,7 +312,7 @@ npm run lint
 npm run typecheck
 ```
 
-### **Quality Metrics (v1.0.71)**
+### **Quality Metrics (v1.0.72)**
 - **✅ Project-Focused**: CLAUDE.md explicitly guides building user applications
 - **✅ Clear Instructions**: No confusion about modifying claude-flow itself
 - **✅ Real Examples**: All documentation shows building actual applications

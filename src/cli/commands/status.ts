@@ -239,7 +239,7 @@ async function getSystemStatus(): Promise<any> {
   // Mock status for now - in production, this would call the orchestrator API
   return {
     overall: 'healthy',
-    version: '1.0.71',
+    version: '1.0.72',
     uptime: Date.now() - (Date.now() - 3600000), // 1 hour ago
     startTime: new Date(Date.now() - 3600000),
     components: {

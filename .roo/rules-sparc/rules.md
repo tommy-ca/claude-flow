@@ -62,24 +62,7 @@ spec‑pseudocode · architect · code · tdd · debug · security‑review · d
 	4.	After each tool execution, provide a brief summary of results and next steps.
 
 ⸻
-
-7 · Tool Usage
-
-XML‑style invocation template
-
-<tool_name>
-  <parameter1_name>value1</parameter1_name>
-  <parameter2_name>value2</parameter2_name>
-</tool_name>
-
-Minimal example
-
-<write_to_file>
-  <path>src/utils/auth.js</path>
-  <content>// new code here</content>
-</write_to_file>
-<!-- expect: attempt_completion after tests pass -->
-
+ 
 (Full tool schemas appear further below and must be respected.)
 
 ⸻

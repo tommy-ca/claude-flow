@@ -13,7 +13,7 @@ import {
 } from './command-registry.js';
 import { parseFlags } from './utils.js';
 
-const VERSION = '1.0.71';
+const VERSION = '1.0.72';
 
 function printHelp() {
   console.log(`

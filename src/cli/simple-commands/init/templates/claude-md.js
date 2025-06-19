@@ -22,18 +22,227 @@ export function createFullClaudeMd() {
   return `# Claude Code Configuration
 
 ## Build Commands
-- \`npm run build\`: Build the project using Deno compile
+- \`npm run build\`: Build the project
 - \`npm run test\`: Run the full test suite
 - \`npm run lint\`: Run ESLint and format checks
 - \`npm run typecheck\`: Run TypeScript type checking
-- \`./claude-flow start\`: Start the orchestration system
 - \`./claude-flow --help\`: Show all available commands
 
+## Claude-Flow Complete Command Reference
+
+### Core System Commands
+- \`./claude-flow start [--ui] [--port 3000] [--host localhost]\`: Start orchestration system with optional web UI
+- \`./claude-flow status\`: Show comprehensive system status
+- \`./claude-flow monitor\`: Real-time system monitoring dashboard
+- \`./claude-flow config <subcommand>\`: Configuration management (show, get, set, init, validate)
+
+### Agent Management
+- \`./claude-flow agent spawn <type> [--name <name>]\`: Create AI agents (researcher, coder, analyst, etc.)
+- \`./claude-flow agent list\`: List all active agents
+- \`./claude-flow spawn <type>\`: Quick agent spawning (alias for agent spawn)
+
+### Task Orchestration
+- \`./claude-flow task create <type> [description]\`: Create and manage tasks
+- \`./claude-flow task list\`: View active task queue
+- \`./claude-flow workflow <file>\`: Execute workflow automation files
+
+### Memory Management
+- \`./claude-flow memory store <key> <data>\`: Store persistent data across sessions
+- \`./claude-flow memory get <key>\`: Retrieve stored information
+- \`./claude-flow memory list\`: List all memory keys
+- \`./claude-flow memory export <file>\`: Export memory to file
+- \`./claude-flow memory import <file>\`: Import memory from file
+- \`./claude-flow memory stats\`: Memory usage statistics
+- \`./claude-flow memory cleanup\`: Clean unused memory entries
+
+### SPARC Development Modes
+- \`./claude-flow sparc "<task>"\`: Run orchestrator mode (default)
+- \`./claude-flow sparc run <mode> "<task>"\`: Run specific SPARC mode
+- \`./claude-flow sparc tdd "<feature>"\`: Test-driven development mode
+- \`./claude-flow sparc modes\`: List all 17 available SPARC modes
+
+Available SPARC modes: orchestrator, coder, researcher, tdd, architect, reviewer, debugger, tester, analyzer, optimizer, documenter, designer, innovator, swarm-coordinator, memory-manager, batch-executor, workflow-manager
+
+### Swarm Coordination
+- \`./claude-flow swarm "<objective>" [options]\`: Multi-agent swarm coordination
+- \`--strategy\`: research, development, analysis, testing, optimization, maintenance
+- \`--mode\`: centralized, distributed, hierarchical, mesh, hybrid
+- \`--max-agents <n>\`: Maximum number of agents (default: 5)
+- \`--parallel\`: Enable parallel execution
+- \`--monitor\`: Real-time monitoring
+- \`--output <format>\`: json, sqlite, csv, html
+
+### MCP Server Integration
+- \`./claude-flow mcp start [--port 3000] [--host localhost]\`: Start MCP server
+- \`./claude-flow mcp status\`: Show MCP server status
+- \`./claude-flow mcp tools\`: List available MCP tools
+
+### Claude Integration
+- \`./claude-flow claude auth\`: Authenticate with Claude API
+- \`./claude-flow claude models\`: List available Claude models
+- \`./claude-flow claude chat\`: Interactive chat mode
+
+### Session Management
+- \`./claude-flow session\`: Manage terminal sessions
+- \`./claude-flow repl\`: Start interactive REPL mode
+
+### Enterprise Features
+- \`./claude-flow project <subcommand>\`: Project management (Enterprise)
+- \`./claude-flow deploy <subcommand>\`: Deployment operations (Enterprise)
+- \`./claude-flow cloud <subcommand>\`: Cloud infrastructure management (Enterprise)
+- \`./claude-flow security <subcommand>\`: Security and compliance tools (Enterprise)
+- \`./claude-flow analytics <subcommand>\`: Analytics and insights (Enterprise)
+
+### Project Initialization
+- \`./claude-flow init\`: Initialize Claude-Flow project
+- \`./claude-flow init --sparc\`: Initialize with full SPARC development environment
+
+## Quick Start Workflows
+
+### Research Workflow
+\`\`\`bash
+# Start a research swarm with distributed coordination
+./claude-flow swarm "Research modern web frameworks" --strategy research --mode distributed --parallel --monitor
+
+# Or use SPARC researcher mode for focused research
+./claude-flow sparc run researcher "Analyze React vs Vue vs Angular performance characteristics"
+
+# Store findings in memory for later use
+./claude-flow memory store "research_findings" "Key insights from framework analysis"
+\`\`\`
+
+### Development Workflow
+\`\`\`bash
+# Start orchestration system with web UI
+./claude-flow start --ui --port 3000
+
+# Run TDD workflow for new feature
+./claude-flow sparc tdd "User authentication system with JWT tokens"
+
+# Development swarm for complex projects
+./claude-flow swarm "Build e-commerce API with payment integration" --strategy development --mode hierarchical --max-agents 8 --monitor
+
+# Check system status
+./claude-flow status
+\`\`\`
+
+### Analysis Workflow
+\`\`\`bash
+# Analyze codebase performance
+./claude-flow sparc run analyzer "Identify performance bottlenecks in current codebase"
+
+# Data analysis swarm
+./claude-flow swarm "Analyze user behavior patterns from logs" --strategy analysis --mode mesh --parallel --output sqlite
+
+# Store analysis results
+./claude-flow memory store "performance_analysis" "Bottlenecks identified in database queries"
+\`\`\`
+
+### Maintenance Workflow
+\`\`\`bash
+# System maintenance with safety controls
+./claude-flow swarm "Update dependencies and security patches" --strategy maintenance --mode centralized --monitor
+
+# Security review
+./claude-flow sparc run reviewer "Security audit of authentication system"
+
+# Export maintenance logs
+./claude-flow memory export maintenance_log.json
+\`\`\`
+
+## Integration Patterns
+
+### Memory-Driven Coordination
+Use Memory to coordinate information across multiple SPARC modes and swarm operations:
+
+\`\`\`bash
+# Store architecture decisions
+./claude-flow memory store "system_architecture" "Microservices with API Gateway pattern"
+
+# All subsequent operations can reference this decision
+./claude-flow sparc run coder "Implement user service based on system_architecture in memory"
+./claude-flow sparc run tester "Create integration tests for microservices architecture"
+\`\`\`
+
+### Multi-Stage Development
+Coordinate complex development through staged execution:
+
+\`\`\`bash
+# Stage 1: Research and planning
+./claude-flow sparc run researcher "Research authentication best practices"
+./claude-flow sparc run architect "Design authentication system architecture"
+
+# Stage 2: Implementation
+./claude-flow sparc tdd "User registration and login functionality"
+./claude-flow sparc run coder "Implement JWT token management"
+
+# Stage 3: Testing and deployment
+./claude-flow sparc run tester "Comprehensive security testing"
+./claude-flow swarm "Deploy authentication system" --strategy maintenance --mode centralized
+\`\`\`
+
+### Enterprise Integration
+For enterprise environments with additional tooling:
+
+\`\`\`bash
+# Project management integration
+./claude-flow project create "authentication-system"
+./claude-flow project switch "authentication-system"
+
+# Security compliance
+./claude-flow security scan
+./claude-flow security audit
+
+# Analytics and monitoring
+./claude-flow analytics dashboard
+./claude-flow deploy production --monitor
+\`\`\`
+
+## Advanced Batch Tool Patterns
+
+### TodoWrite Coordination
+Always use TodoWrite for complex task coordination:
+
+\`\`\`javascript
+TodoWrite([
+  {
+    id: "architecture_design",
+    content: "Design system architecture and component interfaces",
+    status: "pending",
+    priority: "high",
+    dependencies: [],
+    estimatedTime: "60min",
+    assignedAgent: "architect"
+  },
+  {
+    id: "frontend_development", 
+    content: "Develop React components and user interface",
+    status: "pending",
+    priority: "medium",
+    dependencies: ["architecture_design"],
+    estimatedTime: "120min",
+    assignedAgent: "frontend_team"
+  }
+]);
+\`\`\`
+
+### Task and Memory Integration
+Launch coordinated agents with shared memory:
+
+\`\`\`javascript
+// Store architecture in memory
+Task("System Architect", "Design architecture and store specs in Memory");
+
+// Other agents use memory for coordination
+Task("Frontend Team", "Develop UI using Memory architecture specs");
+Task("Backend Team", "Implement APIs according to Memory specifications");
+\`\`\`
+
 ## Code Style Preferences
-- Use ES modules (import/export) syntax, not CommonJS (require)
-- Destructure imports when possible (e.g., \`import { foo } from 'bar'\`)
+- Use ES modules (import/export) syntax
+- Destructure imports when possible
 - Use TypeScript for all new code
-- Follow existing naming conventions (camelCase for variables, PascalCase for classes)
+- Follow existing naming conventions
 - Add JSDoc comments for public APIs
 - Use async/await instead of Promise chains
 - Prefer const/let over var
@@ -41,30 +250,27 @@ export function createFullClaudeMd() {
 ## Workflow Guidelines
 - Always run typecheck after making code changes
 - Run tests before committing changes
-- Use meaningful commit messages following conventional commits
+- Use meaningful commit messages
 - Create feature branches for new functionality
 - Ensure all tests pass before merging
 
-## Project Architecture
-This is a Claude-Flow AI agent orchestration system with the following components:
-- **CLI Interface**: Command-line tools for managing the system
-- **Orchestrator**: Core engine for coordinating agents and tasks
-- **Memory System**: Persistent storage and retrieval of information
-- **Terminal Management**: Automated terminal session handling
-- **MCP Integration**: Model Context Protocol server for Claude integration
-- **Agent Coordination**: Multi-agent task distribution and management
-
 ## Important Notes
-- Use \`claude --dangerously-skip-permissions\` for unattended operation
-- The system supports both daemon and interactive modes
-- Memory persistence is handled automatically
-- All components are event-driven for scalability
+- **Use TodoWrite extensively** for all complex task coordination
+- **Leverage Task tool** for parallel agent execution on independent work
+- **Store all important information in Memory** for cross-agent coordination
+- **Use batch file operations** whenever reading/writing multiple files
+- **Check .claude/commands/** for detailed command documentation
+- **All swarm operations include automatic batch tool coordination**
+- **Monitor progress** with TodoRead during long-running operations
+- **Enable parallel execution** with --parallel flags for maximum efficiency
 
-## Debugging
-- Check logs in \`./claude-flow.log\`
-- Use \`./claude-flow status\` to check system health
-- Monitor with \`./claude-flow monitor\` for real-time updates
-- Verbose output available with \`--verbose\` flag on most commands
+This configuration ensures optimal use of Claude Code's batch tools for swarm orchestration and parallel task execution with full Claude-Flow capabilities.
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
 `;
 }
 
@@ -72,15 +278,34 @@ export function createSparcClaudeMd() {
   return `# Claude Code Configuration - SPARC Development Environment
 
 ## Project Overview
-This project uses the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology for systematic Test-Driven Development with AI assistance through Claude-Flow orchestration.
+This project uses the SPARC (Specification, Pseudocode, Architecture, Refinement, Completion) methodology for systematic development with AI-powered swarm orchestration through Claude-Flow.
 
-## SPARC Development Commands
+## Complete Command Reference
 
-### Core SPARC Commands
-- \`./claude-flow sparc modes\`: List all available SPARC development modes
-- \`./claude-flow sparc run <mode> "<task>"\`: Execute specific SPARC mode for a task
-- \`./claude-flow sparc tdd "<feature>"\`: Run complete TDD workflow using SPARC methodology
-- \`./claude-flow sparc info <mode>\`: Get detailed information about a specific mode
+### SPARC Development Commands
+- \`./claude-flow sparc "<task>"\`: Run orchestrator mode (default)
+- \`./claude-flow sparc run <mode> "<task>"\`: Execute specific SPARC mode
+- \`./claude-flow sparc tdd "<feature>"\`: Test-driven development workflow
+- \`./claude-flow sparc modes\`: List all 17 available SPARC modes
+- \`./claude-flow sparc batch "<tasks>"\`: Execute multiple tasks in parallel
+- \`./claude-flow sparc workflow "<workflow>"\`: Execute workflow orchestration
+
+### Swarm Coordination Commands
+- \`./claude-flow swarm "<objective>" [options]\`: Multi-agent swarm coordination
+  - \`--strategy <type>\`: research, development, analysis, testing, optimization, maintenance
+  - \`--mode <mode>\`: centralized, distributed, hierarchical, mesh, hybrid
+  - \`--max-agents <n>\`: Maximum agents (default: 5)
+  - \`--parallel\`: Enable parallel execution
+  - \`--monitor\`: Real-time monitoring
+  - \`--output <format>\`: json, sqlite, csv, html
+
+### Memory Management
+- \`./claude-flow memory store <key> <data>\`: Store persistent data
+- \`./claude-flow memory get <key>\`: Retrieve stored data
+- \`./claude-flow memory query <search>\`: Advanced search with filters
+- \`./claude-flow memory export <file>\`: Export memory data
+- \`./claude-flow memory import <file>\`: Import memory data
+- \`./claude-flow memory stats\`: Memory usage statistics
 
 ### Standard Build Commands
 - \`npm run build\`: Build the project
@@ -201,27 +426,151 @@ Claude Code slash commands are available in \`.claude/commands/\`:
 - Query previous work before starting new tasks
 - Export/import memory for backup and sharing
 
+## Swarm Orchestration Patterns
+
+### Research Swarm
+\`\`\`bash
+# Comprehensive research with distributed agents
+./claude-flow swarm "Research blockchain consensus algorithms" \\
+  --strategy research \\
+  --mode distributed \\
+  --max-agents 10 \\
+  --parallel \\
+  --monitor \\
+  --output json
+
+# The swarm will:
+# - Launch multiple WebSearch agents for parallel data gathering
+# - Analyze sources with credibility scoring
+# - Synthesize findings into comprehensive report
+# - Store results in Memory for future reference
+\`\`\`
+
+### Development Swarm
+\`\`\`bash
+# Complex development with hierarchical coordination
+./claude-flow swarm "Build microservices authentication system" \\
+  --strategy development \\
+  --mode hierarchical \\
+  --max-agents 8 \\
+  --parallel \\
+  --monitor
+
+# The swarm will:
+# - Architect designs the overall system
+# - Team leads coordinate frontend/backend/database teams
+# - Parallel implementation with shared Memory
+# - Automated testing and integration
+\`\`\`
+
+### Analysis Swarm
+\`\`\`bash
+# Data analysis with mesh coordination
+./claude-flow swarm "Analyze application performance metrics" \\
+  --strategy analysis \\
+  --mode mesh \\
+  --parallel \\
+  --output sqlite
+
+# The swarm will:
+# - Agents self-organize to analyze different metrics
+# - Parallel processing of logs and traces
+# - Pattern detection and anomaly identification
+# - Consolidated insights in structured format
+\`\`\`
+
+## SPARC + Swarm Integration
+
+### Multi-Stage Development Pipeline
+\`\`\`bash
+# Stage 1: Research Phase (Swarm)
+./claude-flow swarm "Research best practices for real-time chat" \\
+  --strategy research --mode distributed --max-agents 5
+
+# Stage 2: Architecture Phase (SPARC)
+./claude-flow sparc run architect "Design scalable chat architecture"
+
+# Stage 3: Development Phase (Swarm)
+./claude-flow swarm "Implement chat system components" \\
+  --strategy development --mode hierarchical --max-agents 10
+
+# Stage 4: Testing Phase (SPARC TDD)
+./claude-flow sparc tdd "Chat message delivery and persistence"
+
+# Stage 5: Optimization Phase (Swarm)
+./claude-flow swarm "Optimize chat system performance" \\
+  --strategy optimization --mode centralized
+\`\`\`
+
+## Task Tracking and Progress Monitoring
+
+### TodoWrite Format for Complex Projects
+\`\`\`javascript
+TodoWrite([
+  {
+    id: "swarm_research_001",
+    content: "Research distributed systems patterns",
+    status: "pending",
+    priority: "high",
+    swarmId: "swarm-research-distributed-123456",
+    agents: ["researcher_1", "researcher_2", "researcher_3"]
+  },
+  {
+    id: "sparc_architect_001",
+    content: "Design system architecture based on research",
+    status: "pending",
+    priority: "high",
+    dependencies: ["swarm_research_001"],
+    mode: "architect"
+  }
+]);
+\`\`\`
+
+### Progress Tracking Format
+\`\`\`
+📊 Progress Overview
+   ├── Total Tasks: 25
+   ├── ✅ Completed: 10 (40%)
+   ├── 🔄 In Progress: 5 (20%)
+   ├── ⭕ Todo: 8 (32%)
+   └── ❌ Blocked: 2 (8%)
+
+📋 Todo (8)
+   ├── 🔴 001: Research authentication patterns [HIGH] ▶
+   └── 🟡 002: Design API endpoints ↳ 1 deps ▶
+
+🔄 In progress (5)
+   ├── 🟡 003: Implement user service ↳ 2 deps ▶
+   └── 🔴 004: Security audit [CRITICAL] ▶
+
+✅ Completed (10)
+   ├── ✅ 005: Database schema design
+   └── ✅ 006: API specification document
+\`\`\`
+
 ## SPARC Memory Integration
 
 ### Memory Commands for SPARC Development
 \`\`\`bash
-# Store project specifications
-./claude-flow memory store spec_auth "User authentication requirements and constraints"
+# Store swarm research findings
+./claude-flow memory store "swarm_research_auth" "OAuth2, JWT, and WebAuthn analysis results"
 
-# Store architectural decisions
-./claude-flow memory store arch_decisions "Database schema and API design choices"
+# Store SPARC architecture decisions
+./claude-flow memory store "sparc_arch_auth" "Microservices with API Gateway pattern"
 
-# Store test results and coverage
-./claude-flow memory store test_coverage "Authentication module: 95% coverage, all tests passing"
+# Store implementation progress
+./claude-flow memory store "impl_progress" "User service: 80% complete, tests passing"
 
-# Query previous work
-./claude-flow memory query auth_implementation
+# Query all authentication-related work
+./claude-flow memory query "auth" --namespace "project"
 
-# Export project memory
-./claude-flow memory export project_backup.json
+# Export complete project memory
+./claude-flow memory export project_state.json
 \`\`\`
 
 ### Memory Namespaces
+- **\`swarm\`**: Swarm execution results and findings
+- **\`sparc\`**: SPARC mode outputs and decisions
 - **\`spec\`**: Requirements and specifications
 - **\`arch\`**: Architecture and design decisions
 - **\`impl\`**: Implementation notes and code patterns
@@ -327,16 +676,70 @@ This SPARC-enabled project follows a systematic development approach:
 - **Comprehensive documentation** for team collaboration
 - **AI-assisted development** through specialized SPARC modes
 
+## Best Practices for SPARC + Swarm Development
+
+### When to Use SPARC vs Swarm
+
+**Use SPARC Modes for:**
+- Focused, single-agent tasks requiring deep expertise
+- Systematic workflows (TDD, architecture design)
+- Sequential processes with clear phases
+- When you need specific mode capabilities
+
+**Use Swarm Orchestration for:**
+- Complex multi-faceted objectives
+- Tasks requiring diverse skill sets
+- Parallel execution opportunities
+- Large-scale research or development
+
+### Optimization Tips
+
+1. **Memory Coordination**
+   - Always store key decisions in Memory
+   - Use consistent naming conventions
+   - Query before starting new work
+   - Export memory for backups
+
+2. **Parallel Execution**
+   - Use \`--parallel\` for independent tasks
+   - Enable \`--monitor\` for progress tracking
+   - Set appropriate \`--max-agents\` limits
+   - Choose right coordination mode
+
+3. **Task Management**
+   - Use TodoWrite for all complex projects
+   - Set clear priorities and dependencies
+   - Update status in real-time
+   - Track blockers and issues
+
+4. **Error Handling**
+   - Always include error recovery plans
+   - Store error patterns in Memory
+   - Use security reviews for critical code
+   - Test edge cases thoroughly
+
 ## Important Notes
 
-- Always run tests before committing (\`npm run test\`)
-- Use SPARC memory system to maintain context across sessions
-- Follow the Red-Green-Refactor cycle during TDD phases
-- Document architectural decisions in memory for future reference
-- Regular security reviews for any authentication or data handling code
-- Claude Code slash commands provide quick access to SPARC modes
+- **Always use TodoWrite** for complex task coordination
+- **Store critical information in Memory** for persistence
+- **Enable parallel execution** when possible for performance
+- **Follow SPARC methodology** for systematic development
+- **Use swarms** for complex multi-agent objectives
+- **Monitor progress** with real-time tracking
+- **Run tests** before committing (\`npm run test\`)
+- **Security first** - regular reviews for auth and data handling
 
-For more information about SPARC methodology, see: https://github.com/ruvnet/claude-code-flow/docs/sparc.md
+This configuration optimizes Claude Code for advanced SPARC development with swarm orchestration capabilities.
+
+# important-instruction-reminders
+Do what has been asked; nothing more, nothing less.
+NEVER create files unless they're absolutely necessary for achieving your goal.
+ALWAYS prefer editing an existing file to creating a new one.
+NEVER proactively create documentation files (*.md) or README files. Only create documentation files if explicitly requested by the User.
+
+For more information:
+- SPARC Guide: https://github.com/ruvnet/claude-code-flow/docs/sparc.md
+- Swarm Orchestration: https://github.com/ruvnet/claude-code-flow/docs/swarm.md
 `;
 }
 

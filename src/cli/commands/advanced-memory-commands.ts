@@ -16,6 +16,22 @@ const logger = Logger.getInstance();
 // Global memory manager instance
 let memoryManager: AdvancedMemoryManager | null = null;
 
+// Register cleanup handler for process termination
+process.on('SIGINT', async () => {
+  if (memoryManager) {
+    console.log('\nShutting down memory manager...');
+    await memoryManager.shutdown();
+  }
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  if (memoryManager) {
+    await memoryManager.shutdown();
+  }
+  process.exit(0);
+});
+
 // Helper functions
 function printSuccess(message: string): void {
   console.log(chalk.green(`✅ ${message}`));
@@ -91,6 +107,7 @@ export function createAdvancedMemoryCommand(): Command {
       console.log('  • Compression and encryption support');
       console.log('  • Cross-agent sharing and synchronization');
       console.log('  • Performance analytics and optimization suggestions');
+      process.exit(0);
     });
 
   // === QUERY COMMAND ===
@@ -230,6 +247,11 @@ export function createAdvancedMemoryCommand(): Command {
         if (options.debug) {
           console.error(error);
         }
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -311,6 +333,11 @@ export function createAdvancedMemoryCommand(): Command {
         printError(`Export failed: ${error.message}`);
         if (options.debug) {
           console.error(error);
+        }
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
         }
       }
     });
@@ -439,6 +466,11 @@ export function createAdvancedMemoryCommand(): Command {
         printError(`Import failed: ${error.message}`);
         if (options.debug) {
           console.error(error);
+        }
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
         }
       }
     });
@@ -584,6 +616,11 @@ export function createAdvancedMemoryCommand(): Command {
         if (options.debug) {
           console.error(error);
         }
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -685,6 +722,11 @@ export function createAdvancedMemoryCommand(): Command {
         if (options.debug) {
           console.error(error);
         }
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -754,6 +796,11 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`Store failed: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -818,6 +865,11 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`Retrieve failed: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -856,6 +908,11 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`Delete failed: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -908,6 +965,11 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`List failed: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -932,6 +994,11 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`Failed to list namespaces: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -955,6 +1022,11 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`Failed to list types: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -978,6 +1050,11 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`Failed to list tags: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
@@ -1010,11 +1087,15 @@ export function createAdvancedMemoryCommand(): Command {
 
       } catch (error) {
         printError(`Configuration operation failed: ${error.message}`);
+      } finally {
+        // Ensure clean shutdown
+        if (memoryManager) {
+          await memoryManager.shutdown();
+        }
       }
     });
 
   return memoryCmd;
 }
 
-// Export for use in the main CLI
-export { createAdvancedMemoryCommand };
+// Export is already declared on the function itself
