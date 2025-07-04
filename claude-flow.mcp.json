@@ -1,0 +1,125 @@
+{
+  "name": "claude-flow",
+  "version": "1.0.73",
+  "description": "Claude-Flow MCP Server - Advanced AI Agent Orchestration with SPARC modes",
+  "command": "npx",
+  "args": [
+    "tsx",
+    "src/cli/mcp-stdio-server.ts"
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "CLAUDE_FLOW_MCP": "true",
+    "CLAUDE_NON_INTERACTIVE": "true",
+    "CLAUDE_FLOW_WRAPPER_MODE": "true"
+  },
+  "tools": [
+    {
+      "name": "sparc_orchestrator",
+      "description": "Execute SPARC orchestrator mode: Multi-agent task orchestration and coordination"
+    },
+    {
+      "name": "sparc_coder",
+      "description": "Execute SPARC coder mode: Autonomous code generation and implementation"
+    },
+    {
+      "name": "sparc_researcher", 
+      "description": "Execute SPARC researcher mode: Deep research and comprehensive analysis"
+    },
+    {
+      "name": "sparc_tdd",
+      "description": "Execute SPARC tdd mode: Test-driven development methodology"
+    },
+    {
+      "name": "sparc_architect",
+      "description": "Execute SPARC architect mode: System design and architecture planning"
+    },
+    {
+      "name": "sparc_reviewer",
+      "description": "Execute SPARC reviewer mode: Code review and quality optimization"
+    },
+    {
+      "name": "sparc_debugger",
+      "description": "Execute SPARC debugger mode: Debug and fix issues systematically"
+    },
+    {
+      "name": "sparc_tester",
+      "description": "Execute SPARC tester mode: Comprehensive testing and validation"
+    },
+    {
+      "name": "sparc_analyzer",
+      "description": "Execute SPARC analyzer mode: Code and data analysis specialist"
+    },
+    {
+      "name": "sparc_optimizer",
+      "description": "Execute SPARC optimizer mode: Performance optimization specialist"
+    },
+    {
+      "name": "sparc_documenter",
+      "description": "Execute SPARC documenter mode: Documentation generation and maintenance"
+    },
+    {
+      "name": "sparc_designer",
+      "description": "Execute SPARC designer mode: UI/UX design and user experience"
+    },
+    {
+      "name": "sparc_innovator",
+      "description": "Execute SPARC innovator mode: Creative problem solving and innovation"
+    },
+    {
+      "name": "sparc_swarm-coordinator",
+      "description": "Execute SPARC swarm-coordinator mode: Swarm coordination and management"
+    },
+    {
+      "name": "sparc_memory-manager",
+      "description": "Execute SPARC memory-manager mode: Memory and knowledge management"
+    },
+    {
+      "name": "sparc_batch-executor",
+      "description": "Execute SPARC batch-executor mode: Parallel task execution specialist"
+    },
+    {
+      "name": "sparc_workflow-manager",
+      "description": "Execute SPARC workflow-manager mode: Workflow automation and process management"
+    },
+    {
+      "name": "sparc_list",
+      "description": "List all available SPARC modes and their capabilities"
+    },
+    {
+      "name": "sparc_execute",
+      "description": "Execute a custom SPARC workflow with specified modes and coordination"
+    },
+    {
+      "name": "sparc_swarm",
+      "description": "Coordinate multiple SPARC agents in a swarm for complex tasks"
+    },
+    {
+      "name": "sparc_swarm_status",
+      "description": "Check status of running swarms and list created files"
+    }
+  ],
+  "alwaysAllow": [
+    "sparc_orchestrator",
+    "sparc_coder",
+    "sparc_researcher",
+    "sparc_tdd",
+    "sparc_architect",
+    "sparc_reviewer",
+    "sparc_debugger",
+    "sparc_tester",
+    "sparc_analyzer",
+    "sparc_optimizer",
+    "sparc_documenter",
+    "sparc_designer",
+    "sparc_innovator",
+    "sparc_swarm-coordinator",
+    "sparc_memory-manager",
+    "sparc_batch-executor",
+    "sparc_workflow-manager",
+    "sparc_list",
+    "sparc_execute",
+    "sparc_swarm",
+    "sparc_swarm_status"
+  ]
+}

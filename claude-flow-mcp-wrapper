@@ -1,0 +1,61 @@
+#!/usr/bin/env node
+
+/**
+ * Claude-Flow MCP Wrapper
+ * 
+ * This script launches the Claude-Flow MCP server that wraps Claude Code MCP
+ * with automatic SPARC/swarm prompt injection.
+ * 
+ * Usage:
+ *   ./claude-flow-mcp-wrapper
+ * 
+ * The wrapper provides:
+ * - All SPARC mode tools (sparc_orchestrator, sparc_coder, etc.)
+ * - Automatic prompt injection with SPARC methodology
+ * - Swarm coordination capabilities
+ * - Pass-through to Claude Code MCP tools
+ */
+
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { spawn } from 'child_process';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Check if TypeScript files need compilation
+const tsFile = join(__dirname, 'src/mcp/claude-code-wrapper.ts');
+const jsFile = join(__dirname, 'dist/mcp/claude-code-wrapper.js');
+
+import fs from 'fs';
+
+// Determine which file to run
+let scriptPath;
+if (fs.existsSync(jsFile)) {
+  scriptPath = jsFile;
+} else if (fs.existsSync(tsFile)) {
+  // Run with ts-node or compile first
+  console.log('Running TypeScript version...');
+  scriptPath = tsFile;
+} else {
+  console.error('Could not find wrapper implementation');
+  process.exit(1);
+}
+
+// Launch the wrapper
+const wrapperProcess = spawn('node', ['--loader', 'tsx', scriptPath], {
+  stdio: 'inherit',
+  env: {
+    ...process.env,
+    NODE_ENV: 'production',
+  },
+});
+
+wrapperProcess.on('error', (error) => {
+  console.error('Failed to start wrapper:', error);
+  process.exit(1);
+});
+
+wrapperProcess.on('exit', (code) => {
+  process.exit(code || 0);
+});
