@@ -1,5 +1,6 @@
 // memory.js - Memory management commands
 import { printSuccess, printError, printWarning } from '../utils.js';
+import { Deno, cwd, exit, existsSync } from '../node-compat.js';
 
 export async function memoryCommand(subArgs, flags) {
   const memorySubcommand = subArgs[0];

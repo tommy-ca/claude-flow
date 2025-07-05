@@ -1,18 +1,17 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Workflow execution commands for Claude-Flow
  */
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
-import { Table } from '@cliffy/table';
-import { Confirm, Input } from '@cliffy/prompt';
+import { promises as fs } from 'node:fs';
+import type { Table } from '@cliffy/table';
 import { formatDuration, formatStatusIndicator, formatProgressBar } from '../formatter.js';
-import { generateId } from '../../utils/helpers.js';
 
 export const workflowCommand = new Command()
   .description('Execute and manage workflows')
   .action(() => {
-    workflowCommand.showHelp();
+    console.log(workflowCommand.getHelp());
   })
   .command('run', new Command()
     .description('Execute a workflow from file')
@@ -138,7 +137,7 @@ async function runWorkflow(workflowFile: string, options: any): Promise<void> {
     
     if (options.dryRun) {
       await validateWorkflowDefinition(workflow, true);
-      console.log(colors.green('✓ Workflow validation passed'));
+      console.log(chalk.green('✓ Workflow validation passed'));
       return;
     }
 
@@ -155,10 +154,10 @@ async function runWorkflow(workflowFile: string, options: any): Promise<void> {
     // Create execution plan
     const execution = await createExecution(workflow);
     
-    console.log(colors.cyan.bold('Starting workflow execution'));
-    console.log(`${colors.white('Workflow:')} ${workflow.name}`);
-    console.log(`${colors.white('ID:')} ${execution.id}`);
-    console.log(`${colors.white('Tasks:')} ${execution.tasks.length}`);
+    console.log(chalk.cyan.bold('Starting workflow execution'));
+    console.log(`${chalk.white('Workflow:')} ${workflow.name}`);
+    console.log(`${chalk.white('ID:')} ${execution.id}`);
+    console.log(`${chalk.white('Tasks:')} ${execution.tasks.length}`);
     console.log();
 
     // Execute workflow
@@ -168,8 +167,8 @@ async function runWorkflow(workflowFile: string, options: any): Promise<void> {
       await executeWorkflow(execution, workflow, options);
     }
   } catch (error) {
-    console.error(colors.red('Workflow execution failed:'), (error as Error).message);
-    Deno.exit(1);
+    console.error(chalk.red('Workflow execution failed:'), (error as Error).message);
+    process.exit(1);
   }
 }
 
@@ -178,18 +177,18 @@ async function validateWorkflow(workflowFile: string, options: any): Promise<voi
     const workflow = await loadWorkflow(workflowFile);
     await validateWorkflowDefinition(workflow, options.strict);
     
-    console.log(colors.green('✓ Workflow validation passed'));
-    console.log(`${colors.white('Name:')} ${workflow.name}`);
-    console.log(`${colors.white('Tasks:')} ${workflow.tasks.length}`);
-    console.log(`${colors.white('Agents:')} ${workflow.agents?.length || 0}`);
+    console.log(chalk.green('✓ Workflow validation passed'));
+    console.log(`${chalk.white('Name:')} ${workflow.name}`);
+    console.log(`${chalk.white('Tasks:')} ${workflow.tasks.length}`);
+    console.log(`${chalk.white('Agents:')} ${workflow.agents?.length || 0}`);
     
     if (workflow.dependencies) {
       const depCount = Object.values(workflow.dependencies).flat().length;
-      console.log(`${colors.white('Dependencies:')} ${depCount}`);
+      console.log(`${chalk.white('Dependencies:')} ${depCount}`);
     }
   } catch (error) {
-    console.error(colors.red('✗ Workflow validation failed:'), (error as Error).message);
-    Deno.exit(1);
+    console.error(chalk.red('✗ Workflow validation failed:'), (error as Error).message);
+    process.exit(1);
   }
 }
 
@@ -204,11 +203,11 @@ async function listWorkflows(options: any): Promise<void> {
     }
 
     if (workflows.length === 0) {
-      console.log(colors.gray('No workflows found'));
+      console.log(chalk.gray('No workflows found'));
       return;
     }
 
-    console.log(colors.cyan.bold(`Workflows (${workflows.length})`));
+    console.log(chalk.cyan.bold(`Workflows (${workflows.length})`));
     console.log('─'.repeat(60));
 
     const table = new Table()
@@ -228,8 +227,8 @@ async function listWorkflows(options: any): Promise<void> {
         : formatDuration(Date.now() - workflow.startedAt.getTime());
       
       table.push([
-        colors.gray(workflow.id.substring(0, 8) + '...'),
-        colors.white(workflow.workflowName),
+        chalk.gray(workflow.id.substring(0, 8) + '...'),
+        chalk.white(workflow.workflowName),
         `${statusIcon} ${workflow.status}`,
         `${progressBar} ${progress}`,
         workflow.startedAt.toLocaleTimeString(),
@@ -239,7 +238,7 @@ async function listWorkflows(options: any): Promise<void> {
 
     table.render();
   } catch (error) {
-    console.error(colors.red('Failed to list workflows:'), (error as Error).message);
+    console.error(chalk.red('Failed to list workflows:'), (error as Error).message);
   }
 }
 
@@ -252,7 +251,7 @@ async function showWorkflowStatus(workflowId: string, options: any): Promise<voi
       displayWorkflowStatus(execution);
     }
   } catch (error) {
-    console.error(colors.red('Failed to get workflow status:'), (error as Error).message);
+    console.error(chalk.red('Failed to get workflow status:'), (error as Error).message);
   }
 }
 
@@ -261,7 +260,7 @@ async function stopWorkflow(workflowId: string, options: any): Promise<void> {
     const execution = await getWorkflowExecution(workflowId);
     
     if (execution.status !== 'running') {
-      console.log(colors.yellow(`Workflow is not running (status: ${execution.status})`));
+      console.log(chalk.yellow(`Workflow is not running (status: ${execution.status})`));
       return;
     }
 
@@ -272,24 +271,24 @@ async function stopWorkflow(workflowId: string, options: any): Promise<void> {
       });
 
       if (!confirmed) {
-        console.log(colors.gray('Stop cancelled'));
+        console.log(chalk.gray('Stop cancelled'));
         return;
       }
     }
 
-    console.log(colors.yellow('Stopping workflow...'));
+    console.log(chalk.yellow('Stopping workflow...'));
     
     // Mock stopping - in production, this would call the orchestrator
     if (options.force) {
-      console.log(colors.red('• Force stopping all tasks'));
+      console.log(chalk.red('• Force stopping all tasks'));
     } else {
-      console.log(colors.blue('• Gracefully stopping tasks'));
-      console.log(colors.blue('• Cleaning up resources'));
+      console.log(chalk.blue('• Gracefully stopping tasks'));
+      console.log(chalk.blue('• Cleaning up resources'));
     }
 
-    console.log(colors.green('✓ Workflow stopped'));
+    console.log(chalk.green('✓ Workflow stopped'));
   } catch (error) {
-    console.error(colors.red('Failed to stop workflow:'), (error as Error).message);
+    console.error(chalk.red('Failed to stop workflow:'), (error as Error).message);
   }
 }
 
@@ -398,8 +397,8 @@ async function generateTemplate(templateType: string, options: any): Promise<voi
 
   const template = templates[templateType];
   if (!template) {
-    console.error(colors.red(`Unknown template type: ${templateType}`));
-    console.log(colors.gray('Available templates:'), Object.keys(templates).join(', '));
+    console.error(chalk.red(`Unknown template type: ${templateType}`));
+    console.log(chalk.gray('Available templates:'), Object.keys(templates).join(', '));
     return;
   }
 
@@ -408,24 +407,24 @@ async function generateTemplate(templateType: string, options: any): Promise<voi
   let content: string;
   if (options.format === 'yaml') {
     // In production, use a proper YAML library
-    console.log(colors.yellow('YAML format not implemented, using JSON'));
+    console.log(chalk.yellow('YAML format not implemented, using JSON'));
     content = JSON.stringify(template, null, 2);
   } else {
     content = JSON.stringify(template, null, 2);
   }
 
-  await Deno.writeTextFile(outputFile, content);
+  await fs.writeFile(outputFile, content);
 
-  console.log(colors.green('✓ Workflow template generated'));
-  console.log(`${colors.white('Template:')} ${templateType}`);
-  console.log(`${colors.white('File:')} ${outputFile}`);
-  console.log(`${colors.white('Tasks:')} ${template.tasks.length}`);
-  console.log(`${colors.white('Agents:')} ${template.agents?.length || 0}`);
+  console.log(chalk.green('✓ Workflow template generated'));
+  console.log(`${chalk.white('Template:')} ${templateType}`);
+  console.log(`${chalk.white('File:')} ${outputFile}`);
+  console.log(`${chalk.white('Tasks:')} ${template.tasks.length}`);
+  console.log(`${chalk.white('Agents:')} ${template.agents?.length || 0}`);
 }
 
 async function loadWorkflow(workflowFile: string): Promise<WorkflowDefinition> {
   try {
-    const content = await Deno.readTextFile(workflowFile);
+    const content = await fs.readFile(workflowFile);
     
     if (workflowFile.endsWith('.yaml') || workflowFile.endsWith('.yml')) {
       // In production, use a proper YAML parser
@@ -531,7 +530,7 @@ async function createExecution(workflow: WorkflowDefinition): Promise<WorkflowEx
 async function executeWorkflow(execution: WorkflowExecution, workflow: WorkflowDefinition, options: any): Promise<void> {
   execution.status = 'running';
   
-  console.log(colors.blue('Executing workflow...'));
+  console.log(chalk.blue('Executing workflow...'));
   console.log();
 
   // Mock execution - in production, this would use the orchestrator
@@ -539,7 +538,7 @@ async function executeWorkflow(execution: WorkflowExecution, workflow: WorkflowD
     const taskExec = execution.tasks[i];
     const taskDef = workflow.tasks.find(t => t.id === taskExec.taskId)!;
     
-    console.log(`${colors.cyan('→')} Starting task: ${taskDef.description}`);
+    console.log(`${chalk.cyan('→')} Starting task: ${taskDef.description}`);
     
     taskExec.status = 'running';
     taskExec.startedAt = new Date();
@@ -554,17 +553,17 @@ async function executeWorkflow(execution: WorkflowExecution, workflow: WorkflowD
       taskExec.status = 'completed';
       taskExec.completedAt = new Date();
       execution.progress.completed++;
-      console.log(`${colors.green('✓')} Completed: ${taskDef.description}`);
+      console.log(`${chalk.green('✓')} Completed: ${taskDef.description}`);
     } else {
       taskExec.status = 'failed';
       taskExec.completedAt = new Date();
       taskExec.error = 'Simulated task failure';
       execution.progress.failed++;
-      console.log(`${colors.red('✗')} Failed: ${taskDef.description}`);
+      console.log(`${chalk.red('✗')} Failed: ${taskDef.description}`);
       
       if (options.failFast || workflow.settings?.failurePolicy === 'fail-fast') {
         execution.status = 'failed';
-        console.log(colors.red('\nWorkflow failed (fail-fast mode)'));
+        console.log(chalk.red('\nWorkflow failed (fail-fast mode)'));
         return;
       }
     }
@@ -578,22 +577,22 @@ async function executeWorkflow(execution: WorkflowExecution, workflow: WorkflowD
   const duration = formatDuration(execution.completedAt.getTime() - execution.startedAt.getTime());
   
   if (execution.status === 'completed') {
-    console.log(colors.green.bold('✓ Workflow completed successfully'));
+    console.log(chalk.green.bold('✓ Workflow completed successfully'));
   } else {
-    console.log(colors.red.bold('✗ Workflow completed with failures'));
+    console.log(chalk.red.bold('✗ Workflow completed with failures'));
   }
   
-  console.log(`${colors.white('Duration:')} ${duration}`);
-  console.log(`${colors.white('Tasks:')} ${execution.progress.completed}/${execution.progress.total} completed`);
+  console.log(`${chalk.white('Duration:')} ${duration}`);
+  console.log(`${chalk.white('Tasks:')} ${execution.progress.completed}/${execution.progress.total} completed`);
   
   if (execution.progress.failed > 0) {
-    console.log(`${colors.white('Failed:')} ${execution.progress.failed}`);
+    console.log(`${chalk.white('Failed:')} ${execution.progress.failed}`);
   }
 }
 
 async function executeWorkflowWithWatch(execution: WorkflowExecution, workflow: WorkflowDefinition, options: any): Promise<void> {
-  console.log(colors.yellow('Starting workflow execution in watch mode...'));
-  console.log(colors.gray('Press Ctrl+C to stop\n'));
+  console.log(chalk.yellow('Starting workflow execution in watch mode...'));
+  console.log(chalk.gray('Press Ctrl+C to stop\n'));
 
   // Start execution in background and watch progress
   const executionPromise = executeWorkflow(execution, workflow, options);
@@ -612,8 +611,8 @@ async function executeWorkflowWithWatch(execution: WorkflowExecution, workflow: 
 }
 
 async function watchWorkflowStatus(workflowId: string): Promise<void> {
-  console.log(colors.cyan('Watching workflow status...'));
-  console.log(colors.gray('Press Ctrl+C to stop\n'));
+  console.log(chalk.cyan('Watching workflow status...'));
+  console.log(chalk.gray('Press Ctrl+C to stop\n'));
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -623,20 +622,20 @@ async function watchWorkflowStatus(workflowId: string): Promise<void> {
       displayWorkflowStatus(execution);
       
       if (execution.status === 'completed' || execution.status === 'failed' || execution.status === 'stopped') {
-        console.log('\n' + colors.gray('Workflow finished. Exiting watch mode.'));
+        console.log('\n' + chalk.gray('Workflow finished. Exiting watch mode.'));
         break;
       }
       
       await new Promise(resolve => setTimeout(resolve, 2000));
     } catch (error) {
-      console.error(colors.red('Error watching workflow:'), (error as Error).message);
+      console.error(chalk.red('Error watching workflow:'), (error as Error).message);
       break;
     }
   }
 }
 
 function displayWorkflowStatus(execution: WorkflowExecution): void {
-  console.log(colors.cyan.bold('Workflow Status'));
+  console.log(chalk.cyan.bold('Workflow Status'));
   console.log('─'.repeat(50));
   
   const statusIcon = formatStatusIndicator(execution.status);
@@ -644,11 +643,11 @@ function displayWorkflowStatus(execution: WorkflowExecution): void {
     ? formatDuration(execution.completedAt.getTime() - execution.startedAt.getTime())
     : formatDuration(Date.now() - execution.startedAt.getTime());
   
-  console.log(`${colors.white('Name:')} ${execution.workflowName}`);
-  console.log(`${colors.white('ID:')} ${execution.id}`);
-  console.log(`${colors.white('Status:')} ${statusIcon} ${execution.status}`);
-  console.log(`${colors.white('Started:')} ${execution.startedAt.toLocaleString()}`);
-  console.log(`${colors.white('Duration:')} ${duration}`);
+  console.log(`${chalk.white('Name:')} ${execution.workflowName}`);
+  console.log(`${chalk.white('ID:')} ${execution.id}`);
+  console.log(`${chalk.white('Status:')} ${statusIcon} ${execution.status}`);
+  console.log(`${chalk.white('Started:')} ${execution.startedAt.toLocaleString()}`);
+  console.log(`${chalk.white('Duration:')} ${duration}`);
   
   const progressBar = formatProgressBar(
     execution.progress.completed,
@@ -659,12 +658,12 @@ function displayWorkflowStatus(execution: WorkflowExecution): void {
   console.log(`${progressBar} ${execution.progress.completed}/${execution.progress.total}`);
   
   if (execution.progress.failed > 0) {
-    console.log(`${colors.white('Failed Tasks:')} ${colors.red(execution.progress.failed.toString())}`);
+    console.log(`${chalk.white('Failed Tasks:')} ${chalk.red(execution.progress.failed.toString())}`);
   }
   console.log();
 
   // Task details
-  console.log(colors.cyan.bold('Tasks'));
+  console.log(chalk.cyan.bold('Tasks'));
   console.log('─'.repeat(50));
   
   const table = new Table()
@@ -680,7 +679,7 @@ function displayWorkflowStatus(execution: WorkflowExecution): void {
       : '-';
     
     table.push([
-      colors.white(taskExec.taskId),
+      chalk.white(taskExec.taskId),
       `${statusIcon} ${taskExec.status}`,
       duration,
       taskExec.assignedAgent || '-'

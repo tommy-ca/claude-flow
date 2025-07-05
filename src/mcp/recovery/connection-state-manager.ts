@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Connection State Manager for MCP
  * Persists connection state across disconnections
@@ -5,8 +6,8 @@
 
 import { promises as fs } from 'node:fs';
 import { join } from 'node:path';
-import { ILogger } from '../../core/logger.js';
-import { MCPRequest, MCPConfig } from '../../utils/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { MCPRequest, MCPConfig } from '../../utils/types.js';
 
 export interface ConnectionState {
   sessionId: string;

@@ -1,8 +1,13 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * VSCode Extension Bridge for Terminal Integration
  * 
  * This file provides the bridge between Claude-Flow and VSCode extension API
  * for terminal management and output capture.
+ * 
+ * NOTE: This file is only used when Claude-Flow is packaged as a VS Code extension.
+ * It is excluded from the main CLI build. If you need to use this in a VS Code
+ * extension context, install @types/vscode as a devDependency.
  */
 
 import * as vscode from 'vscode';

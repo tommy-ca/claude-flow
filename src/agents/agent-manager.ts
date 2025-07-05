@@ -1,12 +1,13 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Comprehensive agent management system
  */
 
 import { EventEmitter } from 'node:events';
 import { spawn, ChildProcess } from 'node:child_process';
-import { ILogger } from '../core/logger.js';
-import { IEventBus } from '../core/event-bus.js';
-import { 
+import type { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { 
   AgentId, 
   AgentType, 
   AgentStatus, 
@@ -19,7 +20,7 @@ import {
   TaskId,
   TaskDefinition
 } from '../swarm/types.js';
-import { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
 import { generateId } from '../utils/helpers.js';
 
 export interface AgentManagerConfig {
@@ -539,7 +540,7 @@ export class AgentManager extends EventEmitter {
       this.logger.info('Started agent', { agentId, name: agent.name });
       this.emit('agent:started', { agent });
 
-    } catch (error: unknown) {
+    } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       agent.status = 'error';
       this.addAgentError(agentId, {
@@ -1042,7 +1043,7 @@ export class AgentManager extends EventEmitter {
     this.addAgentError(agentId, {
       timestamp: new Date(),
       type: 'process_error',
-      message: error.message,
+      message: (error instanceof Error ? error.message : String(error)),
       context: { error: error.toString() },
       severity: 'critical',
       resolved: false

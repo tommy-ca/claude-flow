@@ -1,5 +1,7 @@
 // batch-init.js - Batch initialization features with parallel processing
 import { printSuccess, printError, printWarning, printInfo } from '../../utils.js';
+import { Deno, cwd, exit, existsSync } from '../../node-compat.js';
+import process from 'process';
 import { 
   PerformanceMonitor, 
   ResourceThresholdMonitor, 
@@ -326,15 +328,15 @@ async function initializeProject(projectPath, options = {}) {
 
   try {
     // Get absolute project path
-    const currentDir = Deno.cwd();
+    const currentDir = cwd();
     const absoluteProjectPath = projectPath.startsWith('/') ? projectPath : `${currentDir}/${projectPath}`;
     
     // Create project directory
     await Deno.mkdir(absoluteProjectPath, { recursive: true });
     
     // Change to project directory
-    const originalDir = Deno.cwd();
-    Deno.chdir(absoluteProjectPath);
+    const originalDir = cwd();
+    process.chdir(absoluteProjectPath);
 
     // Initialize base structure
     const directories = [
@@ -437,7 +439,7 @@ async function initializeProject(projectPath, options = {}) {
     }
 
     // Change back to original directory
-    Deno.chdir(originalDir);
+    process.chdir(originalDir);
 
     return { success: true, projectPath: absoluteProjectPath };
   } catch (error) {

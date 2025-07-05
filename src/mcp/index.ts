@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * MCP (Model Context Protocol) Module
  * Export all MCP components for easy integration

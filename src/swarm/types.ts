@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Comprehensive types and interfaces for the swarm system
  */

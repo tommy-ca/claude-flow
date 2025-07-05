@@ -1,21 +1,22 @@
+import { getErrorMessage } from '../../../utils/error-handler.js';
 /**
  * Process Manager - Handles lifecycle of system processes
  */
 
-import { EventEmitter } from './event-emitter.js';
-import { colors } from '@cliffy/ansi/colors';
-import { 
+import type { EventEmitter } from './event-emitter.js';
+import chalk from 'chalk';
+import type { 
   ProcessInfo, 
   ProcessType, 
   ProcessStatus, 
   ProcessMetrics,
   SystemStats 
 } from './types.js';
-import { Orchestrator } from '../../../core/orchestrator.js';
-import { TerminalManager } from '../../../terminal/manager.js';
-import { MemoryManager } from '../../../memory/manager.js';
-import { CoordinationManager } from '../../../coordination/manager.js';
-import { MCPServer } from '../../../mcp/server.js';
+import type { Orchestrator } from '../../../core/orchestrator.js';
+import type { TerminalManager } from '../../../terminal/manager.js';
+import type { MemoryManager } from '../../../memory/manager.js';
+import type { CoordinationManager } from '../../../coordination/manager.js';
+import type { MCPServer } from '../../../mcp/server.js';
 import { eventBus } from '../../../core/event-bus.js';
 import { logger } from '../../../core/logger.js';
 import { configManager } from '../../../core/config.js';
@@ -256,7 +257,7 @@ export class ProcessManager extends EventEmitter {
       try {
         await this.startProcess(processId);
       } catch (error) {
-        console.error(colors.red(`Failed to start ${processId}:`), (error as Error).message);
+        console.error(chalk.red(`Failed to start ${processId}:`), (error as Error).message);
         // Continue with other processes
       }
     }
@@ -279,7 +280,7 @@ export class ProcessManager extends EventEmitter {
         try {
           await this.stopProcess(processId);
         } catch (error) {
-          console.error(colors.red(`Failed to stop ${processId}:`), (error as Error).message);
+          console.error(chalk.red(`Failed to stop ${processId}:`), (error as Error).message);
         }
       }
     }

@@ -1,9 +1,10 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Base Strategy Interface for Swarm Task Execution
  * Provides the foundation for different task execution strategies
  */
 
-import { TaskDefinition, SwarmObjective, AgentState, SwarmConfig } from '../types.js';
+import type { TaskDefinition, SwarmObjective, AgentState, SwarmConfig } from '../types.js';
 
 export interface StrategyMetrics {
   tasksCompleted: number;

@@ -1,15 +1,16 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 import { CLI, success, error, warning, info, VERSION } from "../cli-core.js";
 import type { Command, CommandContext } from "../cli-core.js";
 import colors from "chalk";
 const { bold, blue, yellow } = colors;
-import { Orchestrator } from "../../core/orchestrator-fixed.js";
-import { ConfigManager } from "../../core/config.js";
-import { MemoryManager } from "../../memory/manager.js";
+import type { Orchestrator } from "../../core/orchestrator-fixed.js";
+import type { ConfigManager } from "../../core/config.js";
+import type { MemoryManager } from "../../memory/manager.js";
 import { EventBus } from "../../core/event-bus.js";
-import { Logger } from "../../core/logger.js";
+import type { Logger } from "../../core/logger.js";
 import { JsonPersistenceManager } from "../../core/json-persistence.js";
 import { swarmAction } from "./swarm.js";
-import { SimpleMemoryManager } from "./memory.js";
+import type { SimpleMemoryManager } from "./memory.js";
 import { sparcAction } from "./sparc.js";
 import { createMigrateCommand } from "./migrate.js";
 import { enterpriseCommands } from "./enterprise.js";
@@ -404,7 +405,7 @@ export function setupCommands(cli: CLI): void {
           case "pool":
           case "health":
             // Use the enhanced agent command system
-            console.log(colors.cyan('🚀 Using enhanced agent management system...'));
+            console.log(chalk.cyan('🚀 Using enhanced agent management system...'));
             
             // Create a simplified wrapper around the enhanced command
             const agentManager = await import("../../agents/agent-manager.js");
@@ -421,7 +422,7 @@ export function setupCommands(cli: CLI): void {
             break;
             
           default: {
-            console.log(colors.cyan("📋 Agent Management Commands:"));
+            console.log(chalk.cyan("📋 Agent Management Commands:"));
             console.log("Available subcommands:");
             console.log("  spawn      - Create and start new agents");
             console.log("  list       - Display all agents with status");
@@ -524,7 +525,7 @@ export function setupCommands(cli: CLI): void {
       };
       
       // Mock the enhanced status command action
-      console.log(colors.cyan('🔍 Enhanced Status Command'));
+      console.log(chalk.cyan('🔍 Enhanced Status Command'));
       console.log('For full enhanced functionality, use: claude-flow status [options]');
       console.log('Available options: --watch, --interval, --component, --json, --detailed, --health-check, --history');
       
@@ -1312,7 +1313,7 @@ Now, please proceed with the task: ${task}`;
         noGraphs: ctx.flags.noGraphs || ctx.flags['no-graphs']
       };
       
-      console.log(colors.cyan('📊 Enhanced Monitor Command'));
+      console.log(chalk.cyan('📊 Enhanced Monitor Command'));
       console.log('For full enhanced functionality, use: claude-flow monitor [options]');
       console.log('Available options: --interval, --compact, --focus, --alerts, --export, --threshold, --log-level, --no-graphs');
       
@@ -1661,7 +1662,7 @@ Now, please proceed with the task: ${task}`;
     ],
     action: async (ctx: CommandContext) => {
       try {
-        console.log(colors.cyan('🚀 Enhanced SPARC Development Mode'));
+        console.log(chalk.cyan('🚀 Enhanced SPARC Development Mode'));
         console.log('Features: TDD + Orchestration + Batch Operations + Memory Management');
         
         if (ctx.flags.batch) {
@@ -1773,7 +1774,7 @@ Now, please proceed with the task: ${task}`;
   // Enhanced session command integration
   try {
     const enhancedSessionAction = async (ctx: CommandContext) => {
-      console.log(colors.cyan('💾 Enhanced Session Management'));
+      console.log(chalk.cyan('💾 Enhanced Session Management'));
       console.log('For full enhanced functionality, use: claude-flow session <command> [options]');
       console.log();
       console.log('Available commands:');
@@ -1817,7 +1818,7 @@ Now, please proceed with the task: ${task}`;
   // Enhanced orchestration start command integration
   try {
     const enhancedStartAction = async (ctx: CommandContext) => {
-      console.log(colors.cyan('🧠 Enhanced Claude-Flow Orchestration System'));
+      console.log(chalk.cyan('🧠 Enhanced Claude-Flow Orchestration System'));
       console.log('Features: Service Management + Health Checks + Auto-Recovery + Process UI');
       console.log();
       
@@ -2144,7 +2145,7 @@ Now, please proceed with the task: ${task}`;
   });
 
   // Add enhanced command documentation
-  console.log(colors.cyan('\n🚀 Enhanced Commands Loaded:'));
+  console.log(chalk.cyan('\n🚀 Enhanced Commands Loaded:'));
   console.log('  ✓ start    - Enhanced orchestration with service management');
   console.log('  ✓ status   - Comprehensive system status reporting');
   console.log('  ✓ monitor  - Real-time monitoring with metrics and alerts');

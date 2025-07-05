@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import {
+import { getErrorMessage } from '../utils/error-handler.js';
+import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import type { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import type {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   Tool,
@@ -228,7 +229,11 @@ export class ClaudeCodeMCPWrapper {
     // Execute the SPARC mode directly
     try {
       // Import the execution function dynamically to avoid circular dependencies
-      const { executeSparcMode } = await import('../cli/mcp-stdio-server.js');
+      // const { executeSparcMode } = await import('../cli/mcp-stdio-server.js');
+      // TODO: Implement proper SPARC mode execution or fix import path
+      const executeSparcMode = (mode: string, task: string, tools: any[], context: any) => {
+        throw new Error('SPARC mode execution not yet implemented in wrapper');
+      };
       
       const result = await executeSparcMode(
         mode,

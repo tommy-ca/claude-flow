@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "allowJs": true,
@@ -25,16 +25,17 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "verbatimModuleSyntax": false,
+    "verbatimModuleSyntax": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "lib": ["ES2022", "DOM"],
+    "lib": ["ES2022"],
+    "moduleDetection": "force",
     "types": ["node", "jest"],
     "typeRoots": ["./node_modules/@types", "./src/types"]
   },
   "include": [
-    "src/**/*"
+    "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
@@ -43,7 +44,8 @@
     "**/*.spec.ts",
     "tests/**/*",
     "deno_modules",
-    "bin"
+    "bin",
+    "src/terminal/vscode-bridge.ts"
   ],
   "ts-node": {
     "esm": true,

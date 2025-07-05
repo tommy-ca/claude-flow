@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Fixed orchestrator implementation for Claude-Flow
  */
 
-import { EventBus } from './event-bus.js';
-import { Logger } from './logger.js';
-import { ConfigManager } from './config.js';
-import { JsonPersistenceManager } from './json-persistence.js';
+import type { EventBus } from './event-bus.js';
+import type { Logger } from './logger.js';
+import type { ConfigManager } from './config.js';
+import type { JsonPersistenceManager } from './json-persistence.js';
 
 export interface AgentInfo {
   id: string;

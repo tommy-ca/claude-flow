@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Optimized AUTO Strategy Implementation
  * Uses machine learning-inspired heuristics and intelligent task decomposition
  */
 
-import { BaseStrategy, DecompositionResult, TaskBatch, AgentAllocation, TaskPattern } from './base.js';
-import { SwarmObjective, TaskDefinition, AgentState, TaskType, TaskPriority, TaskId, AgentType } from '../types.js';
+import type { BaseStrategy, DecompositionResult, TaskBatch, AgentAllocation, TaskPattern } from './base.js';
+import type { SwarmObjective, TaskDefinition, AgentState, TaskType, TaskPriority, TaskId, AgentType } from '../types.js';
 import { generateId } from '../../utils/helpers.js';
 
 interface MLHeuristics {

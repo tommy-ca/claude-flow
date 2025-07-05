@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * JSON-based persistence layer for Claude-Flow
  */

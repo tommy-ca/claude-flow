@@ -1,5 +1,6 @@
 // start-wrapper.js - Wrapper to maintain backward compatibility with the new modular start command
 import { printSuccess, printError, printWarning, printInfo } from '../utils.js';
+import { Deno, cwd, exit, existsSync } from '../node-compat.js';
 
 export async function startCommand(subArgs, flags) {
   // Show help if requested
@@ -63,7 +64,7 @@ export async function startCommand(subArgs, flags) {
     console.log('🚀 System Configuration:');
     console.log(`   Mode: ${daemon ? 'Daemon (background)' : 'Interactive'}`);
     console.log(`   MCP Port: ${port}`);
-    console.log(`   Working Directory: ${Deno.cwd()}`);
+    console.log(`   Working Directory: ${cwd()}`);
     console.log(`   Memory Backend: JSON (default)`);
     console.log(`   Terminal Pool: 5 instances (default)`);
     console.log();

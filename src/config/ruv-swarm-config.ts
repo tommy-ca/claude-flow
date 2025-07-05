@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * ruv-swarm configuration management for Claude Code integration
  * 
@@ -7,7 +8,7 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
-import { ILogger } from '../core/logger.js';
+import type { ILogger } from '../core/logger.js';
 import { deepMerge } from '../utils/helpers.js';
 
 /**
@@ -172,7 +173,7 @@ export class RuvSwarmConfigManager {
       }
     } catch (error) {
       this.logger.warn('Failed to load ruv-swarm config, using defaults', { 
-        error: error instanceof Error ? error.message : error 
+        error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : error 
       });
     }
     
@@ -198,7 +199,7 @@ export class RuvSwarmConfigManager {
       this.logger.debug('Saved ruv-swarm config to file', { path: this.configPath });
     } catch (error) {
       this.logger.error('Failed to save ruv-swarm config', { 
-        error: error instanceof Error ? error.message : error 
+        error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : error 
       });
     }
   }

@@ -1,11 +1,13 @@
+import { getErrorMessage } from '../utils/error-handler.js';
+import { promises as fs } from 'node:fs';
 /**
  * Enhanced Interactive REPL for Claude-Flow
  */
 
-import { Input, Confirm, Select } from '@cliffy/prompt';
-import { colors } from '@cliffy/ansi/colors';
-import { Table } from '@cliffy/table';
-import { AgentProfile, Task } from '../utils/types.js';
+import type { Input, Confirm, Select } from '@cliffy/prompt';
+import chalk from 'chalk';
+import type { Table } from '@cliffy/table';
+import type { AgentProfile, Task } from '../utils/types.js';
 import { generateId } from '../utils/helpers.js';
 import { formatStatusIndicator, formatDuration, formatProgressBar } from './formatter.js';
 
@@ -57,7 +59,7 @@ class CommandHistory {
 
   private async loadHistory(): Promise<void> {
     try {
-      const content = await Deno.readTextFile(this.historyFile);
+      const content = await fs.readFile(this.historyFile);
       this.history = content.split('\n').filter(line => line.trim());
     } catch {
       // History file doesn't exist yet
@@ -66,7 +68,7 @@ class CommandHistory {
 
   private async saveHistory(): Promise<void> {
     try {
-      await Deno.writeTextFile(this.historyFile, this.history.join('\n'));
+      await fs.writeFile(this.historyFile, this.history.join('\n'));
     } catch {
       // Ignore save errors
     }
@@ -163,7 +165,7 @@ export async function startREPL(options: any = {}): Promise<void> {
   const context: REPLContext = {
     options,
     history: [],
-    workingDirectory: Deno.cwd(),
+    workingDirectory: process.cwd(),
     connectionStatus: 'disconnected',
     lastActivity: new Date(),
   };
@@ -280,8 +282,8 @@ export async function startREPL(options: any = {}): Promise<void> {
       usage: 'monitor [--interval seconds]',
       examples: ['monitor', 'monitor --interval 5'],
       handler: async (args) => {
-        console.log(colors.cyan('Starting monitor mode...'));
-        console.log(colors.gray('(This would start the live dashboard)'));
+        console.log(chalk.cyan('Starting monitor mode...'));
+        console.log(chalk.gray('(This would start the live dashboard)'));
       },
     },
     {
@@ -294,18 +296,18 @@ export async function startREPL(options: any = {}): Promise<void> {
         const searchQuery = args.indexOf('--search') >= 0 ? args[args.indexOf('--search') + 1] : null;
         const historyItems = searchQuery ? history.search(searchQuery) : history.get();
         
-        console.log(colors.cyan.bold(`Command History${searchQuery ? ` (search: ${searchQuery})` : ''}`));
+        console.log(chalk.cyan.bold(`Command History${searchQuery ? ` (search: ${searchQuery})` : ''}`));
         console.log('─'.repeat(50));
         
         if (historyItems.length === 0) {
-          console.log(colors.gray('No commands in history'));
+          console.log(chalk.gray('No commands in history'));
           return;
         }
         
         const recent = historyItems.slice(-20); // Show last 20
         recent.forEach((cmd, i) => {
           const lineNumber = historyItems.length - recent.length + i + 1;
-          console.log(`${colors.gray(lineNumber.toString().padStart(3))} ${cmd}`);
+          console.log(`${chalk.gray(lineNumber.toString().padStart(3))} ${cmd}`);
         });
       },
     },
@@ -329,12 +331,12 @@ export async function startREPL(options: any = {}): Promise<void> {
         }
         
         try {
-          const newDir = args[0] === '~' ? Deno.env.get('HOME') || '/' : args[0];
-          Deno.chdir(newDir);
-          ctx.workingDirectory = Deno.cwd();
-          console.log(colors.gray(`Changed to: ${ctx.workingDirectory}`));
+          const newDir = args[0] === '~' ? process.env['HOME'] || '/' : args[0];
+          process.chdir(newDir);
+          ctx.workingDirectory = process.cwd();
+          console.log(chalk.gray(`Changed to: ${ctx.workingDirectory}`));
         } catch (error) {
-          console.error(colors.red('Error:'), error instanceof Error ? error.message : String(error));
+          console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
         }
       },
     },
@@ -359,8 +361,8 @@ export async function startREPL(options: any = {}): Promise<void> {
       aliases: ['quit', 'q'],
       description: 'Exit the REPL',
       handler: async () => {
-        console.log(colors.gray('Goodbye!'));
-        Deno.exit(0);
+        console.log(chalk.gray('Goodbye!'));
+        process.exit(0);
       },
     },
   ];
@@ -371,7 +373,7 @@ export async function startREPL(options: any = {}): Promise<void> {
   // Show initial status
   if (!options.quiet) {
     await showSystemStatus(context);
-    console.log(colors.gray('Type "help" for available commands or "exit" to quit.\n'));
+    console.log(chalk.gray('Type "help" for available commands or "exit" to quit.\n'));
   }
 
   // Main REPL loop
@@ -406,26 +408,26 @@ export async function startREPL(options: any = {}): Promise<void> {
         try {
           await command.handler(commandArgs, context);
         } catch (error) {
-          console.error(colors.red('Command failed:'), error instanceof Error ? error.message : String(error));
+          console.error(chalk.red('Command failed:'), error instanceof Error ? error.message : String(error));
         }
       } else {
-        console.log(colors.red(`Unknown command: ${commandName}`));
-        console.log(colors.gray('Type "help" for available commands'));
+        console.log(chalk.red(`Unknown command: ${commandName}`));
+        console.log(chalk.gray('Type "help" for available commands'));
         
         // Suggest similar commands
         const suggestions = findSimilarCommands(commandName, commands);
         if (suggestions.length > 0) {
-          console.log(colors.gray('Did you mean:'), suggestions.map(s => colors.cyan(s)).join(', '));
+          console.log(chalk.gray('Did you mean:'), suggestions.map(s => chalk.cyan(s)).join(', '));
         }
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       if (errorMessage.includes('EOF') || errorMessage.includes('interrupted')) {
         // Ctrl+D or Ctrl+C pressed
-        console.log('\n' + colors.gray('Goodbye!'));
+        console.log('\n' + chalk.gray('Goodbye!'));
         break;
       }
-      console.error(colors.red('REPL Error:'), errorMessage);
+      console.error(chalk.red('REPL Error:'), errorMessage);
     }
   }
 }
@@ -434,15 +436,15 @@ function createPrompt(context: REPLContext): string {
   const statusIcon = getConnectionStatusIcon(context.connectionStatus);
   const dir = context.workingDirectory.split('/').pop() || '/';
   
-  return `${statusIcon} ${colors.cyan('claude-flow')}:${colors.yellow(dir)}${colors.white('>')} `;
+  return `${statusIcon} ${chalk.cyan('claude-flow')}:${chalk.yellow(dir)}${chalk.white('>')} `;
 }
 
 function getConnectionStatusIcon(status: string): string {
   switch (status) {
-    case 'connected': return colors.green('●');
-    case 'connecting': return colors.yellow('◐');
-    case 'disconnected': return colors.red('○');
-    default: return colors.gray('?');
+    case 'connected': return chalk.green('●');
+    case 'connecting': return chalk.yellow('◐');
+    case 'disconnected': return chalk.red('○');
+    default: return chalk.gray('?');
   }
 }
 
@@ -486,11 +488,11 @@ function parseCommand(input: string): string[] {
 }
 
 function showHelp(commands: REPLCommand[]): void {
-  console.log(colors.cyan.bold('Claude-Flow Interactive REPL'));
+  console.log(chalk.cyan.bold('Claude-Flow Interactive REPL'));
   console.log('─'.repeat(50));
   console.log();
   
-  console.log(colors.white.bold('Available Commands:'));
+  console.log(chalk.white.bold('Available Commands:'));
   console.log();
   
   const table = new Table()
@@ -499,8 +501,8 @@ function showHelp(commands: REPLCommand[]): void {
 
   for (const cmd of commands) {
     table.push([
-      colors.cyan(cmd.name),
-      cmd.aliases ? colors.gray(cmd.aliases.join(', ')) : '',
+      chalk.cyan(cmd.name),
+      cmd.aliases ? chalk.gray(cmd.aliases.join(', ')) : '',
       cmd.description
     ]);
   }
@@ -508,11 +510,11 @@ function showHelp(commands: REPLCommand[]): void {
   table.render();
   console.log();
   
-  console.log(colors.gray('Tips:'));
-  console.log(colors.gray('• Use TAB for command completion'));
-  console.log(colors.gray('• Use "help <command>" for detailed help'));
-  console.log(colors.gray('• Use UP/DOWN arrows for command history'));
-  console.log(colors.gray('• Use Ctrl+C or "exit" to quit'));
+  console.log(chalk.gray('Tips:'));
+  console.log(chalk.gray('• Use TAB for command completion'));
+  console.log(chalk.gray('• Use "help <command>" for detailed help'));
+  console.log(chalk.gray('• Use UP/DOWN arrows for command history'));
+  console.log(chalk.gray('• Use Ctrl+C or "exit" to quit'));
 }
 
 function showCommandHelp(commands: REPLCommand[], commandName: string): void {
@@ -522,57 +524,57 @@ function showCommandHelp(commands: REPLCommand[], commandName: string): void {
   );
   
   if (!command) {
-    console.log(colors.red(`Unknown command: ${commandName}`));
+    console.log(chalk.red(`Unknown command: ${commandName}`));
     return;
   }
   
-  console.log(colors.cyan.bold(`Command: ${command.name}`));
+  console.log(chalk.cyan.bold(`Command: ${command.name}`));
   console.log('─'.repeat(30));
-  console.log(`${colors.white('Description:')} ${command.description}`);
+  console.log(`${chalk.white('Description:')} ${command.description}`);
   
   if (command.aliases) {
-    console.log(`${colors.white('Aliases:')} ${command.aliases.join(', ')}`);
+    console.log(`${chalk.white('Aliases:')} ${command.aliases.join(', ')}`);
   }
   
   if (command.usage) {
-    console.log(`${colors.white('Usage:')} ${command.usage}`);
+    console.log(`${chalk.white('Usage:')} ${command.usage}`);
   }
   
   if (command.examples) {
     console.log();
-    console.log(colors.white.bold('Examples:'));
+    console.log(chalk.white.bold('Examples:'));
     for (const example of command.examples) {
-      console.log(`  ${colors.gray('$')} ${colors.cyan(example)}`);
+      console.log(`  ${chalk.gray('$')} ${chalk.cyan(example)}`);
     }
   }
 }
 
 async function showSystemStatus(context: REPLContext, component?: string): Promise<void> {
-  console.log(colors.cyan.bold('System Status'));
+  console.log(chalk.cyan.bold('System Status'));
   console.log('─'.repeat(30));
   
   const statusIcon = formatStatusIndicator(context.connectionStatus === 'connected' ? 'success' : 'error');
   console.log(`${statusIcon} Connection: ${context.connectionStatus}`);
-  console.log(`${colors.white('Working Directory:')} ${context.workingDirectory}`);
-  console.log(`${colors.white('Last Activity:')} ${context.lastActivity.toLocaleTimeString()}`);
+  console.log(`${chalk.white('Working Directory:')} ${context.workingDirectory}`);
+  console.log(`${chalk.white('Last Activity:')} ${context.lastActivity.toLocaleTimeString()}`);
   
   if (context.currentSession) {
-    console.log(`${colors.white('Current Session:')} ${context.currentSession}`);
+    console.log(`${chalk.white('Current Session:')} ${context.currentSession}`);
   }
   
-  console.log(`${colors.white('Commands in History:')} ${context.history.length}`);
+  console.log(`${chalk.white('Commands in History:')} ${context.history.length}`);
   
   if (context.connectionStatus === 'disconnected') {
     console.log();
-    console.log(colors.yellow('⚠ Not connected to orchestrator'));
-    console.log(colors.gray('Use "connect" command to establish connection'));
+    console.log(chalk.yellow('⚠ Not connected to orchestrator'));
+    console.log(chalk.gray('Use "connect" command to establish connection'));
   }
 }
 
 async function connectToOrchestrator(context: REPLContext, target?: string): Promise<void> {
   const host = target || 'localhost:3000';
   
-  console.log(colors.yellow(`Connecting to ${host}...`));
+  console.log(chalk.yellow(`Connecting to ${host}...`));
   context.connectionStatus = 'connecting';
   
   // Mock connection attempt
@@ -583,23 +585,23 @@ async function connectToOrchestrator(context: REPLContext, target?: string): Pro
   
   if (success) {
     context.connectionStatus = 'connected';
-    console.log(colors.green('✓ Connected successfully'));
+    console.log(chalk.green('✓ Connected successfully'));
   } else {
     context.connectionStatus = 'disconnected';
-    console.log(colors.red('✗ Connection failed'));
-    console.log(colors.gray('Make sure Claude-Flow is running with: claude-flow start'));
+    console.log(chalk.red('✗ Connection failed'));
+    console.log(chalk.gray('Make sure Claude-Flow is running with: claude-flow start'));
   }
 }
 
 async function handleAgentCommand(args: string[], context: REPLContext): Promise<void> {
   if (context.connectionStatus !== 'connected') {
-    console.log(colors.yellow('⚠ Not connected to orchestrator'));
-    console.log(colors.gray('Use "connect" to establish connection first'));
+    console.log(chalk.yellow('⚠ Not connected to orchestrator'));
+    console.log(chalk.gray('Use "connect" to establish connection first'));
     return;
   }
 
   if (args.length === 0) {
-    console.log(colors.gray('Usage: agent <spawn|list|terminate|info> [options]'));
+    console.log(chalk.gray('Usage: agent <spawn|list|terminate|info> [options]'));
     return;
   }
   
@@ -613,20 +615,20 @@ async function handleAgentCommand(args: string[], context: REPLContext): Promise
       break;
     case 'terminate':
       if (args.length < 2) {
-        console.log(colors.red('Please specify agent ID'));
+        console.log(chalk.red('Please specify agent ID'));
       } else {
         await handleAgentTerminate(args[1]);
       }
       break;
     case 'info':
       if (args.length < 2) {
-        console.log(colors.red('Please specify agent ID'));
+        console.log(chalk.red('Please specify agent ID'));
       } else {
         await showAgentInfo(args[1]);
       }
       break;
     default:
-      console.log(colors.red(`Unknown agent subcommand: ${subcommand}`));
+      console.log(chalk.red(`Unknown agent subcommand: ${subcommand}`));
   }
 }
 
@@ -638,7 +640,7 @@ async function showAgentList(): Promise<void> {
     { id: 'agent-003', name: 'Implementer', type: 'implementer', status: 'idle', tasks: 0 },
   ];
   
-  console.log(colors.cyan.bold(`Active Agents (${agents.length})`));
+  console.log(chalk.cyan.bold(`Active Agents (${agents.length})`));
   console.log('─'.repeat(50));
   
   const table = new Table()
@@ -649,9 +651,9 @@ async function showAgentList(): Promise<void> {
     const statusIcon = formatStatusIndicator(agent.status);
     
     table.push([
-      colors.gray(agent.id),
-      colors.white(agent.name),
-      colors.cyan(agent.type),
+      chalk.gray(agent.id),
+      chalk.white(agent.name),
+      chalk.cyan(agent.type),
       `${statusIcon} ${agent.status}`,
       agent.tasks.toString()
     ]);
@@ -662,8 +664,8 @@ async function showAgentList(): Promise<void> {
 
 async function handleAgentSpawn(args: string[]): Promise<void> {
   if (args.length === 0) {
-    console.log(colors.gray('Usage: agent spawn <type> [name]'));
-    console.log(colors.gray('Types: coordinator, researcher, implementer, analyst, custom'));
+    console.log(chalk.gray('Usage: agent spawn <type> [name]'));
+    console.log(chalk.gray('Types: coordinator, researcher, implementer, analyst, custom'));
     return;
   }
 
@@ -673,16 +675,16 @@ async function handleAgentSpawn(args: string[]): Promise<void> {
     default: `${type}-agent`,
   });
 
-  console.log(colors.yellow('Spawning agent...'));
+  console.log(chalk.yellow('Spawning agent...'));
   
   // Mock spawning
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   const agentId = generateId('agent');
-  console.log(colors.green('✓ Agent spawned successfully'));
-  console.log(`${colors.white('ID:')} ${agentId}`);
-  console.log(`${colors.white('Name:')} ${name}`);
-  console.log(`${colors.white('Type:')} ${type}`);
+  console.log(chalk.green('✓ Agent spawned successfully'));
+  console.log(`${chalk.white('ID:')} ${agentId}`);
+  console.log(`${chalk.white('Name:')} ${name}`);
+  console.log(`${chalk.white('Type:')} ${type}`);
 }
 
 async function handleAgentTerminate(agentId: string): Promise<void> {
@@ -692,36 +694,36 @@ async function handleAgentTerminate(agentId: string): Promise<void> {
   });
   
   if (!confirmed) {
-    console.log(colors.gray('Termination cancelled'));
+    console.log(chalk.gray('Termination cancelled'));
     return;
   }
   
-  console.log(colors.yellow('Terminating agent...'));
+  console.log(chalk.yellow('Terminating agent...'));
   await new Promise(resolve => setTimeout(resolve, 500));
-  console.log(colors.green('✓ Agent terminated'));
+  console.log(chalk.green('✓ Agent terminated'));
 }
 
 async function showAgentInfo(agentId: string): Promise<void> {
   // Mock agent info
-  console.log(colors.cyan.bold('Agent Information'));
+  console.log(chalk.cyan.bold('Agent Information'));
   console.log('─'.repeat(30));
-  console.log(`${colors.white('ID:')} ${agentId}`);
-  console.log(`${colors.white('Name:')} Research Agent`);
-  console.log(`${colors.white('Type:')} researcher`);
-  console.log(`${colors.white('Status:')} ${formatStatusIndicator('success')} active`);
-  console.log(`${colors.white('Uptime:')} ${formatDuration(3600000)}`);
-  console.log(`${colors.white('Active Tasks:')} 3`);
-  console.log(`${colors.white('Completed Tasks:')} 12`);
+  console.log(`${chalk.white('ID:')} ${agentId}`);
+  console.log(`${chalk.white('Name:')} Research Agent`);
+  console.log(`${chalk.white('Type:')} researcher`);
+  console.log(`${chalk.white('Status:')} ${formatStatusIndicator('success')} active`);
+  console.log(`${chalk.white('Uptime:')} ${formatDuration(3600000)}`);
+  console.log(`${chalk.white('Active Tasks:')} 3`);
+  console.log(`${chalk.white('Completed Tasks:')} 12`);
 }
 
 async function handleTaskCommand(args: string[], context: REPLContext): Promise<void> {
   if (context.connectionStatus !== 'connected') {
-    console.log(colors.yellow('⚠ Not connected to orchestrator'));
+    console.log(chalk.yellow('⚠ Not connected to orchestrator'));
     return;
   }
 
   if (args.length === 0) {
-    console.log(colors.gray('Usage: task <create|list|status|cancel> [options]'));
+    console.log(chalk.gray('Usage: task <create|list|status|cancel> [options]'));
     return;
   }
   
@@ -735,20 +737,20 @@ async function handleTaskCommand(args: string[], context: REPLContext): Promise<
       break;
     case 'status':
       if (args.length < 2) {
-        console.log(colors.red('Please specify task ID'));
+        console.log(chalk.red('Please specify task ID'));
       } else {
         await showTaskStatus(args[1]);
       }
       break;
     case 'cancel':
       if (args.length < 2) {
-        console.log(colors.red('Please specify task ID'));
+        console.log(chalk.red('Please specify task ID'));
       } else {
         await handleTaskCancel(args[1]);
       }
       break;
     default:
-      console.log(colors.red(`Unknown task subcommand: ${subcommand}`));
+      console.log(chalk.red(`Unknown task subcommand: ${subcommand}`));
   }
 }
 
@@ -760,7 +762,7 @@ async function showTaskList(): Promise<void> {
     { id: 'task-003', type: 'implementation', description: 'Implement solution', status: 'completed', agent: 'agent-003' },
   ];
   
-  console.log(colors.cyan.bold(`Tasks (${tasks.length})`));
+  console.log(chalk.cyan.bold(`Tasks (${tasks.length})`));
   console.log('─'.repeat(60));
   
   const table = new Table()
@@ -771,11 +773,11 @@ async function showTaskList(): Promise<void> {
     const statusIcon = formatStatusIndicator(task.status);
     
     table.push([
-      colors.gray(task.id),
-      colors.white(task.type),
+      chalk.gray(task.id),
+      chalk.white(task.type),
       task.description.substring(0, 30) + (task.description.length > 30 ? '...' : ''),
       `${statusIcon} ${task.status}`,
-      task.agent ? colors.cyan(task.agent) : '-'
+      task.agent ? chalk.cyan(task.agent) : '-'
     ]);
   }
   
@@ -784,32 +786,32 @@ async function showTaskList(): Promise<void> {
 
 async function handleTaskCreate(args: string[]): Promise<void> {
   if (args.length < 2) {
-    console.log(colors.gray('Usage: task create <type> <description>'));
+    console.log(chalk.gray('Usage: task create <type> <description>'));
     return;
   }
 
   const type = args[0];
   const description = args.slice(1).join(' ');
   
-  console.log(colors.yellow('Creating task...'));
+  console.log(chalk.yellow('Creating task...'));
   await new Promise(resolve => setTimeout(resolve, 500));
   
   const taskId = generateId('task');
-  console.log(colors.green('✓ Task created successfully'));
-  console.log(`${colors.white('ID:')} ${taskId}`);
-  console.log(`${colors.white('Type:')} ${type}`);
-  console.log(`${colors.white('Description:')} ${description}`);
+  console.log(chalk.green('✓ Task created successfully'));
+  console.log(`${chalk.white('ID:')} ${taskId}`);
+  console.log(`${chalk.white('Type:')} ${type}`);
+  console.log(`${chalk.white('Description:')} ${description}`);
 }
 
 async function showTaskStatus(taskId: string): Promise<void> {
-  console.log(colors.cyan.bold('Task Status'));
+  console.log(chalk.cyan.bold('Task Status'));
   console.log('─'.repeat(30));
-  console.log(`${colors.white('ID:')} ${taskId}`);
-  console.log(`${colors.white('Type:')} research`);
-  console.log(`${colors.white('Status:')} ${formatStatusIndicator('running')} running`);
-  console.log(`${colors.white('Progress:')} ${formatProgressBar(65, 100, 20)} 65%`);
-  console.log(`${colors.white('Agent:')} agent-002`);
-  console.log(`${colors.white('Started:')} ${new Date().toLocaleTimeString()}`);
+  console.log(`${chalk.white('ID:')} ${taskId}`);
+  console.log(`${chalk.white('Type:')} research`);
+  console.log(`${chalk.white('Status:')} ${formatStatusIndicator('running')} running`);
+  console.log(`${chalk.white('Progress:')} ${formatProgressBar(65, 100, 20)} 65%`);
+  console.log(`${chalk.white('Agent:')} agent-002`);
+  console.log(`${chalk.white('Started:')} ${new Date().toLocaleTimeString()}`);
 }
 
 async function handleTaskCancel(taskId: string): Promise<void> {
@@ -819,23 +821,23 @@ async function handleTaskCancel(taskId: string): Promise<void> {
   });
   
   if (!confirmed) {
-    console.log(colors.gray('Cancellation cancelled'));
+    console.log(chalk.gray('Cancellation cancelled'));
     return;
   }
   
-  console.log(colors.yellow('Cancelling task...'));
+  console.log(chalk.yellow('Cancelling task...'));
   await new Promise(resolve => setTimeout(resolve, 500));
-  console.log(colors.green('✓ Task cancelled'));
+  console.log(chalk.green('✓ Task cancelled'));
 }
 
 async function handleMemoryCommand(args: string[], context: REPLContext): Promise<void> {
   if (context.connectionStatus !== 'connected') {
-    console.log(colors.yellow('⚠ Not connected to orchestrator'));
+    console.log(chalk.yellow('⚠ Not connected to orchestrator'));
     return;
   }
 
   if (args.length === 0) {
-    console.log(colors.gray('Usage: memory <query|stats|export> [options]'));
+    console.log(chalk.gray('Usage: memory <query|stats|export> [options]'));
     return;
   }
   
@@ -845,28 +847,28 @@ async function handleMemoryCommand(args: string[], context: REPLContext): Promis
       await showMemoryStats();
       break;
     case 'query':
-      console.log(colors.yellow('Memory query functionality not yet implemented in REPL'));
+      console.log(chalk.yellow('Memory query functionality not yet implemented in REPL'));
       break;
     case 'export':
-      console.log(colors.yellow('Memory export functionality not yet implemented in REPL'));
+      console.log(chalk.yellow('Memory export functionality not yet implemented in REPL'));
       break;
     default:
-      console.log(colors.red(`Unknown memory subcommand: ${subcommand}`));
+      console.log(chalk.red(`Unknown memory subcommand: ${subcommand}`));
   }
 }
 
 async function showMemoryStats(): Promise<void> {
-  console.log(colors.cyan.bold('Memory Statistics'));
+  console.log(chalk.cyan.bold('Memory Statistics'));
   console.log('─'.repeat(30));
-  console.log(`${colors.white('Total Entries:')} 1,247`);
-  console.log(`${colors.white('Cache Size:')} 95 MB`);
-  console.log(`${colors.white('Hit Rate:')} 94.2%`);
-  console.log(`${colors.white('Backend:')} SQLite + Markdown`);
+  console.log(`${chalk.white('Total Entries:')} 1,247`);
+  console.log(`${chalk.white('Cache Size:')} 95 MB`);
+  console.log(`${chalk.white('Hit Rate:')} 94.2%`);
+  console.log(`${chalk.white('Backend:')} SQLite + Markdown`);
 }
 
 async function handleSessionCommand(args: string[], context: REPLContext): Promise<void> {
   if (args.length === 0) {
-    console.log(colors.gray('Usage: session <list|save|restore> [options]'));
+    console.log(chalk.gray('Usage: session <list|save|restore> [options]'));
     return;
   }
   
@@ -880,13 +882,13 @@ async function handleSessionCommand(args: string[], context: REPLContext): Promi
       break;
     case 'restore':
       if (args.length < 2) {
-        console.log(colors.red('Please specify session ID'));
+        console.log(chalk.red('Please specify session ID'));
       } else {
         await handleSessionRestore(args[1]);
       }
       break;
     default:
-      console.log(colors.red(`Unknown session subcommand: ${subcommand}`));
+      console.log(chalk.red(`Unknown session subcommand: ${subcommand}`));
   }
 }
 
@@ -897,7 +899,7 @@ async function showSessionList(): Promise<void> {
     { id: 'session-002', name: 'Development', date: '2024-01-14', agents: 2, tasks: 5 },
   ];
   
-  console.log(colors.cyan.bold(`Saved Sessions (${sessions.length})`));
+  console.log(chalk.cyan.bold(`Saved Sessions (${sessions.length})`));
   console.log('─'.repeat(50));
   
   const table = new Table()
@@ -906,8 +908,8 @@ async function showSessionList(): Promise<void> {
 
   for (const session of sessions) {
     table.push([
-      colors.gray(session.id),
-      colors.white(session.name),
+      chalk.gray(session.id),
+      chalk.white(session.name),
       session.date,
       session.agents.toString(),
       session.tasks.toString()
@@ -923,13 +925,13 @@ async function handleSessionSave(args: string[]): Promise<void> {
     default: `session-${new Date().toISOString().split('T')[0]}`,
   });
   
-  console.log(colors.yellow('Saving session...'));
+  console.log(chalk.yellow('Saving session...'));
   await new Promise(resolve => setTimeout(resolve, 1000));
   
   const sessionId = generateId('session');
-  console.log(colors.green('✓ Session saved successfully'));
-  console.log(`${colors.white('ID:')} ${sessionId}`);
-  console.log(`${colors.white('Name:')} ${name}`);
+  console.log(chalk.green('✓ Session saved successfully'));
+  console.log(`${chalk.white('ID:')} ${sessionId}`);
+  console.log(`${chalk.white('Name:')} ${name}`);
 }
 
 async function handleSessionRestore(sessionId: string): Promise<void> {
@@ -939,23 +941,23 @@ async function handleSessionRestore(sessionId: string): Promise<void> {
   });
   
   if (!confirmed) {
-    console.log(colors.gray('Restore cancelled'));
+    console.log(chalk.gray('Restore cancelled'));
     return;
   }
   
-  console.log(colors.yellow('Restoring session...'));
+  console.log(chalk.yellow('Restoring session...'));
   await new Promise(resolve => setTimeout(resolve, 1500));
-  console.log(colors.green('✓ Session restored successfully'));
+  console.log(chalk.green('✓ Session restored successfully'));
 }
 
 async function handleWorkflowCommand(args: string[], context: REPLContext): Promise<void> {
   if (context.connectionStatus !== 'connected') {
-    console.log(colors.yellow('⚠ Not connected to orchestrator'));
+    console.log(chalk.yellow('⚠ Not connected to orchestrator'));
     return;
   }
 
   if (args.length === 0) {
-    console.log(colors.gray('Usage: workflow <list|run|status> [options]'));
+    console.log(chalk.gray('Usage: workflow <list|run|status> [options]'));
     return;
   }
   
@@ -966,20 +968,20 @@ async function handleWorkflowCommand(args: string[], context: REPLContext): Prom
       break;
     case 'run':
       if (args.length < 2) {
-        console.log(colors.red('Please specify workflow file'));
+        console.log(chalk.red('Please specify workflow file'));
       } else {
         await handleWorkflowRun(args[1]);
       }
       break;
     case 'status':
       if (args.length < 2) {
-        console.log(colors.red('Please specify workflow ID'));
+        console.log(chalk.red('Please specify workflow ID'));
       } else {
         await showWorkflowStatus(args[1]);
       }
       break;
     default:
-      console.log(colors.red(`Unknown workflow subcommand: ${subcommand}`));
+      console.log(chalk.red(`Unknown workflow subcommand: ${subcommand}`));
   }
 }
 
@@ -990,7 +992,7 @@ async function showWorkflowList(): Promise<void> {
     { id: 'workflow-002', name: 'Data Analysis', status: 'completed', progress: 100 },
   ];
   
-  console.log(colors.cyan.bold(`Workflows (${workflows.length})`));
+  console.log(chalk.cyan.bold(`Workflows (${workflows.length})`));
   console.log('─'.repeat(50));
   
   const table = new Table()
@@ -1002,8 +1004,8 @@ async function showWorkflowList(): Promise<void> {
     const progressBar = formatProgressBar(workflow.progress, 100, 15);
     
     table.push([
-      colors.gray(workflow.id),
-      colors.white(workflow.name),
+      chalk.gray(workflow.id),
+      chalk.white(workflow.name),
       `${statusIcon} ${workflow.status}`,
       `${progressBar} ${workflow.progress}%`
     ]);
@@ -1014,27 +1016,27 @@ async function showWorkflowList(): Promise<void> {
 
 async function handleWorkflowRun(filename: string): Promise<void> {
   try {
-    await Deno.stat(filename);
-    console.log(colors.yellow(`Running workflow: ${filename}`));
+    await fs.stat(filename);
+    console.log(chalk.yellow(`Running workflow: ${filename}`));
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const workflowId = generateId('workflow');
-    console.log(colors.green('✓ Workflow started successfully'));
-    console.log(`${colors.white('ID:')} ${workflowId}`);
+    console.log(chalk.green('✓ Workflow started successfully'));
+    console.log(`${chalk.white('ID:')} ${workflowId}`);
   } catch {
-    console.log(colors.red(`Workflow file not found: ${filename}`));
+    console.log(chalk.red(`Workflow file not found: ${filename}`));
   }
 }
 
 async function showWorkflowStatus(workflowId: string): Promise<void> {
-  console.log(colors.cyan.bold('Workflow Status'));
+  console.log(chalk.cyan.bold('Workflow Status'));
   console.log('─'.repeat(30));
-  console.log(`${colors.white('ID:')} ${workflowId}`);
-  console.log(`${colors.white('Name:')} Research Pipeline`);
-  console.log(`${colors.white('Status:')} ${formatStatusIndicator('running')} running`);
-  console.log(`${colors.white('Progress:')} ${formatProgressBar(75, 100, 20)} 75%`);
-  console.log(`${colors.white('Tasks:')} 6/8 completed`);
-  console.log(`${colors.white('Started:')} ${new Date().toLocaleTimeString()}`);
+  console.log(`${chalk.white('ID:')} ${workflowId}`);
+  console.log(`${chalk.white('Name:')} Research Pipeline`);
+  console.log(`${chalk.white('Status:')} ${formatStatusIndicator('running')} running`);
+  console.log(`${chalk.white('Progress:')} ${formatProgressBar(75, 100, 20)} 75%`);
+  console.log(`${chalk.white('Tasks:')} 6/8 completed`);
+  console.log(`${chalk.white('Started:')} ${new Date().toLocaleTimeString()}`);
 }
 
 function findSimilarCommands(input: string, commands: REPLCommand[]): string[] {

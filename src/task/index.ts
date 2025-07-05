@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Task Management System - Main Export
  * Comprehensive task management with orchestration features
@@ -6,17 +7,17 @@
 
 export {
   TaskEngine,
-  WorkflowTask,
-  TaskDependency,
-  ResourceRequirement,
-  TaskSchedule,
-  TaskExecution,
-  TaskMetrics,
-  TaskLog,
-  Workflow,
-  TaskFilter,
-  TaskSort,
-  TaskCheckpoint
+  type WorkflowTask,
+  type TaskDependency,
+  type ResourceRequirement,
+  type TaskSchedule,
+  type TaskExecution,
+  type TaskMetrics,
+  type TaskLog,
+  type Workflow,
+  type TaskFilter,
+  type TaskSort,
+  type TaskCheckpoint
 } from './engine.js';
 
 export {
@@ -25,14 +26,14 @@ export {
   createTaskStatusCommand,
   createTaskCancelCommand,
   createTaskWorkflowCommand,
-  TaskCommandContext
+  type TaskCommandContext
 } from './commands.js';
 
 export {
   TaskCoordinator,
-  TodoItem,
-  MemoryEntry,
-  CoordinationContext
+  type TodoItem,
+  type MemoryEntry,
+  type CoordinationContext
 } from './coordination.js';
 
 /**
@@ -179,7 +180,7 @@ export async function retrieveCoordinationData(
 export const USAGE_EXAMPLES = {
   todoWrite: `
 // Example: Using TodoWrite for task coordination
-import { createTaskTodos } from './task';
+import { createTaskTodos } from './task.js';
 
 const todos = await createTaskTodos(
   "Build e-commerce platform",
@@ -201,7 +202,7 @@ const todos = await createTaskTodos(
 
   taskTool: `
 // Example: Using Task tool pattern for parallel agents
-import { launchParallelAgents } from './task';
+import { launchParallelAgents } from './task.js';
 
 const agentIds = await launchParallelAgents([
   {
@@ -230,7 +231,7 @@ const agentIds = await launchParallelAgents([
 
   memoryCoordination: `
 // Example: Using Memory for cross-agent coordination
-import { storeCoordinationData, retrieveCoordinationData } from './task';
+import { storeCoordinationData, retrieveCoordinationData } from './task.js';
 
 // Store research findings for other agents
 await storeCoordinationData(
@@ -257,7 +258,7 @@ const findings = await retrieveCoordinationData(
 
   batchOperations: `
 // Example: Coordinated batch operations
-import { TaskCoordinator } from './task';
+import type { TaskCoordinator } from './task.js';
 
 const results = await coordinator.coordinateBatchOperations([
   {
@@ -280,8 +281,6 @@ const results = await coordinator.coordinateBatchOperations([
 
   swarmCoordination: `
 // Example: Swarm coordination patterns
-import { TaskCoordinator } from './task';
-
 await coordinator.coordinateSwarm(
   "Comprehensive system development",
   {

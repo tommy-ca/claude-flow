@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 // init/claude-config.ts - Claude configuration creation
 import type { InitOptions } from './index.js';
 

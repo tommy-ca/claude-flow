@@ -1,9 +1,11 @@
 #!/usr/bin/env -S deno run --allow-all
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Simple CLI wrapper for Claude-Flow (JavaScript version)
  * This version avoids TypeScript issues in node_modules
  */
 
+import { promises as fs } from 'node:fs';
 import { 
   executeCommand, 
   hasCommand, 
@@ -264,7 +266,7 @@ async function main() {
               console.log('     • Max Pool Size: 10');
               console.log('     • Idle Timeout: 5 minutes');
               console.log('     • Shell: /bin/bash');
-              console.log('     • Working Directory: ' + Deno.cwd());
+              console.log('     • Working Directory: ' + process.cwd());
               console.log('   Performance:');
               console.log('     • Average Response Time: N/A');
               console.log('     • Terminal Creation Time: N/A');
@@ -317,7 +319,7 @@ async function main() {
           const terminalConfig = {
             name: nameIndex >= 0 ? subArgs[nameIndex + 1] : 'terminal-' + Date.now(),
             shell: shellIndex >= 0 ? subArgs[shellIndex + 1] : 'bash',
-            workingDirectory: wdIndex >= 0 ? subArgs[wdIndex + 1] : Deno.cwd(),
+            workingDirectory: wdIndex >= 0 ? subArgs[wdIndex + 1] : process.cwd(),
             env: envIndex >= 0 ? subArgs[envIndex + 1] : '',
             persistent: persistentIndex >= 0
           };
@@ -2023,7 +2025,7 @@ ${flags.mode === 'full' || !flags.mode ? `Full-stack development covering all as
         suggestions.forEach(cmd => console.log(`  claude-flow ${cmd}`));
       }
       
-      Deno.exit(1);
+      process.exit(1);
   }
 }
 
@@ -2110,7 +2112,7 @@ Shortcuts:
     
     config: async (key) => {
       try {
-        const config = JSON.parse(await Deno.readTextFile('claude-flow.config.json'));
+        const config = JSON.parse(await fs.readFile('claude-flow.config.json'));
         if (key) {
           const keys = key.split('.');
           let value = config;
@@ -2803,23 +2805,23 @@ async function createSparcStructureManually() {
     let roomodesContent;
     try {
       // Check if .roomodes already exists and read it
-      roomodesContent = await Deno.readTextFile('.roomodes');
+      roomodesContent = await fs.readFile('.roomodes');
       console.log('  ✓ Using existing .roomodes configuration');
     } catch {
       // Create basic .roomodes configuration
       roomodesContent = createBasicRoomodesConfig();
-      await Deno.writeTextFile('.roomodes', roomodesContent);
+      await fs.writeFile('.roomodes', roomodesContent);
       console.log('  ✓ Created .roomodes configuration');
     }
     
     // Create basic workflow templates
     const basicWorkflow = createBasicSparcWorkflow();
-    await Deno.writeTextFile('.roo/workflows/basic-tdd.json', basicWorkflow);
+    await fs.writeFile('.roo/workflows/basic-tdd.json', basicWorkflow);
     console.log('  ✓ Created .roo/workflows/basic-tdd.json');
     
     // Create README for .roo directory
     const rooReadme = createRooReadme();
-    await Deno.writeTextFile('.roo/README.md', rooReadme);
+    await fs.writeFile('.roo/README.md', rooReadme);
     console.log('  ✓ Created .roo/README.md');
     
     console.log('  ✅ Basic SPARC structure created successfully');

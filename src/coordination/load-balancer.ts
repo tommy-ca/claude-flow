@@ -1,18 +1,19 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Advanced load balancing and work stealing implementation
  */
 
 import { EventEmitter } from 'node:events';
-import { ILogger } from '../core/logger.js';
-import { IEventBus } from '../core/event-bus.js';
-import { 
+import type { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { 
   AgentId, 
   AgentState, 
   TaskDefinition, 
   TaskId,
   LoadBalancingStrategy 
 } from '../swarm/types.js';
-import { WorkStealingCoordinator } from './work-stealing.js';
+import type { WorkStealingCoordinator } from './work-stealing.js';
 
 export interface LoadBalancerConfig {
   strategy: LoadBalancingStrategy;

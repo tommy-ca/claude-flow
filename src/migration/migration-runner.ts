@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Migration Runner - Executes migration strategies
  */
@@ -5,7 +6,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as crypto from 'crypto';
-import { 
+import type { 
   MigrationOptions, 
   MigrationResult, 
   MigrationBackup,
@@ -13,11 +14,11 @@ import {
   ValidationResult,
   MigrationProgress,
   MigrationManifest
-} from './types';
-import { MigrationAnalyzer } from './migration-analyzer';
-import { logger } from './logger';
-import { ProgressReporter } from './progress-reporter';
-import { MigrationValidator } from './migration-validator';
+} from './types.js';
+import type { MigrationAnalyzer } from './migration-analyzer.js';
+import { logger } from './logger.js';
+import type { ProgressReporter } from './progress-reporter.js';
+import type { MigrationValidator } from './migration-validator.js';
 import { glob } from 'glob';
 import * as inquirer from 'inquirer';
 import * as chalk from 'chalk';
@@ -103,7 +104,7 @@ export class MigrationRunner {
       this.printSummary(result);
 
     } catch (error) {
-      result.errors.push({ error: error.message, stack: error.stack });
+      result.errors.push({ error: (error instanceof Error ? error.message : String(error)), stack: error.stack });
       this.progress.error('Migration failed');
       
       // Attempt rollback on failure

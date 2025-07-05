@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Fallback UI Handler - Handles raw mode errors gracefully
  * Provides alternative UI when Ink/raw mode isn't supported
  */
 
 import chalk from 'chalk';
-import { createCompatibleUI } from './compatible-ui.ts';
+import { createCompatibleUI } from './compatible-ui.js';
 
 export interface FallbackOptions {
   enableUI?: boolean;
@@ -19,9 +20,9 @@ export async function handleRawModeError(
   error: Error, 
   options: FallbackOptions = {}
 ): Promise<void> {
-  const isRawModeError = error.message.includes('Raw mode is not supported') || 
-                        error.message.includes('stdin') ||
-                        error.message.includes('Ink');
+  const isRawModeError = (error instanceof Error ? error.message : String(error)).includes('Raw mode is not supported') || 
+                        (error instanceof Error ? error.message : String(error)).includes('stdin') ||
+                        (error instanceof Error ? error.message : String(error)).includes('Ink');
 
   if (!isRawModeError) {
     throw error; // Re-throw if it's not a raw mode error

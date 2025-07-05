@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 // init/index.ts - Main init command orchestrator
 import { printSuccess, printError } from '../utils.js';
 import { createDirectoryStructure } from './directory-structure.js';
@@ -60,7 +61,7 @@ export async function initCommand(options: InitOptions = {}) {
     }
     
   } catch (error) {
-    printError(`Failed to initialize project: ${error.message}`);
+    printError(`Failed to initialize project: ${(error instanceof Error ? error.message : String(error))}`);
     throw error;
   }
 }

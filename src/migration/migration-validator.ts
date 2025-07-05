@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Migration Validator - Validates successful migration
  */
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { ValidationResult, ValidationCheck } from './types';
-import { logger } from './logger';
+import type { ValidationResult, ValidationCheck } from './types.js';
+import { logger } from './logger.js';
 import * as chalk from 'chalk';
 import { glob } from 'glob';
 
@@ -148,7 +149,7 @@ export class MigrationValidator {
       }
       
     } catch (error) {
-      result.errors.push(`Failed to validate ${command}: ${error.message}`);
+      result.errors.push(`Failed to validate ${command}: ${(error instanceof Error ? error.message : String(error))}`);
     }
   }
 
@@ -197,7 +198,7 @@ export class MigrationValidator {
           }
         }
       } catch (error) {
-        result.errors.push(`Invalid .roomodes file: ${error.message}`);
+        result.errors.push(`Invalid .roomodes file: ${(error instanceof Error ? error.message : String(error))}`);
         check.passed = false;
       }
     }
@@ -233,7 +234,7 @@ export class MigrationValidator {
           }
           
         } catch (error) {
-          result.errors.push(`Cannot read file ${file}: ${error.message}`);
+          result.errors.push(`Cannot read file ${file}: ${(error instanceof Error ? error.message : String(error))}`);
           check.passed = false;
         }
       }

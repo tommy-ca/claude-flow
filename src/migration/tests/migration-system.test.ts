@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Migration System Tests
  * Comprehensive test suite for migration functionality
@@ -7,11 +8,11 @@ import { describe, it, expect, beforeEach, afterEach } from 'jest';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as os from 'os';
-import { MigrationRunner } from '../migration-runner';
-import { MigrationAnalyzer } from '../migration-analyzer';
-import { RollbackManager } from '../rollback-manager';
-import { MigrationValidator } from '../migration-validator';
-import { MigrationStrategy } from '../types';
+import type { MigrationRunner } from '../migration-runner.js';
+import type { MigrationAnalyzer } from '../migration-analyzer.js';
+import type { RollbackManager } from '../rollback-manager.js';
+import type { MigrationValidator } from '../migration-validator.js';
+import type { MigrationStrategy } from '../types.js';
 
 describe('Migration System', () => {
   let testDir: string;

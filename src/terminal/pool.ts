@@ -1,9 +1,10 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Terminal pool management
  */
 
-import { Terminal, ITerminalAdapter } from './adapters/base.js';
-import { ILogger } from '../core/logger.js';
+import type { Terminal, ITerminalAdapter } from './adapters/base.js';
+import type { ILogger } from '../core/logger.js';
 import { TerminalError } from '../utils/errors.js';
 import { delay } from '../utils/helpers.js';
 

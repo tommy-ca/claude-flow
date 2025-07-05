@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Inter-agent messaging system
  */
 
-import { Message, CoordinationConfig, SystemEvents } from '../utils/types.js';
-import { IEventBus } from '../core/event-bus.js';
-import { ILogger } from '../core/logger.js';
-import { CoordinationError } from '../utils/errors.js';
+import type { Message, CoordinationConfig, SystemEvents } from '../utils/types.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { ILogger } from '../core/logger.js';
+import type { CoordinationError } from '../utils/errors.js';
 import { generateId, timeout as timeoutHelper } from '../utils/helpers.js';
 
 interface MessageQueue {

@@ -1,5 +1,7 @@
 // process-ui.js - Simple process management UI in pure JavaScript
 import { printSuccess, printError, printWarning, printInfo } from '../utils.js';
+import { Deno, cwd, exit, existsSync } from '../node-compat.js';
+import process from 'process';
 
 // Simple color utilities
 const colors = {

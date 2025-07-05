@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Terminal session management
  */
 
-import { Terminal } from './adapters/base.js';
-import { AgentProfile } from '../utils/types.js';
-import { ILogger } from '../core/logger.js';
+import type { Terminal } from './adapters/base.js';
+import type { AgentProfile } from '../utils/types.js';
+import type { ILogger } from '../core/logger.js';
 import { TerminalCommandError } from '../utils/errors.js';
 import { generateId, timeout } from '../utils/helpers.js';
 

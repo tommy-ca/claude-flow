@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude Flow SPARC Executor
  * Executes tasks using the full claude-flow SPARC system in non-interactive mode
  */
 
-import { TaskDefinition, AgentState, TaskResult } from './types.js';
-import { Logger } from '../core/logger.js';
+import type { TaskDefinition, AgentState, TaskResult } from './types.js';
+import type { Logger } from '../core/logger.js';
 import * as path from 'node:path';
 import { spawn } from 'node:child_process';
 import { getClaudeFlowBin } from '../utils/paths.js';
@@ -82,7 +83,7 @@ export class ClaudeFlowExecutor {
       };
     } catch (error) {
       this.logger.error('Failed to execute Claude Flow SPARC command', { 
-        error: error.message,
+        error: (error instanceof Error ? error.message : String(error)),
         taskId: task.id.id 
       });
       
@@ -94,7 +95,7 @@ export class ClaudeFlowExecutor {
           quality: 0,
           completeness: 0
         },
-        error: error.message
+        error: (error instanceof Error ? error.message : String(error))
       };
     }
   }

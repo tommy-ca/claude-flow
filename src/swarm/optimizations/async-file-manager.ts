@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Async File Manager
  * Handles non-blocking file operations with queuing

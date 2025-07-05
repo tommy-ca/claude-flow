@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Optimized Task Executor
  * Implements async execution with connection pooling and caching
@@ -5,12 +6,12 @@
 
 import { EventEmitter } from 'node:events';
 import { Logger } from '../../core/logger.js';
-import { ClaudeConnectionPool } from './connection-pool.js';
-import { AsyncFileManager } from './async-file-manager.js';
-import { TTLMap } from './ttl-map.js';
-import { CircularBuffer } from './circular-buffer.js';
+import type { ClaudeConnectionPool } from './connection-pool.js';
+import type { AsyncFileManager } from './async-file-manager.js';
+import type { TTLMap } from './ttl-map.js';
+import type { CircularBuffer } from './circular-buffer.js';
 import PQueue from 'p-queue';
-import { 
+import type { 
   TaskDefinition, 
   TaskResult, 
   AgentId,

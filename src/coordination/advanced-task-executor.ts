@@ -1,13 +1,14 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Advanced task executor with timeout handling, retry logic, and resource management
  */
 
 import { EventEmitter } from 'node:events';
 import { spawn, ChildProcess } from 'node:child_process';
-import { TaskDefinition, TaskResult, TaskStatus, AgentState, TaskError } from '../swarm/types.js';
-import { ILogger } from '../core/logger.js';
-import { IEventBus } from '../core/event-bus.js';
-import { CircuitBreaker, CircuitBreakerManager } from './circuit-breaker.js';
+import type { TaskDefinition, TaskResult, TaskStatus, AgentState, TaskError } from '../swarm/types.js';
+import type { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { CircuitBreaker, CircuitBreakerManager } from './circuit-breaker.js';
 import { generateId } from '../utils/helpers.js';
 
 export interface TaskExecutorConfig {
@@ -214,14 +215,14 @@ export class AdvancedTaskExecutor extends EventEmitter {
           taskId: task.id.id,
           attempt: retryCount,
           maxRetries,
-          error: error.message
+          error: (error instanceof Error ? error.message : String(error))
         });
 
         // Check if we should retry
         if (retryCount > maxRetries) {
           const taskError: TaskError = {
             type: 'execution_failed',
-            message: error.message,
+            message: (error instanceof Error ? error.message : String(error)),
             stack: error.stack,
             context: {
               retryCount,
@@ -374,7 +375,7 @@ export class AdvancedTaskExecutor extends EventEmitter {
       });
 
       childProcess.on('error', (error) => {
-        reject(new Error(`Process error: ${error.message}`));
+        reject(new Error(`Process error: ${(error instanceof Error ? error.message : String(error))}`));
       });
     });
 
@@ -501,7 +502,7 @@ export class AdvancedTaskExecutor extends EventEmitter {
         } catch (error) {
           this.logger.warn('Failed to get resource usage', {
             taskId,
-            error: error.message
+            error: (error instanceof Error ? error.message : String(error))
           });
         }
       }

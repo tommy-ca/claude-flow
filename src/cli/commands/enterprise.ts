@@ -1,4 +1,5 @@
-import { Command, CommandContext } from '../cli-core.js';
+import { getErrorMessage } from '../../utils/error-handler.js';
+import type { Command, CommandContext } from '../cli-core.js';
 import { success, error, warning, info } from '../cli-core.js';
 import colors from 'chalk';
 import { ProjectManager, Project } from '../../enterprise/project-manager.js';
@@ -8,7 +9,7 @@ import { SecurityManager, SecurityScan } from '../../enterprise/security-manager
 import { AnalyticsManager } from '../../enterprise/analytics-manager.js';
 import { AuditManager } from '../../enterprise/audit-manager.js';
 import { Logger } from '../../core/logger.js';
-import { ConfigManager } from '../../core/config.js';
+import type { ConfigManager } from '../../core/config.js';
 
 const { bold, blue, green, yellow, red, cyan, magenta } = colors;
 

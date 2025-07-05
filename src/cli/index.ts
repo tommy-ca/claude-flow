@@ -1,4 +1,5 @@
 #!/usr/bin/env -S deno run --allow-all
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude-Flow CLI entry point
  * This redirects to simple-cli.ts for remote execution compatibility
@@ -22,7 +23,7 @@ import { helpCommand } from './commands/help.js';
 import { mcpCommand } from './commands/mcp.js';
 import { formatError, displayBanner, displayVersion } from './formatter.js';
 import { startREPL } from './repl.js';
-import { CompletionGenerator } from './completion.js';
+import type { CompletionGenerator } from './completion.js';
 
 // Version information
 const VERSION = '1.0.71';
@@ -52,7 +53,7 @@ const cli = new Command()
     
     if (!options.quiet) {
       displayBanner(VERSION);
-      console.log(colors.gray('Type "help" for available commands or "exit" to quit.\n'));
+      console.log(chalk.gray('Type "help" for available commands or "exit" to quit.\n'));
     }
     
     await startREPL(options);
@@ -115,22 +116,22 @@ async function handleError(error: unknown, options?: any): Promise<void> {
       timestamp: new Date().toISOString(),
     }));
   } else {
-    console.error(colors.red(colors.bold('✗ Error:')), formatted);
+    console.error(chalk.red(chalk.bold('✗ Error:')), formatted);
   }
   
   // Show stack trace in debug mode or verbose
-  if (Deno.env.get('CLAUDE_FLOW_DEBUG') === 'true' || options?.verbose) {
-    console.error(colors.gray('\nStack trace:'));
+  if (process.env['CLAUDE_FLOW_DEBUG'] === 'true' || options?.verbose) {
+    console.error(chalk.gray('\nStack trace:'));
     console.error(error);
   }
   
   // Suggest helpful actions
   if (!options?.quiet) {
-    console.error(colors.gray('\nTry running with --verbose for more details'));
-    console.error(colors.gray('Or use "claude-flow help" to see available commands'));
+    console.error(chalk.gray('\nTry running with --verbose for more details'));
+    console.error(chalk.gray('Or use "claude-flow help" to see available commands'));
   }
   
-  Deno.exit(1);
+  process.exit(1);
 }
 
 // Setup logging and configuration based on CLI options
@@ -174,8 +175,8 @@ async function setupLogging(options: any): Promise<void> {
 // Signal handlers for graceful shutdown
 function setupSignalHandlers(): void {
   const gracefulShutdown = () => {
-    console.log('\n' + colors.gray('Gracefully shutting down...'));
-    Deno.exit(0);
+    console.log('\n' + chalk.gray('Gracefully shutting down...'));
+    process.exit(0);
   };
   
   Deno.addSignalListener('SIGINT', gracefulShutdown);

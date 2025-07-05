@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude-Flow CLI - Core implementation using Node.js
  */

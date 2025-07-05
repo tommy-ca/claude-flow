@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Real-time monitoring system for swarm operations
  */
 
 import { EventEmitter } from 'node:events';
-import { ILogger } from '../core/logger.js';
-import { IEventBus } from '../core/event-bus.js';
-import { 
+import type { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { 
   SystemMetrics, 
   Alert, 
   AlertLevel, 
@@ -15,7 +16,7 @@ import {
   SwarmMetrics,
   AgentId
 } from '../swarm/types.js';
-import { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
 
 export interface MonitorConfig {
   updateInterval: number;
@@ -586,7 +587,7 @@ export class RealTimeMonitor extends EventEmitter {
       this.recordMetric(`healthcheck.${check.name}`, 0, {
         type: check.type,
         target: check.target,
-        error: error.message
+        error: (error instanceof Error ? error.message : String(error))
       });
     }
   }

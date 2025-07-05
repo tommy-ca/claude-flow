@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Load balancer and rate limiting for MCP
  */
 
-import { MCPLoadBalancerConfig, MCPRequest, MCPResponse, MCPSession } from '../utils/types.js';
-import { ILogger } from '../core/logger.js';
-import { MCPError } from '../utils/errors.js';
+import type { MCPLoadBalancerConfig, MCPRequest, MCPResponse, MCPSession } from '../utils/types.js';
+import type { ILogger } from '../core/logger.js';
+import type { MCPError } from '../utils/errors.js';
 
 export interface RequestMetrics {
   requestId: string;

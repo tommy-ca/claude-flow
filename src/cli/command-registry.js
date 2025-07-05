@@ -11,8 +11,10 @@ import { monitorCommand } from './simple-commands/monitor.js';
 import { startCommand } from './simple-commands/start.js';
 import { swarmCommand } from './simple-commands/swarm.js';
 import { batchManagerCommand } from './simple-commands/batch-manager.js';
-import { ruvSwarmAction } from './commands/ruv-swarm.js';
-import { configIntegrationAction } from './commands/config-integration.js';
+import { githubCommand } from './simple-commands/github.js';
+// Note: TypeScript imports commented out for Node.js compatibility
+// import { ruvSwarmAction } from './commands/ruv-swarm.ts';
+// import { configIntegrationAction } from './commands/config-integration.ts';
 
 // Command registry for extensible CLI
 export const commandRegistry = new Map();
@@ -184,6 +186,36 @@ Use with init command:
   claude-flow init --config batch-config.json --parallel`
   });
 
+  commandRegistry.set('github', {
+    handler: githubCommand,
+    description: 'GitHub workflow automation with 6 specialized modes',
+    usage: 'github <mode> <objective> [options]',
+    examples: [
+      'github pr-manager "create feature PR with automated testing"',
+      'github gh-coordinator "setup CI/CD pipeline" --auto-approve',
+      'github release-manager "prepare v2.0.0 release"',
+      'github repo-architect "optimize repository structure"',
+      'github issue-tracker "analyze project roadmap issues"',
+      'github sync-coordinator "sync package versions across repos"'
+    ],
+    details: `
+GitHub automation modes:
+  • gh-coordinator: GitHub workflow orchestration and coordination
+  • pr-manager: Pull request management with multi-reviewer coordination
+  • issue-tracker: Issue management and project coordination
+  • release-manager: Release coordination and deployment pipelines
+  • repo-architect: Repository structure optimization
+  • sync-coordinator: Multi-package synchronization and version alignment
+  
+Advanced features:
+  • Multi-reviewer coordination with automated scheduling
+  • Intelligent issue categorization and assignment
+  • Automated testing integration and quality gates
+  • Release pipeline orchestration with rollback capabilities`
+  });
+
+  // Temporarily commented out for Node.js compatibility
+  /*
   commandRegistry.set('ruv-swarm', {
     handler: ruvSwarmAction,
     description: 'Advanced AI swarm coordination with neural capabilities',
@@ -216,8 +248,10 @@ Commands:
   config      - Configuration management
   memory      - Memory usage and coordination data`
   });
+  */
 
-  // Additional ruv-swarm coordination commands
+  // Additional ruv-swarm coordination commands - temporarily commented out
+  /*
   commandRegistry.set('swarm-init', {
     handler: async (args, flags) => {
       const { ruvSwarmAction } = await import('./commands/ruv-swarm.js');
@@ -294,6 +328,7 @@ Commands:
   export       - Export unified configuration
   import       - Import and apply configuration`
   });
+  */
 }
 
 // Register a new command

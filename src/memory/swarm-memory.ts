@@ -1,6 +1,8 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 import { EventEmitter } from 'node:events';
 import { Logger } from '../core/logger.js';
 import { MemoryManager } from './manager.js';
+import { EventBus } from '../core/event-bus.js';
 import { generateId } from '../utils/helpers.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -87,11 +89,15 @@ export class SwarmMemoryManager extends EventEmitter {
     this.knowledgeBases = new Map();
     this.agentMemories = new Map();
 
+    const eventBus = EventBus.getInstance();
     this.baseMemory = new MemoryManager({
+      backend: 'sqlite',
       namespace: this.config.namespace,
-      enableBackup: true,
-      backupInterval: 300000 // 5 minutes
-    });
+      cacheSizeMB: 50,
+      syncOnExit: true,
+      maxEntries: this.config.maxEntries,
+      ttlMinutes: 60
+    }, eventBus, this.logger);
   }
 
   async initialize(): Promise<void> {

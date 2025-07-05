@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Claude-Flow UI Module
  * Provides compatible UI solutions for different terminal environments
@@ -10,7 +11,7 @@ export {
   launchUI,
   type UIProcess,
   type UISystemStats 
-} from './compatible-ui.ts';
+} from './compatible-ui.js';
 
 export { 
   handleRawModeError, 
@@ -18,13 +19,13 @@ export {
   checkUISupport, 
   showUISupport,
   type FallbackOptions 
-} from './fallback-handler.ts';
+} from './fallback-handler.js';
 
 /**
  * Main UI launcher that automatically selects the best available UI
  */
 export async function launchBestUI(): Promise<void> {
-  const { checkUISupport, launchUI, handleRawModeError } = await import('./fallback-handler.ts');
+  const { checkUISupport, launchUI, handleRawModeError } = await import('./fallback-handler.js');
   const support = checkUISupport();
   
   if (support.supported) {

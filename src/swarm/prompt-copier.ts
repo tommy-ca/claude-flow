@@ -1,7 +1,8 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { createHash } from 'crypto';
-import { Worker } from 'worker_threads';
+import type { Worker } from 'worker_threads';
 import { EventEmitter } from 'events';
 import { logger } from '../core/logger.js';
 
@@ -240,7 +241,7 @@ export class PromptCopier extends EventEmitter {
       } catch (error) {
         this.errors.push({
           file: file.path,
-          error: error.message,
+          error: (error instanceof Error ? error.message : String(error)),
           phase: 'write'
         });
       }
@@ -274,7 +275,7 @@ export class PromptCopier extends EventEmitter {
       } catch (error) {
         this.errors.push({
           file: file.path,
-          error: error.message,
+          error: (error instanceof Error ? error.message : String(error)),
           phase: 'write'
         });
       }
@@ -397,7 +398,7 @@ export class PromptCopier extends EventEmitter {
       } catch (error) {
         this.errors.push({
           file: file.path,
-          error: error.message,
+          error: (error instanceof Error ? error.message : String(error)),
           phase: 'verify'
         });
       }

@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Work stealing algorithm for load balancing between agents
  */
 
-import { Task, AgentProfile } from '../utils/types.js';
-import { IEventBus } from '../core/event-bus.js';
-import { ILogger } from '../core/logger.js';
+import type { Task, AgentProfile } from '../utils/types.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { ILogger } from '../core/logger.js';
 
 export interface WorkStealingConfig {
   enabled: boolean;

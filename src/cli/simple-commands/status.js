@@ -1,5 +1,6 @@
 // status.js - System status and monitoring commands
 import { printSuccess, printError, printWarning } from '../utils.js';
+import { Deno } from '../node-compat.js';
 
 export async function statusCommand(subArgs, flags) {
   const verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
@@ -75,7 +76,47 @@ async function getMemoryStats() {
 async function getResourceUsage() {
   // Get system resource information
   try {
-    const memInfo = await Deno.systemMemoryInfo();
+    // Dynamic import for cross-platform compatibility
+    let os;
+    try {
+      os = await import('node:os');
+    } catch {
+      try {
+        os = await import('os');
+      } catch {
+        // Fallback for environments without os module
+        return {
+          memory: { usage: 'N/A (os module unavailable)' },
+          cpu: { cores: 'Unknown', load: 'Unknown' },
+          platform: { type: 'Unknown', error: 'os module not available' }
+        };
+      }
+    }
+    
+    // Node.js doesn't have systemMemoryInfo, use os module instead
+    const totalMem = os.totalmem();
+    const freeMem = os.freemem();
+    const memInfo = {
+      total: totalMem,
+      free: freeMem,
+      available: freeMem,
+      buffers: 0,
+      cached: 0,
+      swapTotal: 0,
+      swapFree: 0
+    };
+    
+    // Get CPU info
+    let cpuCores = os.cpus().length;
+    let loadAvg = 'N/A';
+    
+    try {
+      const loadAvgData = os.loadavg();
+      loadAvg = `${loadAvgData[0].toFixed(2)}, ${loadAvgData[1].toFixed(2)}, ${loadAvgData[2].toFixed(2)}`;
+    } catch (e) {
+      // Load average not available on all platforms
+    }
+    
     return {
       memory: {
         total: formatBytes(memInfo.total),
@@ -84,14 +125,22 @@ async function getResourceUsage() {
         usage: `${Math.round(((memInfo.total - memInfo.available) / memInfo.total) * 100)}%`
       },
       cpu: {
-        cores: navigator.hardwareConcurrency || 'Unknown',
-        load: 'N/A' // Would need additional system calls
+        cores: cpuCores,
+        load: loadAvg,
+        model: os.cpus()[0]?.model || 'Unknown'
+      },
+      platform: {
+        type: os.type(),
+        release: os.release(),
+        arch: os.arch(),
+        uptime: formatUptime(os.uptime() * 1000)
       }
     };
-  } catch {
+  } catch (error) {
     return {
       memory: { usage: 'Unknown' },
-      cpu: { cores: 'Unknown', load: 'Unknown' }
+      cpu: { cores: 'Unknown', load: 'Unknown' },
+      platform: { type: 'Unknown', error: error.message }
     };
   }
 }
@@ -160,8 +209,19 @@ function displayStatus(status, verbose) {
     if (status.resources) {
       console.log('\n📈 Resource Usage:');
       console.log(`   Memory: ${status.resources.memory.usage} of ${status.resources.memory.total}`);
+      console.log(`   Available: ${status.resources.memory.available}`);
       console.log(`   CPU Cores: ${status.resources.cpu.cores}`);
       console.log(`   CPU Load: ${status.resources.cpu.load}`);
+      if (status.resources.cpu.model) {
+        console.log(`   CPU Model: ${status.resources.cpu.model}`);
+      }
+      
+      if (status.resources.platform) {
+        console.log('\n💻 Platform:');
+        console.log(`   OS: ${status.resources.platform.type} ${status.resources.platform.release}`);
+        console.log(`   Architecture: ${status.resources.platform.arch}`);
+        console.log(`   System Uptime: ${status.resources.platform.uptime}`);
+      }
     }
     
     console.log('\n🕐 Status captured at:', new Date(status.timestamp).toLocaleString());
@@ -205,4 +265,32 @@ function formatUptime(milliseconds) {
   if (hours > 0) return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
   if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
   return `${seconds}s`;
+}
+
+// Allow direct execution for testing
+if (import.meta.main) {
+  const args = [];
+  const flags = {};
+  
+  // Parse arguments and flags from Deno.args if available
+  if (typeof Deno !== 'undefined' && Deno.args) {
+    for (let i = 0; i < Deno.args.length; i++) {
+      const arg = Deno.args[i];
+      if (arg.startsWith('--')) {
+        const flagName = arg.substring(2);
+        const nextArg = Deno.args[i + 1];
+        
+        if (nextArg && !nextArg.startsWith('--')) {
+          flags[flagName] = nextArg;
+          i++; // Skip the next argument
+        } else {
+          flags[flagName] = true;
+        }
+      } else {
+        args.push(arg);
+      }
+    }
+  }
+  
+  await statusCommand(args, flags);
 }

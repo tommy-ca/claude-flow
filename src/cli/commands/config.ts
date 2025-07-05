@@ -1,11 +1,13 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Enterprise Configuration Management Commands
  * Features: Security masking, multi-format support, validation, change tracking
  */
+import { promises as fs } from 'node:fs';
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
-import { Confirm, Input, Select } from '@cliffy/prompt';
+import chalk from 'chalk';
+import { confirm, input, select } from '@cliffy/prompt';
 import { configManager } from '../../core/config.js';
 import { deepMerge } from '../../utils/helpers.js';
 import { join } from 'path';
@@ -13,7 +15,7 @@ import { join } from 'path';
 export const configCommand = new Command()
   .description('Manage Claude-Flow configuration')
   .action(() => {
-    configCommand.showHelp();
+    configCommand.outputHelp();
   })
   .command('show', new Command()
     .description('Show current configuration')
@@ -33,7 +35,7 @@ export const configCommand = new Command()
         if (options.format === 'json') {
           console.log(JSON.stringify(config, null, 2));
         } else {
-          console.log(colors.yellow('YAML format not yet implemented'));
+          console.log(chalk.yellow('YAML format not yet implemented'));
           console.log(JSON.stringify(config, null, 2));
         }
       }
@@ -47,13 +49,13 @@ export const configCommand = new Command()
         const value = configManager.getValue(path);
         
         if (value === undefined) {
-          console.error(colors.red(`Configuration path not found: ${path}`));
-          Deno.exit(1);
+          console.error(chalk.red(`Configuration path not found: ${path}`));
+          process.exit(1);
         } else {
           console.log(JSON.stringify(value, null, 2));
         }
       } catch (error) {
-        console.error(colors.red('Failed to get configuration value:'), (error as Error).message);
+        console.error(chalk.red('Failed to get configuration value:'), (error as Error).message);
         process.exit(1);
       }
     }),
@@ -98,14 +100,14 @@ export const configCommand = new Command()
         const reason = options.reason;
         
         configManager.set(path, parsedValue, { user, reason, source: 'cli' });
-        console.log(colors.green('✓'), `Set ${path} = ${JSON.stringify(parsedValue)}`);
+        console.log(chalk.green('✓'), `Set ${path} = ${JSON.stringify(parsedValue)}`);
         
         if (reason) {
-          console.log(colors.gray(`Reason: ${reason}`));
+          console.log(chalk.gray(`Reason: ${reason}`));
         }
       } catch (error) {
-        console.error(colors.red('Failed to set configuration:'), (error as Error).message);
-        Deno.exit(1);
+        console.error(chalk.red('Failed to set configuration:'), (error as Error).message);
+        process.exit(1);
       }
     }),
   )
@@ -114,19 +116,19 @@ export const configCommand = new Command()
     .option('--confirm', 'Skip confirmation prompt')
     .action(async (options: any) => {
       if (!options.confirm) {
-        const confirmed = await Confirm.prompt({
+        const confirmed = await confirm({
           message: 'Reset configuration to defaults?',
           default: false,
         });
         
         if (!confirmed) {
-          console.log(colors.gray('Reset cancelled'));
+          console.log(chalk.gray('Reset cancelled'));
           return;
         }
       }
       
       configManager.reset();
-      console.log(colors.green('✓ Configuration reset to defaults'));
+      console.log(chalk.green('✓ Configuration reset to defaults'));
     }),
   )
   .command('init', new Command()
@@ -140,10 +142,10 @@ export const configCommand = new Command()
       try {
         // Check if file exists
         try {
-          await Deno.stat(outputFile);
+          await fs.stat(outputFile);
           if (!options.force) {
-            console.error(colors.red(`File already exists: ${outputFile}`));
-            console.log(colors.gray('Use --force to overwrite'));
+            console.error(chalk.red(`File already exists: ${outputFile}`));
+            console.log(chalk.gray('Use --force to overwrite'));
             return;
           }
         } catch {
@@ -155,7 +157,7 @@ export const configCommand = new Command()
         // Interactive template selection
         if (options.interactive) {
           const availableTemplates = configManager.getAvailableTemplates();
-          templateName = await Select.prompt({
+          templateName = await select({
             message: 'Select configuration template:',
             options: availableTemplates.map(name => ({
               name: name,
@@ -174,14 +176,14 @@ export const configCommand = new Command()
         const parser = formatParsers[format];
         const content = parser ? parser.stringify(config) : JSON.stringify(config, null, 2);
         
-        await Deno.writeTextFile(outputFile, content);
+        await fs.writeFile(outputFile, content);
         
-        console.log(colors.green('✓'), `Configuration file created: ${outputFile}`);
-        console.log(colors.gray(`Template: ${templateName}`));
-        console.log(colors.gray(`Format: ${format}`));
+        console.log(chalk.green('✓'), `Configuration file created: ${outputFile}`);
+        console.log(chalk.gray(`Template: ${templateName}`));
+        console.log(chalk.gray(`Format: ${format}`));
       } catch (error) {
-        console.error(colors.red('Failed to create configuration file:'), (error as Error).message);
-        Deno.exit(1);
+        console.error(chalk.red('Failed to create configuration file:'), (error as Error).message);
+        process.exit(1);
       }
     }),
   )
@@ -192,35 +194,35 @@ export const configCommand = new Command()
     .action(async (options: any, configFile: string) => {
       try {
         await configManager.load(configFile);
-        console.log(colors.blue('Validating configuration file:'), configFile);
+        console.log(chalk.blue('Validating configuration file:'), configFile);
         
         // Use the new comprehensive validation method
         const result = await configManager.validateFile(configFile);
         
         if (result.valid) {
-          console.log(colors.green('✓'), 'Configuration is valid');
+          console.log(chalk.green('✓'), 'Configuration is valid');
           
           if (options.strict) {
-            console.log(colors.gray('✓ Strict validation passed'));
+            console.log(chalk.gray('✓ Strict validation passed'));
           }
         } else {
-          console.error(colors.red('✗'), 'Configuration validation failed:');
+          console.error(chalk.red('✗'), 'Configuration validation failed:');
           result.errors.forEach(error => {
-            console.error(colors.red(`  • ${error}`));
+            console.error(chalk.red(`  • ${error}`));
           });
-          Deno.exit(1);
+          process.exit(1);
         }
       } catch (error) {
-        console.error(colors.red('✗'), 'Configuration validation failed:');
+        console.error(chalk.red('✗'), 'Configuration validation failed:');
         console.error((error as Error).message);
-        Deno.exit(1);
+        process.exit(1);
       }
     }),
   )
   .command('profile', new Command()
     .description('Manage configuration profiles')
     .action(() => {
-      console.log(colors.gray('Usage: config profile <list|save|load|delete> [options]'));
+      console.log(chalk.gray('Usage: config profile <list|save|load|delete> [options]'));
     })
     .command('list', new Command()
       .description('List all configuration profiles')
@@ -230,24 +232,24 @@ export const configCommand = new Command()
           const currentProfile = configManager.getCurrentProfile();
           
           if (profiles.length === 0) {
-            console.log(colors.gray('No profiles found'));
+            console.log(chalk.gray('No profiles found'));
             return;
           }
           
-          console.log(colors.cyan.bold(`Configuration Profiles (${profiles.length})`));
+          console.log(chalk.cyan.bold(`Configuration Profiles (${profiles.length})`));
           console.log('─'.repeat(40));
           
           for (const profile of profiles) {
-            const indicator = profile === currentProfile ? colors.green('● ') : '  ';
+            const indicator = profile === currentProfile ? chalk.green('● ') : '  ';
             console.log(`${indicator}${profile}`);
           }
           
           if (currentProfile) {
             console.log();
-            console.log(colors.gray(`Current: ${currentProfile}`));
+            console.log(chalk.gray(`Current: ${currentProfile}`));
           }
         } catch (error) {
-          console.error(colors.red('Failed to list profiles:'), (error as Error).message);
+          console.error(chalk.red('Failed to list profiles:'), (error as Error).message);
         }
       }),
     )
@@ -259,15 +261,15 @@ export const configCommand = new Command()
         try {
           const existing = await configManager.getProfile(profileName);
           if (existing && !options.force) {
-            console.error(colors.red(`Profile '${profileName}' already exists`));
-            console.log(colors.gray('Use --force to overwrite'));
+            console.error(chalk.red(`Profile '${profileName}' already exists`));
+            console.log(chalk.gray('Use --force to overwrite'));
             return;
           }
           
           await configManager.saveProfile(profileName);
-          console.log(colors.green('✓'), `Profile '${profileName}' saved`);
+          console.log(chalk.green('✓'), `Profile '${profileName}' saved`);
         } catch (error) {
-          console.error(colors.red('Failed to save profile:'), (error as Error).message);
+          console.error(chalk.red('Failed to save profile:'), (error as Error).message);
         }
       }),
     )
@@ -277,9 +279,9 @@ export const configCommand = new Command()
       .action(async (options: any, profileName: string) => {
         try {
           await configManager.applyProfile(profileName);
-          console.log(colors.green('✓'), `Profile '${profileName}' loaded`);
+          console.log(chalk.green('✓'), `Profile '${profileName}' loaded`);
         } catch (error) {
-          console.error(colors.red('Failed to load profile:'), (error as Error).message);
+          console.error(chalk.red('Failed to load profile:'), (error as Error).message);
         }
       }),
     )
@@ -290,21 +292,21 @@ export const configCommand = new Command()
       .action(async (options: any, profileName: string) => {
         try {
           if (!options.force) {
-            const confirmed = await Confirm.prompt({
+            const confirmed = await confirm({
               message: `Delete profile '${profileName}'?`,
               default: false,
             });
             
             if (!confirmed) {
-              console.log(colors.gray('Delete cancelled'));
+              console.log(chalk.gray('Delete cancelled'));
               return;
             }
           }
           
           await configManager.deleteProfile(profileName);
-          console.log(colors.green('✓'), `Profile '${profileName}' deleted`);
+          console.log(chalk.green('✓'), `Profile '${profileName}' deleted`);
         } catch (error) {
-          console.error(colors.red('Failed to delete profile:'), (error as Error).message);
+          console.error(chalk.red('Failed to delete profile:'), (error as Error).message);
         }
       }),
     )
@@ -315,13 +317,13 @@ export const configCommand = new Command()
         try {
           const profile = await configManager.getProfile(profileName);
           if (!profile) {
-            console.error(colors.red(`Profile '${profileName}' not found`));
+            console.error(chalk.red(`Profile '${profileName}' not found`));
             return;
           }
           
           console.log(JSON.stringify(profile, null, 2));
         } catch (error) {
-          console.error(colors.red('Failed to show profile:'), (error as Error).message);
+          console.error(chalk.red('Failed to show profile:'), (error as Error).message);
         }
       }),
     ),
@@ -344,10 +346,10 @@ export const configCommand = new Command()
           };
         }
         
-        await Deno.writeTextFile(outputFile, JSON.stringify(data, null, 2));
-        console.log(colors.green('✓'), `Configuration exported to ${outputFile}`);
+        await fs.writeFile(outputFile, JSON.stringify(data, null, 2));
+        console.log(chalk.green('✓'), `Configuration exported to ${outputFile}`);
       } catch (error) {
-        console.error(colors.red('Failed to export configuration:'), (error as Error).message);
+        console.error(chalk.red('Failed to export configuration:'), (error as Error).message);
       }
     }),
   )
@@ -357,7 +359,7 @@ export const configCommand = new Command()
     .option('--merge', 'Merge with current configuration')
     .action(async (options: any, inputFile: string) => {
       try {
-        const content = await Deno.readTextFile(inputFile);
+        const content = await fs.readFile(inputFile);
         const data = JSON.parse(content);
         
         if (options.merge) {
@@ -366,13 +368,13 @@ export const configCommand = new Command()
         }
         
         configManager.import(data);
-        console.log(colors.green('✓'), 'Configuration imported successfully');
+        console.log(chalk.green('✓'), 'Configuration imported successfully');
         
         if (data.profile) {
-          console.log(colors.gray(`Profile: ${data.profile}`));
+          console.log(chalk.gray(`Profile: ${data.profile}`));
         }
       } catch (error) {
-        console.error(colors.red('Failed to import configuration:'), (error as Error).message);
+        console.error(chalk.red('Failed to import configuration:'), (error as Error).message);
       }
     }),
   )
@@ -385,7 +387,7 @@ export const configCommand = new Command()
       if (options.path) {
         const value = getValueByPath(schema, options.path);
         if (value === undefined) {
-          console.error(colors.red(`Schema path not found: ${options.path}`));
+          console.error(chalk.red(`Schema path not found: ${options.path}`));
           return;
         }
         console.log(JSON.stringify(value, null, 2));
@@ -406,14 +408,14 @@ export const configCommand = new Command()
           : configManager.getChangeHistory(options.limit);
         
         if (changes.length === 0) {
-          console.log(colors.gray('No configuration changes found'));
+          console.log(chalk.gray('No configuration changes found'));
           return;
         }
         
         if (options.format === 'json') {
           console.log(JSON.stringify(changes, null, 2));
         } else {
-          console.log(colors.cyan.bold(`Configuration Change History (${changes.length} changes)`));
+          console.log(chalk.cyan.bold(`Configuration Change History (${changes.length} changes)`));
           console.log('─'.repeat(80));
           
           changes.reverse().forEach((change, index) => {
@@ -421,16 +423,16 @@ export const configCommand = new Command()
             const user = change.user || 'system';
             const source = change.source || 'unknown';
             
-            console.log(`${colors.green(timestamp)} | ${colors.blue(user)} | ${colors.yellow(source)}`);
-            console.log(`Path: ${colors.cyan(change.path)}`);
+            console.log(`${chalk.green(timestamp)} | ${chalk.blue(user)} | ${chalk.yellow(source)}`);
+            console.log(`Path: ${chalk.cyan(change.path)}`);
             
             if (change.reason) {
-              console.log(`Reason: ${colors.gray(change.reason)}`);
+              console.log(`Reason: ${chalk.gray(change.reason)}`);
             }
             
             if (change.oldValue !== undefined && change.newValue !== undefined) {
-              console.log(`Old: ${colors.red(JSON.stringify(change.oldValue))}`);
-              console.log(`New: ${colors.green(JSON.stringify(change.newValue))}`);
+              console.log(`Old: ${chalk.red(JSON.stringify(change.oldValue))}`);
+              console.log(`New: ${chalk.green(JSON.stringify(change.newValue))}`);
             }
             
             if (index < changes.length - 1) {
@@ -439,7 +441,7 @@ export const configCommand = new Command()
           });
         }
       } catch (error) {
-        console.error(colors.red('Failed to get change history:'), (error as Error).message);
+        console.error(chalk.red('Failed to get change history:'), (error as Error).message);
       }
     }),
   )
@@ -452,10 +454,10 @@ export const configCommand = new Command()
         const finalPath = backupPath || (options.autoName ? undefined : 'config-backup.json');
         const savedPath = await configManager.backup(finalPath);
         
-        console.log(colors.green('✓'), `Configuration backed up to: ${savedPath}`);
-        console.log(colors.gray(`Backup includes configuration and recent change history`));
+        console.log(chalk.green('✓'), `Configuration backed up to: ${savedPath}`);
+        console.log(chalk.gray(`Backup includes configuration and recent change history`));
       } catch (error) {
-        console.error(colors.red('Failed to backup configuration:'), (error as Error).message);
+        console.error(chalk.red('Failed to backup configuration:'), (error as Error).message);
         process.exit(1);
       }
     }),
@@ -467,22 +469,22 @@ export const configCommand = new Command()
     .action(async (options: any, backupPath: string) => {
       try {
         if (!options.force) {
-          const confirmed = await Confirm.prompt({
+          const confirmed = await confirm({
             message: `Restore configuration from ${backupPath}? This will overwrite current configuration.`,
             default: false,
           });
           
           if (!confirmed) {
-            console.log(colors.gray('Restore cancelled'));
+            console.log(chalk.gray('Restore cancelled'));
             return;
           }
         }
         
         await configManager.restore(backupPath);
-        console.log(colors.green('✓'), 'Configuration restored successfully');
-        console.log(colors.yellow('⚠️'), 'You may need to restart the application for changes to take effect');
+        console.log(chalk.green('✓'), 'Configuration restored successfully');
+        console.log(chalk.yellow('⚠️'), 'You may need to restart the application for changes to take effect');
       } catch (error) {
-        console.error(colors.red('Failed to restore configuration:'), (error as Error).message);
+        console.error(chalk.red('Failed to restore configuration:'), (error as Error).message);
         process.exit(1);
       }
     }),
@@ -494,33 +496,33 @@ export const configCommand = new Command()
       try {
         const templates = configManager.getAvailableTemplates();
         
-        console.log(colors.cyan.bold(`Available Configuration Templates (${templates.length})`));
+        console.log(chalk.cyan.bold(`Available Configuration Templates (${templates.length})`));
         console.log('─'.repeat(50));
         
         for (const template of templates) {
-          console.log(colors.green('●'), colors.bold(template));
+          console.log(chalk.green('●'), chalk.bold(template));
           
           if (options.detailed) {
             try {
               const config = configManager.createTemplate(template);
               const description = getTemplateDescription(template);
-              console.log(`  ${colors.gray(description)}`);
+              console.log(`  ${chalk.gray(description)}`);
               
               if (config.orchestrator) {
-                console.log(`  Max Agents: ${colors.cyan(config.orchestrator.maxConcurrentAgents)}`);
+                console.log(`  Max Agents: ${chalk.cyan(config.orchestrator.maxConcurrentAgents)}`);
               }
               if (config.logging) {
-                console.log(`  Log Level: ${colors.cyan(config.logging.level)}`);
+                console.log(`  Log Level: ${chalk.cyan(config.logging.level)}`);
               }
             } catch (error) {
-              console.log(`  ${colors.red('Error loading template')}`);
+              console.log(`  ${chalk.red('Error loading template')}`);
             }
           }
           
           console.log('');
         }
       } catch (error) {
-        console.error(colors.red('Failed to list templates:'), (error as Error).message);
+        console.error(chalk.red('Failed to list templates:'), (error as Error).message);
       }
     }),
   );

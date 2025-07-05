@@ -1,8 +1,9 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * MCP (Model Context Protocol) server implementation
  */
 
-import {
+import type {
   MCPConfig,
   MCPRequest,
   MCPResponse,
@@ -16,17 +17,17 @@ import {
   MCPCapabilities,
   MCPContext,
 } from '../utils/types.js';
-import { IEventBus } from '../core/event-bus.js';
-import { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { ILogger } from '../core/logger.js';
 import { MCPError as MCPErrorClass, MCPMethodNotFoundError } from '../utils/errors.js';
-import { ITransport } from './transports/base.js';
-import { StdioTransport } from './transports/stdio.js';
-import { HttpTransport } from './transports/http.js';
-import { ToolRegistry } from './tools.js';
-import { RequestRouter } from './router.js';
-import { SessionManager, ISessionManager } from './session-manager.js';
-import { AuthManager, IAuthManager } from './auth.js';
-import { LoadBalancer, ILoadBalancer, RequestQueue } from './load-balancer.js';
+import type { ITransport } from './transports/base.js';
+import type { StdioTransport } from './transports/stdio.js';
+import type { HttpTransport } from './transports/http.js';
+import type { ToolRegistry } from './tools.js';
+import type { RequestRouter } from './router.js';
+import type { SessionManager, ISessionManager } from './session-manager.js';
+import type { AuthManager, IAuthManager } from './auth.js';
+import type { LoadBalancer, ILoadBalancer, RequestQueue } from './load-balancer.js';
 import { createClaudeFlowTools, ClaudeFlowToolContext } from './claude-flow-tools.js';
 import { createSwarmTools, SwarmToolContext } from './swarm-tools.js';
 import { createRuvSwarmTools, RuvSwarmToolContext, isRuvSwarmAvailable, initializeRuvSwarmIntegration } from './ruv-swarm-tools.js';
@@ -607,11 +608,11 @@ export class MCPServer implements IMCPServer {
     }
   }
 
-  private errorToMCPError(error: unknown): MCPError {
+  private errorToMCPError(error): MCPError {
     if (error instanceof MCPMethodNotFoundError) {
       return {
         code: -32601,
-        message: error.message,
+        message: (error instanceof Error ? error.message : String(error)),
         data: error.details,
       };
     }
@@ -619,7 +620,7 @@ export class MCPServer implements IMCPServer {
     if (error instanceof MCPErrorClass) {
       return {
         code: -32603,
-        message: error.message,
+        message: (error instanceof Error ? error.message : String(error)),
         data: error.details,
       };
     }
@@ -627,7 +628,7 @@ export class MCPServer implements IMCPServer {
     if (error instanceof Error) {
       return {
         code: -32603,
-        message: error.message,
+        message: (error instanceof Error ? error.message : String(error)),
       };
     }
 

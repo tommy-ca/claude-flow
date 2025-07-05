@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * ruv-swarm MCP tools wrapper for Claude Code integration
  * 
@@ -5,8 +6,8 @@
  * package to enable advanced swarm coordination and neural capabilities.
  */
 
-import { MCPTool, MCPContext } from '../utils/types.js';
-import { ILogger } from '../core/logger.js';
+import type { MCPTool, MCPContext } from '../utils/types.js';
+import type { ILogger } from '../core/logger.js';
 import { execAsync } from '../utils/helpers.js';
 import { existsSync } from 'fs';
 import { join } from 'path';
@@ -68,12 +69,12 @@ async function executeRuvSwarmCommand(
         sessionId: context?.sessionId
       }
     };
-  } catch (error: any) {
-    logger?.error('ruv-swarm command failed', { command, error: error.message });
+  } catch (error) {
+    logger?.error('ruv-swarm command failed', { command, error: (error instanceof Error ? error.message : String(error)) });
     
     return {
       success: false,
-      error: error.message,
+      error: (error instanceof Error ? error.message : String(error)),
       metadata: {
         timestamp: Date.now(),
         swarmId: context?.swarmId,
@@ -533,7 +534,7 @@ export async function isRuvSwarmAvailable(logger?: ILogger): Promise<boolean> {
     const result = await executeRuvSwarmCommand('--version', [], undefined, logger);
     return result.success;
   } catch (error) {
-    logger?.warn('ruv-swarm not available', { error: error instanceof Error ? error.message : error });
+    logger?.warn('ruv-swarm not available', { error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : error });
     return false;
   }
 }

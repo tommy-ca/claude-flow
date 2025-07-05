@@ -6,6 +6,8 @@
 // Node.js compatible imports
 import fs from 'fs';
 import path from 'path';
+import { Deno, cwd, exit, existsSync } from '../node-compat.js';
+import process from 'process';
 
 // Polyfill for Deno's ensureDir using Node.js fs
 async function ensureDir(dirPath) {
@@ -31,7 +33,7 @@ export async function executeSwarm(objective, options = {}) {
   
   // Resolve relative paths
   if (!targetDir.startsWith('/')) {
-    targetDir = join(Deno.cwd(), targetDir);
+    targetDir = join(cwd(), targetDir);
   }
   
   console.log(`📁 Target directory: ${targetDir}`);

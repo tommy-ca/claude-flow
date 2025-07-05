@@ -1,16 +1,18 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Claude instance management commands
  */
+import { promises as fs } from 'node:fs';
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
+import chalk from 'chalk';
 import { spawn } from 'node:child_process';
 import { generateId } from '../../utils/helpers.js';
 
 export const claudeCommand = new Command()
   .description('Manage Claude instances')
   .action(() => {
-    claudeCommand.showHelp();
+    console.log(''); // showHelp() method doesn't exist
   })
   .command('spawn', new Command()
     .description('Spawn a new Claude instance with specific configuration')
@@ -61,8 +63,8 @@ export const claudeCommand = new Command()
         }
         
         if (options.dryRun) {
-          console.log(colors.yellow('DRY RUN - Would execute:'));
-          console.log(colors.gray(`claude ${claudeArgs.join(' ')}`));
+          console.log(chalk.yellow('DRY RUN - Would execute:'));
+          console.log(chalk.gray(`claude ${claudeArgs.join(' ')}`));
           console.log('\nConfiguration:');
           console.log(`  Instance ID: ${instanceId}`);
           console.log(`  Task: ${task}`);
@@ -73,9 +75,9 @@ export const claudeCommand = new Command()
           return;
         }
         
-        console.log(colors.green(`Spawning Claude instance: ${instanceId}`));
-        console.log(colors.gray(`Task: ${task}`));
-        console.log(colors.gray(`Tools: ${tools}`));
+        console.log(chalk.green(`Spawning Claude instance: ${instanceId}`));
+        console.log(chalk.gray(`Task: ${task}`));
+        console.log(chalk.gray(`Tools: ${tools}`));
         
         // Spawn Claude process
         const claude = spawn('claude', claudeArgs, {
@@ -90,19 +92,19 @@ export const claudeCommand = new Command()
         });
         
         claude.on('error', (err) => {
-          console.error(colors.red('Failed to spawn Claude:'), err.message);
+          console.error(chalk.red('Failed to spawn Claude:'), err.message);
         });
         
         claude.on('exit', (code) => {
           if (code === 0) {
-            console.log(colors.green(`Claude instance ${instanceId} completed successfully`));
+            console.log(chalk.green(`Claude instance ${instanceId} completed successfully`));
           } else {
-            console.log(colors.red(`Claude instance ${instanceId} exited with code ${code}`));
+            console.log(chalk.red(`Claude instance ${instanceId} exited with code ${code}`));
           }
         });
         
       } catch (error) {
-        console.error(colors.red('Failed to spawn Claude:'), (error as Error).message);
+        console.error(chalk.red('Failed to spawn Claude:'), (error as Error).message);
       }
     }),
   )
@@ -112,14 +114,14 @@ export const claudeCommand = new Command()
     .option('--dry-run', 'Show what would be executed without running')
     .action(async (options: any, workflowFile: string) => {
       try {
-        const content = await Deno.readTextFile(workflowFile);
+        const content = await fs.readFile(workflowFile, 'utf-8');
         const workflow = JSON.parse(content);
         
-        console.log(colors.green('Loading workflow:'), workflow.name || 'Unnamed');
-        console.log(colors.gray(`Tasks: ${workflow.tasks?.length || 0}`));
+        console.log(chalk.green('Loading workflow:'), workflow.name || 'Unnamed');
+        console.log(chalk.gray(`Tasks: ${workflow.tasks?.length || 0}`));
         
         if (!workflow.tasks || workflow.tasks.length === 0) {
-          console.log(colors.yellow('No tasks found in workflow'));
+          console.log(chalk.yellow('No tasks found in workflow'));
           return;
         }
         
@@ -141,10 +143,10 @@ export const claudeCommand = new Command()
           }
           
           if (options.dryRun) {
-            console.log(colors.yellow(`\nDRY RUN - Task: ${task.name || task.id}`));
-            console.log(colors.gray(`claude ${claudeArgs.join(' ')}`));
+            console.log(chalk.yellow(`\nDRY RUN - Task: ${task.name || task.id}`));
+            console.log(chalk.gray(`claude ${claudeArgs.join(' ')}`));
           } else {
-            console.log(colors.blue(`\nSpawning Claude for task: ${task.name || task.id}`));
+            console.log(chalk.blue(`\nSpawning Claude for task: ${task.name || task.id}`));
             
             const claude = spawn('claude', claudeArgs, {
               stdio: 'inherit',
@@ -165,11 +167,11 @@ export const claudeCommand = new Command()
         }
         
         if (!options.dryRun && workflow.parallel) {
-          console.log(colors.green('\nAll Claude instances spawned in parallel mode'));
+          console.log(chalk.green('\nAll Claude instances spawned in parallel mode'));
         }
         
       } catch (error) {
-        console.error(colors.red('Failed to process workflow:'), (error as Error).message);
+        console.error(chalk.red('Failed to process workflow:'), (error as Error).message);
       }
     }),
   );

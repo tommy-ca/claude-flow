@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Conflict resolution mechanisms for multi-agent coordination
  */
 
-import { ILogger } from '../core/logger.js';
-import { IEventBus } from '../core/event-bus.js';
-import { Task, Resource } from '../utils/types.js';
+import type { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { Task, Resource } from '../utils/types.js';
 
 export interface ResourceConflict {
   id: string;

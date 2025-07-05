@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Authentication and authorization for MCP
  */
 
-import { MCPAuthConfig, MCPSession } from '../utils/types.js';
-import { ILogger } from '../core/logger.js';
-import { MCPError } from '../utils/errors.js';
+import type { MCPAuthConfig, MCPSession } from '../utils/types.js';
+import type { ILogger } from '../core/logger.js';
+import type { MCPError } from '../utils/errors.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
 export interface IAuthManager {
@@ -87,7 +88,7 @@ export class AuthManager implements IAuthManager {
       this.logger.error('Authentication error', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Authentication failed',
+        error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Authentication failed',
       };
     }
   }

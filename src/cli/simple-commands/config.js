@@ -1,5 +1,5 @@
 // config.js - Configuration management commands
-import { printSuccess, printError, printWarning, readJsonFile, writeJsonFile } from '../utils.js';
+import { printSuccess, printError, printWarning, readJsonFile, writeJsonFile, fileExists } from '../utils.js';
 
 export async function configCommand(subArgs, flags) {
   const configCmd = subArgs[0];
@@ -286,14 +286,7 @@ function getFlag(args, flagName) {
   return index !== -1 && index + 1 < args.length ? args[index + 1] : null;
 }
 
-async function fileExists(path) {
-  try {
-    await Deno.stat(path);
-    return true;
-  } catch {
-    return false;
-  }
-}
+// fileExists is now imported from utils.js
 
 function showConfigHelp() {
   console.log('Configuration commands:');

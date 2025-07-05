@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../../../utils/error-handler.js';
 /**
  * System Monitor - Real-time monitoring of system processes
  */
 
-import { colors } from '@cliffy/ansi/colors';
-import { ProcessManager } from './process-manager.js';
-import { SystemEvents } from '../../../utils/types.js';
+import chalk from 'chalk';
+import type { ProcessManager } from './process-manager.js';
+import type { SystemEvents } from '../../../utils/types.js';
 import { eventBus } from '../../../core/event-bus.js';
 
 export class SystemMonitor {
@@ -97,7 +98,7 @@ export class SystemMonitor {
       this.addEvent({
         type: 'process_error',
         timestamp: Date.now(),
-        data: { processId, error: error.message },
+        data: { processId, error: (error instanceof Error ? error.message : String(error)) },
         level: 'error'
       });
     });
@@ -145,8 +146,8 @@ export class SystemMonitor {
   }
 
   printEventLog(count: number = 20): void {
-    console.log(colors.cyan.bold('📊 Recent System Events'));
-    console.log(colors.gray('─'.repeat(80)));
+    console.log(chalk.cyan.bold('📊 Recent System Events'));
+    console.log(chalk.gray('─'.repeat(80)));
     
     const events = this.getRecentEvents(count);
     
@@ -156,7 +157,7 @@ export class SystemMonitor {
       const color = this.getEventColor(event.level);
       
       console.log(
-        colors.gray(timestamp),
+        chalk.gray(timestamp),
         icon,
         color(this.formatEventMessage(event))
       );
@@ -182,15 +183,15 @@ export class SystemMonitor {
   private getEventColor(level: string): (text: string) => string {
     switch (level) {
       case 'success':
-        return colors.green;
+        return chalk.green;
       case 'info':
-        return colors.blue;
+        return chalk.blue;
       case 'warning':
-        return colors.yellow;
+        return chalk.yellow;
       case 'error':
-        return colors.red;
+        return chalk.red;
       default:
-        return colors.white;
+        return chalk.white;
     }
   }
 
@@ -223,20 +224,20 @@ export class SystemMonitor {
     const stats = this.processManager.getSystemStats();
     const processes = this.processManager.getAllProcesses();
     
-    console.log(colors.cyan.bold('🏥 System Health'));
-    console.log(colors.gray('─'.repeat(60)));
+    console.log(chalk.cyan.bold('🏥 System Health'));
+    console.log(chalk.gray('─'.repeat(60)));
     
     // Overall status
     const healthStatus = stats.errorProcesses === 0 ? 
-      colors.green('● Healthy') : 
-      colors.red(`● Unhealthy (${stats.errorProcesses} errors)`);
+      chalk.green('● Healthy') : 
+      chalk.red(`● Unhealthy (${stats.errorProcesses} errors)`);
     
     console.log('Status:', healthStatus);
     console.log('Uptime:', this.formatUptime(stats.systemUptime));
     console.log();
     
     // Process status
-    console.log(colors.white.bold('Process Status:'));
+    console.log(chalk.white.bold('Process Status:'));
     for (const process of processes) {
       const status = this.getProcessStatusIcon(process.status);
       const metrics = process.metrics;
@@ -244,8 +245,8 @@ export class SystemMonitor {
       let line = `  ${status} ${process.name.padEnd(20)}`;
       
       if (metrics && process.status === 'running') {
-        line += colors.gray(` CPU: ${metrics.cpu?.toFixed(1)}% `);
-        line += colors.gray(` MEM: ${metrics.memory?.toFixed(0)}MB`);
+        line += chalk.gray(` CPU: ${metrics.cpu?.toFixed(1)}% `);
+        line += chalk.gray(` MEM: ${metrics.memory?.toFixed(0)}MB`);
       }
       
       console.log(line);
@@ -254,7 +255,7 @@ export class SystemMonitor {
     console.log();
     
     // System metrics
-    console.log(colors.white.bold('System Metrics:'));
+    console.log(chalk.white.bold('System Metrics:'));
     console.log(`  Active Processes: ${stats.runningProcesses}/${stats.totalProcesses}`);
     console.log(`  Recent Events: ${this.events.length}`);
     
@@ -265,10 +266,10 @@ export class SystemMonitor {
     
     if (recentErrors.length > 0) {
       console.log();
-      console.log(colors.red.bold('Recent Errors:'));
+      console.log(chalk.red.bold('Recent Errors:'));
       for (const error of recentErrors) {
         const time = new Date(error.timestamp).toLocaleTimeString();
-        console.log(colors.red(`  ${time} - ${this.formatEventMessage(error)}`));
+        console.log(chalk.red(`  ${time} - ${this.formatEventMessage(error)}`));
       }
     }
   }
@@ -276,17 +277,17 @@ export class SystemMonitor {
   private getProcessStatusIcon(status: string): string {
     switch (status) {
       case 'running':
-        return colors.green('●');
+        return chalk.green('●');
       case 'stopped':
-        return colors.gray('○');
+        return chalk.gray('○');
       case 'starting':
-        return colors.yellow('◐');
+        return chalk.yellow('◐');
       case 'stopping':
-        return colors.yellow('◑');
+        return chalk.yellow('◑');
       case 'error':
-        return colors.red('✗');
+        return chalk.red('✗');
       default:
-        return colors.gray('?');
+        return chalk.gray('?');
     }
   }
 

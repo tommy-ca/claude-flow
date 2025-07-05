@@ -1,5 +1,7 @@
 // init/index.js - Initialize Claude Code integration files
 import { printSuccess, printError, printWarning } from '../../utils.js';
+import { Deno, cwd, exit, existsSync } from '../../node-compat.js';
+import process from 'process';
 import { createLocalExecutable } from './executable-wrapper.js';
 import { createSparcStructureManually } from './sparc-structure.js';
 import { createClaudeSlashCommands } from './claude-commands/slash-commands.js';
@@ -83,12 +85,12 @@ export async function initCommand(subArgs, flags) {
   
   // Get the actual working directory (where the command was run from)
   // Use PWD environment variable which preserves the original directory
-  const workingDir = Deno.env.get('PWD') || Deno.cwd();
+  const workingDir = process.env.PWD || cwd();
   console.log(`📁 Initializing in: ${workingDir}`);
   
   // Change to the working directory to ensure all file operations happen there
   try {
-    Deno.chdir(workingDir);
+    process.chdir(workingDir);
   } catch (err) {
     printWarning(`Could not change to directory ${workingDir}: ${err.message}`);
   }
@@ -172,7 +174,7 @@ export async function initCommand(subArgs, flags) {
           console.log(`  [DRY RUN] Would create ${dir}/ directory`);
         }
       } catch (err) {
-        if (!(err instanceof Deno.errors.AlreadyExists)) {
+        if (err.code !== 'EEXIST') {
           throw err;
         }
       }

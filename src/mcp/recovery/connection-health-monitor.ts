@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Connection Health Monitor for MCP
  * Monitors connection health and triggers recovery when needed
  */
 
 import { EventEmitter } from 'node:events';
-import { ILogger } from '../../core/logger.js';
-import { MCPClient } from '../client.js';
+import type { ILogger } from '../../core/logger.js';
+import type { MCPClient } from '../client.js';
 
 export interface HealthStatus {
   healthy: boolean;
@@ -238,12 +239,12 @@ export class ConnectionHealthMonitor extends EventEmitter {
     this.logger.warn('Heartbeat failed', {
       missedHeartbeats: this.missedHeartbeats,
       maxMissed: this.config.maxMissedHeartbeats,
-      error: error.message,
+      error: (error instanceof Error ? error.message : String(error)),
     });
     
     if (this.missedHeartbeats >= this.config.maxMissedHeartbeats) {
       this.logger.error('Max missed heartbeats exceeded, connection unhealthy');
-      this.updateHealthStatus('disconnected', false, error.message);
+      this.updateHealthStatus('disconnected', false, (error instanceof Error ? error.message : String(error)));
       
       if (this.config.enableAutoRecovery) {
         this.emit('connectionLost', { error });

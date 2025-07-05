@@ -1,15 +1,16 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Migration CLI Command Integration
  */
 
-import { Command } from 'commander';
-import { MigrationRunner } from '../../migration/migration-runner';
-import { MigrationAnalyzer } from '../../migration/migration-analyzer';
-import { RollbackManager } from '../../migration/rollback-manager';
-import { MigrationStrategy } from '../../migration/types';
-import { logger } from '../../migration/logger';
+import type { Command } from "@cliffy/command";
+import type { MigrationRunner } from '../../migration/migration-runner.js';
+import type { MigrationAnalyzer } from '../../migration/migration-analyzer.js';
+import type { RollbackManager } from '../../migration/rollback-manager.js';
+import type { MigrationStrategy } from '../../migration/types.js';
+import { logger } from '../../migration/logger.js';
 import * as path from 'path';
-import chalk from "npm:chalk@^4.1.2";
+import chalk from "chalk";
 
 export function createMigrateCommand(): Command {
   const command = new Command('migrate');

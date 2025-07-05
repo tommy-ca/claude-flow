@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * ruv-swarm integration helper for Claude Code configuration
  * 

@@ -1,6 +1,8 @@
 // sparc.js - SPARC development mode commands
 import { printSuccess, printError, printWarning } from '../utils.js';
 import { createSparcPrompt } from './sparc-modes/index.js';
+import { Deno, cwd, exit, existsSync } from '../node-compat.js';
+import process from 'process';
 
 export async function sparcCommand(subArgs, flags) {
   const sparcCmd = subArgs[0];
@@ -70,7 +72,7 @@ export async function sparcCommand(subArgs, flags) {
 async function listSparcModes(subArgs) {
   try {
     // Get the actual working directory where the command was run from
-    const workingDir = Deno.env.get('PWD') || Deno.cwd();
+    const workingDir = process.env.PWD || cwd();
     const configPath = `${workingDir}/.roomodes`;
     let configContent;
     try {
@@ -122,7 +124,7 @@ async function showModeInfo(subArgs) {
   
   try {
     // Get the actual working directory where the command was run from
-    const workingDir = Deno.env.get('PWD') || Deno.cwd();
+    const workingDir = process.env.PWD || cwd();
     const configPath = `${workingDir}/.roomodes`;
     let configContent;
     try {
@@ -177,7 +179,7 @@ async function runSparcMode(subArgs, flags) {
   
   try {
     // Get the actual working directory where the command was run from
-    const workingDir = Deno.env.get('PWD') || Deno.cwd();
+    const workingDir = process.env.PWD || cwd();
     const configPath = `${workingDir}/.roomodes`;
     let configContent;
     try {
@@ -395,7 +397,7 @@ async function executeClaude(enhancedTask, toolsList, instanceId, memoryNamespac
     // Log the actual command being executed
     console.log('\n🚀 Executing command:');
     console.log(`Command: claude`);
-    console.log(`Working Directory: ${Deno.cwd()}`);
+    console.log(`Working Directory: ${cwd()}`);
     console.log(`Number of args: ${claudeArgs.length}`);
     
     // Check if claude command exists
@@ -419,14 +421,14 @@ async function executeClaude(enhancedTask, toolsList, instanceId, memoryNamespac
     
     const command = new Deno.Command('claude', {
       args: claudeArgs,
-      cwd: Deno.cwd(), // Explicitly set working directory to current directory
+      cwd: cwd(), // Explicitly set working directory to current directory
       env: {
         ...Deno.env.toObject(),
         CLAUDE_INSTANCE_ID: instanceId,
         CLAUDE_SPARC_MODE: 'true',
         CLAUDE_FLOW_MEMORY_ENABLED: 'true',
         CLAUDE_FLOW_MEMORY_NAMESPACE: memoryNamespace,
-        CLAUDE_WORKING_DIRECTORY: Deno.cwd(), // Also pass as env variable
+        CLAUDE_WORKING_DIRECTORY: cwd(), // Also pass as env variable
       },
       stdin: 'inherit',
       stdout: 'inherit',

@@ -1,14 +1,16 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
+import { promises as fs } from 'node:fs';
 /**
  * Enhanced Swarm Command - Integration with new comprehensive swarm system
  */
 
-import { SwarmCoordinator } from '../../swarm/coordinator.js';
-import { TaskExecutor } from '../../swarm/executor.js';
-import { SwarmMemoryManager } from '../../swarm/memory.js';
+import type { SwarmCoordinator } from '../../swarm/coordinator.js';
+import type { TaskExecutor } from '../../swarm/executor.js';
+import type { SwarmMemoryManager } from '../../swarm/memory.js';
 import { generateId } from '../../utils/helpers.js';
 import { success, error, warning, info } from "../cli-core.js";
 import type { CommandContext } from "../cli-core.js";
-import { SwarmStrategy, SwarmMode, AgentType } from '../../swarm/types.js';
+import type { SwarmStrategy, SwarmMode, AgentType } from '../../swarm/types.js';
 
 export async function swarmAction(ctx: CommandContext) {
   // First check if help is requested
@@ -61,11 +63,6 @@ export async function swarmAction(ctx: CommandContext) {
       reviewRequired: options.review,
       testingRequired: options.testing,
       // Configure quiet logging unless verbose
-      logging: {
-        level: options.verbose ? 'debug' : 'error',
-        format: 'text',
-        destination: 'console'
-      },
       coordinationStrategy: {
         name: 'advanced',
         description: 'Advanced coordination with all features',
@@ -192,7 +189,7 @@ export async function swarmAction(ctx: CommandContext) {
 
     // Create swarm tracking directory
     const swarmDir = `./swarm-runs/${swarmId}`;
-    await Deno.mkdir(swarmDir, { recursive: true });
+    await fs.mkdir(swarmDir, { recursive: true });
 
     // Create objective
     const objectiveId = await coordinator.createObjective(
@@ -233,7 +230,7 @@ export async function swarmAction(ctx: CommandContext) {
     }
 
     // Write swarm configuration
-    await Deno.writeTextFile(`${swarmDir}/config.json`, JSON.stringify({
+    await fs.writeFile(`${swarmDir}/config.json`, JSON.stringify({
       swarmId,
       objectiveId,
       objective,
@@ -262,12 +259,12 @@ export async function swarmAction(ctx: CommandContext) {
     // Start the objective execution
     await coordinator.executeObjective(objectiveId);
 
-    if (options.background && Deno.env.get('CLAUDE_SWARM_NO_BG')) {
+    if (options.background && process.env['CLAUDE_SWARM_NO_BG']) {
       // We're running inside the background script
       // Save state and continue with normal execution
-      await Deno.writeTextFile(`${swarmDir}/coordinator.json`, JSON.stringify({
+      await fs.writeFile(`${swarmDir}/coordinator.json`, JSON.stringify({
         coordinatorRunning: true,
-        pid: Deno.pid,
+        pid: process.pid,
         startTime: new Date().toISOString(),
         status: coordinator.getStatus(),
         swarmId: coordinator.getSwarmId()
@@ -613,7 +610,7 @@ async function setupIncrementalUpdates(
   const tasksDir = `${swarmDir}/tasks`;
   
   // Create tasks directory
-  await Deno.mkdir(tasksDir, { recursive: true });
+  await fs.mkdir(tasksDir, { recursive: true });
   
   // Initialize with first status update
   try {
@@ -622,7 +619,7 @@ async function setupIncrementalUpdates(
     const initialAgents = coordinator.getAgents();
     const initialObjective = coordinator.getObjectives()[0];
     
-    await Deno.writeTextFile(statusFile, JSON.stringify({
+    await fs.writeFile(statusFile, JSON.stringify({
       timestamp: new Date().toISOString(),
       swarmStatus: initialStatus,
       objective: initialObjective ? {
@@ -662,13 +659,13 @@ Tasks: ${initialStatus.tasks.completed}/${initialStatus.tasks.total} completed
 
 Agents: ${initialStatus.agents.active}/${initialStatus.agents.total} active
 `;
-    await Deno.writeTextFile(`${swarmDir}/progress.txt`, initialProgressText);
+    await fs.writeFile(`${swarmDir}/progress.txt`, initialProgressText);
   } catch (error) {
-    console.warn('Failed to create initial status files:', error.message);
+    console.warn('Failed to create initial status files:', (error instanceof Error ? error.message : String(error)));
   }
   
   // Set up periodic status updates - use longer interval for background mode
-  const updateInterval = Deno.env.get('CLAUDE_SWARM_NO_BG') ? 3000 : 5000; // 3s for background, 5s for foreground
+  const updateInterval = process.env['CLAUDE_SWARM_NO_BG'] ? 3000 : 5000; // 3s for background, 5s for foreground
   
   const updateFunction = async () => {
     try {
@@ -678,7 +675,7 @@ Agents: ${initialStatus.agents.active}/${initialStatus.agents.total} active
       const objective = coordinator.getObjectives()[0];
       
       // Write main status
-      await Deno.writeTextFile(statusFile, JSON.stringify({
+      await fs.writeFile(statusFile, JSON.stringify({
         timestamp: new Date().toISOString(),
         swarmStatus: status,
         objective: objective ? {
@@ -709,7 +706,7 @@ Agents: ${initialStatus.agents.active}/${initialStatus.agents.total} active
         // Extract task ID string - handle both string and object IDs
         const taskId = typeof task.id === 'string' ? task.id : task.id?.id || 'unknown';
         const taskFile = `${tasksDir}/${taskId}.json`;
-        await Deno.writeTextFile(taskFile, JSON.stringify({
+        await fs.writeFile(taskFile, JSON.stringify({
           id: task.id,
           name: task.name,
           type: task.type,
@@ -738,13 +735,13 @@ Tasks: ${status.tasks.completed}/${status.tasks.total} completed
 
 Agents: ${status.agents.active}/${status.agents.total} active
 `;
-      await Deno.writeTextFile(progressFile, progressText);
+      await fs.writeFile(progressFile, progressText);
       
     } catch (error) {
       // Write error to debug file but don't disrupt swarm
       try {
-        await Deno.writeTextFile(`${swarmDir}/update-errors.log`, 
-          `${new Date().toISOString()}: ${error.message}\n`, { append: true });
+        await fs.writeFile(`${swarmDir}/update-errors.log`, 
+          `${new Date().toISOString()}: ${(error instanceof Error ? error.message : String(error))}\n`, { append: true });
       } catch (e) {
         // Ignore file write errors
       }
@@ -801,9 +798,9 @@ function setupSwarmMonitoring(
         }
       };
       
-      await Deno.writeTextFile(metricsFile, JSON.stringify(metrics) + '\n', { append: true });
+      await fs.writeFile(metricsFile, JSON.stringify(metrics) + '\n', { append: true });
     } catch (error) {
-      console.warn('Failed to collect metrics:', error.message);
+      console.warn('Failed to collect metrics:', (error instanceof Error ? error.message : String(error)));
     }
   }, 10000); // Every 10 seconds
   
@@ -877,7 +874,7 @@ async function showSwarmResults(
     swarmStatus
   };
   
-  await Deno.writeTextFile(`${swarmDir}/results.json`, JSON.stringify(results, null, 2));
+  await fs.writeFile(`${swarmDir}/results.json`, JSON.stringify(results, null, 2));
   
   // Show summary
   success(`\n✅ Swarm completed successfully!`);
@@ -903,7 +900,7 @@ async function showSwarmResults(
           if (entry.isFile && !entry.name.startsWith('.') && 
               !dir.includes('swarm-runs') && !dir.includes('node_modules')) {
             const fullPath = `${dir}/${entry.name}`;
-            const stat = await Deno.stat(fullPath);
+            const stat = await fs.stat(fullPath);
             // Check if file was created recently (within swarm execution time)
             const executionStartTime = Date.now() - coordinator.getUptime();
             if (stat.mtime && stat.mtime.getTime() > executionStartTime) {
@@ -943,7 +940,7 @@ async function launchSwarmUI(objective: string, options: any): Promise<void> {
     
     // Check if the UI script exists
     try {
-      await Deno.stat(uiScriptPath);
+      await fs.stat(uiScriptPath);
     } catch {
       warning('Swarm UI script not found. Falling back to standard mode.');
       return;

@@ -1,9 +1,6 @@
-/**
- * Comprehensive Swarm Coordinator - Main orchestration engine
- */
-
-import { EventEmitter } from 'node:events';
-import { Logger } from '../core/logger.js';
+import { getErrorMessage } from '../utils/error-handler.js';
+import { promises as fs } from 'node:fs';
+import type { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
 import {
   SwarmId, AgentId, TaskId, AgentState, TaskDefinition, SwarmObjective,
@@ -12,7 +9,7 @@ import {
   SwarmEvent, EventType, SwarmEventEmitter, ValidationResult,
   SWARM_CONSTANTS
 } from './types.js';
-import { AutoStrategy } from './strategies/auto.js';
+import type { AutoStrategy } from './strategies/auto.js';
 import { getClaudeFlowRoot, getClaudeFlowBin } from '../utils/paths.js';
 
 export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter {
@@ -509,7 +506,7 @@ export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter 
       agent.errorHistory.push({
         timestamp: new Date(),
         type: 'startup_error',
-        message: error.message,
+        message: (error instanceof Error ? error.message : String(error)),
         stack: error.stack,
         context: { agentId },
         severity: 'high',
@@ -851,11 +848,11 @@ export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter 
       throw new Error('Task not assigned to any agent');
     }
 
-    this.logger.warn('Task failed', { taskId, agentId: agent.id.id, error: error.message });
+    this.logger.warn('Task failed', { taskId, agentId: agent.id.id, error: (error instanceof Error ? error.message : String(error)) });
 
     task.error = {
       type: error.constructor.name,
-      message: error.message,
+      message: (error instanceof Error ? error.message : String(error)),
       code: error.code,
       stack: error.stack,
       context: { taskId, agentId: agent.id.id },
@@ -881,7 +878,7 @@ export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter 
     agent.errorHistory.push({
       timestamp: new Date(),
       type: 'task_failure',
-      message: error.message,
+      message: (error instanceof Error ? error.message : String(error)),
       stack: error.stack,
       context: { taskId },
       severity: 'medium',
@@ -901,7 +898,7 @@ export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter 
         timestamp: new Date(),
         from: 'running',
         to: 'retrying',
-        reason: `Task failed, will retry: ${error.message}`,
+        reason: `Task failed, will retry: ${(error instanceof Error ? error.message : String(error))}`,
         triggeredBy: agent.id
       });
 
@@ -932,7 +929,7 @@ export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter 
         timestamp: new Date(),
         from: 'running',
         to: 'failed',
-        reason: `Task failed permanently: ${error.message}`,
+        reason: `Task failed permanently: ${(error instanceof Error ? error.message : String(error))}`,
         triggeredBy: agent.id
       });
 
@@ -2187,7 +2184,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
     } catch (error) {
       this.logger.error('Task execution failed', { 
         taskId: task.id.id,
-        error: error.message
+        error: (error instanceof Error ? error.message : String(error))
       });
       throw error;
     }
@@ -2323,7 +2320,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
       // Execute Claude with the prompt
       const command = new Deno.Command("claude", {
         args: claudeArgs,
-        cwd: targetDir || Deno.cwd(),
+        cwd: targetDir || process.cwd(),
         env: {
           ...Deno.env.toObject(),
           CLAUDE_INSTANCE_ID: instanceId,
@@ -2331,7 +2328,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
           CLAUDE_SWARM_ID: this.swarmId.id,
           CLAUDE_TASK_ID: task.id.id,
           CLAUDE_AGENT_ID: agent.id.id,
-          CLAUDE_WORKING_DIRECTORY: targetDir || Deno.cwd(),
+          CLAUDE_WORKING_DIRECTORY: targetDir || process.cwd(),
           CLAUDE_FLOW_MEMORY_ENABLED: "true",
           CLAUDE_FLOW_MEMORY_NAMESPACE: `swarm-${this.swarmId.id}`,
         },
@@ -2375,7 +2372,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
     } catch (error) {
       this.logger.error('Failed to execute Claude agent', { 
         taskId: task.id.id,
-        error: error.message 
+        error: (error instanceof Error ? error.message : String(error)) 
       });
       throw error;
     }
@@ -2494,7 +2491,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
           return await this.executeGenericTask(task, workDir, agent);
       }
     } catch (error) {
-      throw new Error(`Task execution failed: ${error.message}`);
+      throw new Error(`Task execution failed: ${(error instanceof Error ? error.message : String(error))}`);
     }
   }
   
@@ -2598,7 +2595,7 @@ app.listen(port, () => {
 module.exports = app;
 `;
       
-      await Deno.writeTextFile(`${projectDir}/server.js`, apiCode);
+      await fs.writeFile(`${projectDir}/server.js`, apiCode);
       
       // Create package.json
       const packageJson = {
@@ -2630,7 +2627,7 @@ module.exports = app;
         }
       };
       
-      await Deno.writeTextFile(
+      await fs.writeFile(
         `${projectDir}/package.json`, 
         JSON.stringify(packageJson, null, 2)
       );
@@ -2680,7 +2677,7 @@ ${task.description}
 Created by Claude Flow Swarm
 `;
       
-      await Deno.writeTextFile(`${projectDir}/README.md`, readme);
+      await fs.writeFile(`${projectDir}/README.md`, readme);
       
       // Create .gitignore
       const gitignore = `node_modules/
@@ -2690,7 +2687,7 @@ Created by Claude Flow Swarm
 coverage/
 `;
       
-      await Deno.writeTextFile(`${projectDir}/.gitignore`, gitignore);
+      await fs.writeFile(`${projectDir}/.gitignore`, gitignore);
       
       return {
         success: true,
@@ -2728,7 +2725,7 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 `;
       
-      await Deno.writeTextFile(`${projectDir}/index.js`, mainCode);
+      await fs.writeFile(`${projectDir}/index.js`, mainCode);
       
       // Create package.json
       const packageJson = {
@@ -2745,7 +2742,7 @@ if (typeof module !== 'undefined' && module.exports) {
         license: "MIT"
       };
       
-      await Deno.writeTextFile(
+      await fs.writeFile(
         `${projectDir}/package.json`, 
         JSON.stringify(packageJson, null, 2)
       );
@@ -2770,7 +2767,7 @@ npm start
 ${task.description}
 `;
       
-      await Deno.writeTextFile(`${projectDir}/README.md`, readme);
+      await fs.writeFile(`${projectDir}/README.md`, readme);
       
       return {
         success: true,
@@ -2802,7 +2799,7 @@ function main() {
 main();
 `;
     
-    await Deno.writeTextFile(`${projectDir}/main.js`, code);
+    await fs.writeFile(`${projectDir}/main.js`, code);
     
     return {
       success: true,
@@ -2836,7 +2833,7 @@ main();
       ]
     };
     
-    await Deno.writeTextFile(
+    await fs.writeFile(
       `${analysisDir}/analysis-report.json`,
       JSON.stringify(analysis, null, 2)
     );
@@ -2876,7 +2873,7 @@ ${task.instructions}
 - Further details would be added based on actual implementation
 `;
     
-    await Deno.writeTextFile(`${docsDir}/documentation.md`, documentation);
+    await fs.writeFile(`${docsDir}/documentation.md`, documentation);
     
     return {
       success: true,
@@ -2916,7 +2913,7 @@ describe('${task.name}', () => {
 console.log('Tests completed for: ${task.name}');
 `;
     
-    await Deno.writeTextFile(`${testDir}/test.js`, testCode);
+    await fs.writeFile(`${testDir}/test.js`, testCode);
     
     return {
       success: true,
@@ -2948,7 +2945,7 @@ console.log('Tests completed for: ${task.name}');
       result: 'Task executed successfully'
     };
     
-    await Deno.writeTextFile(
+    await fs.writeFile(
       `${outputDir}/result.json`,
       JSON.stringify(output, null, 2)
     );

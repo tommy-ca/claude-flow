@@ -1,8 +1,10 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Shell completion generator for Claude-Flow CLI
  */
 
-import { colors } from '@cliffy/ansi/colors';
+import chalk from 'chalk';
+import { promises as fs } from 'node:fs';
 
 export class CompletionGenerator {
   private commands = [
@@ -33,20 +35,20 @@ export class CompletionGenerator {
         await this.generateFishCompletion(install);
         break;
       default:
-        console.error(colors.red(`Unsupported shell: ${detectedShell}`));
-        console.log(colors.gray('Supported shells: bash, zsh, fish'));
+        console.error(chalk.red(`Unsupported shell: ${detectedShell}`));
+        console.log(chalk.gray('Supported shells: bash, zsh, fish'));
         break;
     }
   }
 
   private async detectShell(): Promise<string> {
-    const shell = Deno.env.get('SHELL') || '';
+    const shell = process.env['SHELL'] || '';
     
     if (shell.includes('bash')) return 'bash';
     if (shell.includes('zsh')) return 'zsh';
     if (shell.includes('fish')) return 'fish';
     
-    console.log(colors.yellow('Could not detect shell, defaulting to bash'));
+    console.log(chalk.yellow('Could not detect shell, defaulting to bash'));
     return 'bash';
   }
 
@@ -473,19 +475,19 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
     const possiblePaths = [
       '/etc/bash_completion.d/claude-flow',
       '/usr/local/etc/bash_completion.d/claude-flow',
-      `${Deno.env.get('HOME')}/.local/share/bash-completion/completions/claude-flow`,
-      `${Deno.env.get('HOME')}/.bash_completion.d/claude-flow`
+      `${process.env['HOME']}/.local/share/bash-completion/completions/claude-flow`,
+      `${process.env['HOME']}/.bash_completion.d/claude-flow`
     ];
 
     for (const path of possiblePaths) {
       try {
         const dir = path.substring(0, path.lastIndexOf('/'));
         await Deno.mkdir(dir, { recursive: true });
-        await Deno.writeTextFile(path, script);
+        await fs.writeFile(path, script);
         
-        console.log(colors.green('✓ Bash completion installed'));
-        console.log(`${colors.white('Location:')} ${path}`);
-        console.log(colors.gray('Restart your shell or run: source ~/.bashrc'));
+        console.log(chalk.green('✓ Bash completion installed'));
+        console.log(`${chalk.white('Location:')} ${path}`);
+        console.log(chalk.gray('Restart your shell or run: source ~/.bashrc'));
         return;
       } catch (error) {
         // Try next path
@@ -493,13 +495,13 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
       }
     }
 
-    console.error(colors.red('Failed to install bash completion'));
-    console.log(colors.gray('You can manually save the completion script to a bash completion directory'));
+    console.error(chalk.red('Failed to install bash completion'));
+    console.log(chalk.gray('You can manually save the completion script to a bash completion directory'));
   }
 
   private async installZshCompletion(script: string): Promise<void> {
     const possiblePaths = [
-      `${Deno.env.get('HOME')}/.zsh/completions/_claude-flow`,
+      `${process.env['HOME']}/.zsh/completions/_claude-flow`,
       '/usr/local/share/zsh/site-functions/_claude-flow',
       '/usr/share/zsh/site-functions/_claude-flow'
     ];
@@ -508,11 +510,11 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
       try {
         const dir = path.substring(0, path.lastIndexOf('/'));
         await Deno.mkdir(dir, { recursive: true });
-        await Deno.writeTextFile(path, script);
+        await fs.writeFile(path, script);
         
-        console.log(colors.green('✓ Zsh completion installed'));
-        console.log(`${colors.white('Location:')} ${path}`);
-        console.log(colors.gray('Restart your shell or run: autoload -U compinit && compinit'));
+        console.log(chalk.green('✓ Zsh completion installed'));
+        console.log(`${chalk.white('Location:')} ${path}`);
+        console.log(chalk.gray('Restart your shell or run: autoload -U compinit && compinit'));
         return;
       } catch (error) {
         // Try next path
@@ -520,13 +522,13 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
       }
     }
 
-    console.error(colors.red('Failed to install zsh completion'));
-    console.log(colors.gray('You can manually save the completion script to your zsh completion directory'));
+    console.error(chalk.red('Failed to install zsh completion'));
+    console.log(chalk.gray('You can manually save the completion script to your zsh completion directory'));
   }
 
   private async installFishCompletion(script: string): Promise<void> {
     const possiblePaths = [
-      `${Deno.env.get('HOME')}/.config/fish/completions/claude-flow.fish`,
+      `${process.env['HOME']}/.config/fish/completions/claude-flow.fish`,
       '/usr/local/share/fish/completions/claude-flow.fish',
       '/usr/share/fish/completions/claude-flow.fish'
     ];
@@ -535,11 +537,11 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
       try {
         const dir = path.substring(0, path.lastIndexOf('/'));
         await Deno.mkdir(dir, { recursive: true });
-        await Deno.writeTextFile(path, script);
+        await fs.writeFile(path, script);
         
-        console.log(colors.green('✓ Fish completion installed'));
-        console.log(`${colors.white('Location:')} ${path}`);
-        console.log(colors.gray('Completions will be available in new fish sessions'));
+        console.log(chalk.green('✓ Fish completion installed'));
+        console.log(`${chalk.white('Location:')} ${path}`);
+        console.log(chalk.gray('Completions will be available in new fish sessions'));
         return;
       } catch (error) {
         // Try next path
@@ -547,7 +549,7 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
       }
     }
 
-    console.error(colors.red('Failed to install fish completion'));
-    console.log(colors.gray('You can manually save the completion script to your fish completion directory'));
+    console.error(chalk.red('Failed to install fish completion'));
+    console.log(chalk.gray('You can manually save the completion script to your fish completion directory'));
   }
 }

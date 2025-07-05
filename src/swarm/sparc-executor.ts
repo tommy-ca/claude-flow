@@ -1,12 +1,13 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * SPARC-Enhanced Task Executor for Swarm
  * Implements the full SPARC methodology with TDD
  */
 
-import { TaskDefinition, AgentState, TaskResult } from './types.js';
+import type { TaskDefinition, AgentState, TaskResult } from './types.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Logger } from '../core/logger.js';
+import type { Logger } from '../core/logger.js';
 
 export interface SparcPhase {
   name: string;
@@ -122,7 +123,7 @@ export class SparcTaskExecutor {
     } catch (error) {
       this.logger.error('SPARC task execution failed', {
         taskId: task.id.id,
-        error: error.message
+        error: (error instanceof Error ? error.message : String(error))
       });
       throw error;
     }

@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Comprehensive help system for Claude-Flow CLI
  */
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
-import { Table } from '@cliffy/table';
-import { Select } from '@cliffy/prompt';
+import chalk from 'chalk';
+import type { Table } from '@cliffy/table';
+import type { Select } from '@cliffy/prompt';
 
 export const helpCommand = new Command()
   .description('Comprehensive help system with examples and tutorials')
@@ -609,21 +610,21 @@ const HELP_TOPICS: HelpTopic[] = [
 ];
 
 function showMainHelp(): void {
-  console.log(colors.cyan.bold('Claude-Flow Help System'));
+  console.log(chalk.cyan.bold('Claude-Flow Help System'));
   console.log('─'.repeat(50));
   console.log();
   
-  console.log(colors.white('Claude-Flow is an advanced AI agent orchestration system.'));
-  console.log(colors.white('Use this help system to learn about features and best practices.'));
+  console.log(chalk.white('Claude-Flow is an advanced AI agent orchestration system.'));
+  console.log(chalk.white('Use this help system to learn about features and best practices.'));
   console.log();
   
-  console.log(colors.yellow.bold('Quick Start:'));
-  console.log(colors.gray('  claude-flow help getting-started    # Beginner tutorial'));
-  console.log(colors.gray('  claude-flow help --interactive      # Interactive help mode'));
-  console.log(colors.gray('  claude-flow help <topic>            # Specific topic help'));
+  console.log(chalk.yellow.bold('Quick Start:'));
+  console.log(chalk.gray('  claude-flow help getting-started    # Beginner tutorial'));
+  console.log(chalk.gray('  claude-flow help --interactive      # Interactive help mode'));
+  console.log(chalk.gray('  claude-flow help <topic>            # Specific topic help'));
   console.log();
   
-  console.log(colors.yellow.bold('Help Categories:'));
+  console.log(chalk.yellow.bold('Help Categories:'));
   
   const categories = {
     basic: 'Essential concepts and commands',
@@ -635,22 +636,22 @@ function showMainHelp(): void {
   
   for (const [category, description] of Object.entries(categories)) {
     console.log();
-    console.log(colors.cyan.bold(`${category.toUpperCase()}:`));
-    console.log(colors.white(`  ${description}`));
+    console.log(chalk.cyan.bold(`${category.toUpperCase()}:`));
+    console.log(chalk.white(`  ${description}`));
     
     const topics = HELP_TOPICS.filter(t => t.category === category);
     for (const topic of topics) {
-      console.log(colors.gray(`    ${topic.name.padEnd(20)} ${topic.description}`));
+      console.log(chalk.gray(`    ${topic.name.padEnd(20)} ${topic.description}`));
     }
   }
   
   console.log();
-  console.log(colors.gray('Use "claude-flow help <topic>" for detailed information.'));
-  console.log(colors.gray('Use "claude-flow help --all" to see all topics.'));
+  console.log(chalk.gray('Use "claude-flow help <topic>" for detailed information.'));
+  console.log(chalk.gray('Use "claude-flow help --all" to see all topics.'));
 }
 
 function showAllTopics(): void {
-  console.log(colors.cyan.bold('All Help Topics'));
+  console.log(chalk.cyan.bold('All Help Topics'));
   console.log('─'.repeat(50));
   
   const table = new Table()
@@ -659,8 +660,8 @@ function showAllTopics(): void {
 
   for (const topic of HELP_TOPICS) {
     table.push([
-      colors.cyan(topic.name),
-      colors.yellow(topic.category),
+      chalk.cyan(topic.name),
+      chalk.yellow(topic.category),
       topic.description
     ]);
   }
@@ -668,14 +669,14 @@ function showAllTopics(): void {
   table.render();
   
   console.log();
-  console.log(colors.gray('Use "claude-flow help <topic>" for detailed information.'));
+  console.log(chalk.gray('Use "claude-flow help <topic>" for detailed information.'));
 }
 
 async function showTopicHelp(topicName: string, options: any): Promise<void> {
   const topic = HELP_TOPICS.find(t => t.name === topicName);
   
   if (!topic) {
-    console.log(colors.red(`Help topic '${topicName}' not found.`));
+    console.log(chalk.red(`Help topic '${topicName}' not found.`));
     console.log();
     
     // Suggest similar topics
@@ -685,44 +686,44 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
     );
     
     if (similar.length > 0) {
-      console.log(colors.gray('Did you mean:'));
+      console.log(chalk.gray('Did you mean:'));
       for (const suggestion of similar) {
-        console.log(colors.cyan(`  ${suggestion.name}`));
+        console.log(chalk.cyan(`  ${suggestion.name}`));
       }
     } else {
-      console.log(colors.gray('Use "claude-flow help --all" to see all topics.'));
+      console.log(chalk.gray('Use "claude-flow help --all" to see all topics.'));
     }
     return;
   }
   
-  console.log(colors.cyan.bold(`Help: ${topic.name}`));
+  console.log(chalk.cyan.bold(`Help: ${topic.name}`));
   console.log('─'.repeat(50));
-  console.log(colors.white(topic.description));
+  console.log(chalk.white(topic.description));
   console.log();
   
   if (options.tutorial && topic.tutorial) {
-    console.log(colors.yellow.bold('Tutorial:'));
+    console.log(chalk.yellow.bold('Tutorial:'));
     console.log('─'.repeat(20));
     for (const line of topic.tutorial) {
       if (line.trim().startsWith('claude-flow')) {
-        console.log(colors.cyan(`  ${line}`));
+        console.log(chalk.cyan(`  ${line}`));
       } else if (line.trim() === '') {
         console.log();
       } else {
-        console.log(colors.white(line));
+        console.log(chalk.white(line));
       }
     }
     console.log();
   }
   
   if (options.examples && topic.examples) {
-    console.log(colors.yellow.bold('Examples:'));
+    console.log(chalk.yellow.bold('Examples:'));
     console.log('─'.repeat(20));
     for (const example of topic.examples) {
-      console.log(colors.white.bold(`${example.description}:`));
-      console.log(colors.cyan(`  ${example.command}`));
+      console.log(chalk.white.bold(`${example.description}:`));
+      console.log(chalk.cyan(`  ${example.command}`));
       if (example.explanation) {
-        console.log(colors.gray(`  ${example.explanation}`));
+        console.log(chalk.gray(`  ${example.explanation}`));
       }
       console.log();
     }
@@ -731,50 +732,50 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
   if (!options.examples && !options.tutorial) {
     // Show both by default
     if (topic.tutorial) {
-      console.log(colors.yellow.bold('Overview:'));
+      console.log(chalk.yellow.bold('Overview:'));
       console.log('─'.repeat(20));
       const overview = topic.tutorial.slice(0, 5);
       for (const line of overview) {
         if (line.trim() === '') {
           console.log();
         } else {
-          console.log(colors.white(line));
+          console.log(chalk.white(line));
         }
       }
       console.log();
-      console.log(colors.gray('Use --tutorial for complete tutorial.'));
+      console.log(chalk.gray('Use --tutorial for complete tutorial.'));
       console.log();
     }
     
     if (topic.examples) {
-      console.log(colors.yellow.bold('Common Examples:'));
+      console.log(chalk.yellow.bold('Common Examples:'));
       console.log('─'.repeat(20));
       const commonExamples = topic.examples.slice(0, 3);
       for (const example of commonExamples) {
-        console.log(colors.cyan(`  ${example.command}`));
-        console.log(colors.gray(`    ${example.description}`));
+        console.log(chalk.cyan(`  ${example.command}`));
+        console.log(chalk.gray(`    ${example.description}`));
       }
       if (topic.examples.length > 3) {
-        console.log(colors.gray(`    ... and ${topic.examples.length - 3} more`));
+        console.log(chalk.gray(`    ... and ${topic.examples.length - 3} more`));
       }
       console.log();
-      console.log(colors.gray('Use --examples for all examples.'));
+      console.log(chalk.gray('Use --examples for all examples.'));
       console.log();
     }
   }
   
   if (topic.related && topic.related.length > 0) {
-    console.log(colors.yellow.bold('Related Topics:'));
+    console.log(chalk.yellow.bold('Related Topics:'));
     console.log('─'.repeat(20));
     for (const related of topic.related) {
-      console.log(colors.cyan(`  claude-flow help ${related}`));
+      console.log(chalk.cyan(`  claude-flow help ${related}`));
     }
     console.log();
   }
 }
 
 async function startInteractiveHelp(): Promise<void> {
-  console.log(colors.cyan.bold('Interactive Help Mode'));
+  console.log(chalk.cyan.bold('Interactive Help Mode'));
   console.log('─'.repeat(30));
   console.log();
   
@@ -801,7 +802,7 @@ async function startInteractiveHelp(): Promise<void> {
     const choice = typeof result === 'string' ? result : result.value;
     
     if (choice === 'exit') {
-      console.log(colors.gray('Goodbye!'));
+      console.log(chalk.gray('Goodbye!'));
       break;
     }
     
@@ -814,7 +815,7 @@ async function startInteractiveHelp(): Promise<void> {
     }
     
     console.log();
-    console.log(colors.gray('Press Enter to continue...'));
+    console.log(chalk.gray('Press Enter to continue...'));
     await new Promise(resolve => {
       const stdin = Deno.stdin;
       const buffer = new Uint8Array(1);

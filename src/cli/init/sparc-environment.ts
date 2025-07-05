@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 // init/sparc-environment.ts - SPARC development environment setup
 export async function createSparcEnvironment(): Promise<void> {
   const fs = await import('fs/promises');

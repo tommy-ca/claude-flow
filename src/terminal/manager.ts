@@ -1,12 +1,13 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Terminal manager interface and implementation
  */
 
-import { AgentProfile, AgentSession, TerminalConfig } from '../utils/types.js';
-import { IEventBus } from '../core/event-bus.js';
-import { ILogger } from '../core/logger.js';
+import type { AgentProfile, AgentSession, TerminalConfig } from '../utils/types.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { ILogger } from '../core/logger.js';
 import { TerminalError, TerminalSpawnError } from '../utils/errors.js';
-import { ITerminalAdapter } from './adapters/base.js';
+import type { ITerminalAdapter } from './adapters/base.js';
 import { VSCodeAdapter } from './adapters/vscode.js';
 import { NativeAdapter } from './adapters/native.js';
 import { TerminalPool } from './pool.js';

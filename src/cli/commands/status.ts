@@ -1,10 +1,12 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
+import { promises as fs } from 'node:fs';
 /**
  * Status command for Claude-Flow
  */
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
-import { Table } from '@cliffy/table';
+import chalk from 'chalk';
+import type { Table } from '@cliffy/table';
 import { formatHealthStatus, formatDuration, formatStatusIndicator } from '../formatter.js';
 
 export const statusCommand = new Command()
@@ -38,10 +40,10 @@ async function showStatus(options: any): Promise<void> {
     }
   } catch (error) {
     if ((error as Error).message.includes('ECONNREFUSED') || (error as Error).message.includes('connection refused')) {
-      console.error(colors.red('✗ Claude-Flow is not running'));
-      console.log(colors.gray('Start it with: claude-flow start'));
+      console.error(chalk.red('✗ Claude-Flow is not running'));
+      console.log(chalk.gray('Start it with: claude-flow start'));
     } else {
-      console.error(colors.red('Error getting status:'), (error as Error).message);
+      console.error(chalk.red('Error getting status:'), (error as Error).message);
     }
   }
 }
@@ -49,21 +51,21 @@ async function showStatus(options: any): Promise<void> {
 async function watchStatus(options: any): Promise<void> {
   const interval = options.interval * 1000;
   
-  console.log(colors.cyan('Watching Claude-Flow status...'));
-  console.log(colors.gray(`Update interval: ${options.interval}s`));
-  console.log(colors.gray('Press Ctrl+C to stop\n'));
+  console.log(chalk.cyan('Watching Claude-Flow status...'));
+  console.log(chalk.gray(`Update interval: ${options.interval}s`));
+  console.log(chalk.gray('Press Ctrl+C to stop\n'));
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
     // Clear screen and show status
     console.clear();
-    console.log(colors.cyan.bold('Claude-Flow Status Monitor'));
-    console.log(colors.gray(`Last updated: ${new Date().toLocaleTimeString()}\n`));
+    console.log(chalk.cyan.bold('Claude-Flow Status Monitor'));
+    console.log(chalk.gray(`Last updated: ${new Date().toLocaleTimeString()}\n`));
     
     try {
       await showStatus({ ...options, json: false });
     } catch (error) {
-      console.error(colors.red('Status update failed:'), (error as Error).message);
+      console.error(chalk.red('Status update failed:'), (error as Error).message);
     }
     
     await new Promise(resolve => setTimeout(resolve, interval));
@@ -72,61 +74,65 @@ async function watchStatus(options: any): Promise<void> {
 
 function showFullStatus(status: any): void {
   // System overview
-  console.log(colors.cyan.bold('System Overview'));
+  console.log(chalk.cyan.bold('System Overview'));
   console.log('─'.repeat(50));
   
   const statusIcon = formatStatusIndicator(status.overall);
   console.log(`${statusIcon} Overall Status: ${getStatusColor(status.overall)(status.overall.toUpperCase())}`);
-  console.log(`${colors.white('Uptime:')} ${formatDuration(status.uptime)}`);
-  console.log(`${colors.white('Version:')} ${status.version}`);
-  console.log(`${colors.white('Started:')} ${new Date(status.startTime).toLocaleString()}`);
+  console.log(`${chalk.white('Uptime:')} ${formatDuration(status.uptime)}`);
+  console.log(`${chalk.white('Version:')} ${status.version}`);
+  console.log(`${chalk.white('Started:')} ${new Date(status.startTime).toLocaleString()}`);
   console.log();
 
   // Components status
-  console.log(colors.cyan.bold('Components'));
+  console.log(chalk.cyan.bold('Components'));
   console.log('─'.repeat(50));
   
-  const componentTable = new Table()
-    .header(['Component', 'Status', 'Uptime', 'Details'])
-    .border(true);
-
+  const componentRows = [];
   for (const [name, component] of Object.entries(status.components)) {
     const comp = component as any;
     const statusIcon = formatStatusIndicator(comp.status);
     const statusText = getStatusColor(comp.status)(comp.status.toUpperCase());
     
-    componentTable.push([
-      colors.white(name),
+    componentRows.push([
+      chalk.white(name),
       `${statusIcon} ${statusText}`,
       formatDuration(comp.uptime || 0),
       comp.details || '-'
     ]);
   }
   
+  const componentTable = new Table()
+    .header(['Component', 'Status', 'Uptime', 'Details'])
+    .body(componentRows)
+    .border(true);
+  
   componentTable.render();
   console.log();
 
   // Resource usage
   if (status.resources) {
-    console.log(colors.cyan.bold('Resource Usage'));
+    console.log(chalk.cyan.bold('Resource Usage'));
     console.log('─'.repeat(50));
     
-    const resourceTable = new Table()
-      .header(['Resource', 'Used', 'Total', 'Percentage'])
-      .border(true);
-
+    const resourceRows = [];
     for (const [name, resource] of Object.entries(status.resources)) {
       const res = resource as any;
       const percentage = ((res.used / res.total) * 100).toFixed(1);
       const color = getResourceColor(parseFloat(percentage));
       
-      resourceTable.push([
-        colors.white(name),
+      resourceRows.push([
+        chalk.white(name),
         res.used.toString(),
         res.total.toString(),
         color(`${percentage}%`)
       ]);
     }
+    
+    const resourceTable = new Table()
+      .header(['Resource', 'Used', 'Total', 'Percentage'])
+      .body(resourceRows)
+      .border(true);
     
     resourceTable.render();
     console.log();
@@ -134,60 +140,64 @@ function showFullStatus(status: any): void {
 
   // Active agents
   if (status.agents) {
-    console.log(colors.cyan.bold(`Active Agents (${status.agents.length})`));
+    console.log(chalk.cyan.bold(`Active Agents (${status.agents.length})`));
     console.log('─'.repeat(50));
     
     if (status.agents.length > 0) {
-      const agentTable = new Table()
-        .header(['ID', 'Name', 'Type', 'Status', 'Tasks'])
-        .border(true);
-
+      const agentRows = [];
       for (const agent of status.agents) {
         const statusIcon = formatStatusIndicator(agent.status);
         const statusText = getStatusColor(agent.status)(agent.status);
         
-        agentTable.push([
-          colors.gray(agent.id.substring(0, 8) + '...'),
-          colors.white(agent.name),
-          colors.cyan(agent.type),
+        agentRows.push([
+          chalk.gray(agent.id.slice(0, 8)),
+          chalk.white(agent.name),
+          agent.type,
           `${statusIcon} ${statusText}`,
           agent.activeTasks.toString()
         ]);
       }
       
+      const agentTable = new Table()
+        .header(['ID', 'Name', 'Type', 'Status', 'Tasks'])
+        .body(agentRows)
+        .border(true);
+      
       agentTable.render();
     } else {
-      console.log(colors.gray('No active agents'));
+      console.log(chalk.gray('No active agents'));
     }
     console.log();
   }
 
   // Recent tasks
   if (status.recentTasks) {
-    console.log(colors.cyan.bold(`Recent Tasks (${status.recentTasks.length})`));
+    console.log(chalk.cyan.bold('Recent Tasks'));
     console.log('─'.repeat(50));
     
     if (status.recentTasks.length > 0) {
-      const taskTable = new Table()
-        .header(['ID', 'Type', 'Status', 'Agent', 'Duration'])
-        .border(true);
-
-      for (const task of status.recentTasks.slice(0, 10)) { // Show last 10
+      const taskRows = [];
+      for (const task of status.recentTasks.slice(0, 10)) {
         const statusIcon = formatStatusIndicator(task.status);
         const statusText = getStatusColor(task.status)(task.status);
         
-        taskTable.push([
-          colors.gray(task.id.substring(0, 8) + '...'),
-          colors.white(task.type),
+        taskRows.push([
+          chalk.gray(task.id.slice(0, 8)),
+          task.type,
           `${statusIcon} ${statusText}`,
-          task.agent ? colors.cyan(task.agent.substring(0, 12) + '...') : '-',
-          task.duration ? formatDuration(task.duration) : '-'
+          formatDuration(Date.now() - new Date(task.startTime).getTime()),
+          task.assignedTo ? chalk.gray(task.assignedTo.slice(0, 8)) : '-'
         ]);
       }
       
+      const taskTable = new Table()
+        .header(['ID', 'Type', 'Status', 'Duration', 'Agent'])
+        .body(taskRows)
+        .border(true);
+      
       taskTable.render();
     } else {
-      console.log(colors.gray('No recent tasks'));
+      console.log(chalk.gray('No recent tasks'));
     }
   }
 }
@@ -196,104 +206,110 @@ function showComponentStatus(status: any, componentName: string): void {
   const component = status.components[componentName];
   
   if (!component) {
-    console.error(colors.red(`Component '${componentName}' not found`));
-    console.log(colors.gray('Available components:'), Object.keys(status.components).join(', '));
+    console.error(chalk.red(`Component '${componentName}' not found`));
+    console.log(chalk.gray(`Available components: ${Object.keys(status.components).join(', ')}`));
     return;
   }
 
-  console.log(colors.cyan.bold(`${componentName} Status`));
-  console.log('─'.repeat(30));
+  console.log(chalk.cyan.bold(`Component: ${componentName}`));
+  console.log('─'.repeat(50));
   
   const statusIcon = formatStatusIndicator(component.status);
   console.log(`${statusIcon} Status: ${getStatusColor(component.status)(component.status.toUpperCase())}`);
-  
-  if (component.uptime) {
-    console.log(`${colors.white('Uptime:')} ${formatDuration(component.uptime)}`);
-  }
+  console.log(`${chalk.white('Uptime:')} ${formatDuration(component.uptime || 0)}`);
   
   if (component.details) {
-    console.log(`${colors.white('Details:')} ${component.details}`);
+    console.log(`${chalk.white('Details:')} ${component.details}`);
   }
   
   if (component.metrics) {
-    console.log('\n' + colors.cyan.bold('Metrics'));
-    console.log('─'.repeat(20));
+    console.log();
+    console.log(chalk.cyan('Metrics:'));
     
-    for (const [metric, value] of Object.entries(component.metrics)) {
-      console.log(`${colors.white(metric + ':')} ${value}`);
+    const metricRows = [];
+    for (const [name, value] of Object.entries(component.metrics)) {
+      metricRows.push([
+        chalk.white(name),
+        value.toString()
+      ]);
     }
+    
+    const metricsTable = new Table()
+      .header(['Metric', 'Value'])
+      .body(metricRows)
+      .border(true);
+    
+    metricsTable.render();
   }
   
   if (component.errors && component.errors.length > 0) {
-    console.log('\n' + colors.red.bold('Recent Errors'));
-    console.log('─'.repeat(20));
+    console.log();
+    console.log(chalk.red('Recent Errors:'));
     
+    const errorRows = [];
     for (const error of component.errors.slice(0, 5)) {
-      console.log(colors.red(`• ${error.message}`));
-      console.log(colors.gray(`  ${new Date(error.timestamp).toLocaleString()}`));
+      errorRows.push([
+        new Date(error.timestamp).toLocaleTimeString(),
+        error.message
+      ]);
     }
+    
+    const errorTable = new Table()
+      .header(['Time', 'Error'])
+      .body(errorRows)
+      .border(true);
+    
+    errorTable.render();
   }
 }
 
 async function getSystemStatus(): Promise<any> {
-  // Mock status for now - in production, this would call the orchestrator API
+  // In a real implementation, this would connect to the orchestrator
+  // For now, return mock data
   return {
     overall: 'healthy',
-    version: '1.0.71',
-    uptime: Date.now() - (Date.now() - 3600000), // 1 hour ago
-    startTime: new Date(Date.now() - 3600000),
+    version: '1.0.0',
+    uptime: 3600000,
+    startTime: Date.now() - 3600000,
     components: {
       orchestrator: {
         status: 'healthy',
         uptime: 3600000,
-        details: 'Managing 3 agents'
+        details: 'Running smoothly'
       },
-      terminal: {
+      agents: {
         status: 'healthy',
         uptime: 3600000,
-        details: 'Pool: 2/5 active sessions'
+        details: '5 active agents'
       },
       memory: {
         status: 'healthy',
         uptime: 3600000,
-        details: 'SQLite + 95MB cache'
-      },
-      coordination: {
-        status: 'healthy',
-        uptime: 3600000,
-        details: '12 active tasks'
-      },
-      mcp: {
-        status: 'healthy',
-        uptime: 3600000,
-        details: 'Listening on stdio'
+        details: 'Using 128MB of 512MB'
       }
     },
     resources: {
-      'Memory (MB)': { used: 256, total: 1024 },
-      'CPU (%)': { used: 15, total: 100 },
-      'Agents': { used: 3, total: 10 },
-      'Tasks': { used: 12, total: 100 }
+      memory: {
+        used: 128,
+        total: 512
+      },
+      cpu: {
+        used: 25,
+        total: 100
+      }
     },
     agents: [
       {
         id: 'agent-001',
-        name: 'Coordinator Agent',
-        type: 'coordinator',
+        name: 'Research Agent',
+        type: 'research',
         status: 'active',
         activeTasks: 2
       },
       {
         id: 'agent-002',
-        name: 'Research Agent',
-        type: 'researcher',
-        status: 'active',
-        activeTasks: 5
-      },
-      {
-        id: 'agent-003',
-        name: 'Implementation Agent',
-        type: 'implementer',
+        name: 'Code Agent',
+        type: 'coding',
         status: 'idle',
         activeTasks: 0
       }
@@ -303,274 +319,33 @@ async function getSystemStatus(): Promise<any> {
         id: 'task-001',
         type: 'research',
         status: 'completed',
-        agent: 'agent-002',
-        duration: 45000
-      },
-      {
-        id: 'task-002',
-        type: 'coordination',
-        status: 'running',
-        agent: 'agent-001',
-        duration: null,
-        priority: 'high'
+        startTime: Date.now() - 300000,
+        assignedTo: 'agent-001'
       }
-    ],
-    errors: generateRecentErrors(),
-    warnings: generateHealthWarnings(),
-    performance: options.detailed ? generatePerformanceMetrics() : undefined
+    ]
   };
-  
-  // Add health check results if requested
-  if (options.healthCheck) {
-    baseStatus.healthChecks = await performSystemHealthChecks();
-  }
-  
-  return baseStatus;
 }
 
-function getStatusColor(status: string) {
+function getStatusColor(status: string): (text: string) => string {
   switch (status.toLowerCase()) {
     case 'healthy':
     case 'active':
     case 'completed':
-      return colors.green;
-    case 'degraded':
+      return chalk.green;
     case 'warning':
     case 'idle':
-      return colors.yellow;
-    case 'unhealthy':
+    case 'pending':
+      return chalk.yellow;
     case 'error':
     case 'failed':
-      return colors.red;
-    case 'running':
-      return colors.cyan;
+      return chalk.red;
     default:
-      return colors.white;
+      return chalk.gray;
   }
 }
 
-function getResourceColor(percentage: number) {
-  if (percentage >= 90) return colors.red;
-  if (percentage >= 75) return colors.yellow;
-  return colors.green;
-}
-
-function getPriorityColor(priority: string) {
-  switch (priority.toLowerCase()) {
-    case 'high': return colors.red;
-    case 'medium': return colors.yellow;
-    case 'low': return colors.green;
-    default: return colors.white;
-  }
-}
-
-function getMetricStatus(metric: string, value: any): string {
-  // Simple heuristic for metric status
-  if (typeof value === 'string' && value.includes('%')) {
-    const percentage = parseFloat(value);
-    if (percentage >= 95) return 'excellent';
-    if (percentage >= 80) return 'good';
-    if (percentage >= 60) return 'fair';
-    return 'poor';
-  }
-  return 'normal';
-}
-
-function calculateTrend(history: number[]): number {
-  if (history.length < 2) return 0;
-  const recent = history.slice(-5).reduce((a, b) => a + b, 0) / Math.min(5, history.length);
-  const older = history.slice(0, -5).reduce((a, b) => a + b, 0) / Math.max(1, history.length - 5);
-  return (recent - older) / older;
-}
-
-async function getRealSystemStatus(): Promise<any | null> {
-  try {
-    // Try to connect to running orchestrator
-    // This would be implemented based on actual IPC/HTTP communication
-    return null; // Not implemented yet
-  } catch {
-    return null;
-  }
-}
-
-async function getPidFromFile(): Promise<number | null> {
-  try {
-    if (await existsSync('.claude-flow.pid')) {
-      const pidData = await Deno.readTextFile('.claude-flow.pid');
-      const data = JSON.parse(pidData);
-      return data.pid || null;
-    }
-  } catch {
-    // Ignore errors
-  }
-  return null;
-}
-
-async function getLastKnownStatus(): Promise<any | null> {
-  try {
-    if (await existsSync('.claude-flow-last-status.json')) {
-      const statusData = await Deno.readTextFile('.claude-flow-last-status.json');
-      return JSON.parse(statusData);
-    }
-  } catch {
-    // Ignore errors
-  }
-  return null;
-}
-
-function generateRecentTasks() {
-  const types = ['research', 'implementation', 'analysis', 'coordination', 'testing'];
-  const statuses = ['running', 'pending', 'completed', 'failed'];
-  const priorities = ['high', 'medium', 'low'];
-  
-  return Array.from({ length: 15 }, (_, i) => ({
-    id: `task-${String(i + 1).padStart(3, '0')}`,
-    type: types[Math.floor(Math.random() * types.length)],
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    agent: Math.random() > 0.3 ? `agent-${String(Math.floor(Math.random() * 5) + 1).padStart(3, '0')}` : null,
-    duration: Math.random() > 0.4 ? Math.floor(Math.random() * 120000) + 5000 : null,
-    priority: priorities[Math.floor(Math.random() * priorities.length)]
-  }));
-}
-
-function generateRecentErrors() {
-  const components = ['orchestrator', 'terminal', 'memory', 'coordination', 'mcp'];
-  const errorTypes = [
-    'Connection timeout',
-    'Memory allocation failed',
-    'Task execution error',
-    'Resource not available',
-    'Configuration invalid'
-  ];
-  
-  return Array.from({ length: Math.floor(Math.random() * 3) }, (_, i) => ({
-    component: components[Math.floor(Math.random() * components.length)],
-    message: errorTypes[Math.floor(Math.random() * errorTypes.length)],
-    timestamp: Date.now() - (Math.random() * 3600000), // Last hour
-    stack: 'Error stack trace would be here...'
-  }));
-}
-
-function generateHealthWarnings() {
-  const warnings = [
-    {
-      message: 'Memory usage approaching 80% threshold',
-      recommendation: 'Consider restarting memory manager or increasing cache limits'
-    },
-    {
-      message: 'High task queue length detected',
-      recommendation: 'Scale up coordination workers or check for blocked tasks'
-    }
-  ];
-  
-  return Math.random() > 0.7 ? [warnings[Math.floor(Math.random() * warnings.length)]] : [];
-}
-
-function generatePerformanceMetrics() {
-  return {
-    'Response Time': {
-      current: '1.2s',
-      average: '1.5s',
-      peak: '3.2s'
-    },
-    'Throughput': {
-      current: '45 req/min',
-      average: '38 req/min',
-      peak: '67 req/min'
-    },
-    'Error Rate': {
-      current: '0.2%',
-      average: '0.5%',
-      peak: '2.1%'
-    }
-  };
-}
-
-async function performSystemHealthChecks(): Promise<any> {
-  const checks = {
-    'Disk Space': await checkDiskSpace(),
-    'Memory Usage': await checkMemoryUsage(),
-    'Network Connectivity': await checkNetworkConnectivity(),
-    'Process Health': await checkProcessHealth()
-  };
-  
-  return checks;
-}
-
-async function checkDiskSpace(): Promise<{ status: string; details: string }> {
-  try {
-    // Basic disk space check
-    const stats = await Deno.stat('.');
-    return {
-      status: 'healthy',
-      details: 'Sufficient disk space available'
-    };
-  } catch {
-    return {
-      status: 'warning',
-      details: 'Cannot determine disk space'
-    };
-  }
-}
-
-async function checkMemoryUsage(): Promise<{ status: string; details: string }> {
-  const memoryInfo = Deno.memoryUsage();
-  const heapUsedMB = Math.round(memoryInfo.heapUsed / 1024 / 1024);
-  
-  if (heapUsedMB > 500) {
-    return {
-      status: 'warning',
-      details: `High memory usage: ${heapUsedMB}MB`
-    };
-  }
-  
-  return {
-    status: 'healthy',
-    details: `Memory usage normal: ${heapUsedMB}MB`
-  };
-}
-
-async function checkNetworkConnectivity(): Promise<{ status: string; details: string }> {
-  try {
-    const controller = new AbortController();
-    setTimeout(() => controller.abort(), 3000);
-    
-    const response = await fetch('https://httpbin.org/status/200', {
-      signal: controller.signal
-    });
-    
-    return {
-      status: response.ok ? 'healthy' : 'warning',
-      details: response.ok ? 'Network connectivity normal' : `HTTP ${response.status}`
-    };
-  } catch {
-    return {
-      status: 'warning',
-      details: 'Network connectivity check failed (offline mode?)'
-    };
-  }
-}
-
-async function checkProcessHealth(): Promise<{ status: string; details: string }> {
-  const pid = await getPidFromFile();
-  if (!pid) {
-    return {
-      status: 'error',
-      details: 'No process ID found - system may not be running'
-    };
-  }
-  
-  try {
-    // Check if process exists
-    Deno.kill(pid, 'SIGUSR1'); // Non-destructive signal
-    return {
-      status: 'healthy',
-      details: `Process ${pid} is running`
-    };
-  } catch {
-    return {
-      status: 'error',
-      details: `Process ${pid} not found - system stopped unexpectedly`
-    };
-  }
+function getResourceColor(percentage: number): (text: string) => string {
+  if (percentage < 50) return chalk.green;
+  if (percentage < 80) return chalk.yellow;
+  return chalk.red;
 }

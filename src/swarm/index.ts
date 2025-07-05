@@ -1,48 +1,49 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 // Main exports for the swarm system
-export * from './coordinator';
-export * from './executor';
-export * from './types';
-export * from './strategies/base';
-export * from './strategies/auto';
-export * from './strategies/research';
-export * from './memory';
+export * from './coordinator.js';
+export * from './executor.js';
+export * from './types.js';
+export * from './strategies/base.js';
+export * from './strategies/auto.js';
+export * from './strategies/research.js';
+export * from './memory.js';
 
 // Prompt copying system exports
-export * from './prompt-copier';
-export * from './prompt-copier-enhanced';
-export * from './prompt-utils';
-export * from './prompt-manager';
-export * from './prompt-cli';
+export * from './prompt-copier.js';
+export * from './prompt-copier-enhanced.js';
+export * from './prompt-utils.js';
+export * from './prompt-manager.js';
+export * from './prompt-cli.js';
 
 // Optimizations
-export * from './optimizations';
+export * from './optimizations/index.js';
 
 // Utility function to get all exports
 export function getSwarmComponents() {
   return {
     // Core components
-    coordinator: () => import('./coordinator'),
-    executor: () => import('./executor'),
-    types: () => import('./types'),
+    coordinator: () => import('./coordinator.js'),
+    executor: () => import('./executor.js'),
+    types: () => import('./types.js'),
     
     // Strategies
     strategies: {
-      base: () => import('./strategies/base'),
-      auto: () => import('./strategies/auto'),
-      research: () => import('./strategies/research')
+      base: () => import('./strategies/base.js'),
+      auto: () => import('./strategies/auto.js'),
+      research: () => import('./strategies/research.js')
     },
     
     // Memory
-    memory: () => import('./memory'),
+    memory: () => import('./memory.js'),
     
     // Prompt system
-    promptCopier: () => import('./prompt-copier'),
-    promptCopierEnhanced: () => import('./prompt-copier-enhanced'),
-    promptUtils: () => import('./prompt-utils'),
-    promptManager: () => import('./prompt-manager'),
-    promptCli: () => import('./prompt-cli'),
+    promptCopier: () => import('./prompt-copier.js'),
+    promptCopierEnhanced: () => import('./prompt-copier-enhanced.js'),
+    promptUtils: () => import('./prompt-utils.js'),
+    promptManager: () => import('./prompt-manager.js'),
+    promptCli: () => import('./prompt-cli.js'),
     
     // Optimizations
-    optimizations: () => import('./optimizations')
+    optimizations: () => import('./optimizations/index.js')
   };
 }

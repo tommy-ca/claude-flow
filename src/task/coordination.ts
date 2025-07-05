@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Task Coordination Layer - Integrates with TodoWrite/TodoRead and Memory for orchestration
  * Provides seamless coordination between task management and Claude Code batch tools
  */
 
 import { EventEmitter } from 'events';
-import { TaskEngine, WorkflowTask, TaskExecution } from './engine.js';
+import type { TaskEngine, WorkflowTask, TaskExecution } from './engine.js';
 import { generateId } from '../utils/helpers.js';
 
 export interface TodoItem {

@@ -2,6 +2,20 @@
  * Core type definitions for Claude-Flow
  */
 
+// Logging configuration interface
+export interface LoggingConfig {
+  level: 'debug' | 'info' | 'warn' | 'error';
+  format: 'text' | 'json';
+  destination: 'console' | 'file' | 'both';
+  file?: {
+    path: string;
+    maxSize: number;
+    maxFiles: number;
+  };
+  enableTimestamps?: boolean;
+  enableContext?: boolean;
+}
+
 // Import orchestrator metrics type
 export interface OrchestratorMetrics {
   uptime: number;

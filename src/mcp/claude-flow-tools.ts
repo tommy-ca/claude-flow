@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude-Flow specific MCP tools
  */
 
-import { MCPTool, MCPContext, AgentProfile, Task, MemoryEntry } from '../utils/types.js';
-import { ILogger } from '../core/logger.js';
-import { Permissions } from './auth.js';
+import type { MCPTool, MCPContext, AgentProfile, Task, MemoryEntry } from '../utils/types.js';
+import type { ILogger } from '../core/logger.js';
+import type { Permissions } from './auth.js';
 
 export interface ClaudeFlowToolContext extends MCPContext {
   orchestrator?: any; // Reference to orchestrator instance

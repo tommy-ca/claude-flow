@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Distributed memory system with sharing capabilities
  */
 
 import { EventEmitter } from 'node:events';
-import { ILogger } from '../core/logger.js';
-import { IEventBus } from '../core/event-bus.js';
-import { 
+import type { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { 
   SwarmMemory, 
   MemoryPartition, 
   MemoryEntry, 
@@ -620,6 +621,16 @@ export class DistributedMemorySystem extends EventEmitter {
       this.recordMetric('query-error', Date.now() - startTime);
       throw error;
     }
+  }
+
+  /**
+   * Query entries by type
+   */
+  async queryByType(type: string, namespace?: string): Promise<MemoryEntry[]> {
+    return this.query({
+      filter: { type },
+      namespace
+    });
   }
 
   // === SYNCHRONIZATION ===

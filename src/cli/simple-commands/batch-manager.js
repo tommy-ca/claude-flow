@@ -1,6 +1,7 @@
 // batch-manager.js - Batch configuration management utility
 import { printSuccess, printError, printInfo, printWarning } from '../utils.js';
 import { PROJECT_TEMPLATES, ENVIRONMENT_CONFIGS } from './init/batch-init.js';
+import { Deno, cwd, exit, existsSync } from '../node-compat.js';
 
 export async function batchManagerCommand(subArgs, flags) {
   const command = subArgs[0];

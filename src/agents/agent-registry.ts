@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Agent Registry with Memory Integration
  * Provides persistent storage and coordination for agent management
  */
 
-import { DistributedMemorySystem } from '../memory/distributed-memory.js';
-import { AgentState, AgentId, AgentType, AgentStatus } from '../swarm/types.js';
+import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { AgentState, AgentId, AgentType, AgentStatus } from '../swarm/types.js';
 import { EventEmitter } from 'node:events';
 
 export interface AgentRegistryEntry {
@@ -168,11 +169,13 @@ export class AgentRegistry extends EventEmitter {
 
     // Load from memory
     const key = this.getAgentKey(agentId);
-    const entry = await this.memory.retrieve(key);
+    const memoryEntry = await this.memory.retrieve(key);
     
-    if (entry) {
-      this.cache.set(agentId, entry);
-      return entry;
+    if (memoryEntry && memoryEntry.value) {
+      // Convert MemoryEntry to AgentRegistryEntry
+      const registryEntry: AgentRegistryEntry = memoryEntry.value as AgentRegistryEntry;
+      this.cache.set(agentId, registryEntry);
+      return registryEntry;
     }
 
     return null;
@@ -196,7 +199,7 @@ export class AgentRegistry extends EventEmitter {
     }
 
     if (query.healthThreshold !== undefined) {
-      agents = agents.filter(agent => agent.health >= query.healthThreshold);
+      agents = agents.filter(agent => agent.health >= query.healthThreshold!);
     }
 
     if (query.namePattern) {
@@ -391,15 +394,16 @@ export class AgentRegistry extends EventEmitter {
   async getCoordinationData(agentId: string): Promise<any> {
     const key = `coordination:${agentId}`;
     const result = await this.memory.retrieve(key);
-    return result?.data || null;
+    return result?.value || null;
   }
 
   // === PRIVATE METHODS ===
 
   private async loadFromMemory(): Promise<void> {
     try {
-      const entries = await this.memory.queryByType('agent-registry', {
-        partition: this.namespace
+      const entries = await this.memory.query({
+        type: 'state' as const,
+        namespace: this.namespace
       });
 
       this.cache.clear();

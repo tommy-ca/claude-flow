@@ -1,5 +1,7 @@
 // utils.js - Shared CLI utility functions
 
+import { Deno, existsSync } from './node-compat.js';
+
 // Color formatting functions
 export function printSuccess(message) {
   console.log(`✅ ${message}`);
@@ -32,7 +34,7 @@ export async function ensureDirectory(path) {
     await Deno.mkdir(path, { recursive: true });
     return true;
   } catch (err) {
-    if (!(err instanceof Deno.errors.AlreadyExists)) {
+    if (err.code !== 'EEXIST') {
       throw err;
     }
     return true;

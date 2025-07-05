@@ -1,8 +1,9 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Simple MCP command implementation for Node.js compatibility
  */
 
-import { Command } from 'commander';
+import type { Command } from "@cliffy/command";
 import http from 'http';
 
 function printSuccess(message: string) {

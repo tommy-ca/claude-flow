@@ -1,10 +1,12 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Monitor command for Claude-Flow - Live dashboard mode
  */
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
-import { Table } from '@cliffy/table';
+import { promises as fs } from 'node:fs';
+import chalk from 'chalk';
+import type { Table } from '@cliffy/table';
 import { formatProgressBar, formatDuration, formatStatusIndicator } from '../formatter.js';
 
 export const monitorCommand = new Command()
@@ -47,8 +49,8 @@ class Dashboard {
     const cleanup = () => {
       this.running = false;
       Deno.stdout.writeSync(new TextEncoder().encode('\x1b[?25h')); // Show cursor
-      console.log('\n' + colors.gray('Monitor stopped'));
-      Deno.exit(0);
+      console.log('\n' + chalk.gray('Monitor stopped'));
+      process.exit(0);
     };
 
     Deno.addSignalListener('SIGINT', cleanup);
@@ -143,12 +145,12 @@ class Dashboard {
 
   private renderHeader(data: MonitorData): void {
     const time = data.timestamp.toLocaleTimeString();
-    console.log(colors.cyan.bold('Claude-Flow Live Monitor') + colors.gray(` - ${time}`));
+    console.log(chalk.cyan.bold('Claude-Flow Live Monitor') + chalk.gray(` - ${time}`));
     console.log('═'.repeat(80));
   }
 
   private renderSystemOverview(data: MonitorData): void {
-    console.log(colors.white.bold('System Overview'));
+    console.log(chalk.white.bold('System Overview'));
     console.log('─'.repeat(40));
     
     const cpuBar = formatProgressBar(data.system.cpu, 100, 20, 'CPU');
@@ -156,13 +158,13 @@ class Dashboard {
     
     console.log(`${cpuBar} ${data.system.cpu.toFixed(1)}%`);
     console.log(`${memoryBar} ${data.system.memory.toFixed(0)}MB`);
-    console.log(`${colors.white('Agents:')} ${data.system.agents} active`);
-    console.log(`${colors.white('Tasks:')} ${data.system.tasks} in queue`);
+    console.log(`${chalk.white('Agents:')} ${data.system.agents} active`);
+    console.log(`${chalk.white('Tasks:')} ${data.system.tasks} in queue`);
     console.log();
   }
 
   private renderComponentsStatus(data: MonitorData): void {
-    console.log(colors.white.bold('Components'));
+    console.log(chalk.white.bold('Components'));
     console.log('─'.repeat(40));
     
     const table = new Table()
@@ -173,11 +175,11 @@ class Dashboard {
       const statusIcon = formatStatusIndicator(component.status);
       const loadBar = this.createMiniProgressBar(component.load, 100, 10);
       
-      table.push([
-        colors.cyan(name),
+      table.body([[
+        chalk.cyan(name),
         `${statusIcon} ${component.status}`,
         `${loadBar} ${component.load.toFixed(0)}%`
-      ]);
+      ]]);
     }
     
     table.render();
@@ -186,7 +188,7 @@ class Dashboard {
 
   private renderAgentsAndTasks(data: MonitorData): void {
     // Agents table
-    console.log(colors.white.bold('Active Agents'));
+    console.log(chalk.white.bold('Active Agents'));
     console.log('─'.repeat(40));
     
     if (data.agents.length > 0) {
@@ -198,8 +200,8 @@ class Dashboard {
         const statusIcon = formatStatusIndicator(agent.status);
         
         agentTable.push([
-          colors.gray(agent.id.substring(0, 8) + '...'),
-          colors.cyan(agent.type),
+          chalk.gray(agent.id.substring(0, 8) + '...'),
+          chalk.cyan(agent.type),
           `${statusIcon} ${agent.status}`,
           agent.activeTasks.toString()
         ]);
@@ -207,12 +209,12 @@ class Dashboard {
       
       agentTable.render();
     } else {
-      console.log(colors.gray('No active agents'));
+      console.log(chalk.gray('No active agents'));
     }
     console.log();
 
     // Recent tasks
-    console.log(colors.white.bold('Recent Tasks'));
+    console.log(chalk.white.bold('Recent Tasks'));
     console.log('─'.repeat(40));
     
     if (data.tasks.length > 0) {
@@ -224,8 +226,8 @@ class Dashboard {
         const statusIcon = formatStatusIndicator(task.status);
         
         taskTable.push([
-          colors.gray(task.id.substring(0, 8) + '...'),
-          colors.white(task.type),
+          chalk.gray(task.id.substring(0, 8) + '...'),
+          chalk.white(task.type),
           `${statusIcon} ${task.status}`,
           task.duration ? formatDuration(task.duration) : '-'
         ]);
@@ -233,41 +235,41 @@ class Dashboard {
       
       taskTable.render();
     } else {
-      console.log(colors.gray('No recent tasks'));
+      console.log(chalk.gray('No recent tasks'));
     }
     console.log();
   }
 
   private renderRecentEvents(data: MonitorData): void {
-    console.log(colors.white.bold('Recent Events'));
+    console.log(chalk.white.bold('Recent Events'));
     console.log('─'.repeat(40));
     
     if (data.events.length > 0) {
       for (const event of data.events.slice(0, 3)) {
         const time = new Date(event.timestamp).toLocaleTimeString();
         const icon = this.getEventIcon(event.type);
-        console.log(`${colors.gray(time)} ${icon} ${event.message}`);
+        console.log(`${chalk.gray(time)} ${icon} ${event.message}`);
       }
     } else {
-      console.log(colors.gray('No recent events'));
+      console.log(chalk.gray('No recent events'));
     }
     console.log();
   }
 
   private renderPerformanceGraphs(): void {
-    console.log(colors.white.bold('Performance (Last 60s)'));
+    console.log(chalk.white.bold('Performance (Last 60s)'));
     console.log('─'.repeat(40));
     
     if (this.data.length >= 2) {
       // CPU graph
-      console.log(colors.cyan('CPU Usage:'));
+      console.log(chalk.cyan('CPU Usage:'));
       console.log(this.createSparkline(this.data.map(d => d.system.cpu), 30));
       
       // Memory graph
-      console.log(colors.cyan('Memory Usage:'));
+      console.log(chalk.cyan('Memory Usage:'));
       console.log(this.createSparkline(this.data.map(d => d.system.memory), 30));
     } else {
-      console.log(colors.gray('Collecting data...'));
+      console.log(chalk.gray('Collecting data...'));
     }
     console.log();
   }
@@ -275,11 +277,11 @@ class Dashboard {
   private renderFocusedComponent(data: MonitorData, componentName: string): void {
     const component = data.components[componentName];
     if (!component) {
-      console.log(colors.red(`Component '${componentName}' not found`));
+      console.log(chalk.red(`Component '${componentName}' not found`));
       return;
     }
 
-    console.log(colors.white.bold(`${componentName} Details`));
+    console.log(chalk.white.bold(`${componentName} Details`));
     console.log('─'.repeat(40));
     
     const statusIcon = formatStatusIndicator(component.status);
@@ -292,33 +294,33 @@ class Dashboard {
 
   private renderFooter(): void {
     console.log('─'.repeat(80));
-    console.log(colors.gray('Press Ctrl+C to exit • Update interval: ') + 
-               colors.yellow(`${this.options.interval}s`));
+    console.log(chalk.gray('Press Ctrl+C to exit • Update interval: ') + 
+               chalk.yellow(`${this.options.interval}s`));
   }
 
   private renderError(error: any): void {
     console.clear();
-    console.log(colors.red.bold('Monitor Error'));
+    console.log(chalk.red.bold('Monitor Error'));
     console.log('─'.repeat(40));
     
     if ((error as Error).message.includes('ECONNREFUSED')) {
-      console.log(colors.red('✗ Cannot connect to Claude-Flow'));
-      console.log(colors.gray('Make sure Claude-Flow is running with: claude-flow start'));
+      console.log(chalk.red('✗ Cannot connect to Claude-Flow'));
+      console.log(chalk.gray('Make sure Claude-Flow is running with: claude-flow start'));
     } else {
-      console.log(colors.red('Error:'), (error as Error).message);
+      console.log(chalk.red('Error:'), (error as Error).message);
     }
     
-    console.log('\n' + colors.gray('Retrying in ') + colors.yellow(`${this.options.interval}s...`));
+    console.log('\n' + chalk.gray('Retrying in ') + chalk.yellow(`${this.options.interval}s...`));
   }
 
   private createMiniProgressBar(current: number, max: number, width: number): string {
     const filled = Math.floor((current / max) * width);
     const empty = width - filled;
-    return colors.green('█'.repeat(filled)) + colors.gray('░'.repeat(empty));
+    return chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
   }
 
   private createSparkline(data: number[], width: number): string {
-    if (data.length < 2) return colors.gray('▁'.repeat(width));
+    if (data.length < 2) return chalk.gray('▁'.repeat(width));
     
     const max = Math.max(...data);
     const min = Math.min(...data);
@@ -330,21 +332,21 @@ class Dashboard {
     return recent.map(value => {
       const normalized = (value - min) / range;
       const charIndex = Math.floor(normalized * (chars.length - 1));
-      return colors.cyan(chars[charIndex]);
+      return chalk.cyan(chars[charIndex]);
     }).join('');
   }
 
   private getEventIcon(type: string): string {
     const icons = {
-      agent_spawned: colors.green('↗'),
-      agent_terminated: colors.red('↙'),
-      task_completed: colors.green('✓'),
-      task_failed: colors.red('✗'),
-      task_assigned: colors.blue('→'),
-      system_warning: colors.yellow('⚠'),
-      system_error: colors.red('✗'),
+      agent_spawned: chalk.green('↗'),
+      agent_terminated: chalk.red('↙'),
+      task_completed: chalk.green('✓'),
+      task_failed: chalk.red('✗'),
+      task_assigned: chalk.blue('→'),
+      system_warning: chalk.yellow('⚠'),
+      system_error: chalk.red('✗'),
     };
-    return icons[type as keyof typeof icons] || colors.blue('•');
+    return icons[type as keyof typeof icons] || chalk.blue('•');
   }
 
   private generateMockAgents(): any[] {
@@ -519,10 +521,10 @@ class Dashboard {
         alerts: this.alerts
       };
       
-      await Deno.writeTextFile(this.options.export, JSON.stringify(exportData, null, 2));
-      console.log(colors.green(`✓ Monitoring data exported to ${this.options.export}`));
+      await fs.writeFile(this.options.export, JSON.stringify(exportData, null, 2));
+      console.log(chalk.green(`✓ Monitoring data exported to ${this.options.export}`));
     } catch (error) {
-      console.error(colors.red('Failed to export data:'), (error as Error).message);
+      console.error(chalk.red('Failed to export data:'), (error as Error).message);
     }
   }
 }
@@ -530,22 +532,22 @@ class Dashboard {
 async function startMonitorDashboard(options: any): Promise<void> {
   // Validate options
   if (options.interval < 1) {
-    console.error(colors.red('Update interval must be at least 1 second'));
+    console.error(chalk.red('Update interval must be at least 1 second'));
     return;
   }
   
   if (options.threshold < 1 || options.threshold > 100) {
-    console.error(colors.red('Threshold must be between 1 and 100'));
+    console.error(chalk.red('Threshold must be between 1 and 100'));
     return;
   }
   
   if (options.export) {
     // Check if export path is writable
     try {
-      await Deno.writeTextFile(options.export, '');
+      await fs.writeFile(options.export, '');
       await Deno.remove(options.export);
     } catch {
-      console.error(colors.red(`Cannot write to export file: ${options.export}`));
+      console.error(chalk.red(`Cannot write to export file: ${options.export}`));
       return;
     }
   }

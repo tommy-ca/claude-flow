@@ -1,25 +1,26 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Output formatting utilities for CLI
  */
 
-import { colors } from '@cliffy/ansi/colors';
-import { Table } from '@cliffy/table';
+import chalk from 'chalk';
+import type { Table } from '@cliffy/table';
 // Box is not available in the current cliffy version
-import { AgentProfile, Task, MemoryEntry, HealthStatus } from '../utils/types.js';
+import type { AgentProfile, Task, MemoryEntry, HealthStatus } from '../utils/types.js';
 
 /**
  * Formats an error for display
  */
-export function formatError(error: unknown): string {
+export function formatError(error): string {
   if (error instanceof Error) {
-    let message = error.message;
+    let message = (error instanceof Error ? error.message : String(error));
     
     if ('code' in error) {
       message = `[${(error as any).code}] ${message}`;
     }
     
     if ('details' in error && (error as any).details) {
-      message += '\n' + colors.gray('Details: ' + JSON.stringify((error as any).details, null, 2));
+      message += '\n' + chalk.gray('Details: ' + JSON.stringify((error as any).details, null, 2));
     }
     
     return message;
@@ -33,12 +34,12 @@ export function formatError(error: unknown): string {
  */
 export function formatAgent(agent: AgentProfile): string {
   const lines = [
-    colors.cyan.bold(`Agent: ${agent.name}`),
-    colors.gray(`ID: ${agent.id}`),
-    colors.gray(`Type: ${agent.type}`),
-    colors.gray(`Priority: ${agent.priority}`),
-    colors.gray(`Max Tasks: ${agent.maxConcurrentTasks}`),
-    colors.gray(`Capabilities: ${agent.capabilities.join(', ')}`),
+    chalk.cyan.bold(`Agent: ${agent.name}`),
+    chalk.gray(`ID: ${agent.id}`),
+    chalk.gray(`Type: ${agent.type}`),
+    chalk.gray(`Priority: ${agent.priority}`),
+    chalk.gray(`Max Tasks: ${agent.maxConcurrentTasks}`),
+    chalk.gray(`Capabilities: ${agent.capabilities.join(', ')}`),
   ];
   
   return lines.join('\n');
@@ -49,33 +50,33 @@ export function formatAgent(agent: AgentProfile): string {
  */
 export function formatTask(task: Task): string {
   const statusColor = {
-    pending: colors.gray,
-    queued: colors.yellow,
-    assigned: colors.blue,
-    running: colors.cyan,
-    completed: colors.green,
-    failed: colors.red,
-    cancelled: colors.magenta,
-  }[task.status] || colors.white;
+    pending: chalk.gray,
+    queued: chalk.yellow,
+    assigned: chalk.blue,
+    running: chalk.cyan,
+    completed: chalk.green,
+    failed: chalk.red,
+    cancelled: chalk.magenta,
+  }[task.status] || chalk.white;
 
   const lines = [
-    colors.yellow.bold(`Task: ${task.description}`),
-    colors.gray(`ID: ${task.id}`),
-    colors.gray(`Type: ${task.type}`),
+    chalk.yellow.bold(`Task: ${task.description}`),
+    chalk.gray(`ID: ${task.id}`),
+    chalk.gray(`Type: ${task.type}`),
     statusColor(`Status: ${task.status}`),
-    colors.gray(`Priority: ${task.priority}`),
+    chalk.gray(`Priority: ${task.priority}`),
   ];
 
   if (task.assignedAgent) {
-    lines.push(colors.gray(`Assigned to: ${task.assignedAgent}`));
+    lines.push(chalk.gray(`Assigned to: ${task.assignedAgent}`));
   }
 
   if (task.dependencies.length > 0) {
-    lines.push(colors.gray(`Dependencies: ${task.dependencies.join(', ')}`));
+    lines.push(chalk.gray(`Dependencies: ${task.dependencies.join(', ')}`));
   }
 
   if (task.error) {
-    lines.push(colors.red(`Error: ${task.error.message}`));
+    lines.push(chalk.red(`Error: ${task.error}`));
   }
 
   return lines.join('\n');
@@ -86,19 +87,19 @@ export function formatTask(task: Task): string {
  */
 export function formatMemoryEntry(entry: MemoryEntry): string {
   const lines = [
-    colors.magenta.bold(`Memory Entry: ${entry.type}`),
-    colors.gray(`ID: ${entry.id}`),
-    colors.gray(`Agent: ${entry.agentId}`),
-    colors.gray(`Session: ${entry.sessionId}`),
-    colors.gray(`Timestamp: ${entry.timestamp.toISOString()}`),
-    colors.gray(`Version: ${entry.version}`),
+    chalk.magenta.bold(`Memory Entry: ${entry.type}`),
+    chalk.gray(`ID: ${entry.id}`),
+    chalk.gray(`Agent: ${entry.agentId}`),
+    chalk.gray(`Session: ${entry.sessionId}`),
+    chalk.gray(`Timestamp: ${entry.timestamp.toISOString()}`),
+    chalk.gray(`Version: ${entry.version}`),
   ];
 
   if (entry.tags.length > 0) {
-    lines.push(colors.gray(`Tags: ${entry.tags.join(', ')}`));
+    lines.push(chalk.gray(`Tags: ${entry.tags.join(', ')}`));
   }
 
-  lines.push('', colors.white('Content:'), entry.content);
+  lines.push('', chalk.white('Content:'), entry.content);
 
   return lines.join('\n');
 }
@@ -108,34 +109,34 @@ export function formatMemoryEntry(entry: MemoryEntry): string {
  */
 export function formatHealthStatus(health: HealthStatus): string {
   const statusColor = {
-    healthy: colors.green,
-    degraded: colors.yellow,
-    unhealthy: colors.red,
+    healthy: chalk.green,
+    degraded: chalk.yellow,
+    unhealthy: chalk.red,
   }[health.status];
 
   const lines = [
     statusColor.bold(`System Status: ${health.status.toUpperCase()}`),
-    colors.gray(`Checked at: ${health.timestamp.toISOString()}`),
+    chalk.gray(`Checked at: ${health.timestamp.toISOString()}`),
     '',
-    colors.cyan.bold('Components:'),
+    chalk.cyan.bold('Components:'),
   ];
 
   for (const [name, component] of Object.entries(health.components)) {
     const compColor = {
-      healthy: colors.green,
-      degraded: colors.yellow,
-      unhealthy: colors.red,
+      healthy: chalk.green,
+      degraded: chalk.yellow,
+      unhealthy: chalk.red,
     }[component.status];
 
     lines.push(compColor(`  ${name}: ${component.status}`));
     
     if (component.error) {
-      lines.push(colors.red(`    Error: ${component.error}`));
+      lines.push(chalk.red(`    Error: ${component.error}`));
     }
 
     if (component.metrics) {
       for (const [metric, value] of Object.entries(component.metrics)) {
-        lines.push(colors.gray(`    ${metric}: ${value}`));
+        lines.push(chalk.gray(`    ${metric}: ${value}`));
       }
     }
   }
@@ -174,13 +175,13 @@ export function createTaskTable(tasks: Task[]): Table {
 
   for (const task of tasks) {
     const statusCell = {
-      pending: colors.gray(task.status),
-      queued: colors.yellow(task.status),
-      assigned: colors.blue(task.status),
-      running: colors.cyan(task.status),
-      completed: colors.green(task.status),
-      failed: colors.red(task.status),
-      cancelled: colors.magenta(task.status),
+      pending: chalk.gray(task.status),
+      queued: chalk.yellow(task.status),
+      assigned: chalk.blue(task.status),
+      running: chalk.cyan(task.status),
+      completed: chalk.green(task.status),
+      failed: chalk.red(task.status),
+      cancelled: chalk.magenta(task.status),
     }[task.status] || task.status;
 
     table.push([
@@ -226,10 +227,10 @@ export function formatDuration(ms: number): string {
  */
 export function displayBanner(version: string): void {
   const banner = `
-${colors.cyan.bold('╔══════════════════════════════════════════════════════════════╗')}
-${colors.cyan.bold('║')}             ${colors.white.bold('🧠 Claude-Flow')} ${colors.gray('v' + version)}                        ${colors.cyan.bold('║')}
-${colors.cyan.bold('║')}          ${colors.gray('Advanced AI Agent Orchestration')}               ${colors.cyan.bold('║')}
-${colors.cyan.bold('╚══════════════════════════════════════════════════════════════╝')}
+${chalk.cyan.bold('╔══════════════════════════════════════════════════════════════╗')}
+${chalk.cyan.bold('║')}             ${chalk.white.bold('🧠 Claude-Flow')} ${chalk.gray('v' + version)}                        ${chalk.cyan.bold('║')}
+${chalk.cyan.bold('║')}          ${chalk.gray('Advanced AI Agent Orchestration')}               ${chalk.cyan.bold('║')}
+${chalk.cyan.bold('╚══════════════════════════════════════════════════════════════╝')}
 `;
   console.log(banner);
 }
@@ -239,22 +240,22 @@ ${colors.cyan.bold('╚═══════════════════
  */
 export function displayVersion(version: string, buildDate: string): void {
   const info = [
-    colors.cyan.bold('Claude-Flow Version Information'),
+    chalk.cyan.bold('Claude-Flow Version Information'),
     '',
-    colors.white('Version:    ') + colors.yellow(version),
-    colors.white('Build Date: ') + colors.yellow(buildDate),
-    colors.white('Runtime:    ') + colors.yellow('Deno ' + Deno.version.deno),
-    colors.white('TypeScript: ') + colors.yellow(Deno.version.typescript),
-    colors.white('V8:         ') + colors.yellow(Deno.version.v8),
+    chalk.white('Version:    ') + chalk.yellow(version),
+    chalk.white('Build Date: ') + chalk.yellow(buildDate),
+    chalk.white('Runtime:    ') + chalk.yellow('Deno ' + Deno.version.deno),
+    chalk.white('TypeScript: ') + chalk.yellow(Deno.version.typescript),
+    chalk.white('V8:         ') + chalk.yellow(Deno.version.v8),
     '',
-    colors.gray('Components:'),
-    colors.white('  • Multi-Agent Orchestration'),
-    colors.white('  • Memory Management'),
-    colors.white('  • Terminal Integration'),
-    colors.white('  • MCP Server'),
-    colors.white('  • Task Coordination'),
+    chalk.gray('Components:'),
+    chalk.white('  • Multi-Agent Orchestration'),
+    chalk.white('  • Memory Management'),
+    chalk.white('  • Terminal Integration'),
+    chalk.white('  • MCP Server'),
+    chalk.white('  • Task Coordination'),
     '',
-    colors.blue('Homepage: ') + colors.underline('https://github.com/anthropics/claude-code-flow'),
+    chalk.blue('Homepage: ') + colors.underline('https://github.com/anthropics/claude-code-flow'),
   ];
   
   console.log(info.join('\n'));
@@ -273,7 +274,7 @@ export function formatProgressBar(
   const filled = Math.floor((percentage / 100) * width);
   const empty = width - filled;
   
-  const bar = colors.green('█'.repeat(filled)) + colors.gray('░'.repeat(empty));
+  const bar = chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
   const percent = percentage.toFixed(1).padStart(5) + '%';
   
   let result = `[${bar}] ${percent}`;
@@ -289,12 +290,12 @@ export function formatProgressBar(
  */
 export function formatStatusIndicator(status: string): string {
   const indicators = {
-    success: colors.green('✓'),
-    error: colors.red('✗'),
-    warning: colors.yellow('⚠'),
-    info: colors.blue('ℹ'),
-    running: colors.cyan('⟳'),
-    pending: colors.gray('○'),
+    success: chalk.green('✓'),
+    error: chalk.red('✗'),
+    warning: chalk.yellow('⚠'),
+    info: chalk.blue('ℹ'),
+    running: chalk.cyan('⟳'),
+    pending: chalk.gray('○'),
   };
   
   return indicators[status as keyof typeof indicators] || status;
@@ -305,6 +306,6 @@ export function formatStatusIndicator(status: string): string {
  */
 export function formatSpinner(message: string, frame: number = 0): string {
   const frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
-  const spinner = colors.cyan(frames[frame % frames.length]);
+  const spinner = chalk.cyan(frames[frame % frames.length]);
   return `${spinner} ${message}`;
 }

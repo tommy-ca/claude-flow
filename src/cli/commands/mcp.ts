@@ -1,12 +1,13 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * MCP command for Claude-Flow
  */
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
+import chalk from 'chalk';
 import { logger } from '../../core/logger.js';
 import { configManager } from '../../core/config.js';
-import { MCPServer } from '../../mcp/server.js';
+import type { MCPServer } from '../../mcp/server.js';
 import { eventBus } from '../../core/event-bus.js';
 
 let mcpServer: MCPServer | null = null;
@@ -14,7 +15,7 @@ let mcpServer: MCPServer | null = null;
 export const mcpCommand = new Command()
   .description('Manage MCP server and tools')
   .action(() => {
-    console.log(colors.yellow('Please specify a subcommand:'));
+    console.log(chalk.yellow('Please specify a subcommand:'));
     console.log('  start   - Start the MCP server');
     console.log('  stop    - Stop the MCP server');
     console.log('  status  - Show MCP server status');
@@ -43,13 +44,13 @@ export const mcpCommand = new Command()
         mcpServer = new MCPServer(mcpConfig, eventBus, logger);
         await mcpServer.start();
 
-        console.log(colors.green(`✅ MCP server started on ${options.host}:${options.port}`));
-        console.log(colors.cyan(`📡 Server URL: http://${options.host}:${options.port}`));
-        console.log(colors.cyan(`🔧 Available tools: Research, Code, Terminal, Memory`));
-        console.log(colors.cyan(`📚 API documentation: http://${options.host}:${options.port}/docs`));
+        console.log(chalk.green(`✅ MCP server started on ${options.host}:${options.port}`));
+        console.log(chalk.cyan(`📡 Server URL: http://${options.host}:${options.port}`));
+        console.log(chalk.cyan(`🔧 Available tools: Research, Code, Terminal, Memory`));
+        console.log(chalk.cyan(`📚 API documentation: http://${options.host}:${options.port}/docs`));
       } catch (error) {
-        console.error(colors.red(`❌ Failed to start MCP server: ${(error as Error).message}`));
-        Deno.exit(1);
+        console.error(chalk.red(`❌ Failed to start MCP server: ${(error as Error).message}`));
+        process.exit(1);
       }
     })
   )
@@ -60,13 +61,13 @@ export const mcpCommand = new Command()
         if (mcpServer) {
           await mcpServer.stop();
           mcpServer = null;
-          console.log(colors.green('✅ MCP server stopped'));
+          console.log(chalk.green('✅ MCP server stopped'));
         } else {
-          console.log(colors.yellow('⚠️  MCP server is not running'));
+          console.log(chalk.yellow('⚠️  MCP server is not running'));
         }
       } catch (error) {
-        console.error(colors.red(`❌ Failed to stop MCP server: ${(error as Error).message}`));
-        Deno.exit(1);
+        console.error(chalk.red(`❌ Failed to stop MCP server: ${(error as Error).message}`));
+        process.exit(1);
       }
     })
   )
@@ -77,26 +78,26 @@ export const mcpCommand = new Command()
         const config = await configManager.load();
         const isRunning = mcpServer !== null;
 
-        console.log(colors.cyan('MCP Server Status:'));
-        console.log(`🌐 Status: ${isRunning ? colors.green('Running') : colors.red('Stopped')}`);
+        console.log(chalk.cyan('MCP Server Status:'));
+        console.log(`🌐 Status: ${isRunning ? chalk.green('Running') : chalk.red('Stopped')}`);
         
         if (isRunning) {
           console.log(`📍 Address: ${config.mcp.host}:${config.mcp.port}`);
-          console.log(`🔐 Authentication: ${config.mcp.auth ? colors.green('Enabled') : colors.yellow('Disabled')}`);
-          console.log(`🔧 Tools: ${colors.green('Available')}`);
-          console.log(`📊 Metrics: ${colors.green('Collecting')}`);
+          console.log(`🔐 Authentication: ${config.mcp.auth ? chalk.green('Enabled') : chalk.yellow('Disabled')}`);
+          console.log(`🔧 Tools: ${chalk.green('Available')}`);
+          console.log(`📊 Metrics: ${chalk.green('Collecting')}`);
         } else {
-          console.log(colors.gray('Use "claude-flow mcp start" to start the server'));
+          console.log(chalk.gray('Use "claude-flow mcp start" to start the server'));
         }
       } catch (error) {
-        console.error(colors.red(`❌ Failed to get MCP status: ${(error as Error).message}`));
+        console.error(chalk.red(`❌ Failed to get MCP status: ${(error as Error).message}`));
       }
     })
   )
   .command('tools', new Command()
     .description('List available MCP tools')
     .action(() => {
-      console.log(colors.cyan('Available MCP Tools:'));
+      console.log(chalk.cyan('Available MCP Tools:'));
       
       console.log('\n📊 Research Tools:');
       console.log('  • web_search - Search the web for information');
@@ -125,10 +126,10 @@ export const mcpCommand = new Command()
       try {
         const config = await configManager.load();
         
-        console.log(colors.cyan('MCP Configuration:'));
+        console.log(chalk.cyan('MCP Configuration:'));
         console.log(JSON.stringify(config.mcp, null, 2));
       } catch (error) {
-        console.error(colors.red(`❌ Failed to show MCP config: ${(error as Error).message}`));
+        console.error(chalk.red(`❌ Failed to show MCP config: ${(error as Error).message}`));
       }
     })
   )
@@ -136,20 +137,20 @@ export const mcpCommand = new Command()
     .description('Restart the MCP server')
     .action(async () => {
       try {
-        console.log(colors.yellow('🔄 Stopping MCP server...'));
+        console.log(chalk.yellow('🔄 Stopping MCP server...'));
         if (mcpServer) {
           await mcpServer.stop();
         }
         
-        console.log(colors.yellow('🔄 Starting MCP server...'));
+        console.log(chalk.yellow('🔄 Starting MCP server...'));
         const config = await configManager.load();
         mcpServer = new MCPServer(config.mcp, eventBus, logger);
         await mcpServer.start();
         
-        console.log(colors.green(`✅ MCP server restarted on ${config.mcp.host}:${config.mcp.port}`));
+        console.log(chalk.green(`✅ MCP server restarted on ${config.mcp.host}:${config.mcp.port}`));
       } catch (error) {
-        console.error(colors.red(`❌ Failed to restart MCP server: ${(error as Error).message}`));
-        Deno.exit(1);
+        console.error(chalk.red(`❌ Failed to restart MCP server: ${(error as Error).message}`));
+        process.exit(1);
       }
     })
   )
@@ -157,7 +158,7 @@ export const mcpCommand = new Command()
     .description('Show MCP server logs')
     .option('-n, --lines <lines:number>', 'Number of log lines to show', { default: 50 })
     .action((options: any) => {
-      console.log(colors.cyan(`MCP Server Logs (last ${options.lines} lines):`));
+      console.log(chalk.cyan(`MCP Server Logs (last ${options.lines} lines):`));
       
       // Mock logs since logging system might not be fully implemented
       const logEntries = [
@@ -178,13 +179,13 @@ export const mcpCommand = new Command()
       
       for (const entry of displayLogs) {
         if (entry.includes('[ERROR]')) {
-          console.log(colors.red(entry));
+          console.log(chalk.red(entry));
         } else if (entry.includes('[WARN]')) {
-          console.log(colors.yellow(entry));
+          console.log(chalk.yellow(entry));
         } else if (entry.includes('[INFO]')) {
-          console.log(colors.green(entry));
+          console.log(chalk.green(entry));
         } else {
-          console.log(colors.gray(entry));
+          console.log(chalk.gray(entry));
         }
       }
     })

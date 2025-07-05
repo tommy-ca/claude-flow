@@ -1,11 +1,12 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Advanced messaging and communication layer for swarm coordination
  */
 
 import { EventEmitter } from 'node:events';
-import { ILogger } from '../core/logger.js';
-import { IEventBus } from '../core/event-bus.js';
-import { 
+import type { ILogger } from '../core/logger.js';
+import type { IEventBus } from '../core/event-bus.js';
+import type { 
   SwarmEvent, 
   EventType, 
   AgentId, 
@@ -1333,7 +1334,7 @@ class RetryManager extends EventEmitter {
     this.logger.debug('Retry scheduled', {
       messageId: message.id,
       target: target.id,
-      error: error.message
+      error: (error instanceof Error ? error.message : String(error))
     });
   }
 
@@ -1372,7 +1373,7 @@ class RetryManager extends EventEmitter {
           this.logger.warn('Retry attempt failed', {
             messageId: entry.message.id,
             attempt: entry.attempts,
-            error: error.message
+            error: (error instanceof Error ? error.message : String(error))
           });
         }
       }

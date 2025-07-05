@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Node.js-compatible Configuration management for Claude-Flow
  */

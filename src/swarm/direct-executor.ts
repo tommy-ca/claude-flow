@@ -1,13 +1,14 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Direct Task Executor for Swarm
  * Executes tasks directly without relying on Claude CLI
  * Works in both local development and npm installed environments
  */
 
-import { TaskDefinition, AgentState, TaskResult } from './types.js';
+import type { TaskDefinition, AgentState, TaskResult } from './types.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import { Logger } from '../core/logger.js';
+import type { Logger } from '../core/logger.js';
 
 export interface DirectExecutorConfig {
   logger?: Logger;
@@ -77,7 +78,7 @@ export class DirectTaskExecutor {
     } catch (error) {
       this.logger.error('Task execution failed', {
         taskId: task.id.id,
-        error: error.message
+        error: (error instanceof Error ? error.message : String(error))
       });
       throw error;
     }
@@ -335,7 +336,7 @@ function prompt() {
           const result = calc.sqrt(parseFloat(num));
           console.log(\`Result: \${result}\\n\`);
         } catch (error) {
-          console.log(\`Error: \${error.message}\\n\`);
+          console.log(\`Error: \${(error instanceof Error ? error.message : String(error))}\\n\`);
         }
         prompt();
       });
@@ -371,7 +372,7 @@ function prompt() {
 
             console.log(\`Result: \${result}\\n\`);
           } catch (error) {
-            console.log(\`Error: \${error.message}\\n\`);
+            console.log(\`Error: \${(error instanceof Error ? error.message : String(error))}\\n\`);
           }
           prompt();
         });

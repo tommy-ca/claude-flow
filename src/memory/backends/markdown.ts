@@ -1,13 +1,14 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Markdown backend implementation for human-readable memory storage
  */
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { IMemoryBackend } from './base.js';
-import { MemoryEntry, MemoryQuery } from '../../utils/types.js';
-import { ILogger } from '../../core/logger.js';
-import { MemoryBackendError } from '../../utils/errors.js';
+import type { IMemoryBackend } from './base.js';
+import type { MemoryEntry, MemoryQuery } from '../../utils/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { MemoryBackendError } from '../../utils/errors.js';
 
 /**
  * Markdown-based memory backend
@@ -205,7 +206,7 @@ export class MarkdownBackend implements IMemoryBackend {
       }
 
       this.logger.info('Loaded memory index', { entries: this.entries.size });
-    } catch (error: any) {
+    } catch (error) {
       if (error.code !== 'ENOENT') {
         this.logger.warn('Failed to load index', { error });
       }

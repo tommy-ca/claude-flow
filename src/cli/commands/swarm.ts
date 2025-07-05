@@ -1,14 +1,12 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Claude Swarm Mode - Self-orchestrating agent swarms using claude-flow
  */
 
 import { generateId } from '../../utils/helpers.js';
-import { success, error, warning, info } from "../cli-core.js";
+import { promises as fs } from 'node:fs';
 import type { CommandContext } from "../cli-core.js";
-import { SwarmCoordinator } from '../../coordination/swarm-coordinator.js';
-import { BackgroundExecutor } from '../../coordination/background-executor.js';
-import { SwarmMemoryManager } from '../../memory/swarm-memory.js';
-
+import type { BackgroundExecutor } from '../../coordination/background-executor.js';
 export async function swarmAction(ctx: CommandContext) {
   // First check if help is requested
   if (ctx.flags.help || ctx.flags.h) {
@@ -88,7 +86,7 @@ export async function swarmAction(ctx: CommandContext) {
       
       // Check if the UI script exists
       try {
-        await Deno.stat(uiScriptPath);
+        await fs.stat(uiScriptPath);
       } catch {
         warning('Swarm UI script not found. Falling back to standard mode.');
         options.ui = false;
@@ -180,7 +178,7 @@ export async function swarmAction(ctx: CommandContext) {
     }
 
     // Write swarm configuration
-    await Deno.writeTextFile(`${swarmDir}/config.json`, JSON.stringify({
+    await fs.writeFile(`${swarmDir}/config.json`, JSON.stringify({
       swarmId,
       objectiveId,
       objective,
@@ -197,7 +195,7 @@ export async function swarmAction(ctx: CommandContext) {
       console.log(`Running in background mode. Check status with: claude-flow swarm status ${swarmId}`);
       
       // Save coordinator state and exit
-      await Deno.writeTextFile(`${swarmDir}/coordinator.json`, JSON.stringify({
+      await fs.writeFile(`${swarmDir}/coordinator.json`, JSON.stringify({
         coordinatorRunning: true,
         pid: Deno.pid,
         startTime: new Date().toISOString()
@@ -208,7 +206,7 @@ export async function swarmAction(ctx: CommandContext) {
       await waitForObjectiveCompletion(coordinator, objectiveId, options);
       
       // Write completion status
-      await Deno.writeTextFile(`${swarmDir}/status.json`, JSON.stringify({
+      await fs.writeFile(`${swarmDir}/status.json`, JSON.stringify({
         status: 'completed',
         endTime: new Date().toISOString()
       }, null, 2));
@@ -308,7 +306,7 @@ async function executeParallelTasks(tasks: any[], options: any, swarmId: string,
     await Deno.mkdir(agentDir, { recursive: true });
     
     // Write agent task
-    await Deno.writeTextFile(`${agentDir}/task.json`, JSON.stringify({
+    await fs.writeFile(`${agentDir}/task.json`, JSON.stringify({
       agentId,
       swarmId,
       task,
@@ -320,7 +318,7 @@ async function executeParallelTasks(tasks: any[], options: any, swarmId: string,
     await executeAgentTask(agentId, task, options, agentDir);
     
     // Update status
-    await Deno.writeTextFile(`${agentDir}/status.json`, JSON.stringify({
+    await fs.writeFile(`${agentDir}/status.json`, JSON.stringify({
       status: 'completed',
       endTime: new Date().toISOString()
     }, null, 2));
@@ -344,7 +342,7 @@ async function executeSequentialTasks(tasks: any[], options: any, swarmId: strin
     await Deno.mkdir(agentDir, { recursive: true });
     
     // Write agent task
-    await Deno.writeTextFile(`${agentDir}/task.json`, JSON.stringify({
+    await fs.writeFile(`${agentDir}/task.json`, JSON.stringify({
       agentId,
       swarmId,
       task,
@@ -356,7 +354,7 @@ async function executeSequentialTasks(tasks: any[], options: any, swarmId: strin
     await executeAgentTask(agentId, task, options, agentDir);
     
     // Update status
-    await Deno.writeTextFile(`${agentDir}/status.json`, JSON.stringify({
+    await fs.writeFile(`${agentDir}/status.json`, JSON.stringify({
       status: 'completed',
       endTime: new Date().toISOString()
     }, null, 2));
@@ -393,7 +391,7 @@ Provide your output in a structured format.
 
 When you're done, please end with "TASK COMPLETED" on its own line.`;
 
-      await Deno.writeTextFile(promptFile, prompt);
+      await fs.writeFile(promptFile, prompt);
       
       // Build claude command using bash to pipe the prompt
       let tools = 'View,GlobTool,GrepTool,LS';
@@ -412,7 +410,7 @@ When you're done, please end with "TASK COMPLETED" on its own line.`;
       ];
       
       // Write command to file for tracking
-      await Deno.writeTextFile(`${agentDir}/command.txt`, `claude ${claudeArgs.join(' ')}`);
+      await fs.writeFile(`${agentDir}/command.txt`, `claude ${claudeArgs.join(' ')}`);
       
       console.log(`    → Running: ${task.description}`);
       
@@ -425,7 +423,7 @@ claude ${claudeArgs.map(arg => `"${arg}"`).join(' ')} | tee "${agentDir}/output.
 exit \${PIPESTATUS[0]}`;
       
       const wrapperPath = `${agentDir}/wrapper.sh`;
-      await Deno.writeTextFile(wrapperPath, wrapperScript);
+      await fs.writeFile(wrapperPath, wrapperScript);
       await Deno.chmod(wrapperPath, 0o755);
       
       console.log(`    ┌─ Claude Output ─────────────────────────────`);
@@ -483,9 +481,9 @@ exit \${PIPESTATUS[0]}`;
       const { code, stdout, stderr } = await command.output();
       
       // Save output
-      await Deno.writeTextFile(`${agentDir}/output.txt`, new TextDecoder().decode(stdout));
+      await fs.writeFile(`${agentDir}/output.txt`, new TextDecoder().decode(stdout));
       if (stderr.length > 0) {
-        await Deno.writeTextFile(`${agentDir}/error.txt`, new TextDecoder().decode(stderr));
+        await fs.writeFile(`${agentDir}/error.txt`, new TextDecoder().decode(stderr));
       }
       
       if (code !== 0) {
@@ -495,7 +493,7 @@ exit \${PIPESTATUS[0]}`;
   } catch (err) {
     // Log error but continue
     console.log(`    ⚠️  Error executing task: ${(err as Error).message}`);
-    await Deno.writeTextFile(`${agentDir}/error.txt`, (err as Error).message);
+    await fs.writeFile(`${agentDir}/error.txt`, (err as Error).message);
   }
 }
 

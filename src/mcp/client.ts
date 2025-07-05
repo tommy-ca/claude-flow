@@ -1,12 +1,13 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * MCP Client for Model Context Protocol
  */
 
 import { EventEmitter } from 'node:events';
-import { ITransport } from './transports/base.js';
+import type { ITransport } from './transports/base.js';
 import { logger } from '../core/logger.js';
-import { MCPRequest, MCPResponse, MCPNotification, MCPConfig } from '../utils/types.js';
-import { RecoveryManager, RecoveryConfig } from './recovery/index.js';
+import type { MCPRequest, MCPResponse, MCPNotification, MCPConfig } from '../utils/types.js';
+import type { RecoveryManager, RecoveryConfig } from './recovery/index.js';
 
 export interface MCPClientConfig {
   transport: ITransport;
@@ -118,7 +119,7 @@ export class MCPClient extends EventEmitter {
       }
       
       if ('error' in response) {
-        throw new Error(response.error.message);
+        throw new Error(response.error);
       }
 
       return response.result;

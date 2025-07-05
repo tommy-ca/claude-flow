@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Persistence layer for Claude-Flow using SQLite
  */

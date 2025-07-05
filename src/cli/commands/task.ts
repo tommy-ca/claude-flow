@@ -1,16 +1,15 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Task management commands
  */
 
 import { Command } from '@cliffy/command';
-import { colors } from '@cliffy/ansi/colors';
-import { Task } from '../../utils/types.js';
-import { generateId } from '../../utils/helpers.js';
-
+import { promises as fs } from 'node:fs';
+import type { Task } from '../../utils/types.js';
 export const taskCommand = new Command()
   .description('Manage tasks')
   .action(() => {
-    taskCommand.showHelp();
+    console.log(taskCommand.getHelp());
   })
   .command('create', new Command()
     .description('Create a new task')
@@ -32,9 +31,9 @@ export const taskCommand = new Command()
         createdAt: new Date(),
       };
 
-      console.log(colors.green('Task created:'));
+      console.log(chalk.green('Task created:'));
       console.log(JSON.stringify(task, null, 2));
-      console.log(colors.yellow('\nTo submit this task, ensure Claude-Flow is running'));
+      console.log(chalk.yellow('\nTo submit this task, ensure Claude-Flow is running'));
     }),
   )
   .command('list', new Command()
@@ -42,14 +41,14 @@ export const taskCommand = new Command()
     .option('-s, --status <status:string>', 'Filter by status')
     .option('-a, --agent <agent:string>', 'Filter by assigned agent')
     .action(async (options: any) => {
-      console.log(colors.yellow('Task listing requires a running Claude-Flow instance'));
+      console.log(chalk.yellow('Task listing requires a running Claude-Flow instance'));
     }),
   )
   .command('status', new Command()
     .description('Get task status')
     .arguments('<task-id:string>')
     .action(async (options: any, taskId: string) => {
-      console.log(colors.yellow(`Task status requires a running Claude-Flow instance`));
+      console.log(chalk.yellow(`Task status requires a running Claude-Flow instance`));
     }),
   )
   .command('cancel', new Command()
@@ -57,7 +56,7 @@ export const taskCommand = new Command()
     .arguments('<task-id:string>')
     .option('-r, --reason <reason:string>', 'Cancellation reason')
     .action(async (options: any, taskId: string) => {
-      console.log(colors.yellow(`Cancelling task ${taskId} requires a running Claude-Flow instance`));
+      console.log(chalk.yellow(`Cancelling task ${taskId} requires a running Claude-Flow instance`));
     }),
   )
   .command('workflow', new Command()
@@ -65,15 +64,15 @@ export const taskCommand = new Command()
     .arguments('<workflow-file:string>')
     .action(async (options: any, workflowFile: string) => {
       try {
-        const content = await Deno.readTextFile(workflowFile);
+        const content = await fs.readFile(workflowFile);
         const workflow = JSON.parse(content);
         
-        console.log(colors.green('Workflow loaded:'));
+        console.log(chalk.green('Workflow loaded:'));
         console.log(`- Name: ${workflow.name || 'Unnamed'}`);
         console.log(`- Tasks: ${workflow.tasks?.length || 0}`);
-        console.log(colors.yellow('\nTo execute this workflow, ensure Claude-Flow is running'));
+        console.log(chalk.yellow('\nTo execute this workflow, ensure Claude-Flow is running'));
       } catch (error) {
-        console.error(colors.red('Failed to load workflow:'), (error as Error).message);
+        console.error(chalk.red('Failed to load workflow:'), (error as Error).message);
       }
     }),
   );

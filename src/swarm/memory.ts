@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Distributed Memory System with Cross-Agent Sharing
  */
@@ -6,7 +7,7 @@ import { EventEmitter } from 'node:events';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import { Logger } from '../core/logger.js';
+import type { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
 import {
   MemoryEntry, MemoryPartition, SwarmMemory, AccessLevel, ConsistencyLevel,
@@ -622,7 +623,7 @@ export class SwarmMemoryManager extends EventEmitter {
         this.logger.warn('Failed to share memory with agent', {
           key,
           targetAgent: targetAgent.id,
-          error: error.message
+          error: (error instanceof Error ? error.message : String(error))
         });
       }
     }

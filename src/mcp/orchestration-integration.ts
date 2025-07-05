@@ -1,16 +1,17 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * MCP Integration with Claude-Flow Orchestration System
  * Provides seamless integration between MCP servers and the broader orchestration components
  */
 
 import { EventEmitter } from 'node:events';
-import { ILogger } from '../core/logger.js';
-import { MCPConfig, MCPSession, MCPTool, SystemEvents } from '../utils/types.js';
-import { MCPError } from '../utils/errors.js';
-import { MCPServer, IMCPServer } from './server.js';
-import { MCPLifecycleManager, LifecycleState } from './lifecycle-manager.js';
-import { MCPPerformanceMonitor } from './performance-monitor.js';
-import { MCPProtocolManager } from './protocol-manager.js';
+import type { ILogger } from '../core/logger.js';
+import type { MCPConfig, MCPSession, MCPTool, SystemEvents } from '../utils/types.js';
+import type { MCPError } from '../utils/errors.js';
+import type { MCPServer, IMCPServer } from './server.js';
+import type { MCPLifecycleManager, LifecycleState } from './lifecycle-manager.js';
+import type { MCPPerformanceMonitor } from './performance-monitor.js';
+import type { MCPProtocolManager } from './protocol-manager.js';
 
 export interface OrchestrationComponents {
   orchestrator?: any;
@@ -775,7 +776,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         status.error = undefined;
       } catch (error) {
         status.healthy = false;
-        status.error = error instanceof Error ? error.message : 'Health check failed';
+        status.error = error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Health check failed';
         this.logger.warn('Component health check failed', { component, error });
       }
     }

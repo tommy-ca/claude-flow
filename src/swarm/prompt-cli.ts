@@ -1,8 +1,9 @@
 #!/usr/bin/env node
+import { getErrorMessage } from '../utils/error-handler.js';
 
-import { Command } from 'commander';
+import type { Command } from "@cliffy/command";
 import * as path from 'path';
-import { copyPrompts, copyPromptsEnhanced } from './prompt-copier-enhanced';
+import { copyPrompts, copyPromptsEnhanced } from './prompt-copier-enhanced.js';
 import { 
   PromptConfigManager, 
   PromptPathResolver, 
@@ -10,8 +11,8 @@ import {
   createProgressBar,
   formatFileSize,
   formatDuration
-} from './prompt-utils';
-import { logger } from '../logger';
+} from './prompt-utils.js';
+import { logger } from '../core/logger.js';
 
 const program = new Command();
 

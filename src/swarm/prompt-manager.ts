@@ -1,14 +1,15 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 import * as path from 'path';
 import { EventEmitter } from 'events';
-import { copyPrompts, copyPromptsEnhanced, CopyOptions, CopyResult } from './prompt-copier-enhanced';
+import { copyPrompts, copyPromptsEnhanced, CopyOptions, CopyResult } from './prompt-copier-enhanced.js';
 import { 
   PromptConfigManager, 
   PromptPathResolver, 
   PromptValidator,
   formatDuration,
   formatFileSize
-} from './prompt-utils';
-import { logger } from '../logger';
+} from './prompt-utils.js';
+import { logger } from '../core/logger.js';
 
 export interface PromptManagerOptions {
   configPath?: string;
@@ -162,7 +163,7 @@ export class PromptManager extends EventEmitter {
           copiedFiles: 0,
           failedFiles: 0,
           skippedFiles: 0,
-          errors: [{ file: source, error: error.message, phase: 'read' }],
+          errors: [{ file: source, error: (error instanceof Error ? error.message : String(error)), phase: 'read' }],
           duration: 0
         });
       }

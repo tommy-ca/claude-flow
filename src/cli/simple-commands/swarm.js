@@ -82,7 +82,7 @@ https://github.com/ruvnet/claude-code-flow/docs/swarm.md
 
 export async function swarmCommand(args, flags) {
   // Check if we should run in background mode
-  if (flags && flags.background && !Deno.env.get('CLAUDE_SWARM_NO_BG')) {
+  if (flags && flags.background && !process.env.CLAUDE_SWARM_NO_BG) {
     // Check if we're in Deno environment
     if (typeof Deno !== 'undefined') {
       // In Deno, spawn a new process for true background execution
@@ -117,6 +117,8 @@ export async function swarmCommand(args, flags) {
       // Create a script to run the swarm without background flag
       const scriptContent = `#!/usr/bin/env -S deno run --allow-all
 import { swarmCommand } from "${import.meta.url}";
+import { Deno, cwd, exit, existsSync } from '../node-compat.js';
+import process from 'process';
 
 // Remove background flag to prevent recursion
 const flags = ${JSON.stringify(newFlags)};

@@ -1,8 +1,10 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 import { EventEmitter } from 'node:events';
 import { Logger } from '../core/logger.js';
+import { EventBus } from '../core/event-bus.js';
 import { generateId } from '../utils/helpers.js';
-import { SwarmMonitor } from './swarm-monitor.js';
-import { AdvancedTaskScheduler } from './advanced-scheduler.js';
+import type { SwarmMonitor } from './swarm-monitor.js';
+import type { AdvancedTaskScheduler } from './advanced-scheduler.js';
 import { MemoryManager } from '../memory/manager.js';
 
 export interface SwarmAgent {
@@ -102,7 +104,15 @@ export class SwarmCoordinator extends EventEmitter {
     this.backgroundWorkers = new Map();
 
     // Initialize memory manager
-    this.memoryManager = new MemoryManager({ namespace: this.config.memoryNamespace });
+    const eventBus = EventBus.getInstance();
+    this.memoryManager = new MemoryManager({
+      backend: 'sqlite',
+      namespace: this.config.memoryNamespace,
+      cacheSizeMB: 50,
+      syncOnExit: true,
+      maxEntries: 10000,
+      ttlMinutes: 60
+    }, eventBus, this.logger);
 
     if (this.config.enableMonitoring) {
       this.monitor = new SwarmMonitor({
@@ -472,7 +482,7 @@ export class SwarmCoordinator extends EventEmitter {
 
     const agent = task.assignedTo ? this.agents.get(task.assignedTo) : null;
 
-    task.error = error.message || String(error);
+    task.error = (error instanceof Error ? error.message : String(error)) || String(error);
     task.retryCount++;
 
     if (agent) {

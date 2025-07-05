@@ -1,4 +1,5 @@
 #!/usr/bin/env -S deno run --allow-all
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Claude-Flow CLI entry point - Remote execution friendly version
  * This version can be run directly from GitHub
@@ -57,15 +58,15 @@ For more info: https://github.com/ruvnet/claude-code-flow
 }
 
 function printSuccess(message: string) {
-  console.log(colors.green('✅ ' + message));
+  console.log(chalk.green('✅ ' + message));
 }
 
 function printError(message: string) {
-  console.log(colors.red('❌ ' + message));
+  console.log(chalk.red('❌ ' + message));
 }
 
 function printWarning(message: string) {
-  console.log(colors.yellow('⚠️  ' + message));
+  console.log(chalk.yellow('⚠️  ' + message));
 }
 
 async function main() {
@@ -101,16 +102,16 @@ async function main() {
       break;
       
     case 'install':
-      console.log(colors.blue('📦 Installing Claude-Flow...'));
+      console.log(chalk.blue('📦 Installing Claude-Flow...'));
       console.log('\nRun these commands to install:');
-      console.log(colors.gray('  # Using npm (recommended)'));
+      console.log(chalk.gray('  # Using npm (recommended)'));
       console.log('  npm install -g claude-flow');
       console.log('');
-      console.log(colors.gray('  # Or using Deno'));
+      console.log(chalk.gray('  # Or using Deno'));
       console.log('  deno install --allow-all --name claude-flow \\');
       console.log('    https://raw.githubusercontent.com/ruvnet/claude-code-flow/main/src/cli/index.ts');
       console.log('');
-      console.log(colors.gray('  # Or clone and build from source'));
+      console.log(chalk.gray('  # Or clone and build from source'));
       console.log('  git clone https://github.com/ruvnet/claude-code-flow.git');
       console.log('  cd claude-code-flow');
       console.log('  deno task build');
@@ -131,7 +132,7 @@ async function main() {
 
 if (import.meta.main) {
   main().catch((error) => {
-    printError(`Error: ${error.message}`);
-    Deno.exit(1);
+    printError(`Error: ${(error instanceof Error ? error.message : String(error))}`);
+    process.exit(1);
   });
 }

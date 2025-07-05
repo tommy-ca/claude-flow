@@ -1,4 +1,4 @@
-#!/usr/bin/env -S deno run --allow-all
+#!/usr/bin/env node
 /**
  * Simple CLI wrapper for Claude-Flow (JavaScript version)
  * This version avoids TypeScript issues in node_modules
@@ -12,6 +12,7 @@ import {
   listCommands 
 } from './command-registry.js';
 import { parseFlags } from './utils.js';
+import { args, cwd, isMainModule } from './node-compat.js';
 
 const VERSION = '2.0.0';
 
@@ -169,7 +170,7 @@ function showHelpWithCommands() {
 }
 
 async function main() {
-  const args = Deno.args;
+  // args is imported from node-compat.js
   
   if (args.length === 0) {
     printHelp();
@@ -317,7 +318,7 @@ async function main() {
           const terminalConfig = {
             name: nameIndex >= 0 ? subArgs[nameIndex + 1] : 'terminal-' + Date.now(),
             shell: shellIndex >= 0 ? subArgs[shellIndex + 1] : 'bash',
-            workingDirectory: wdIndex >= 0 ? subArgs[wdIndex + 1] : Deno.cwd(),
+            workingDirectory: wdIndex >= 0 ? subArgs[wdIndex + 1] : cwd(),
             env: envIndex >= 0 ? subArgs[envIndex + 1] : '',
             persistent: persistentIndex >= 0
           };
@@ -3227,6 +3228,6 @@ For more information about SPARC methodology, see: https://github.com/ruvnet/cla
 `;
 }
 
-if (import.meta.main) {
+if (isMainModule(import.meta.url)) {
   await main();
 }

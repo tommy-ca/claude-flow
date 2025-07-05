@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Compatible Terminal UI - Works without raw mode
  * Designed for environments that don't support stdin raw mode
@@ -90,7 +91,7 @@ export class CompatibleUI {
       case 'h':
       case 'help':
       case '?':
-        this.showHelp();
+        this.outputHelp();
         break;
         
       case 's':

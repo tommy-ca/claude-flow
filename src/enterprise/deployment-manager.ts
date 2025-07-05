@@ -1,9 +1,10 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 import { EventEmitter } from 'events';
 import { writeFile, readFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
 import { spawn, ChildProcess } from 'child_process';
-import { Logger } from '../core/logger.js';
-import { ConfigManager } from '../core/config.js';
+import type { Logger } from '../core/logger.js';
+import type { ConfigManager } from '../core/config.js';
 
 export interface DeploymentEnvironment {
   id: string;
@@ -537,7 +538,7 @@ export class DeploymentManager extends EventEmitter {
       stage.status = 'failed';
       stage.endTime = new Date();
       
-      this.addLog(stage, 'error', `Stage failed: ${error.message}`, 'system');
+      this.addLog(stage, 'error', `Stage failed: ${(error instanceof Error ? error.message : String(error))}`, 'system');
       
       // Retry logic
       if (stage.retryPolicy.maxRetries > 0) {
@@ -615,7 +616,7 @@ export class DeploymentManager extends EventEmitter {
       childProcess.on('error', (error) => {
         clearTimeout(timeout);
         this.activeProcesses.delete(`${deployment.id}-${stage.id}-${command.id}`);
-        this.addLog(stage, 'error', `Command error: ${error.message}`, 'command');
+        this.addLog(stage, 'error', `Command error: ${(error instanceof Error ? error.message : String(error))}`, 'command');
         reject(error);
       });
     });
@@ -678,7 +679,7 @@ export class DeploymentManager extends EventEmitter {
     } catch (error) {
       this.addAuditEntry(deployment, userId, 'rollback_failed', 'deployment', {
         deploymentId,
-        error: error.message
+        error: (error instanceof Error ? error.message : String(error))
       });
 
       this.logger.error(`Rollback failed for deployment ${deploymentId}`, { error });
@@ -1185,7 +1186,7 @@ export class DeploymentManager extends EventEmitter {
 
     this.addAuditEntry(deployment, 'system', 'deployment_error', 'deployment', {
       deploymentId: deployment.id,
-      error: error.message
+      error: (error instanceof Error ? error.message : String(error))
     });
 
     await this.saveDeployment(deployment);

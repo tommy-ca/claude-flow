@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Connection Pool for Claude API
  * Manages reusable connections to improve performance
@@ -5,7 +6,7 @@
 
 import { EventEmitter } from 'node:events';
 import { Logger } from '../../core/logger.js';
-import { ClaudeAPI } from '../../services/claude/api.js';
+import type { ClaudeAPI } from '../../services/claude/api.js';
 
 export interface PoolConfig {
   min: number;

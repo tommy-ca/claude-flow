@@ -1,10 +1,11 @@
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * VSCode terminal adapter implementation
  */
 
 import { platform } from 'os';
-import { ITerminalAdapter, Terminal } from './base.js';
-import { ILogger } from '../../core/logger.js';
+import type { ITerminalAdapter, Terminal } from './base.js';
+import type { ILogger } from '../../core/logger.js';
 import { TerminalError } from '../../utils/errors.js';
 import { generateId, delay, timeout, createDeferred } from '../../utils/helpers.js';
 

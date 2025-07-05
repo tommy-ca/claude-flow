@@ -1,3 +1,4 @@
+import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Advanced Memory Management System with comprehensive capabilities
  * Includes indexing, compression, cross-agent sharing, and intelligent cleanup
@@ -8,7 +9,7 @@ import { promises as fs } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ILogger } from '../core/logger.js';
+import type { ILogger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
 
 // === INTERFACES ===
@@ -748,7 +749,7 @@ export class AdvancedMemoryManager extends EventEmitter {
               break;
           }
         } catch (error) {
-          results.conflicts.push(`Error importing '${item.key}': ${error.message}`);
+          results.conflicts.push(`Error importing '${item.key}': ${(error instanceof Error ? error.message : String(error))}`);
         }
       }
 
