@@ -455,10 +455,12 @@ export class WebSocketClient {
    */
   async getAvailableTools() {
     try {
-      return await this.sendRequest('tools/list');
+      const result = await this.sendRequest('tools/list');
+      // The server returns { tools: [...] }, so we need to extract the tools array
+      return result && result.tools ? result.tools : [];
     } catch (error) {
       console.error('Failed to get tools:', error);
-      throw error;
+      return []; // Return empty array on error instead of throwing
     }
   }
   

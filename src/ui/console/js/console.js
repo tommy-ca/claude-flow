@@ -357,6 +357,10 @@ class ClaudeCodeConsole {
         this.handleLogMessage(params);
         break;
         
+      case 'connection/established':
+        this.handleConnectionEstablished(params);
+        break;
+        
       default:
         console.log('Unhandled notification:', method, params);
     }
@@ -442,6 +446,16 @@ class ClaudeCodeConsole {
                   params.level === 'warn' ? 'warning' : 'info';
       this.terminal.write(`[${params.level.toUpperCase()}] ${params.message}`, type);
     }
+  }
+
+  /**
+   * Handle connection established notification
+   */
+  handleConnectionEstablished(params) {
+    // Log connection details without cluttering the terminal
+    console.log('Connection established:', params);
+    // Optionally show a brief success message
+    // this.terminal.writeSuccess(`Connected to ${params.server} v${params.version}`);
   }
   
   /**

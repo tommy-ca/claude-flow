@@ -128,6 +128,13 @@ export class TerminalEmulator {
    * Show welcome message
    */
   showWelcomeMessage() {
+    // Check if welcome message already exists (from static HTML)
+    const existingWelcome = this.outputElement.querySelector('.welcome-message');
+    if (existingWelcome) {
+      // Welcome message already exists, don't add another one
+      return;
+    }
+
     const welcome = document.createElement('div');
     welcome.className = 'welcome-message';
     welcome.innerHTML = `

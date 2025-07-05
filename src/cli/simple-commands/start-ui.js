@@ -4,8 +4,25 @@ import { printSuccess, printError, printWarning, printInfo } from '../utils.js';
 export async function launchUI() {
   try {
     // Dynamic import to avoid initial load issues
-    const { ProcessManager } = await import('../commands/start/process-manager.ts');
-    const { ProcessUI } = await import('../commands/start/process-ui-simple.ts');
+    let ProcessManager, ProcessUI;
+    try {
+      // Try the compiled version first (for production/npm packages)
+      const pmModule = await import('../../../dist/cli/commands/start/process-manager.js');
+      const puiModule = await import('../../../dist/cli/commands/start/process-ui-simple.js');
+      ProcessManager = pmModule.ProcessManager;
+      ProcessUI = puiModule.ProcessUI;
+    } catch (distError) {
+      // If dist version not found, try TypeScript version (for development)
+      try {
+        const pmModule = await import('../commands/start/process-manager.ts');
+        const puiModule = await import('../commands/start/process-ui-simple.ts');
+        ProcessManager = pmModule.ProcessManager;
+        ProcessUI = puiModule.ProcessUI;
+      } catch (tsError) {
+        // Neither version found, throw the original error
+        throw distError;
+      }
+    }
     
     printSuccess('🚀 Claude-Flow Process Management UI');
     console.log('─'.repeat(60));

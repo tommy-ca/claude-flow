@@ -1,5 +1,7 @@
 // process-ui-enhanced.js - Enhanced process management UI with multiple views
 import { printSuccess, printError, printWarning, printInfo } from '../utils.js';
+import { compat } from '../runtime-detector.js';
+import SwarmWebUIIntegration from './swarm-webui-integration.js';
 
 // Simple color utilities
 const colors = {
@@ -57,6 +59,9 @@ export class EnhancedProcessUI {
       cpuUsage: 0
     };
     
+    // Initialize swarm integration
+    this.swarmIntegration = new SwarmWebUIIntegration(this);
+    
     // Initialize process states
     PROCESSES.forEach(p => {
       this.processes.set(p.id, {
@@ -74,25 +79,13 @@ export class EnhancedProcessUI {
       this.systemStats.uptime++;
     }, 1000);
     
-    // Simulate some initial data
-    this.initializeMockData();
+    // Initialize swarm (this will create mock data)
+    this.initializeSwarm();
   }
   
-  initializeMockData() {
-    // Mock agents
-    this.agents = [
-      { id: 'agent-001', name: 'Research Agent', type: 'researcher', status: 'idle', tasks: 0 },
-      { id: 'agent-002', name: 'Code Developer', type: 'implementer', status: 'working', tasks: 2 },
-      { id: 'agent-003', name: 'Data Analyst', type: 'analyst', status: 'idle', tasks: 0 }
-    ];
-    
-    // Mock tasks
-    this.tasks = [
-      { id: 'task-001', description: 'Analyze user requirements', status: 'completed', assignedTo: 'agent-001' },
-      { id: 'task-002', description: 'Implement authentication', status: 'in_progress', assignedTo: 'agent-002' },
-      { id: 'task-003', description: 'Write unit tests', status: 'pending', assignedTo: 'agent-002' },
-      { id: 'task-004', description: 'Review security', status: 'pending', assignedTo: null }
-    ];
+  async initializeSwarm() {
+    // Initialize swarm with mock data
+    await this.swarmIntegration.initializeSwarm('hierarchical', 8);
     
     // Mock memory namespaces
     this.memoryStats = {
@@ -106,11 +99,11 @@ export class EnhancedProcessUI {
       ]
     };
     
-    // Mock logs
+    // Initial logs
     this.logs = [
       { time: new Date(), level: 'info', message: 'System initialized' },
       { time: new Date(), level: 'success', message: 'All processes ready' },
-      { time: new Date(), level: 'warning', message: 'High memory usage detected' }
+      { time: new Date(), level: 'success', message: 'Swarm orchestration active' }
     ];
   }
   
@@ -259,8 +252,19 @@ export class EnhancedProcessUI {
   }
   
   renderOrchestrationView() {
-    console.log(colors.white(colors.bold('Orchestration Management')));
+    console.log(colors.white(colors.bold('Swarm Orchestration Management')));
     console.log();
+    
+    // Swarm metrics
+    const metrics = this.swarmIntegration.getSwarmMetrics();
+    if (metrics) {
+      console.log(colors.cyan('🐝 Swarm Status'));
+      console.log(`  Swarm ID: ${colors.yellow(metrics.swarmId)}`);
+      console.log(`  Agents: ${colors.green(metrics.agents.active)}/${metrics.agents.total} active`);
+      console.log(`  Tasks: ${colors.yellow(metrics.tasks.inProgress)} in progress, ${colors.green(metrics.tasks.completed)} completed`);
+      console.log(`  Efficiency: ${metrics.efficiency}%`);
+      console.log();
+    }
     
     // Agents section
     console.log(colors.cyan('🤖 Active Agents'));
@@ -273,6 +277,9 @@ export class EnhancedProcessUI {
       
       console.log(`${prefix}${statusIcon} ${name} (${agent.type})`);
       console.log(`     ID: ${agent.id} | Tasks: ${agent.tasks} | Status: ${agent.status}`);
+      if (agent.capabilities && agent.capabilities.length > 0) {
+        console.log(`     Capabilities: ${colors.dim(agent.capabilities.join(', '))}`);
+      }
       console.log();
     });
     
@@ -285,7 +292,10 @@ export class EnhancedProcessUI {
       const statusColor = task.status === 'completed' ? colors.green : 
                          task.status === 'in_progress' ? colors.yellow : colors.gray;
       const status = statusColor(`[${task.status}]`);
-      console.log(`  ${status} ${task.description}`);
+      const priority = task.priority === 'high' ? colors.red(`[${task.priority}]`) :
+                      task.priority === 'medium' ? colors.yellow(`[${task.priority}]`) :
+                      colors.gray(`[${task.priority}]`);
+      console.log(`  ${status} ${priority} ${task.description}`);
       if (task.assignedTo) {
         const agent = this.agents.find(a => a.id === task.assignedTo);
         console.log(`       Assigned to: ${agent ? agent.name : task.assignedTo}`);
@@ -387,10 +397,11 @@ export class EnhancedProcessUI {
     console.log(`  ${colors.yellow('R')}       Restart all processes`);
     console.log();
     
-    console.log(colors.cyan('🤖 Orchestration'));
+    console.log(colors.cyan('🤖 Swarm Orchestration'));
     console.log(`  ${colors.yellow('N')}       Spawn new agent`);
     console.log(`  ${colors.yellow('T')}       Create new task`);
-    console.log(`  ${colors.yellow('D')}       Delete selected item`);
+    console.log(`  ${colors.yellow('D')}       Complete task`);
+    console.log(`  ${colors.yellow('S')}       Show swarm metrics`);
     console.log();
     
     console.log(colors.cyan('💾 Memory Operations'));
@@ -416,7 +427,7 @@ export class EnhancedProcessUI {
         controls = `${colors.yellow('Space')} Toggle | ${colors.yellow('A')} Start All | ${colors.yellow('Z')} Stop All | ${colors.yellow('R')} Restart`;
         break;
       case VIEWS.ORCHESTRATION:
-        controls = `${colors.yellow('N')} New Agent | ${colors.yellow('T')} New Task | ${colors.yellow('D')} Delete`;
+        controls = `${colors.yellow('N')} New Agent | ${colors.yellow('T')} New Task | ${colors.yellow('D')} Complete | ${colors.yellow('S')} Metrics`;
         break;
       case VIEWS.MEMORY:
         controls = `${colors.yellow('S')} Store | ${colors.yellow('G')} Get | ${colors.yellow('C')} Clear`;
@@ -469,16 +480,15 @@ export class EnhancedProcessUI {
   }
   
   async handleInput() {
-    const decoder = new TextDecoder();
-    const encoder = new TextEncoder();
+    const terminal = compat.terminal;
     
-    await Deno.stdout.write(encoder.encode('\nCommand: '));
+    await terminal.write('\nCommand: ');
     
     const buf = new Uint8Array(1024);
-    const n = await Deno.stdin.read(buf);
+    const n = await terminal.read(buf);
     if (n === null) return;
     
-    const rawInput = decoder.decode(buf.subarray(0, n)).trim();
+    const rawInput = terminal.decoder.decode(buf.subarray(0, n)).trim();
     const input = rawInput.split('\n')[0].toLowerCase();
     
     // Global commands
@@ -488,7 +498,7 @@ export class EnhancedProcessUI {
         this.running = false;
         console.clear();
         printSuccess('Goodbye!');
-        Deno.exit(0);
+        compat.terminal.exit(0);
         break;
         
       case '1':
@@ -594,15 +604,44 @@ export class EnhancedProcessUI {
   async handleOrchestrationInput(input) {
     switch (input) {
       case 'n':
-        this.addLog('info', 'Agent spawning not yet implemented');
+        // Spawn new agent
+        const agentTypes = ['researcher', 'coder', 'analyst', 'coordinator', 'tester'];
+        const randomType = agentTypes[Math.floor(Math.random() * agentTypes.length)];
+        await this.swarmIntegration.spawnAgent(randomType);
         break;
         
       case 't':
-        this.addLog('info', 'Task creation not yet implemented');
+        // Create new task
+        const sampleTasks = [
+          'Implement new feature',
+          'Fix critical bug',
+          'Optimize performance',
+          'Update documentation',
+          'Review code quality'
+        ];
+        const randomTask = sampleTasks[Math.floor(Math.random() * sampleTasks.length)];
+        await this.swarmIntegration.createTask(randomTask, 'medium');
         break;
         
       case 'd':
-        this.addLog('warning', 'Deletion not yet implemented');
+        // Complete selected task (simulate)
+        if (this.tasks.length > 0) {
+          const pendingTasks = this.tasks.filter(t => t.status === 'in_progress');
+          if (pendingTasks.length > 0) {
+            const taskToComplete = pendingTasks[0];
+            await this.swarmIntegration.completeTask(taskToComplete.id);
+          } else {
+            this.addLog('info', 'No in-progress tasks to complete');
+          }
+        }
+        break;
+        
+      case 's':
+        // Show swarm metrics
+        const metrics = this.swarmIntegration.getSwarmMetrics();
+        if (metrics) {
+          this.addLog('info', `Swarm efficiency: ${metrics.efficiency}% (${metrics.tasks.completed}/${metrics.tasks.total} tasks completed)`);
+        }
         break;
     }
   }

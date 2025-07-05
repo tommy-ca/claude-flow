@@ -1,6 +1,7 @@
 // start-wrapper.js - Wrapper to maintain backward compatibility with the new modular start command
 import { printSuccess, printError, printWarning, printInfo } from '../utils.js';
 import { Deno, cwd, exit, existsSync } from '../node-compat.js';
+import { compat } from '../runtime-detector.js';
 
 export async function startCommand(subArgs, flags) {
   // Show help if requested
@@ -14,12 +15,35 @@ export async function startCommand(subArgs, flags) {
   const port = flags.port || getArgValue(subArgs, '--port') || getArgValue(subArgs, '-p') || 3000;
   const verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
   const ui = subArgs.includes('--ui') || subArgs.includes('-u') || flags.ui;
+  const web = subArgs.includes('--web') || subArgs.includes('-w') || flags.web;
   
   try {
     printSuccess('Starting Claude-Flow Orchestration System...');
     console.log();
     
-    // Check if we should launch the new UI mode
+    // Check if we should launch the web UI mode
+    if (web) {
+      try {
+        // Launch the web server
+        const { startWebServer } = await import('./web-server.js');
+        const server = await startWebServer(port);
+        
+        printSuccess(`🌐 Web UI is running!`);
+        console.log(`📍 Open your browser to: http://localhost:${port}/console`);
+        console.log('   Press Ctrl+C to stop the server');
+        console.log();
+        
+        // Keep process running
+        await new Promise(() => {});
+        return;
+      } catch (err) {
+        printError('Failed to launch web UI: ' + err.message);
+        console.error(err.stack);
+        return;
+      }
+    }
+    
+    // Check if we should launch the terminal UI mode
     if (ui) {
       try {
         // Launch the enhanced JavaScript UI
@@ -35,7 +59,7 @@ export async function startCommand(subArgs, flags) {
           return;
         } catch (fallbackErr) {
           // If both fail, show error
-          printError('Failed to launch UI: ' + err.message);
+          printError('Failed to launch terminal UI: ' + err.message);
           console.error(err.stack);
           return;
         }
@@ -80,7 +104,7 @@ export async function startCommand(subArgs, flags) {
     // Terminal pool
     console.log('   ✓ Terminal Pool: Ready');
     console.log('     - Pool Size: 5');
-    console.log('     - Shell: ' + (Deno.build.os === 'windows' ? 'cmd.exe' : '/bin/bash'));
+    console.log('     - Shell: ' + (compat.platform.os === 'windows' ? 'cmd.exe' : '/bin/bash'));
     
     // Task queue
     console.log('   ✓ Task Queue: Ready');
@@ -101,8 +125,15 @@ export async function startCommand(subArgs, flags) {
       console.log('The orchestrator would run in the background on port ' + port);
       
       // Create a simple PID file to simulate daemon
-      const pid = Deno.pid;
-      await Deno.writeTextFile('.claude-flow.pid', pid.toString());
+      const pid = compat.terminal.getPid();
+      await compat.safeCall(async () => {
+        if (compat.runtime === 'deno') {
+          await Deno.writeTextFile('.claude-flow.pid', pid.toString());
+        } else {
+          const fs = await import('fs/promises');
+          await fs.writeFile('.claude-flow.pid', pid.toString());
+        }
+      });
       console.log(`Process ID: ${pid} (saved to .claude-flow.pid)`);
       
     } else {
@@ -137,10 +168,10 @@ export async function startCommand(subArgs, flags) {
       // Set up signal handlers
       const abortController = new AbortController();
       
-      Deno.addSignalListener("SIGINT", () => {
+      compat.terminal.onSignal("SIGINT", () => {
         console.log('\n⏹️  Shutting down orchestrator...');
         cleanup();
-        Deno.exit(0);
+        compat.terminal.exit(0);
       });
       
       // Simple heartbeat to show system is alive
@@ -173,7 +204,14 @@ function getArgValue(args, flag) {
 async function cleanup() {
   // Clean up resources
   try {
-    await Deno.remove('.claude-flow.pid');
+    await compat.safeCall(async () => {
+      if (compat.runtime === 'deno') {
+        await Deno.remove('.claude-flow.pid');
+      } else {
+        const fs = await import('fs/promises');
+        await fs.unlink('.claude-flow.pid');
+      }
+    });
   } catch {
     // File might not exist
   }
@@ -191,19 +229,29 @@ function showStartHelp() {
   console.log();
   console.log('Options:');
   console.log('  -d, --daemon        Run as daemon in background');
-  console.log('  -p, --port <port>   MCP server port (default: 3000)');
-  console.log('  -u, --ui            Launch interactive process management UI');
+  console.log('  -p, --port <port>   Server port (default: 3000)');
+  console.log('  -u, --ui            Launch terminal-based process management UI');
+  console.log('  -w, --web           Launch web-based UI server');
   console.log('  -v, --verbose       Show detailed system activity');
   console.log('  -h, --help          Show this help message');
   console.log();
   console.log('Examples:');
   console.log('  claude-flow start                    # Start in interactive mode');
   console.log('  claude-flow start --daemon           # Start as background daemon');
-  console.log('  claude-flow start --port 8080        # Use custom MCP port');
-  console.log('  claude-flow start --ui               # Launch process management UI');
+  console.log('  claude-flow start --port 8080        # Use custom server port');
+  console.log('  claude-flow start --ui               # Launch terminal-based UI');
+  console.log('  claude-flow start --web              # Launch web-based UI');
   console.log('  claude-flow start --verbose          # Show detailed logs');
   console.log();
-  console.log('Enhanced Process Management UI:');
+  console.log('Web-based UI:');
+  console.log('  The --web flag starts a web server with:');
+  console.log('    - Full-featured web console at http://localhost:3000/console');
+  console.log('    - Real-time WebSocket communication');
+  console.log('    - Mobile-responsive design');
+  console.log('    - Multiple themes and customization options');
+  console.log('    - Claude Flow swarm integration');
+  console.log();
+  console.log('Terminal-based UI:');
   console.log('  The --ui flag launches an advanced multi-view interface with:');
   console.log();
   console.log('  Views (press 1-6 to switch):');

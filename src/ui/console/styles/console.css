@@ -261,9 +261,12 @@ body {
 }
 
 .ascii-art {
+  font-family: var(--font-mono);
   font-size: var(--font-size-small);
   line-height: 1.2;
   color: var(--text-accent);
+  white-space: pre;
+  font-weight: normal;
 }
 
 /* Console output entries */

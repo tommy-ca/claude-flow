@@ -36,7 +36,21 @@ export class CommandHandler {
       'sparc': this.executeSparc.bind(this)
     };
     
-    this.allCommands = { ...this.builtinCommands, ...this.claudeFlowCommands };
+    // Direct SPARC mode commands
+    this.sparcModeCommands = {
+      'coder': this.executeSparcMode.bind(this, 'coder'),
+      'architect': this.executeSparcMode.bind(this, 'architect'),
+      'analyzer': this.executeSparcMode.bind(this, 'analyzer'),
+      'researcher': this.executeSparcMode.bind(this, 'researcher'),
+      'reviewer': this.executeSparcMode.bind(this, 'reviewer'),
+      'tester': this.executeSparcMode.bind(this, 'tester'),
+      'debugger': this.executeSparcMode.bind(this, 'debugger'),
+      'documenter': this.executeSparcMode.bind(this, 'documenter'),
+      'optimizer': this.executeSparcMode.bind(this, 'optimizer'),
+      'designer': this.executeSparcMode.bind(this, 'designer')
+    };
+    
+    this.allCommands = { ...this.builtinCommands, ...this.claudeFlowCommands, ...this.sparcModeCommands };
   }
   
   /**
@@ -459,8 +473,23 @@ Examples:
       return;
     }
     
-    // Implementation would call the swarm coordination system
-    this.terminal.writeWarning('Swarm commands not yet implemented in web console');
+    try {
+      const action = args[0] || 'status';
+      this.terminal.writeInfo(`Executing swarm ${action}...`);
+      
+      const result = await this.wsClient.sendRequest('tools/call', {
+        name: 'swarm/status',
+        arguments: { action, args: args.slice(1) }
+      });
+      
+      if (result && result.content && result.content[0]) {
+        this.terminal.writeSuccess(result.content[0].text);
+      } else {
+        this.terminal.writeSuccess('Swarm command executed successfully');
+      }
+    } catch (error) {
+      this.terminal.writeError(`Swarm command failed: ${error.message}`);
+    }
   }
   
   /**
@@ -491,7 +520,26 @@ Examples:
       return;
     }
     
-    this.terminal.writeWarning('Memory management not yet implemented in web console');
+    try {
+      const operation = args[0] || 'list';
+      const key = args[1];
+      const value = args.slice(2).join(' ');
+      
+      this.terminal.writeInfo(`Executing memory ${operation}...`);
+      
+      const result = await this.wsClient.sendRequest('tools/call', {
+        name: 'memory/manage',
+        arguments: { operation, key, value }
+      });
+      
+      if (result && result.content && result.content[0]) {
+        this.terminal.writeSuccess(result.content[0].text);
+      } else {
+        this.terminal.writeSuccess('Memory operation completed successfully');
+      }
+    } catch (error) {
+      this.terminal.writeError(`Memory command failed: ${error.message}`);
+    }
   }
   
   /**
@@ -503,7 +551,26 @@ Examples:
       return;
     }
     
-    this.terminal.writeWarning('Agent management not yet implemented in web console');
+    try {
+      const action = args[0] || 'list';
+      const agentType = args[1];
+      const agentId = args[1];
+      
+      this.terminal.writeInfo(`Executing agents ${action}...`);
+      
+      const result = await this.wsClient.sendRequest('tools/call', {
+        name: 'agents/manage',
+        arguments: { action, agentType, agentId }
+      });
+      
+      if (result && result.content && result.content[0]) {
+        this.terminal.writeSuccess(result.content[0].text);
+      } else {
+        this.terminal.writeSuccess('Agent operation completed successfully');
+      }
+    } catch (error) {
+      this.terminal.writeError(`Agent command failed: ${error.message}`);
+    }
   }
   
   /**
@@ -515,7 +582,25 @@ Examples:
       return;
     }
     
-    this.terminal.writeWarning('Benchmarking not yet implemented in web console');
+    try {
+      const suite = args[0] || 'default';
+      const iterations = parseInt(args[1]) || 10;
+      
+      this.terminal.writeInfo(`Running benchmark suite: ${suite}...`);
+      
+      const result = await this.wsClient.sendRequest('tools/call', {
+        name: 'benchmark/run',
+        arguments: { suite, iterations }
+      });
+      
+      if (result && result.content && result.content[0]) {
+        this.terminal.writeSuccess(result.content[0].text);
+      } else {
+        this.terminal.writeSuccess('Benchmark completed successfully');
+      }
+    } catch (error) {
+      this.terminal.writeError(`Benchmark failed: ${error.message}`);
+    }
   }
   
   /**
@@ -537,7 +622,26 @@ Examples:
       return;
     }
     
-    this.terminal.writeWarning('SPARC mode execution not yet implemented in web console');
+    try {
+      const mode = args[0];
+      const task = args.slice(1).join(' ') || 'General task execution';
+      const options = {};
+      
+      this.terminal.writeInfo(`Executing SPARC mode: ${mode}...`);
+      
+      const result = await this.wsClient.sendRequest('tools/call', {
+        name: 'sparc/execute',
+        arguments: { mode, task, options }
+      });
+      
+      if (result && result.content && result.content[0]) {
+        this.terminal.writeSuccess(result.content[0].text);
+      } else {
+        this.terminal.writeSuccess(`SPARC ${mode} mode executed successfully`);
+      }
+    } catch (error) {
+      this.terminal.writeError(`SPARC execution failed: ${error.message}`);
+    }
   }
   
   /**

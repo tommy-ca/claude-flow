@@ -262,8 +262,23 @@ exit 0
   }
   
   try {
-    // Try to load the TypeScript module directly (works in Deno and local dev)
-    const { swarmAction } = await import('../commands/swarm-new.ts');
+    // Try to load the compiled JavaScript module first
+    let swarmAction;
+    try {
+      // Try the compiled version first (for production/npm packages)
+      const distPath = new URL('../../../dist/cli/commands/swarm-new.js', import.meta.url);
+      const module = await import(distPath);
+      swarmAction = module.swarmAction;
+    } catch (distError) {
+      // If dist version not found, try TypeScript version (for development)
+      try {
+        const module = await import('../commands/swarm-new.ts');
+        swarmAction = module.swarmAction;
+      } catch (tsError) {
+        // Neither version found, throw the original error
+        throw distError;
+      }
+    }
     
     // Create command context compatible with TypeScript version
     const ctx = {
@@ -274,8 +289,8 @@ exit 0
     
     await swarmAction(ctx);
   } catch (error) {
-    // If TypeScript import fails (e.g., in node_modules), provide inline implementation
-    if (error.code === 'ERR_MODULE_NOT_FOUND' || error.code === 'ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING') {
+    // If import fails (e.g., in node_modules), provide inline implementation
+    if (error.code === 'ERR_MODULE_NOT_FOUND' || error.code === 'ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING' || error.code === 'ERR_UNKNOWN_FILE_EXTENSION') {
       // Provide a basic swarm implementation that works without TypeScript imports
       const objective = (args || []).join(' ').trim();
       

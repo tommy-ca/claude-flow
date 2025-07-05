@@ -14,7 +14,7 @@ export class SettingsManager {
       // Connection settings
       serverUrl: 'ws://localhost:3000/ws',
       authToken: '',
-      autoConnect: false,
+      autoConnect: true,
       
       // Appearance settings
       theme: 'dark',

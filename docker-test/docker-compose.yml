@@ -1,210 +1,104 @@
-# Docker Compose for claude-code-flow and ruv-swarm integration testing
 version: '3.8'
 
 services:
-  # =================== CLAUDE-CODE-FLOW SERVICES ===================
-  claude-flow-dev:
+  # NPX installation testing
+  test-npx-swarm:
     build:
-      context: ..
-      dockerfile: docker-test/Dockerfile
-      target: development
-    container_name: claude-flow-dev
+      context: .
+      dockerfile: Dockerfile.npx
+    container_name: claude-flow-test-npx-swarm
     volumes:
-      - ../:/app:delegated
-      - claude-flow-node-modules:/app/node_modules
-      - claude-flow-dist:/app/dist
-      - ./volumes/claude-flow:/app/docker-test/volumes/claude-flow
-      - ./volumes/shared:/app/docker-test/volumes/shared
-    ports:
-      - "3000:3000"
-      - "3001:3001"
-      - "8080:8080"
-    environment:
-      - NODE_ENV=development
-      - DEBUG=claude-flow:*
-      - SWARM_MODE=true
-      - MCP_ENABLED=true
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npx", "swarm"]
     networks:
-      - claude-swarm-network
-    depends_on:
-      - claude-flow-db
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    restart: unless-stopped
+      - claude-flow-test
 
-  claude-flow-test:
+  test-npx-neural:
     build:
-      context: ..
-      dockerfile: docker-test/Dockerfile
-      target: testing
-    container_name: claude-flow-test
+      context: .
+      dockerfile: Dockerfile.npx
+    container_name: claude-flow-test-npx-neural
     volumes:
-      - ../:/app:delegated
-      - claude-flow-test-results:/app/test-results
-      - claude-flow-coverage:/app/coverage
-      - ./volumes/shared:/app/docker-test/volumes/shared
-    environment:
-      - NODE_ENV=test
-      - CI=true
-      - SWARM_MODE=true
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npx", "neural"]
     networks:
-      - claude-swarm-network
-    depends_on:
-      - claude-flow-db
-    profiles:
-      - testing
+      - claude-flow-test
 
-  claude-flow-prod:
+  test-npx-memory:
     build:
-      context: ..
-      dockerfile: docker-test/Dockerfile
-      target: production
-    container_name: claude-flow-prod
+      context: .
+      dockerfile: Dockerfile.npx
+    container_name: claude-flow-test-npx-memory
     volumes:
-      - claude-flow-data:/app/data
-      - ./volumes/shared:/app/docker-test/volumes/shared
-    ports:
-      - "3002:3000"
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npx", "memory"]
     networks:
-      - claude-swarm-network
-    depends_on:
-      - claude-flow-db
-    profiles:
-      - production
+      - claude-flow-test
 
-  # =================== RUV-SWARM INTEGRATION ===================
-  ruv-swarm-integration:
+  test-npx-analysis:
     build:
-      context: ..
-      dockerfile: docker-test/Dockerfile
-      target: swarm-integration
-    container_name: ruv-swarm-integration
+      context: .
+      dockerfile: Dockerfile.npx
+    container_name: claude-flow-test-npx-analysis
     volumes:
-      - ../:/app:delegated
-      - ../../ruv-swarm:/app/ruv-swarm:delegated
-      - ./volumes/ruv-swarm:/app/docker-test/volumes/ruv-swarm
-      - ./volumes/shared:/app/docker-test/volumes/shared
-    environment:
-      - NODE_ENV=development
-      - SWARM_MODE=true
-      - MCP_ENABLED=true
-      - SWARM_TOPOLOGY=mesh
-      - SWARM_MAX_AGENTS=8
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npx", "analysis"]
     networks:
-      - claude-swarm-network
-    depends_on:
-      - claude-flow-dev
-      - ruv-swarm-db
-    profiles:
-      - swarm
+      - claude-flow-test
 
-  # =================== DATABASE SERVICES ===================
-  claude-flow-db:
-    image: sqlite:latest
-    container_name: claude-flow-db
-    volumes:
-      - claude-flow-db-data:/var/lib/sqlite
-      - ./volumes/shared:/shared
-    environment:
-      - SQLITE_DATABASE=claude_flow.db
-    networks:
-      - claude-swarm-network
-
-  ruv-swarm-db:
-    image: sqlite:latest
-    container_name: ruv-swarm-db
-    volumes:
-      - ruv-swarm-db-data:/var/lib/sqlite
-      - ./volumes/shared:/shared
-    environment:
-      - SQLITE_DATABASE=ruv_swarm.db
-    networks:
-      - claude-swarm-network
-
-  # =================== MONITORING & UTILITIES ===================
-  test-runner:
+  # NPM installation testing
+  test-npm-workflow:
     build:
-      context: ..
-      dockerfile: docker-test/Dockerfile
-      target: testing
-    container_name: test-runner
+      context: .
+      dockerfile: Dockerfile.npm
+    container_name: claude-flow-test-npm-workflow
     volumes:
-      - ../:/app:delegated
-      - ./volumes/shared:/app/docker-test/volumes/shared
-      - ./test-results:/app/test-results
-    environment:
-      - NODE_ENV=test
-      - CI=true
-      - PARALLEL_TESTS=true
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npm", "workflow"]
     networks:
-      - claude-swarm-network
-    depends_on:
-      - claude-flow-dev
-      - ruv-swarm-integration
-    profiles:
-      - testing
-    command: ["./docker-test/scripts/run-all-tests.sh"]
+      - claude-flow-test
 
-  performance-monitor:
-    image: node:20-alpine
-    container_name: performance-monitor
+  test-npm-github:
+    build:
+      context: .
+      dockerfile: Dockerfile.npm
+    container_name: claude-flow-test-npm-github
     volumes:
-      - ./scripts:/scripts
-      - ./volumes/shared:/shared
-    environment:
-      - MONITOR_INTERVAL=30
-      - METRICS_OUTPUT=/shared/metrics.json
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npm", "github"]
     networks:
-      - claude-swarm-network
-    command: ["node", "/scripts/performance-monitor.js"]
-    profiles:
-      - monitoring
+      - claude-flow-test
 
-  # =================== NGINX LOAD BALANCER ===================
-  nginx-lb:
-    image: nginx:alpine
-    container_name: claude-flow-lb
+  test-npm-daa:
+    build:
+      context: .
+      dockerfile: Dockerfile.npm
+    container_name: claude-flow-test-npm-daa
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./volumes/shared:/shared
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - claude-flow-dev
-      - claude-flow-prod
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npm", "daa"]
     networks:
-      - claude-swarm-network
-    profiles:
-      - production
+      - claude-flow-test
 
-# =================== NETWORKS ===================
+  test-npm-system:
+    build:
+      context: .
+      dockerfile: Dockerfile.npm
+    container_name: claude-flow-test-npm-system
+    volumes:
+      - ./results:/test/results
+      - ./logs:/test/logs
+    command: ["/test/scripts/test-mcp-tools.sh", "npm", "system"]
+    networks:
+      - claude-flow-test
+
 networks:
-  claude-swarm-network:
+  claude-flow-test:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16
-
-# =================== VOLUMES ===================
-volumes:
-  claude-flow-node-modules:
-    driver: local
-  claude-flow-dist:
-    driver: local
-  claude-flow-data:
-    driver: local
-  claude-flow-db-data:
-    driver: local
-  claude-flow-test-results:
-    driver: local
-  claude-flow-coverage:
-    driver: local
-  ruv-swarm-db-data:
-    driver: local

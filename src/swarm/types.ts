@@ -32,10 +32,12 @@ export interface TaskId {
 export type AgentType = 
   | 'coordinator'    // Orchestrates and manages other agents
   | 'researcher'     // Performs research and data gathering
-  | 'developer'      // Writes and maintains code
-  | 'analyzer'       // Analyzes data and generates insights
-  | 'reviewer'       // Reviews and validates work
+  | 'coder'          // Writes and maintains code (was 'developer')
+  | 'analyst'        // Analyzes data and generates insights (was 'analyzer')
+  | 'architect'      // Designs system architecture and solutions
   | 'tester'         // Tests and validates functionality
+  | 'reviewer'       // Reviews and validates work
+  | 'optimizer'      // Optimizes performance and efficiency
   | 'documenter'     // Creates and maintains documentation
   | 'monitor'        // Monitors system health and performance
   | 'specialist';    // Domain-specific specialized agent
