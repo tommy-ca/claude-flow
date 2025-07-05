@@ -19,8 +19,8 @@ export const TEST_CONFIG = {
     performance: './tests/performance',
     fixtures: './tests/fixtures',
     mocks: './tests/mocks',
-    coverage: './test-results/coverage',
-    reports: './test-results',
+    coverage: './tests/results/coverage',
+    reports: './tests/results',
   },
 
   // Coverage thresholds - targeting >90% coverage
@@ -87,7 +87,7 @@ export async function cleanupTestEnv(): Promise<void> {
     TEST_CONFIG.env.CLAUDE_FLOW_DATA_DIR,
     './tests/temp',
     './tests/fixtures/temp',
-    './test-results/temp',
+    './tests/results/temp',
   ];
 
   for (const path of cleanupPaths) {
@@ -117,7 +117,7 @@ function ensureTestDirectories(): void {
     './tests/temp',
     './tests/data',
     './tests/fixtures/temp',
-    './test-results/temp',
+    './tests/results/temp',
   ];
 
   additionalDirs.forEach(dir => {

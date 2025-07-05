@@ -461,7 +461,7 @@ async function main(): Promise<void> {
       verbose: false,
       "fail-fast": false,
       "update-snapshots": false,
-      "output-dir": "./test-results",
+      "output-dir": "./tests/results",
     },
     alias: {
       h: "help",

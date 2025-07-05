@@ -612,8 +612,8 @@ async function main(): Promise<void> {
     boolean: ["help"],
     default: {
       "source-dir": "./src",
-      "coverage-dir": "./test-results/coverage",
-      "output-dir": "./test-results",
+      "coverage-dir": "./tests/results/coverage",
+      "output-dir": "./tests/results",
     },
     alias: {
       h: "help",
@@ -632,8 +632,8 @@ USAGE:
 
 OPTIONS:
   --source-dir, -s     Source code directory (default: ./src)
-  --coverage-dir, -c   Coverage data directory (default: ./test-results/coverage)
-  --output-dir, -o     Output directory for reports (default: ./test-results)
+  --coverage-dir, -c   Coverage data directory (default: ./tests/results/coverage)
+  --output-dir, -o     Output directory for reports (default: ./tests/results)
   --help, -h           Show this help
 
 EXAMPLES:

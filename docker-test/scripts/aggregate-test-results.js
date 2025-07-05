@@ -8,8 +8,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const TEST_RESULTS_DIR = '/app/test-results';
-const OUTPUT_DIR = '/app/test-results/aggregated';
+const TEST_RESULTS_DIR = '/app/tests/results';
+const OUTPUT_DIR = '/app/tests/results/aggregated';
 const TIMESTAMP = new Date().toISOString().replace(/[:.]/g, '-');
 
 // Ensure output directory exists
