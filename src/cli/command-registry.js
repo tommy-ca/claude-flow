@@ -12,6 +12,11 @@ import { startCommand } from './simple-commands/start.js';
 import { swarmCommand } from './simple-commands/swarm.js';
 import { batchManagerCommand } from './simple-commands/batch-manager.js';
 import { githubCommand } from './simple-commands/github.js';
+import { trainingAction } from './simple-commands/training.js';
+import { analysisAction } from './simple-commands/analysis.js';
+import { automationAction } from './simple-commands/automation.js';
+import { coordinationAction } from './simple-commands/coordination.js';
+import { hooksAction } from './simple-commands/hooks.js';
 // Note: TypeScript imports commented out for Node.js compatibility
 // import { ruvSwarmAction } from './commands/ruv-swarm.ts';
 // import { configIntegrationAction } from './commands/config-integration.ts';
@@ -212,6 +217,98 @@ Advanced features:
   • Intelligent issue categorization and assignment
   • Automated testing integration and quality gates
   • Release pipeline orchestration with rollback capabilities`
+  });
+
+  commandRegistry.set('training', {
+    handler: trainingAction,
+    description: 'Neural pattern learning and model updates',
+    usage: 'training <command> [options]',
+    examples: [
+      'training neural-train --data recent --model task-predictor',
+      'training pattern-learn --operation "file-creation" --outcome "success"',
+      'training model-update --agent-type coordinator --operation-result "efficient"'
+    ],
+    details: `
+Neural training commands:
+  • neural-train: Train neural patterns from operations
+  • pattern-learn: Learn from specific operation outcomes
+  • model-update: Update agent models with new insights
+  
+Improves task selection accuracy, agent performance prediction, and coordination efficiency.`
+  });
+
+  commandRegistry.set('analysis', {
+    handler: analysisAction,
+    description: 'Performance and usage analytics',
+    usage: 'analysis <command> [options]',
+    examples: [
+      'analysis bottleneck-detect --scope system',
+      'analysis performance-report --timeframe 7d --format detailed',
+      'analysis token-usage --breakdown --cost-analysis'
+    ],
+    details: `
+Analysis commands:
+  • bottleneck-detect: Detect performance bottlenecks in the system
+  • performance-report: Generate comprehensive performance reports
+  • token-usage: Analyze token consumption and costs
+  
+Helps with performance optimization, cost management, and resource allocation.`
+  });
+
+  commandRegistry.set('automation', {
+    handler: automationAction,
+    description: 'Intelligent agent and workflow management',
+    usage: 'automation <command> [options]',
+    examples: [
+      'automation auto-agent --task-complexity enterprise --swarm-id swarm-123',
+      'automation smart-spawn --requirement "web-development" --max-agents 8',
+      'automation workflow-select --project-type api --priority speed'
+    ],
+    details: `
+Automation commands:
+  • auto-agent: Automatically spawn optimal agents based on task complexity
+  • smart-spawn: Intelligently spawn agents based on specific requirements
+  • workflow-select: Select and configure optimal workflows for project types
+  
+Provides optimal resource allocation and intelligent agent selection.`
+  });
+
+  commandRegistry.set('coordination', {
+    handler: coordinationAction,
+    description: 'Swarm and agent orchestration',
+    usage: 'coordination <command> [options]',
+    examples: [
+      'coordination swarm-init --topology hierarchical --max-agents 8',
+      'coordination agent-spawn --type developer --name "api-dev" --swarm-id swarm-123',
+      'coordination task-orchestrate --task "Build REST API" --strategy parallel'
+    ],
+    details: `
+Coordination commands:
+  • swarm-init: Initialize swarm coordination infrastructure
+  • agent-spawn: Spawn and coordinate new agents
+  • task-orchestrate: Orchestrate task execution across agents
+  
+Enables intelligent task distribution, agent synchronization, and shared memory coordination.`
+  });
+
+  commandRegistry.set('hooks', {
+    handler: hooksAction,
+    description: 'Lifecycle event management',
+    usage: 'hooks <command> [options]',
+    examples: [
+      'hooks pre-task --description "Build API" --task-id task-123',
+      'hooks post-task --task-id task-123 --analyze-performance --generate-insights',
+      'hooks session-end --export-metrics --generate-summary'
+    ],
+    details: `
+Hooks commands:
+  • pre-task: Execute before task begins (preparation & setup)
+  • post-task: Execute after task completion (analysis & cleanup)
+  • pre-edit: Execute before file modifications (backup & validation)
+  • post-edit: Execute after file modifications (tracking & coordination)
+  • session-end: Execute at session termination (cleanup & export)
+  
+Enables automated preparation & cleanup, performance tracking, and coordination synchronization.`
   });
 
   // Temporarily commented out for Node.js compatibility

@@ -121,19 +121,64 @@ export function parseFlags(args) {
 // Process execution helpers
 export async function runCommand(command, args = [], options = {}) {
   try {
-    const cmd = new Deno.Command(command, {
-      args,
-      ...options
-    });
-    
-    const result = await cmd.output();
-    
-    return {
-      success: result.code === 0,
-      code: result.code,
-      stdout: new TextDecoder().decode(result.stdout),
-      stderr: new TextDecoder().decode(result.stderr)
-    };
+    // Check if we're in Node.js or Deno environment
+    if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+      // Node.js environment
+      const { spawn } = await import('child_process');
+      const { promisify } = await import('util');
+      
+      return new Promise((resolve) => {
+        const child = spawn(command, args, {
+          stdio: ['pipe', 'pipe', 'pipe'],
+          shell: true,
+          ...options
+        });
+        
+        let stdout = '';
+        let stderr = '';
+        
+        child.stdout?.on('data', (data) => {
+          stdout += data.toString();
+        });
+        
+        child.stderr?.on('data', (data) => {
+          stderr += data.toString();
+        });
+        
+        child.on('close', (code) => {
+          resolve({
+            success: code === 0,
+            code: code || 0,
+            stdout: stdout,
+            stderr: stderr
+          });
+        });
+        
+        child.on('error', (err) => {
+          resolve({
+            success: false,
+            code: -1,
+            stdout: '',
+            stderr: err.message
+          });
+        });
+      });
+    } else {
+      // Deno environment
+      const cmd = new Deno.Command(command, {
+        args,
+        ...options
+      });
+      
+      const result = await cmd.output();
+      
+      return {
+        success: result.code === 0,
+        code: result.code,
+        stdout: new TextDecoder().decode(result.stdout),
+        stderr: new TextDecoder().decode(result.stderr)
+      };
+    }
   } catch (err) {
     return {
       success: false,
@@ -246,4 +291,110 @@ export async function retry(fn, maxAttempts = 3, delay = 1000) {
       await sleep(delay * attempt);
     }
   }
+}
+
+// ruv-swarm MCP integration helpers
+export async function callRuvSwarmMCP(tool, params = {}) {
+  try {
+    const command = 'npx';
+    const args = ['ruv-swarm', 'mcp', 'call', tool, '--params', JSON.stringify(params)];
+    
+    const result = await runCommand(command, args, { 
+      stdout: 'piped',
+      stderr: 'piped'
+    });
+    
+    if (!result.success) {
+      throw new Error(`ruv-swarm MCP call failed: ${result.stderr}`);
+    }
+    
+    try {
+      return JSON.parse(result.stdout);
+    } catch {
+      return { success: true, output: result.stdout };
+    }
+  } catch (err) {
+    printError(`Failed to call ruv-swarm MCP tool ${tool}: ${err.message}`);
+    throw err;
+  }
+}
+
+export async function execRuvSwarmHook(hookName, params = {}) {
+  try {
+    const command = 'npx';
+    const args = ['ruv-swarm', 'hook', hookName];
+    
+    // Add parameters as CLI arguments
+    Object.entries(params).forEach(([key, value]) => {
+      args.push(`--${key}`);
+      if (value !== true && value !== false) {
+        args.push(String(value));
+      }
+    });
+    
+    const result = await runCommand(command, args, {
+      stdout: 'piped',
+      stderr: 'piped'
+    });
+    
+    if (!result.success) {
+      throw new Error(`ruv-swarm hook failed: ${result.stderr}`);
+    }
+    
+    return {
+      success: true,
+      output: result.stdout,
+      stderr: result.stderr
+    };
+  } catch (err) {
+    printError(`Failed to execute ruv-swarm hook ${hookName}: ${err.message}`);
+    throw err;
+  }
+}
+
+export async function checkRuvSwarmAvailable() {
+  try {
+    const result = await runCommand('npx', ['ruv-swarm', '--version'], {
+      stdout: 'piped',
+      stderr: 'piped'
+    });
+    
+    return result.success;
+  } catch {
+    return false;
+  }
+}
+
+// Neural training specific helpers
+export async function trainNeuralModel(modelName, dataSource, epochs = 50) {
+  return await callRuvSwarmMCP('neural_train', {
+    model: modelName,
+    data: dataSource,
+    epochs: epochs,
+    timestamp: Date.now()
+  });
+}
+
+export async function updateNeuralPattern(operation, outcome, metadata = {}) {
+  return await callRuvSwarmMCP('neural_patterns', {
+    action: 'learn',
+    operation: operation,
+    outcome: outcome,
+    metadata: metadata,
+    timestamp: Date.now()
+  });
+}
+
+export async function getSwarmStatus(swarmId = null) {
+  return await callRuvSwarmMCP('swarm_status', {
+    swarmId: swarmId
+  });
+}
+
+export async function spawnSwarmAgent(agentType, config = {}) {
+  return await callRuvSwarmMCP('agent_spawn', {
+    type: agentType,
+    config: config,
+    timestamp: Date.now()
+  });
 }

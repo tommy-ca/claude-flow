@@ -32,11 +32,19 @@ USAGE:
   github <mode>            GitHub workflow automation (6 modes)
   status                   System status and health
   
+📋 SWARM INTELLIGENCE COMMANDS:
+  training <command>       Neural pattern learning & model updates (3 commands)
+  coordination <command>   Swarm & agent orchestration (3 commands)
+  analysis <command>       Performance & usage analytics (3 commands)
+  automation <command>     Intelligent agent & workflow management (3 commands)
+  hooks <command>          Lifecycle event management (5 commands)
+  monitoring <command>     Real-time system monitoring (3 commands)
+  optimization <command>   Performance & topology optimization (3 commands)
+  
 📋 ADDITIONAL COMMANDS:
   task <action>            Task and workflow management
   config <action>          System configuration
   mcp <action>             MCP server management
-  monitor                  Real-time system monitoring
   batch <action>           Batch operations
 
 🔍 GET HELP:
@@ -341,6 +349,247 @@ EXAMPLES:
   claude-flow status --verbose           # Detailed information
   claude-flow status --json              # Machine-readable format
   claude-flow status --watch             # Live monitoring
+`,
+
+  training: `
+🧠 TRAINING COMMAND - Neural Pattern Learning & Model Updates
+
+USAGE:
+  claude-flow training <command> [options]
+
+DESCRIPTION:
+  Train neural patterns from operations, learn from outcomes, and update agent models 
+  with real ruv-swarm integration for continuous learning and optimization.
+
+COMMANDS:
+  neural-train      Train neural patterns from operations data
+  pattern-learn     Learn from specific operation outcomes  
+  model-update      Update agent models with new insights
+
+NEURAL TRAIN OPTIONS:
+  --data <source>   Training data source (default: recent)
+                    Options: recent, historical, custom, swarm-<id>
+  --model <name>    Target model (default: general-predictor)
+                    Options: task-predictor, agent-selector, performance-optimizer
+  --epochs <n>      Training epochs (default: 50)
+
+PATTERN LEARN OPTIONS:
+  --operation <op>  Operation type to learn from
+  --outcome <result> Operation outcome (success/failure/partial)
+
+MODEL UPDATE OPTIONS:
+  --agent-type <type>      Agent type to update (coordinator, coder, researcher, etc.)
+  --operation-result <res> Result from operation execution
+
+EXAMPLES:
+  claude-flow training neural-train --data recent --model task-predictor
+  claude-flow training pattern-learn --operation "file-creation" --outcome "success"
+  claude-flow training model-update --agent-type coordinator --operation-result "efficient"
+  claude-flow training neural-train --data "swarm-123" --epochs 100 --model "coordinator-predictor"
+
+🎯 Neural training improves:
+  • Task selection accuracy
+  • Agent performance prediction  
+  • Coordination efficiency
+  • Error prevention patterns
+`,
+
+  coordination: `
+🐝 COORDINATION COMMAND - Swarm & Agent Orchestration
+
+USAGE:
+  claude-flow coordination <command> [options]
+
+DESCRIPTION:
+  Initialize swarms, spawn coordinated agents, and orchestrate task execution 
+  across agents with real ruv-swarm MCP integration for optimal performance.
+
+COMMANDS:
+  swarm-init        Initialize swarm coordination infrastructure
+  agent-spawn       Spawn and coordinate new agents
+  task-orchestrate  Orchestrate task execution across agents
+
+SWARM-INIT OPTIONS:
+  --swarm-id <id>      Swarm identifier (auto-generated if not provided)
+  --topology <type>    Coordination topology (default: hierarchical)
+                       Options: hierarchical, mesh, ring, star, hybrid
+  --max-agents <n>     Maximum number of agents (default: 5)
+  --strategy <strategy> Coordination strategy (default: balanced)
+
+AGENT-SPAWN OPTIONS:
+  --type <type>        Agent type (default: general)
+                       Options: coordinator, developer, researcher, analyzer, tester, general
+  --name <name>        Custom agent name (auto-generated if not provided)
+  --swarm-id <id>      Target swarm for agent coordination
+  --capabilities <cap> Custom capabilities specification
+
+TASK-ORCHESTRATE OPTIONS:
+  --task <description> Task description (required)
+  --swarm-id <id>      Target swarm for task execution
+  --strategy <strategy> Coordination strategy (default: adaptive)
+                       Options: adaptive, parallel, sequential, hierarchical
+  --share-results      Enable result sharing across swarm
+
+EXAMPLES:
+  claude-flow coordination swarm-init --topology hierarchical --max-agents 8
+  claude-flow coordination agent-spawn --type developer --name "api-dev" --swarm-id swarm-123
+  claude-flow coordination task-orchestrate --task "Build REST API" --strategy parallel --share-results
+  claude-flow coordination swarm-init --topology mesh --max-agents 12
+
+🎯 Coordination enables:
+  • Intelligent task distribution
+  • Agent synchronization
+  • Shared memory coordination
+  • Performance optimization
+  • Fault tolerance
+`,
+
+  analysis: `
+📊 ANALYSIS COMMAND - Performance & Usage Analytics
+
+USAGE:
+  claude-flow analysis <command> [options]
+
+DESCRIPTION:
+  Detect performance bottlenecks, generate comprehensive reports, and analyze 
+  token consumption using real ruv-swarm analytics for system optimization.
+
+COMMANDS:
+  bottleneck-detect    Detect performance bottlenecks in the system
+  performance-report   Generate comprehensive performance reports
+  token-usage          Analyze token consumption and costs
+
+BOTTLENECK DETECT OPTIONS:
+  --scope <scope>      Analysis scope (default: system)
+                       Options: system, swarm, agent, task, memory
+  --target <target>    Specific target to analyze (default: all)
+                       Examples: agent-id, swarm-id, task-type
+
+PERFORMANCE REPORT OPTIONS:
+  --timeframe <time>   Report timeframe (default: 24h)
+                       Options: 1h, 6h, 24h, 7d, 30d
+  --format <format>    Report format (default: summary)
+                       Options: summary, detailed, json, csv
+
+TOKEN USAGE OPTIONS:
+  --agent <agent>      Filter by agent type or ID (default: all)
+  --breakdown          Include detailed breakdown by agent type
+  --cost-analysis      Include cost projections and optimization
+
+EXAMPLES:
+  claude-flow analysis bottleneck-detect --scope system
+  claude-flow analysis bottleneck-detect --scope agent --target coordinator-1
+  claude-flow analysis performance-report --timeframe 7d --format detailed
+  claude-flow analysis token-usage --breakdown --cost-analysis
+  claude-flow analysis bottleneck-detect --scope swarm --target swarm-123
+
+🎯 Analysis helps with:
+  • Performance optimization
+  • Cost management
+  • Resource allocation
+  • Bottleneck identification
+  • Trend analysis
+`,
+
+  automation: `
+🤖 AUTOMATION COMMAND - Intelligent Agent & Workflow Management
+
+USAGE:
+  claude-flow automation <command> [options]
+
+DESCRIPTION:
+  Automatically spawn optimal agents, intelligently manage workflows, and select 
+  optimal configurations with real ruv-swarm intelligence for maximum efficiency.
+
+COMMANDS:
+  auto-agent        Automatically spawn optimal agents based on task complexity
+  smart-spawn       Intelligently spawn agents based on specific requirements
+  workflow-select   Select and configure optimal workflows for project types
+
+AUTO-AGENT OPTIONS:
+  --task-complexity <level>  Task complexity level (default: medium)
+                             Options: low, medium, high, enterprise
+  --swarm-id <id>           Target swarm ID for agent spawning
+
+SMART-SPAWN OPTIONS:
+  --requirement <req>       Specific requirement description
+                           Examples: "web-development", "data-analysis", "enterprise-api"
+  --max-agents <n>         Maximum number of agents to spawn (default: 10)
+
+WORKFLOW-SELECT OPTIONS:
+  --project-type <type>     Project type (default: general)
+                           Options: web-app, api, data-analysis, enterprise, general
+  --priority <priority>     Optimization priority (default: balanced)
+                           Options: speed, quality, cost, balanced
+
+EXAMPLES:
+  claude-flow automation auto-agent --task-complexity enterprise --swarm-id swarm-123
+  claude-flow automation smart-spawn --requirement "web-development" --max-agents 8
+  claude-flow automation workflow-select --project-type api --priority speed
+  claude-flow automation auto-agent --task-complexity low
+
+🎯 Automation benefits:
+  • Optimal resource allocation
+  • Intelligent agent selection
+  • Workflow optimization
+  • Reduced manual configuration
+  • Performance-based scaling
+`,
+
+  hooks: `
+🔗 HOOKS COMMAND - Lifecycle Event Management
+
+USAGE:
+  claude-flow hooks <command> [options]
+
+DESCRIPTION:
+  Execute lifecycle hooks before and after tasks, edits, and sessions with 
+  real ruv-swarm integration for automated preparation, tracking, and cleanup.
+
+COMMANDS:
+  pre-task      Execute before task begins (preparation & setup)
+  post-task     Execute after task completion (analysis & cleanup)
+  pre-edit      Execute before file modifications (backup & validation)
+  post-edit     Execute after file modifications (tracking & coordination)
+  session-end   Execute at session termination (cleanup & export)
+
+PRE-TASK OPTIONS:
+  --description <desc>     Task description
+  --task-id <id>          Task identifier
+  --agent-id <id>         Executing agent identifier
+  --auto-spawn-agents     Auto-spawn agents for task (default: true)
+
+POST-TASK OPTIONS:
+  --task-id <id>               Task identifier
+  --analyze-performance        Generate performance analysis
+  --generate-insights          Create AI-powered insights
+
+PRE-EDIT OPTIONS:
+  --file <path>           Target file path
+  --operation <type>      Edit operation type (edit, create, delete)
+
+POST-EDIT OPTIONS:
+  --file <path>           Modified file path
+  --memory-key <key>      Coordination memory key for storing edit info
+
+SESSION-END OPTIONS:
+  --export-metrics        Export session performance metrics
+  --swarm-id <id>         Swarm identifier for coordination cleanup
+  --generate-summary      Create comprehensive session summary
+
+EXAMPLES:
+  claude-flow hooks pre-task --description "Build API" --task-id task-123 --agent-id agent-456
+  claude-flow hooks post-task --task-id task-123 --analyze-performance --generate-insights
+  claude-flow hooks pre-edit --file "src/api.js" --operation edit
+  claude-flow hooks post-edit --file "src/api.js" --memory-key "swarm/123/edits/timestamp"
+  claude-flow hooks session-end --export-metrics --generate-summary --swarm-id swarm-123
+
+🎯 Hooks enable:
+  • Automated preparation & cleanup
+  • Performance tracking
+  • Coordination synchronization
+  • Error prevention
+  • Insight generation
 `
 };
 
