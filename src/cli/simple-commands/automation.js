@@ -98,7 +98,7 @@ async function smartSpawnCommand(subArgs, flags) {
     if (requirement.includes('development') || requirement.includes('coding')) {
         recommendedAgents.push(
             { type: 'coordinator', count: 1, reason: 'Task orchestration' },
-            { type: 'developer', count: 3, reason: 'Core development work' },
+            { type: 'coder', count: 3, reason: 'Core development work' },
             { type: 'tester', count: 1, reason: 'Quality assurance' }
         );
     }
@@ -106,16 +106,16 @@ async function smartSpawnCommand(subArgs, flags) {
     if (requirement.includes('research') || requirement.includes('analysis')) {
         recommendedAgents.push(
             { type: 'researcher', count: 2, reason: 'Information gathering' },
-            { type: 'analyzer', count: 1, reason: 'Data analysis' }
+            { type: 'analyst', count: 1, reason: 'Data analysis' }
         );
     }
     
     if (requirement.includes('enterprise') || requirement.includes('production')) {
         recommendedAgents.push(
             { type: 'coordinator', count: 2, reason: 'Multi-tier coordination' },
-            { type: 'developer', count: 4, reason: 'Parallel development' },
+            { type: 'coder', count: 4, reason: 'Parallel development' },
             { type: 'researcher', count: 2, reason: 'Requirements analysis' },
-            { type: 'analyzer', count: 1, reason: 'Performance monitoring' },
+            { type: 'analyst', count: 1, reason: 'Performance monitoring' },
             { type: 'tester', count: 2, reason: 'Comprehensive testing' }
         );
     }
@@ -124,7 +124,7 @@ async function smartSpawnCommand(subArgs, flags) {
     if (recommendedAgents.length === 0) {
         recommendedAgents = [
             { type: 'coordinator', count: 1, reason: 'General coordination' },
-            { type: 'developer', count: 2, reason: 'General development' },
+            { type: 'coder', count: 2, reason: 'General development' },
             { type: 'researcher', count: 1, reason: 'Support research' }
         ];
     }

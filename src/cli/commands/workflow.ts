@@ -303,7 +303,7 @@ async function generateTemplate(templateType: string, options: any): Promise<voi
       },
       agents: [
         { id: 'researcher', type: 'researcher', name: 'Research Agent' },
-        { id: 'analyzer', type: 'analyst', name: 'Analysis Agent' }
+        { id: 'analyst', type: 'analyst', name: 'Analysis Agent' }
       ],
       tasks: [
         {
@@ -317,7 +317,7 @@ async function generateTemplate(templateType: string, options: any): Promise<voi
           id: 'analyze-task',
           type: 'analysis',
           description: 'Analyze research findings',
-          assignTo: 'analyzer',
+          assignTo: 'analyst',
           depends: ['research-task'],
           input: { data: '${research-task.output}' }
         }

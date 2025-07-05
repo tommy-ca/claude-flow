@@ -497,16 +497,16 @@ exit \${PIPESTATUS[0]}`;
   }
 }
 
-function getAgentTypesForStrategy(strategy: string): ('researcher' | 'developer' | 'analyzer' | 'coordinator' | 'reviewer')[] {
+function getAgentTypesForStrategy(strategy: string): ('researcher' | 'coder' | 'analyst' | 'coordinator' | 'reviewer')[] {
   switch (strategy) {
     case 'research':
-      return ['researcher', 'analyzer', 'coordinator'];
+      return ['researcher', 'analyst', 'coordinator'];
     case 'development':
-      return ['developer', 'analyzer', 'reviewer', 'coordinator'];
+      return ['coder', 'analyst', 'reviewer', 'coordinator'];
     case 'analysis':
-      return ['analyzer', 'researcher', 'coordinator'];
+      return ['analyst', 'researcher', 'coordinator'];
     default: // auto
-      return ['coordinator', 'researcher', 'developer', 'analyzer'];
+      return ['coordinator', 'researcher', 'coder', 'analyst'];
   }
 }
 
@@ -514,9 +514,9 @@ function getCapabilitiesForType(type: string): string[] {
   switch (type) {
     case 'researcher':
       return ['web-search', 'data-collection', 'analysis', 'documentation'];
-    case 'developer':
+    case 'coder':
       return ['coding', 'testing', 'debugging', 'architecture'];
-    case 'analyzer':
+    case 'analyst':
       return ['data-analysis', 'visualization', 'reporting', 'insights'];
     case 'reviewer':
       return ['code-review', 'quality-assurance', 'validation', 'testing'];

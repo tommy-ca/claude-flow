@@ -103,10 +103,10 @@ export class DirectTaskExecutor {
 
     // Route to appropriate implementation based on agent type and task
     switch (agent.type) {
-      case 'analyzer':
+      case 'analyst':
         return this.executeAnalyzerTask(task, targetDir);
       
-      case 'developer':
+      case 'coder':
         if (isRestAPI) return this.createRestAPI(targetDir, task);
         if (isTodo) return this.createTodoApp(targetDir, task);
         if (isChat) return this.createChatApp(targetDir, task);

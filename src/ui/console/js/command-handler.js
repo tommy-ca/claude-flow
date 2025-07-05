@@ -40,7 +40,7 @@ export class CommandHandler {
     this.sparcModeCommands = {
       'coder': this.executeSparcMode.bind(this, 'coder'),
       'architect': this.executeSparcMode.bind(this, 'architect'),
-      'analyzer': this.executeSparcMode.bind(this, 'analyzer'),
+      'analyst': this.executeSparcMode.bind(this, 'analyst'),
       'researcher': this.executeSparcMode.bind(this, 'researcher'),
       'reviewer': this.executeSparcMode.bind(this, 'reviewer'),
       'tester': this.executeSparcMode.bind(this, 'tester'),
@@ -624,7 +624,7 @@ Examples:
     
     if (args.length === 0) {
       this.terminal.writeInfo('Available SPARC modes:');
-      const modes = ['coder', 'architect', 'analyzer', 'researcher', 'reviewer', 
+      const modes = ['coder', 'architect', 'analyst', 'researcher', 'reviewer', 
                     'tester', 'debugger', 'documenter', 'optimizer', 'designer'];
       modes.forEach(mode => {
         this.terminal.writeLine(`  ${mode}`);

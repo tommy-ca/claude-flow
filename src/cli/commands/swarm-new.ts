@@ -447,19 +447,19 @@ function parseSwarmOptions(flags: any) {
 function getRequiredAgentTypes(strategy: SwarmStrategy): AgentType[] {
   switch (strategy) {
     case 'research':
-      return ['researcher', 'analyzer', 'documenter'];
+      return ['researcher', 'analyst', 'documenter'];
     case 'development':
-      return ['developer', 'tester', 'reviewer', 'documenter'];
+      return ['coder', 'tester', 'reviewer', 'documenter'];
     case 'analysis':
-      return ['analyzer', 'researcher', 'documenter'];
+      return ['analyst', 'researcher', 'documenter'];
     case 'testing':
-      return ['tester', 'developer', 'reviewer'];
+      return ['tester', 'coder', 'reviewer'];
     case 'optimization':
-      return ['analyzer', 'developer', 'monitor'];
+      return ['analyst', 'coder', 'monitor'];
     case 'maintenance':
-      return ['developer', 'monitor', 'tester'];
+      return ['coder', 'monitor', 'tester'];
     default: // auto
-      return ['coordinator', 'developer', 'researcher', 'analyzer'];
+      return ['coordinator', 'coder', 'researcher', 'analyst'];
   }
 }
 
@@ -494,7 +494,7 @@ function getAgentCapabilities(agentType: AgentType) {
         reliability: 0.95
       };
       
-    case 'developer':
+    case 'coder':
       return {
         ...baseCapabilities,
         codeGeneration: true,
@@ -534,7 +534,7 @@ function getAgentCapabilities(agentType: AgentType) {
         reliability: 0.85
       };
       
-    case 'analyzer':
+    case 'analyst':
       return {
         ...baseCapabilities,
         codeGeneration: false,

@@ -1461,23 +1461,23 @@ export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter 
 
   private determineRequiredAgentTypes(strategy: SwarmStrategy): AgentType[] {
     switch (strategy) {
-      case 'research': return ['researcher', 'analyzer'];
-      case 'development': return ['developer', 'tester', 'reviewer'];
-      case 'analysis': return ['analyzer', 'researcher'];
-      case 'testing': return ['tester', 'developer'];
-      case 'optimization': return ['analyzer', 'developer'];
-      case 'maintenance': return ['developer', 'monitor'];
-      default: return ['coordinator', 'developer', 'analyzer'];
+      case 'research': return ['researcher', 'analyst'];
+      case 'development': return ['coder', 'tester', 'reviewer'];
+      case 'analysis': return ['analyst', 'researcher'];
+      case 'testing': return ['tester', 'coder'];
+      case 'optimization': return ['analyst', 'coder'];
+      case 'maintenance': return ['coder', 'monitor'];
+      default: return ['coordinator', 'coder', 'analyst'];
     }
   }
 
   private getAgentTypeInstructions(agentType: string): string {
     switch (agentType) {
-      case 'developer':
+      case 'coder':
         return '- Focus on implementation, code quality, and best practices\n- Create clean, maintainable code\n- Consider architecture and design patterns';
       case 'tester':
         return '- Focus on testing, edge cases, and quality assurance\n- Create comprehensive test suites\n- Identify potential bugs and issues';
-      case 'analyzer':
+      case 'analyst':
         return '- Focus on analysis, research, and understanding\n- Break down complex problems\n- Provide insights and recommendations';
       case 'researcher':
         return '- Focus on gathering information and best practices\n- Research existing solutions and patterns\n- Document findings and recommendations';
@@ -1494,11 +1494,11 @@ export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter 
 
   private getAgentCapabilities(agentType: string): string[] {
     switch (agentType) {
-      case 'developer':
+      case 'coder':
         return ['code-generation', 'file-system', 'debugging'];
       case 'tester':
         return ['testing', 'code-generation', 'analysis'];
-      case 'analyzer':
+      case 'analyst':
         return ['analysis', 'documentation', 'research'];
       case 'researcher':
         return ['research', 'documentation', 'analysis'];
@@ -2055,7 +2055,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
   private getDefaultPermissions(type: AgentType): string[] {
     switch (type) {
       case 'coordinator': return ['read', 'write', 'execute', 'admin'];
-      case 'developer': return ['read', 'write', 'execute'];
+      case 'coder': return ['read', 'write', 'execute'];
       case 'tester': return ['read', 'execute'];
       case 'reviewer': return ['read', 'write'];
       default: return ['read'];
@@ -2073,7 +2073,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
         agent.capabilities.research = true;
         agent.capabilities.analysis = true;
         break;
-      case 'developer':
+      case 'coder':
         agent.capabilities.codeGeneration = true;
         agent.capabilities.codeReview = true;
         agent.capabilities.testing = true;
@@ -2085,7 +2085,7 @@ Ensure your implementation is complete, well-structured, and follows best practi
         agent.capabilities.webSearch = true;
         agent.capabilities.documentation = true;
         break;
-      case 'analyzer':
+      case 'analyst':
         agent.capabilities.analysis = true;
         agent.capabilities.research = true;
         agent.capabilities.documentation = true;

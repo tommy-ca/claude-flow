@@ -277,9 +277,9 @@ export class AgentManager extends EventEmitter {
     });
 
     // Developer agent template
-    this.templates.set('developer', {
+    this.templates.set('coder', {
       name: 'Developer Agent',
-      type: 'developer',
+      type: 'coder',
       capabilities: {
         codeGeneration: true,
         codeReview: true,
@@ -336,9 +336,9 @@ export class AgentManager extends EventEmitter {
 
   private initializeSpecializedTemplates(): void {
     // Analyzer template
-    this.templates.set('analyzer', {
+    this.templates.set('analyst', {
       name: 'Analyzer Agent',
-      type: 'analyzer',
+      type: 'analyst',
       capabilities: {
         codeGeneration: false,
         codeReview: true,

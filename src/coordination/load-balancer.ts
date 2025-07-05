@@ -707,8 +707,8 @@ export class LoadBalancer extends EventEmitter {
   private checkTypeCompatibility(agentType: string, taskType: string): boolean {
     const compatibilityMap: Record<string, string[]> = {
       'researcher': ['research', 'analysis', 'documentation'],
-      'developer': ['coding', 'testing', 'integration', 'deployment'],
-      'analyzer': ['analysis', 'validation', 'review'],
+      'coder': ['coding', 'testing', 'integration', 'deployment'],
+      'analyst': ['analysis', 'validation', 'review'],
       'reviewer': ['review', 'validation', 'documentation'],
       'coordinator': ['coordination', 'monitoring', 'management'],
       'tester': ['testing', 'validation', 'integration'],

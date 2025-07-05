@@ -115,9 +115,9 @@ export class ClaudeFlowExecutor {
       'integration': 'integration',
       
       // Agent type overrides
-      'developer': 'code',
+      'coder': 'code',
       'tester': 'tdd',
-      'analyzer': 'spec-pseudocode',
+      'analyst': 'spec-pseudocode',
       'documenter': 'docs-writer',
       'reviewer': 'refinement-optimization-mode',
       'researcher': 'spec-pseudocode',

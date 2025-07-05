@@ -555,7 +555,7 @@ Use the appropriate tools for each phase and maintain progress in TodoWrite.`;
       case 'research':
         agents.push(
           { id: generateId(), mode: 'researcher', task: `Research: ${objective}`, status: 'pending' },
-          { id: generateId(), mode: 'analyzer', task: `Analyze findings for: ${objective}`, status: 'pending' },
+          { id: generateId(), mode: 'analyst', task: `Analyze findings for: ${objective}`, status: 'pending' },
           { id: generateId(), mode: 'documenter', task: `Document research results: ${objective}`, status: 'pending' }
         );
         break;
@@ -571,7 +571,7 @@ Use the appropriate tools for each phase and maintain progress in TodoWrite.`;
         
       case 'analysis':
         agents.push(
-          { id: generateId(), mode: 'analyzer', task: `Analyze: ${objective}`, status: 'pending' },
+          { id: generateId(), mode: 'analyst', task: `Analyze: ${objective}`, status: 'pending' },
           { id: generateId(), mode: 'optimizer', task: `Optimize based on analysis: ${objective}`, status: 'pending' }
         );
         break;
@@ -585,7 +585,7 @@ Use the appropriate tools for each phase and maintain progress in TodoWrite.`;
         
       case 'optimization':
         agents.push(
-          { id: generateId(), mode: 'analyzer', task: `Performance analysis: ${objective}`, status: 'pending' },
+          { id: generateId(), mode: 'analyst', task: `Performance analysis: ${objective}`, status: 'pending' },
           { id: generateId(), mode: 'optimizer', task: `Optimize: ${objective}`, status: 'pending' }
         );
         break;

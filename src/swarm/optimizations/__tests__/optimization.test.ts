@@ -311,7 +311,7 @@ describe('Swarm Optimizations', () => {
       
       const agentId: AgentId = {
         id: generateId('agent'),
-        type: 'analyzer'
+        type: 'analyst'
       };
       
       // First execution

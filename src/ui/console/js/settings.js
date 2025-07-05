@@ -420,7 +420,7 @@ export class SettingsManager {
       lineHeight: (v) => v >= 1.0 && v <= 2.0,
       maxLines: (v) => v >= 100 && v <= 10000,
       theme: (v) => ['dark', 'light', 'classic', 'matrix'].includes(v),
-      defaultMode: (v) => ['coder', 'architect', 'analyzer', 'researcher', 'reviewer', 
+      defaultMode: (v) => ['coder', 'architect', 'analyst', 'researcher', 'reviewer', 
                           'tester', 'debugger', 'documenter', 'optimizer', 'designer'].includes(v),
       swarmStrategy: (v) => ['development', 'research', 'analysis', 'testing', 
                            'optimization', 'maintenance'].includes(v),

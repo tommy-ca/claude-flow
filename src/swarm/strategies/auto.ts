@@ -504,16 +504,16 @@ export class AutoStrategy extends BaseStrategy {
     const toolMap: Record<TaskType, string[]> = {
       'coding': ['file-system', 'terminal', 'editor'],
       'testing': ['test-runner', 'file-system', 'terminal'],
-      'analysis': ['analyzer', 'file-system', 'web-search'],
+      'analysis': ['analyst', 'file-system', 'web-search'],
       'documentation': ['editor', 'file-system'],
-      'research': ['web-search', 'analyzer', 'file-system'],
-      'review': ['analyzer', 'file-system'],
+      'research': ['web-search', 'analyst', 'file-system'],
+      'review': ['analyst', 'file-system'],
       'deployment': ['terminal', 'file-system', 'deployment-tools'],
-      'monitoring': ['monitoring-tools', 'analyzer'],
+      'monitoring': ['monitoring-tools', 'analyst'],
       'coordination': ['communication-tools'],
       'communication': ['communication-tools'],
       'maintenance': ['file-system', 'terminal', 'monitoring-tools'],
-      'optimization': ['analyzer', 'profiler', 'file-system'],
+      'optimization': ['analyst', 'profiler', 'file-system'],
       'validation': ['validator', 'test-runner'],
       'integration': ['integration-tools', 'file-system', 'terminal'],
       'custom': ['file-system']
@@ -697,9 +697,9 @@ export class AutoStrategy extends BaseStrategy {
     
     // Apply agent type bonus
     let bonus = 0;
-    if (agent.type === 'developer' && taskType === 'development') bonus = 0.2;
+    if (agent.type === 'coder' && taskType === 'development') bonus = 0.2;
     if (agent.type === 'tester' && taskType === 'testing') bonus = 0.2;
-    if (agent.type === 'analyzer' && taskType === 'analysis') bonus = 0.2;
+    if (agent.type === 'analyst' && taskType === 'analysis') bonus = 0.2;
 
     return Math.min(weight + bonus, 1.0);
   }

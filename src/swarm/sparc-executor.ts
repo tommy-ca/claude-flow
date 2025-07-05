@@ -138,7 +138,7 @@ export class SparcTaskExecutor {
     
     // Map agent types to SPARC phases
     switch (agent.type) {
-      case 'analyzer':
+      case 'analyst':
         if (task.name.includes('Requirements') || task.name.includes('Plan')) {
           return this.executeSpecificationPhase(task, targetDir);
         }
@@ -154,7 +154,7 @@ export class SparcTaskExecutor {
         }
         return this.executeCoordinationPhase(task, targetDir);
       
-      case 'developer':
+      case 'coder':
         if (this.enableTDD && task.name.includes('Implement')) {
           return this.executeTDDPhase(task, targetDir);
         }

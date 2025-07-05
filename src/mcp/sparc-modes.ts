@@ -106,7 +106,7 @@ function getModeBestPractices(modeName: string): string[] {
       'Test performance characteristics',
       'Automate test execution',
     ],
-    'analyzer': [
+    'analyst': [
       'Use efficient search patterns',
       'Analyze code metrics',
       'Identify patterns and anomalies',
@@ -279,7 +279,7 @@ function getDefaultModes(): SparcMode[] {
       ],
     },
     {
-      name: 'analyzer',
+      name: 'analyst',
       description: 'Code and data analysis specialist',
       tools: ['Read', 'Grep', 'Glob', 'Memory', 'TodoWrite'],
       bestPractices: [

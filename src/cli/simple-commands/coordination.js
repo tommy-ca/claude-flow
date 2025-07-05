@@ -102,7 +102,7 @@ async function agentSpawnCommand(subArgs, flags) {
     if (swarmId) console.log(`🐝 Target swarm: ${swarmId}`);
 
     // Validate agent type
-    const validTypes = ['coordinator', 'developer', 'researcher', 'analyzer', 'tester', 'general'];
+    const validTypes = ['coordinator', 'coder', 'researcher', 'analyst', 'tester', 'general'];
     if (!validTypes.includes(agentType)) {
         printWarning(`⚠️  Unknown agent type '${agentType}'. Using 'general' instead.`);
     }

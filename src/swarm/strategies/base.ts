@@ -14,6 +14,12 @@ export interface StrategyMetrics {
   parallelismEfficiency: number;
   cacheHitRate: number;
   predictionAccuracy: number;
+  // Additional metrics
+  queriesExecuted?: number;
+  averageResponseTime?: number;
+  cacheHits?: number;
+  cacheMisses?: number;
+  credibilityScores?: Record<string, number>;
 }
 
 export interface TaskPattern {

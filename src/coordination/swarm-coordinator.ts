@@ -10,7 +10,7 @@ import { MemoryManager } from '../memory/manager.js';
 export interface SwarmAgent {
   id: string;
   name: string;
-  type: 'researcher' | 'developer' | 'analyzer' | 'coordinator' | 'reviewer';
+  type: 'researcher' | 'coder' | 'analyst' | 'coordinator' | 'reviewer';
   status: 'idle' | 'busy' | 'failed' | 'completed';
   capabilities: string[];
   currentTask?: SwarmTask;
@@ -575,8 +575,8 @@ export class SwarmCoordinator extends EventEmitter {
     const compatibleAgents = availableAgents.filter(agent => {
       // Match task type to agent type
       if (task.type.includes('research') && agent.type === 'researcher') return true;
-      if (task.type.includes('implement') && agent.type === 'developer') return true;
-      if (task.type.includes('analysis') && agent.type === 'analyzer') return true;
+      if (task.type.includes('implement') && agent.type === 'coder') return true;
+      if (task.type.includes('analysis') && agent.type === 'analyst') return true;
       if (task.type.includes('review') && agent.type === 'reviewer') return true;
       return agent.type === 'coordinator'; // Coordinator can do any task
     });

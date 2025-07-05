@@ -28,7 +28,7 @@ export function createSwarmTools(logger: ILogger): MCPTool[] {
         properties: {
           type: {
             type: 'string',
-            enum: ['researcher', 'developer', 'analyst', 'reviewer', 'coordinator'],
+            enum: ['researcher', 'coder', 'analyst', 'reviewer', 'coordinator'],
             description: 'The type of agent to spawn',
           },
           task: {
@@ -690,7 +690,7 @@ export const dispatchAgentTool = {
     properties: {
       type: {
         type: 'string',
-        enum: ['researcher', 'developer', 'analyst', 'reviewer', 'coordinator'],
+        enum: ['researcher', 'coder', 'analyst', 'reviewer', 'coordinator'],
         description: 'The type of agent to spawn',
       },
       task: {

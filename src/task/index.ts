@@ -289,10 +289,10 @@ await coordinator.coordinateSwarm(
   },
   [
     { type: 'lead-architect', role: 'team-lead', capabilities: ['design', 'coordination'] },
-    { type: 'frontend-dev-1', role: 'developer', capabilities: ['react', 'ui'] },
-    { type: 'frontend-dev-2', role: 'developer', capabilities: ['react', 'testing'] },
-    { type: 'backend-dev-1', role: 'developer', capabilities: ['nodejs', 'api'] },
-    { type: 'backend-dev-2', role: 'developer', capabilities: ['database', 'scaling'] },
+    { type: 'frontend-dev-1', role: 'coder', capabilities: ['react', 'ui'] },
+    { type: 'frontend-dev-2', role: 'coder', capabilities: ['react', 'testing'] },
+    { type: 'backend-dev-1', role: 'coder', capabilities: ['nodejs', 'api'] },
+    { type: 'backend-dev-2', role: 'coder', capabilities: ['database', 'scaling'] },
     { type: 'devops-engineer', role: 'specialist', capabilities: ['deployment', 'monitoring'] }
   ]
 );

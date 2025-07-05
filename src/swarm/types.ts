@@ -32,8 +32,8 @@ export interface TaskId {
 export type AgentType = 
   | 'coordinator'    // Orchestrates and manages other agents
   | 'researcher'     // Performs research and data gathering
-  | 'coder'          // Writes and maintains code (was 'developer')
-  | 'analyst'        // Analyzes data and generates insights (was 'analyzer')
+  | 'coder'          // Writes and maintains code (was 'coder')
+  | 'analyst'        // Analyzes data and generates insights (was 'analyst')
   | 'architect'      // Designs system architecture and solutions
   | 'tester'         // Tests and validates functionality
   | 'reviewer'       // Reviews and validates work
@@ -260,6 +260,7 @@ export interface TaskConstraints {
   deadline?: Date;
   startAfter?: Date;
   maxRetries?: number;
+  maxTokens?: number;
   timeoutAfter?: number;
   
   // Resource constraints
@@ -459,6 +460,7 @@ export interface SwarmConstraints {
   // Operational constraints
   allowedFailures: number;
   recoveryTime: number;
+  resourceLimits: Record<string, number>;
   maintenanceWindows?: TimeWindow[];
 }
 
