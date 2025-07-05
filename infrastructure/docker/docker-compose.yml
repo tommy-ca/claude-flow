@@ -4,8 +4,8 @@ services:
   # Claude Flow main service
   claude-flow:
     build:
-      context: .
-      dockerfile: Docker/Dockerfile
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
     image: claude-flow:latest
     container_name: claude-flow
     restart: unless-stopped
@@ -16,7 +16,7 @@ services:
       - MCP_SERVER_URL=http://mcp-server:3001
     volumes:
       - claude-flow-data:/home/claude/.claude-flow
-      - ./workspace:/workspace
+      - ../../workspace:/workspace
     networks:
       - claude-flow-network
     command: ["start", "--mode", "server"]
@@ -26,8 +26,8 @@ services:
   # MCP Server for Claude Flow
   mcp-server:
     build:
-      context: .
-      dockerfile: Docker/Dockerfile
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
     image: claude-flow:latest
     container_name: claude-flow-mcp
     restart: unless-stopped
@@ -53,7 +53,7 @@ services:
       - SWARM_MODE=distributed
       - CLAUDE_FLOW_URL=http://claude-flow:3000
     volumes:
-      - ./ruv-swarm:/app
+      - ../../ruv-swarm:/app
       - swarm-data:/data
     networks:
       - claude-flow-network
@@ -65,15 +65,15 @@ services:
   # Development environment
   dev:
     build:
-      context: .
-      dockerfile: Docker/Dockerfile
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
       target: builder
     image: claude-flow:dev
     container_name: claude-flow-dev
     environment:
       - NODE_ENV=development
     volumes:
-      - .:/app
+      - ../..:/app
       - /app/node_modules
     networks:
       - claude-flow-network
@@ -84,8 +84,8 @@ services:
   # Test runner
   test:
     build:
-      context: .
-      dockerfile: Docker/Dockerfile
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile
       target: builder
     image: claude-flow:test
     container_name: claude-flow-test
@@ -93,7 +93,7 @@ services:
       - NODE_ENV=test
       - CI=true
     volumes:
-      - .:/app
+      - ../..:/app
       - /app/node_modules
     networks:
       - claude-flow-network

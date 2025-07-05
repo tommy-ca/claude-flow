@@ -253,10 +253,10 @@ npx claude-flow github release-manager "prepare v2.0.0 release"
 #### Docker Development
 ```bash
 # Build Docker environment
-docker-compose -f docker-test/docker-compose.yml up
+docker-compose -f infrastructure/docker/docker-compose.yml up
 
 # Run tests in Docker
-docker-compose -f docker-test/docker-compose.test.yml up
+docker-compose -f infrastructure/docker/testing/docker-compose.test.yml up
 ```
 
 ### Verification
@@ -277,7 +277,7 @@ claude-flow agent list
 claude-flow github --help
 
 # Docker testing
-cd docker-test && docker-compose up
+cd infrastructure/docker && docker-compose up
 ```
 
 ---

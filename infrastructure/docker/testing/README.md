@@ -100,7 +100,7 @@ docker-compose --profile monitoring up -d performance-monitor
 curl http://localhost/metrics
 
 # Check performance reports
-cat docker-test/volumes/shared/performance-report.json
+cat infrastructure/docker/testing/volumes/shared/performance-report.json
 ```
 
 ### Health Checks
@@ -174,9 +174,11 @@ docker-compose run --rm claude-flow-test npm run test:performance
 ## 📂 Directory Structure
 
 ```
-docker-test/
+infrastructure/docker/testing/
 ├── Dockerfile                 # Multi-stage build definition
 ├── docker-compose.yml         # Service orchestration
+├── docker-compose.test.yml    # Test-specific orchestration
+├── docker-compose.override.yml # Local overrides
 ├── .dockerignore              # Build context exclusions
 ├── nginx.conf                 # Load balancer configuration
 ├── README.md                  # This file
@@ -207,7 +209,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run Docker Tests
         run: |
-          cd docker-test
+          cd infrastructure/docker/testing
           ./scripts/build-and-test.sh
 ```
 
