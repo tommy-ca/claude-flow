@@ -15,12 +15,15 @@ USAGE:
   claude-flow <command> --help    # Get detailed help for any command
 
 🚀 QUICK START:
-  npx claude-flow@2.0.0 init --sparc    # Initialize enterprise environment
+  # First time setup (creates CLAUDE.md & .claude/commands)
+  npx claude-flow@2.0.0 init --sparc
+  
+  # After setup, use without npx:
   claude-flow start --ui --swarm         # Start with swarm intelligence UI
   claude-flow swarm "build REST API"     # Deploy multi-agent workflow
 
 📋 CORE COMMANDS:
-  init [--sparc]           Initialize project with SPARC environment
+  init [--sparc]           Initialize with CLAUDE.md & .claude/commands
   start [--ui] [--swarm]   Start orchestration system
   swarm <objective>        Multi-agent swarm coordination
   agent <action>           Agent management (spawn, list, terminate)
@@ -244,9 +247,25 @@ OPTIONS:
   --template <t>   Use specific project template
 
 WHAT --sparc CREATES:
-  .roomodes        17 specialized SPARC development modes
-  CLAUDE.md        AI-readable project instructions
-  .claude/         Configuration and hooks directory
+  📄 CLAUDE.md          AI-readable project instructions & context
+  📁 .claude/           Enterprise configuration directory containing:
+    └── commands/       Custom commands and automation scripts
+    └── settings.json   Advanced configuration and hooks
+    └── hooks/          Pre/post operation automation
+  📋 .roomodes          17 specialized SPARC development modes
+  
+  CLAUDE.md CONTENTS:
+  • Project overview and objectives
+  • Technology stack and architecture
+  • Development guidelines and patterns
+  • AI-specific instructions for better assistance
+  • Integration with ruv-swarm MCP tools
+  
+  .claude/commands INCLUDES:
+  • Custom project-specific commands
+  • Automated workflow scripts
+  • Integration hooks for Claude Code
+  • Team collaboration tools
   
   Features enabled:
   • ruv-swarm integration with 27 MCP tools
