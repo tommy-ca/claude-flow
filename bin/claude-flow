@@ -10,39 +10,16 @@ if [ $# -eq 0 ]; then
   set -- "--help"
 fi
 
-# Quick version check and help
+# Special handling for help command to ensure it passes through
+if [ "$1" = "help" ] || [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+  # Let the actual CLI handle help display
+  :  # no-op, just pass through
+fi
+
+# Quick version check only - let the actual CLI handle help
 for arg in "$@"; do
   if [ "$arg" = "--version" ] || [ "$arg" = "-v" ]; then
     echo "v$VERSION"
-    exit 0
-  fi
-  if [ "$arg" = "--help" ] || [ "$arg" = "-h" ] || [ "$arg" = "help" ]; then
-    echo "🌊 Claude-Flow v$VERSION - Enterprise-Grade AI Agent Orchestration Platform"
-    echo ""
-    echo "🎯 ENTERPRISE FEATURES: Complete ruv-swarm integration with 27 MCP tools, neural networking, and production-ready infrastructure"
-    echo ""
-    echo "USAGE:"
-    echo "  claude-flow <command> [options]"
-    echo ""
-    echo "🚀 INSTALLATION & ENTERPRISE SETUP:"
-    echo "  npx claude-flow@2.0.0 init --sparc  # Enterprise SPARC + ruv-swarm integration"
-    echo ""
-    echo "🧠 SWARM INTELLIGENCE COMMANDS (v2.0.0):"
-    echo "  swarm \"objective\" [--strategy] [--mode] [--max-agents N] [--parallel] [--monitor]"
-    echo ""
-    echo "🐙 GITHUB WORKFLOW AUTOMATION (v2.0.0):"
-    echo "  github gh-coordinator        # GitHub workflow orchestration and coordination"
-    echo "  github pr-manager           # Pull request management with multi-reviewer coordination"
-    echo ""
-    echo "🏗️ CORE ENTERPRISE COMMANDS:"
-    echo "  init [--sparc]              # Initialize with enterprise environment + ruv-swarm"
-    echo "  start [--ui] [--swarm]      # Start orchestration with swarm intelligence"
-    echo "  status                      # Comprehensive system status with performance metrics"
-    echo ""
-    echo "📚 Documentation: https://github.com/ruvnet/claude-code-flow"
-    echo "🐝 ruv-swarm: https://github.com/ruvnet/ruv-FANN/tree/main/ruv-swarm"
-    echo ""
-    echo "🚀 Enterprise-Grade AI Agent Orchestration - Built with ❤️ by rUv for the Claude community"
     exit 0
   fi
 done

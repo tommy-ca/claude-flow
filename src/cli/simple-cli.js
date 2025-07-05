@@ -13,10 +13,21 @@ import {
 } from './command-registry.js';
 import { parseFlags } from './utils.js';
 import { args, cwd, isMainModule } from './node-compat.js';
+import { getMainHelp, getCommandHelp } from './help-text.js';
 
 const VERSION = '2.0.0';
 
 function printHelp() {
+  console.log(getMainHelp());
+}
+
+function printCommandHelp(command) {
+  const help = getCommandHelp(command);
+  console.log(help);
+}
+
+// Legacy help function for backward compatibility
+function printLegacyHelp() {
   console.log(`
 🌊 Claude-Flow v${VERSION} - Enterprise-Grade AI Agent Orchestration Platform
 
@@ -179,6 +190,20 @@ async function main() {
 
   const command = args[0];
   const { flags, args: parsedArgs } = parseFlags(args.slice(1));
+  
+  // Check if user is asking for help on a specific command
+  if (command !== 'help' && command !== '--help' && command !== '-h' && (flags.help || flags.h)) {
+    const detailedHelp = getCommandHelp(command);
+    if (detailedHelp && !detailedHelp.includes('Help not available')) {
+      printCommandHelp(command);
+    } else if (hasCommand(command)) {
+      showCommandHelp(command);
+    } else {
+      printError(`Unknown command: ${command}`);
+      console.log('\nRun "claude-flow --help" to see available commands.');
+    }
+    return;
+  }
 
   // Handle special commands first
   switch (command) {
@@ -192,9 +217,16 @@ async function main() {
     case '--help':
     case '-h':
       if (parsedArgs.length > 0) {
-        showCommandHelp(parsedArgs[0]);
+        // Try our detailed help first
+        const detailedHelp = getCommandHelp(parsedArgs[0]);
+        if (detailedHelp && !detailedHelp.includes('Help not available')) {
+          printCommandHelp(parsedArgs[0]);
+        } else {
+          // Fall back to command registry help
+          showCommandHelp(parsedArgs[0]);
+        }
       } else {
-        showHelpWithCommands();
+        printHelp();
       }
       return;
   }
@@ -206,6 +238,7 @@ async function main() {
       return;
     } catch (err) {
       printError(err.message);
+      console.log(`\nRun "claude-flow ${command} --help" for usage information.`);
       return;
     }
   }

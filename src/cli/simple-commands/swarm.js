@@ -11,10 +11,11 @@ USAGE:
   claude-flow swarm <objective> [options]
 
 EXAMPLES:
-  claude-flow swarm "Build a REST API" --strategy development
-  claude-flow swarm "Research cloud architecture" --strategy research --ui
-  claude-flow swarm "Analyze data trends" --strategy analysis --parallel
-  claude-flow swarm "Optimize performance" --distributed --monitor
+  claude-flow swarm "Build a REST API with authentication"
+  claude-flow swarm "Research cloud architecture patterns" --strategy research
+  claude-flow swarm "Analyze database performance" --max-agents 3 --parallel
+  claude-flow swarm "Develop user registration feature" --strategy development --monitor
+  claude-flow swarm "Optimize React app performance" --strategy optimization --ui
 
 REMOTE EXECUTION:
   When running via npx, swarm will use Claude wrapper if available:
