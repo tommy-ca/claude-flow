@@ -23,7 +23,7 @@ USAGE:
   claude-flow swarm "build REST API"     # Deploy multi-agent workflow
 
 📋 CORE COMMANDS:
-  init [--sparc]           Initialize with CLAUDE.md & .claude/commands
+  init                     Initialize Claude Flow v2.0.0 (creates CLAUDE.md & .claude/commands)
   start [--ui] [--swarm]   Start orchestration system
   swarm <objective>        Multi-agent swarm coordination
   agent <action>           Agent management (spawn, list, terminate)
@@ -237,16 +237,18 @@ USAGE:
   claude-flow init [options]
 
 DESCRIPTION:
-  Initialize Claude Flow in your project with optional SPARC enterprise setup.
-  Creates configuration files and development environment.
+  Initialize Claude Flow v2.0.0 in your project with full MCP integration.
+  By default creates enhanced setup with CLAUDE.md and .claude/commands.
 
 OPTIONS:
-  --sparc          Full SPARC enterprise setup (recommended)
   --force          Overwrite existing configuration
+  --dry-run        Preview what will be created
+  --basic          Use basic initialization (pre-v2.0.0)
+  --sparc          SPARC enterprise setup with additional features
   --minimal        Minimal setup without examples
   --template <t>   Use specific project template
 
-WHAT --sparc CREATES:
+WHAT claude-flow init CREATES (DEFAULT):
   📄 CLAUDE.md          AI-readable project instructions & context
   📁 .claude/           Enterprise configuration directory containing:
     └── commands/       Custom commands and automation scripts
@@ -277,10 +279,12 @@ WHAT --sparc CREATES:
   • Enterprise security features
 
 EXAMPLES:
-  npx claude-flow@2.0.0 init --sparc      # Recommended first-time setup
-  claude-flow init --sparc --force         # Reinitialize with SPARC
-  claude-flow init --minimal               # Basic setup only
-  claude-flow init --template typescript   # TypeScript project template
+  npx claude-flow@2.0.0 init              # Default: Full v2.0.0 setup
+  claude-flow init                        # Initialize with enhanced features
+  claude-flow init --force                # Overwrite existing configuration
+  claude-flow init --dry-run              # Preview what will be created
+  claude-flow init --sparc                # SPARC enterprise setup
+  claude-flow init --minimal              # Basic setup only
 `,
 
   start: `

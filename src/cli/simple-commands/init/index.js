@@ -55,6 +55,12 @@ export async function initCommand(subArgs, flags) {
     return;
   }
   
+  // Default to enhanced Claude Flow v2 init
+  // Use --basic flag for old behavior
+  if (!flags.basic && !flags.minimal && !flags.sparc) {
+    return await enhancedClaudeFlowInit(flags);
+  }
+  
   // Check for validation and rollback commands
   if (subArgs.includes('--validate') || subArgs.includes('--validate-only')) {
     return handleValidationCommand(subArgs, flags);
@@ -89,10 +95,7 @@ export async function initCommand(subArgs, flags) {
   const initSparc = subArgs.includes('--sparc') || subArgs.includes('-s') || flags.sparc;
   const initDryRun = subArgs.includes('--dry-run') || subArgs.includes('-d') || flags.dryRun;
   const initOptimized = initSparc && initForce; // Use optimized templates when both flags are present
-  const initClaudeFlow = subArgs.includes('--claude-flow') || subArgs.includes('--v2') || flags.claudeFlow || flags.v2; // New enhanced mode
   const selectedModes = flags.modes ? flags.modes.split(',') : null; // Support selective mode initialization
-  
-  // Check for Claude Flow v2.0.0 enhanced mode
   if (initClaudeFlow) {
     return enhancedClaudeFlowInit(subArgs, flags, initDryRun, initForce);
   }
@@ -869,10 +872,16 @@ async function setupCoordinationSystem(workingDir) {
 /**
  * Enhanced Claude Flow v2.0.0 initialization
  */
-async function enhancedClaudeFlowInit(subArgs, flags, dryRun, force) {
+async function enhancedClaudeFlowInit(flags) {
   console.log('🚀 Initializing Claude Flow v2.0.0 with enhanced features...');
   
-  const workingDir = process.env.PWD || cwd();
+  const workingDir = process.cwd();
+  const force = flags.force || flags.f;
+  const dryRun = flags.dryRun || flags['dry-run'] || flags.d;
+  
+  // Import fs module for Node.js
+  const fs = await import('fs/promises');
+  const { chmod } = fs;
   
   try {
     // Check existing files
@@ -932,7 +941,7 @@ Commands for ${category} operations in Claude Flow.
 
 ## Available Commands
 
-${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\\n')}
+${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
 `;
         await Deno.writeTextFile(`${categoryDir}/README.md`, categoryReadme);
         
@@ -955,7 +964,7 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\\n')}
       // Unix wrapper
       const unixWrapper = createWrapperScript('unix');
       await Deno.writeTextFile(`${workingDir}/claude-flow`, unixWrapper);
-      await Deno.chmod(`${workingDir}/claude-flow`, 0o755);
+      await require('fs').promises.chmod(`${workingDir}/claude-flow`, 0o755);
       
       // Windows wrapper
       await Deno.writeTextFile(`${workingDir}/claude-flow.bat`, createWrapperScript('windows'));
@@ -975,7 +984,7 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\\n')}
         const content = createHelperScript(helper);
         if (content) {
           await Deno.writeTextFile(`${claudeDir}/helpers/${helper}`, content);
-          await Deno.chmod(`${claudeDir}/helpers/${helper}`, 0o755);
+          await require('fs').promises.chmod(`${claudeDir}/helpers/${helper}`, 0o755);
         }
       }
     }
@@ -999,7 +1008,7 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\\n')}
     
     for (const dir of standardDirs) {
       if (!dryRun) {
-        await Deno.mkdir(`${workingDir}/${dir}`, { recursive: true });
+        await fs.mkdir(`${workingDir}/${dir}`, { recursive: true });
       }
     }
     
@@ -1008,11 +1017,11 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\\n')}
       
       // Initialize memory system
       const initialData = { agents: [], tasks: [], lastUpdated: Date.now() };
-      await Deno.writeTextFile(`${workingDir}/memory/claude-flow-data.json`, JSON.stringify(initialData, null, 2));
+      await fs.writeFile(`${workingDir}/memory/claude-flow-data.json`, JSON.stringify(initialData, null, 2));
       
       // Create README files
-      await Deno.writeTextFile(`${workingDir}/memory/agents/README.md`, createAgentsReadme());
-      await Deno.writeTextFile(`${workingDir}/memory/sessions/README.md`, createSessionsReadme());
+      await fs.writeFile(`${workingDir}/memory/agents/README.md`, createAgentsReadme());
+      await fs.writeFile(`${workingDir}/memory/sessions/README.md`, createSessionsReadme());
       
       printSuccess('✓ Initialized memory system');
     }
