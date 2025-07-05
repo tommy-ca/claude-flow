@@ -645,6 +645,36 @@ Examples:
   }
   
   /**
+   * Execute specific SPARC mode
+   */
+  async executeSparcMode(mode, args) {
+    if (!this.wsClient.isConnected) {
+      this.terminal.writeError('Not connected to server');
+      return;
+    }
+    
+    try {
+      const task = args.join(' ') || `Execute ${mode} mode tasks`;
+      const options = {};
+      
+      this.terminal.writeInfo(`Executing SPARC ${mode} mode...`);
+      
+      const result = await this.wsClient.sendRequest('tools/call', {
+        name: 'sparc/execute',
+        arguments: { mode, task, options }
+      });
+      
+      if (result && result.content && result.content[0]) {
+        this.terminal.writeSuccess(result.content[0].text);
+      } else {
+        this.terminal.writeSuccess(`SPARC ${mode} mode executed successfully`);
+      }
+    } catch (error) {
+      this.terminal.writeError(`SPARC ${mode} execution failed: ${error.message}`);
+    }
+  }
+  
+  /**
    * Execute remote command via WebSocket
    */
   async executeRemoteCommand(command, args) {
