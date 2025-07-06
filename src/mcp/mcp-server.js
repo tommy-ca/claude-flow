@@ -51,7 +51,7 @@ class ClaudeFlowMCPServer {
         inputSchema: {
           type: 'object',
           properties: {
-            type: { type: 'string', enum: ['researcher', 'coder', 'analyst', 'architect', 'tester', 'coordinator', 'reviewer', 'optimizer'] },
+            type: { type: 'string', enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'] },
             name: { type: 'string' },
             capabilities: { type: 'array' },
             swarmId: { type: 'string' }

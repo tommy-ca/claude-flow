@@ -74,9 +74,9 @@ class MCPValidator {
     static validateAgentSpawn(params) {
         const errors = [];
         
-        if (params.type && !['researcher', 'coder', 'analyst', 'optimizer', 'coordinator', 'tester', 'architect'].includes(params.type)) {
+        if (params.type && !['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'].includes(params.type)) {
             errors.push(new MCPValidationError(
-                'Invalid agent type. Must be one of: researcher, coder, analyst, optimizer, coordinator, tester, architect',
+                'Invalid agent type. Must be one of: coordinator, researcher, coder, analyst, architect, tester, reviewer, optimizer, documenter, monitor, specialist',
                 'type',
                 params.type
             ));

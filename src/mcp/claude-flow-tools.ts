@@ -67,7 +67,7 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
       properties: {
         type: {
           type: 'string',
-          enum: ['coordinator', 'researcher', 'implementer', 'analyst', 'custom'],
+          enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'],
           description: 'Type of agent to spawn',
         },
         name: {
@@ -150,7 +150,7 @@ function createListAgentsTool(logger: ILogger): MCPTool {
         },
         filterByType: {
           type: 'string',
-          enum: ['coordinator', 'researcher', 'implementer', 'analyst', 'custom'],
+          enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'],
           description: 'Filter agents by type',
         },
       },
@@ -294,7 +294,7 @@ function createCreateTaskTool(logger: ILogger): MCPTool {
         },
         assignToAgentType: {
           type: 'string',
-          enum: ['coordinator', 'researcher', 'implementer', 'analyst', 'custom'],
+          enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'],
           description: 'Type of agent to assign the task to',
         },
         input: {

@@ -191,7 +191,7 @@ export function createRuvSwarmTools(logger: ILogger): MCPTool[] {
         properties: {
           type: {
             type: 'string',
-            enum: ['researcher', 'coder', 'analyst', 'optimizer', 'coordinator'],
+            enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'],
             description: 'Agent type'
           },
           name: {
