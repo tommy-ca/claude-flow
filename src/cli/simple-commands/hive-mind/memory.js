@@ -795,6 +795,85 @@ export class CollectiveMemory extends EventEmitter {
   }
   
   /**
+   * Optimize database performance
+   */
+  _optimizeDatabase() {
+    try {
+      // Run database optimization
+      this.db.pragma('optimize');
+      this.db.pragma('analysis_limit=1000');
+      this.db.exec('ANALYZE');
+      
+      // Update database statistics
+      this._updateStatistics();
+      
+      this.emit('database:optimized');
+      
+    } catch (error) {
+      this.emit('error', error);
+    }
+  }
+  
+  /**
+   * Optimize cache performance
+   */
+  _optimizeCache() {
+    try {
+      const now = Date.now();
+      const cacheTimeout = 300000; // 5 minutes
+      
+      // Clear expired cache entries
+      if (this.cache.cache) {
+        this.cache.cache.forEach((value, key) => {
+          if (now - value.timestamp > cacheTimeout) {
+            this.cache.cache.delete(key);
+          }
+        });
+      }
+      
+      this.emit('cache:optimized', { 
+        size: this.cache.cache ? this.cache.cache.size : 0 
+      });
+      
+    } catch (error) {
+      this.emit('error', error);
+    }
+  }
+  
+  /**
+   * Update performance metrics
+   */
+  _updatePerformanceMetrics() {
+    try {
+      // Calculate cache hit rate
+      const cacheStats = this.cache.getStats();
+      this.state.performanceMetrics.cacheHitRate = cacheStats.hitRate || 0;
+      
+      // Calculate memory efficiency
+      this.state.performanceMetrics.memoryEfficiency = 
+        (this.state.totalSize / (this.config.maxSize * 1024 * 1024)) * 100;
+      
+      // Update average query time if we have recent measurements
+      if (this.state.performanceMetrics.queryTimes.length > 0) {
+        this.state.performanceMetrics.avgQueryTime = 
+          this.state.performanceMetrics.queryTimes.reduce((sum, time) => sum + time, 0) / 
+          this.state.performanceMetrics.queryTimes.length;
+        
+        // Keep only recent query times (last 100)
+        if (this.state.performanceMetrics.queryTimes.length > 100) {
+          this.state.performanceMetrics.queryTimes = 
+            this.state.performanceMetrics.queryTimes.slice(-100);
+        }
+      }
+      
+      this.emit('metrics:updated', this.state.performanceMetrics);
+      
+    } catch (error) {
+      this.emit('error', error);
+    }
+  }
+  
+  /**
    * Update memory statistics
    */
   _updateStatistics() {
