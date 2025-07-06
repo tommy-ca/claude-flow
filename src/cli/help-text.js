@@ -9,6 +9,7 @@ export const MAIN_HELP = `
 🌊 Claude-Flow v${VERSION} - Enterprise-Grade AI Agent Orchestration Platform
 
 🎯 ENTERPRISE FEATURES: Complete ruv-swarm integration with 27 MCP tools, neural networking, and production-ready infrastructure
+🐝 NEW: Advanced Hive Mind System with Queen-led coordination, collective intelligence, and unlimited scaling
 
 USAGE:
   claude-flow <command> [options]
@@ -18,9 +19,20 @@ USAGE:
   # First time setup (creates CLAUDE.md & .claude/commands)
   npx claude-flow@2.0.0 init --sparc
   
+  # 🐝 HIVE MIND QUICK START (NEW!):
+  claude-flow hive-mind wizard          # Interactive setup wizard
+  claude-flow hive-mind spawn "objective"  # Create intelligent swarm
+  
   # After setup, use without npx:
   claude-flow start --ui --swarm         # Start with swarm intelligence UI
   claude-flow swarm "build REST API"     # Deploy multi-agent workflow
+
+🐝 HIVE MIND COMMANDS (NEW!):
+  hive-mind wizard         🎯 Interactive setup wizard (RECOMMENDED)
+  hive-mind init           Initialize Hive Mind system with SQLite
+  hive-mind spawn <task>   Create intelligent swarm with objective
+  hive-mind status         View active swarms and performance metrics
+  hive-mind metrics        Advanced performance analytics
 
 📋 CORE COMMANDS:
   init                     Initialize Claude Flow v2.0.0 (creates CLAUDE.md & .claude/commands)
@@ -53,7 +65,13 @@ USAGE:
   claude-flow help <command>        Detailed command help
   claude-flow <command> --help      Detailed command help
 
+🎯 RECOMMENDED FOR NEW USERS:
+  claude-flow hive-mind wizard     # Start here! Interactive guided setup
+  claude-flow init --sparc         # Initialize with SPARC methodology
+  claude-flow help hive-mind       # Learn about Hive Mind features
+
 📚 Documentation: https://github.com/ruvnet/claude-code-flow
+🐝 Hive Mind Guide: https://github.com/ruvnet/claude-code-flow/docs/hive-mind
 🐝 ruv-swarm: https://github.com/ruvnet/ruv-FANN/tree/main/ruv-swarm
 `;
 
