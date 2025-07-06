@@ -131,9 +131,94 @@ npx claude-flow@2.0.0 coordination swarm-init --topology mesh --max-agents 8
 # Step 3: Enable neural pattern learning
 npx claude-flow@2.0.0 neural train --pattern-type coordination --epochs 50
 
-# Step 4: Start coordinated development
-npx claude-flow@2.0.0 start-ui
+# Step 4: Start coordinated development (both methods work)
+npx claude-flow@2.0.0 start --ui     # Primary method
+npx claude-flow@2.0.0 start-ui       # Convenient alias
 # Navigate to http://localhost:3000 for full coordination interface
+```
+
+---
+
+## 🖥️ **Environment-Specific Usage Guide**
+
+### 🚨 **Important: Non-Interactive Environments**
+
+Claude Flow v2.0.0 includes intelligent environment detection to ensure smooth operation across different execution contexts. Here's what you need to know:
+
+### **VS Code Integrated Terminal**
+```bash
+# VS Code output panel requires non-interactive mode
+npx claude-flow@2.0.0 init --non-interactive --dangerously-skip-permissions
+
+# For interactive features, use the integrated terminal (Ctrl+`)
+# NOT the output panel from extension commands
+```
+
+### **CI/CD Environments**
+```bash
+# Automatic detection for GitHub Actions, GitLab CI, Jenkins, etc.
+npx claude-flow@2.0.0 init --ci --non-interactive
+
+# All prompts will use defaults, no manual intervention needed
+CI=true npx claude-flow@2.0.0 swarm "build and test" --auto-approve
+```
+
+### **Docker Containers**
+```bash
+# Run with proper TTY allocation
+docker run -it claude-flow:2.0.0 init
+
+# Without TTY (automated deployments)
+docker run claude-flow:2.0.0 init --non-interactive --no-emoji
+```
+
+### **SSH Sessions**
+```bash
+# Use SSH with TTY allocation
+ssh -t user@host "npx claude-flow@2.0.0 init"
+
+# Without TTY (automated scripts)
+ssh user@host "npx claude-flow@2.0.0 init --batch --non-interactive"
+```
+
+### **🔧 Environment Detection Features**
+
+Claude Flow v2.0.0 automatically detects your environment and applies smart defaults:
+
+| Environment | Auto-Applied Flags | Why |
+|-------------|-------------------|-----|
+| VS Code Output | `--non-interactive --dangerously-skip-permissions` | No TTY support |
+| CI/CD | `--non-interactive --ci --quiet` | Automated execution |
+| Docker (no TTY) | `--non-interactive --no-emoji` | Container compatibility |
+| SSH (no TTY) | `--batch --non-interactive` | Remote execution |
+| Git Bash | `--windows-compat` | Windows terminal quirks |
+
+### **💡 Troubleshooting Tips**
+
+**"Manual UI agreement needed" Error:**
+```bash
+# Solution 1: Use non-interactive mode
+npx claude-flow@2.0.0 init --non-interactive
+
+# Solution 2: Pre-configure defaults
+export CLAUDE_AUTO_APPROVE=1
+export CLAUDE_NON_INTERACTIVE=1
+npx claude-flow@2.0.0 init
+
+# Solution 3: Use the Web UI for full control (both methods work)
+npx claude-flow@2.0.0 start --ui     # Primary method
+npx claude-flow@2.0.0 start-ui       # Convenient alias
+```
+
+**Environment Detection Output:**
+```bash
+# Check your detected environment
+npx claude-flow@2.0.0 env-check
+
+# Example output:
+# Detected Environment: VS Code on darwin
+# Recommended flags: --non-interactive --dangerously-skip-permissions
+# Applied automatically: ✓
 ```
 
 ---
@@ -153,8 +238,9 @@ npx claude-flow@2.0.0 init --claude --webui
 # ✓ Neural pattern learning enabled
 # ✓ Cross-session memory persistence
 
-# Start the revolutionary platform
-npx claude-flow@2.0.0 start-ui
+# Start the revolutionary platform (both methods work)
+npx claude-flow@2.0.0 start --ui     # Primary method
+npx claude-flow@2.0.0 start-ui       # Convenient alias
 # Access at: http://localhost:3000
 ```
 
@@ -177,8 +263,9 @@ npx claude-flow@2.0.0 coordination task-orchestrate \
 
 ### 🌐 **Method 3: WebUI + Real-Time Coordination**
 ```bash
-# Start modern web interface with live coordination
-npx claude-flow@2.0.0 start-ui --port 3000
+# Start modern web interface with live coordination (both methods work)
+npx claude-flow@2.0.0 start --ui --port 3000    # Primary method
+npx claude-flow@2.0.0 start-ui --port 3000      # Convenient alias
 
 # Features available in WebUI:
 # ✓ Real-time terminal emulator
@@ -371,7 +458,7 @@ npx claude-flow@2.0.0 load balance --swarm-id mesh-prod-001 --tasks high-priorit
 ### **🌐 WebUI & SPARC Commands**
 | Command | Purpose | Example |
 |---------|---------|---------|
-| `start-ui` | Launch modern WebUI | `--port 3000 --theme dark` |
+| `start-ui` | Launch UI (alias for start --ui) | `--port 3000 --theme dark` |
 | `sparc-mode` | Execute SPARC modes | `--mode coder --task "build API"` |
 | `terminal-execute` | Execute terminal commands | `--command "npm test" --capture-output` |
 | `config-manage` | Configuration management | `--action update --config ui-settings.json` |
@@ -509,7 +596,8 @@ npm run build
 
 # Setup development integration
 npx claude-flow@2.0.0 init --claude --dev
-npx claude-flow@2.0.0 start-ui --dev --port 3000
+npx claude-flow@2.0.0 start --ui --dev --port 3000    # Primary method
+# Or use alias: npx claude-flow@2.0.0 start-ui --dev --port 3000
 
 # Run comprehensive tests
 npm run test:all

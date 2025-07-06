@@ -49,12 +49,29 @@ First-time users should run: npx claude-flow@latest init --sparc`
   commandRegistry.set('start', {
     handler: startCommand,
     description: 'Start the Claude-Flow orchestration system',
-    usage: 'start [--daemon] [--port <port>] [--verbose]',
+    usage: 'start [--daemon] [--port <port>] [--verbose] [--ui] [--web]',
     examples: [
       'start                    # Start in interactive mode',
       'start --daemon           # Start as background daemon',
       'start --port 8080        # Use custom MCP port',
-      'start --verbose          # Show detailed system activity'
+      'start --verbose          # Show detailed system activity',
+      'start --ui               # Launch terminal-based UI',
+      'start --web              # Launch web-based UI'
+    ]
+  });
+
+  // Add start-ui as a convenient alias for start --ui
+  commandRegistry.set('start-ui', {
+    handler: async (args, flags) => {
+      // Call start command with --ui flag
+      return startCommand(args, { ...flags, ui: true });
+    },
+    description: 'Start the UI interface (alias for start --ui)',
+    usage: 'start-ui [--port <port>] [--web]',
+    examples: [
+      'start-ui                 # Launch terminal-based UI',
+      'start-ui --port 3000     # Use custom port',
+      'start-ui --web           # Launch web-based UI instead'
     ]
   });
 

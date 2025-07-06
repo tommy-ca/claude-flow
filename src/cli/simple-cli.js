@@ -194,8 +194,21 @@ async function main() {
   const command = args[0];
   const { flags, args: parsedArgs } = parseFlags(args.slice(1));
   
+  // Apply environment-based smart defaults
+  let enhancedFlags = flags;
+  try {
+    const { detectExecutionEnvironment, applySmartDefaults } = await import('./utils/environment-detector.js');
+    enhancedFlags = applySmartDefaults(flags);
+    
+    // Store environment info for commands that need it
+    enhancedFlags._environment = detectExecutionEnvironment({ skipWarnings: true });
+  } catch (e) {
+    // If environment detector fails, continue with original flags
+    enhancedFlags = flags;
+  }
+  
   // Check if user is asking for help on a specific command
-  if (command !== 'help' && command !== '--help' && command !== '-h' && (flags.help || flags.h)) {
+  if (command !== 'help' && command !== '--help' && command !== '-h' && (enhancedFlags.help || enhancedFlags.h)) {
     const detailedHelp = getCommandHelp(command);
     if (detailedHelp && !detailedHelp.includes('Help not available')) {
       printCommandHelp(command);
@@ -210,6 +223,28 @@ async function main() {
 
   // Handle special commands first
   switch (command) {
+    case 'env-check':
+    case 'environment':
+      if (enhancedFlags._environment) {
+        const env = enhancedFlags._environment;
+        console.log(`\n🖥️  Environment Detection Results:`);
+        console.log(`   Terminal: ${env.terminalType}`);
+        console.log(`   Interactive: ${env.isInteractive ? 'Yes' : 'No'}`);
+        console.log(`   TTY Support: ${env.supportsRawMode ? 'Yes' : 'No'}`);
+        console.log(`   Detected: ${env.isVSCode ? 'VS Code' : env.isCI ? 'CI/CD' : env.isDocker ? 'Docker' : env.isSSH ? 'SSH' : 'Standard Terminal'}`);
+        if (env.recommendedFlags.length > 0) {
+          console.log(`\n💡 Recommended flags:`);
+          console.log(`   ${env.recommendedFlags.join(' ')}`);
+        }
+        if (enhancedFlags.appliedDefaults && enhancedFlags.appliedDefaults.length > 0) {
+          console.log(`\n✅ Auto-applied:`);
+          console.log(`   ${enhancedFlags.appliedDefaults.join(' ')}`);
+        }
+        console.log();
+      } else {
+        console.log('Environment detection not available');
+      }
+      return;
     case 'version':
     case '--version':
     case '-v':
