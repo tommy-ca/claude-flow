@@ -8,7 +8,7 @@ export const VERSION = '2.0.0';
 export const MAIN_HELP = `
 🌊 Claude-Flow v${VERSION} - Enterprise-Grade AI Agent Orchestration Platform
 
-🎯 ENTERPRISE FEATURES: Complete ruv-swarm integration with 27 MCP tools, neural networking, and production-ready infrastructure
+🎯 ENTERPRISE FEATURES: Complete ruv-swarm integration with 87 MCP tools, neural networking, and production-ready infrastructure
 🐝 NEW: Advanced Hive Mind System with Queen-led coordination, collective intelligence, and unlimited scaling
 
 USAGE:
