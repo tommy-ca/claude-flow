@@ -10,7 +10,7 @@ import { homedir } from 'os';
 import { createHash, randomBytes, createCipher, createDecipher } from 'crypto';
 import type { Config } from '../utils/types.js';
 import { deepMerge, safeParseJSON } from '../utils/helpers.js';
-import type { ConfigError, ValidationError } from '../utils/errors.js';
+import { ConfigError, ValidationError } from '../utils/errors.js';
 
 // Format parsers
 interface FormatParser {
@@ -269,8 +269,8 @@ export class ConfigManager {
   private constructor() {
     this.config = deepClone(DEFAULT_CONFIG);
     this.userConfigDir = this.getUserConfigDir();
-    this.initializeEncryption();
     this.setupValidationRules();
+    // Encryption will be initialized via init() method
   }
 
   /**
@@ -284,9 +284,16 @@ export class ConfigManager {
   }
 
   /**
+   * Initialize async components
+   */
+  async init(): Promise<void> {
+    await this.initializeEncryption();
+  }
+
+  /**
    * Initializes encryption for sensitive configuration values
    */
-  private initializeEncryption(): void {
+  private async initializeEncryption(): Promise<void> {
     try {
       const keyFile = join(this.userConfigDir, '.encryption-key');
       // Check if key file exists (simplified for demo)

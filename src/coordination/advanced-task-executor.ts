@@ -8,7 +8,7 @@ import { spawn, ChildProcess } from 'node:child_process';
 import type { TaskDefinition, TaskResult, TaskStatus, AgentState, TaskError } from '../swarm/types.js';
 import type { ILogger } from '../core/logger.js';
 import type { IEventBus } from '../core/event-bus.js';
-import type { CircuitBreaker, CircuitBreakerManager } from './circuit-breaker.js';
+import { CircuitBreaker, CircuitBreakerManager } from './circuit-breaker.js';
 import { generateId } from '../utils/helpers.js';
 
 export interface TaskExecutorConfig {

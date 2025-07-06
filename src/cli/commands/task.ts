@@ -5,6 +5,8 @@ import { getErrorMessage } from '../../utils/error-handler.js';
 
 import { Command } from '@cliffy/command';
 import { promises as fs } from 'node:fs';
+import chalk from 'chalk';
+import { generateId } from '../../utils/helpers.js';
 import type { Task } from '../../utils/types.js';
 export const taskCommand = new Command()
   .description('Manage tasks')
@@ -13,7 +15,7 @@ export const taskCommand = new Command()
   })
   .command('create', new Command()
     .description('Create a new task')
-    .arguments('<type:string> <description:string>')
+    .argument('<type:string> <description:string>')
     .option('-p, --priority <priority:number>', 'Task priority', { default: 0 })
     .option('-d, --dependencies <deps:string>', 'Comma-separated list of dependency task IDs')
     .option('-i, --input <input:string>', 'Task input as JSON')
@@ -46,14 +48,14 @@ export const taskCommand = new Command()
   )
   .command('status', new Command()
     .description('Get task status')
-    .arguments('<task-id:string>')
+    .argument('<task-id:string>')
     .action(async (options: any, taskId: string) => {
       console.log(chalk.yellow(`Task status requires a running Claude-Flow instance`));
     }),
   )
   .command('cancel', new Command()
     .description('Cancel a task')
-    .arguments('<task-id:string>')
+    .argument('<task-id:string>')
     .option('-r, --reason <reason:string>', 'Cancellation reason')
     .action(async (options: any, taskId: string) => {
       console.log(chalk.yellow(`Cancelling task ${taskId} requires a running Claude-Flow instance`));
@@ -61,7 +63,7 @@ export const taskCommand = new Command()
   )
   .command('workflow', new Command()
     .description('Execute a workflow from file')
-    .arguments('<workflow-file:string>')
+    .argument('<workflow-file:string>')
     .action(async (options: any, workflowFile: string) => {
       try {
         const content = await fs.readFile(workflowFile);

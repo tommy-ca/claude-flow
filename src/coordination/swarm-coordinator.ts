@@ -3,7 +3,7 @@ import { EventEmitter } from 'node:events';
 import { Logger } from '../core/logger.js';
 import { EventBus } from '../core/event-bus.js';
 import { generateId } from '../utils/helpers.js';
-import type { SwarmMonitor } from './swarm-monitor.js';
+import { SwarmMonitor } from './swarm-monitor.js';
 import type { AdvancedTaskScheduler } from './advanced-scheduler.js';
 import { MemoryManager } from '../memory/manager.js';
 
@@ -78,6 +78,8 @@ export class SwarmCoordinator extends EventEmitter {
   private memoryManager: MemoryManager;
   private backgroundWorkers: Map<string, NodeJS.Timeout>;
   private isRunning: boolean = false;
+  private workStealer?: any;
+  private circuitBreaker?: any;
 
   constructor(config: Partial<SwarmConfig> = {}) {
     super();
@@ -177,7 +179,7 @@ export class SwarmCoordinator extends EventEmitter {
     this.stopBackgroundWorkers();
 
     // Stop subsystems
-    await this.scheduler.stop();
+    await this.scheduler.shutdown();
     
     if (this.monitor) {
       this.monitor.stop();
@@ -241,10 +243,13 @@ export class SwarmCoordinator extends EventEmitter {
     objective.tasks = tasks;
 
     // Store in memory
-    await this.memoryManager.remember({
-      namespace: this.config.memoryNamespace,
-      key: `objective:${objectiveId}`,
+    await this.memoryManager.store({
+      id: `objective:${objectiveId}`,
+      agentId: 'swarm-coordinator',
+      type: 'objective',
       content: JSON.stringify(objective),
+      namespace: this.config.memoryNamespace,
+      timestamp: new Date(),
       metadata: {
         type: 'objective',
         strategy,
@@ -458,10 +463,13 @@ export class SwarmCoordinator extends EventEmitter {
     }
 
     // Store result in memory
-    await this.memoryManager.remember({
-      namespace: this.config.memoryNamespace,
-      key: `task:${taskId}:result`,
+    await this.memoryManager.store({
+      id: `task:${taskId}:result`,
+      agentId: agent?.id || 'unknown',
+      type: 'task-result',
       content: JSON.stringify(result),
+      namespace: this.config.memoryNamespace,
+      timestamp: new Date(),
       metadata: {
         type: 'task-result',
         taskType: task.type,
@@ -660,10 +668,13 @@ export class SwarmCoordinator extends EventEmitter {
         timestamp: new Date()
       };
 
-      await this.memoryManager.remember({
-        namespace: this.config.memoryNamespace,
-        key: 'swarm:state',
+      await this.memoryManager.store({
+        id: 'swarm:state',
+        agentId: 'swarm-coordinator',
+        type: 'swarm-state',
         content: JSON.stringify(state),
+        namespace: this.config.memoryNamespace,
+        timestamp: new Date(),
         metadata: {
           type: 'swarm-state',
           objectiveCount: state.objectives.length,

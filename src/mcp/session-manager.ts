@@ -3,7 +3,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Session manager for MCP connections
  */
 
-import type {
+import {
   MCPSession,
   MCPInitializeParams,
   MCPProtocolVersion,
@@ -12,7 +12,7 @@ import type {
   MCPConfig,
 } from '../utils/types.js';
 import type { ILogger } from '../core/logger.js';
-import type { MCPError } from '../utils/errors.js';
+import { MCPError } from '../utils/errors.js';
 import { createHash, timingSafeEqual } from 'node:crypto';
 
 export interface ISessionManager {

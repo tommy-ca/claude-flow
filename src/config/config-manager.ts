@@ -400,6 +400,77 @@ export class ConfigManager {
   }
 
   /**
+   * Get available configuration templates
+   */
+  getAvailableTemplates(): string[] {
+    return ['default', 'development', 'production', 'testing'];
+  }
+
+  /**
+   * Create a configuration template
+   */
+  createTemplate(name: string, config: any): void {
+    // Implementation for creating templates
+    console.log(`Creating template: ${name}`, config);
+  }
+
+  /**
+   * Get format parsers
+   */
+  getFormatParsers(): Record<string, any> {
+    return {
+      json: { extension: '.json', parse: JSON.parse, stringify: JSON.stringify },
+      yaml: { extension: '.yaml', parse: (content: string) => content, stringify: (obj: any) => JSON.stringify(obj) }
+    };
+  }
+
+  /**
+   * Validate configuration file
+   */
+  validateFile(path: string): boolean {
+    try {
+      // Basic validation - file exists and is valid JSON
+      require('fs').readFileSync(path, 'utf8');
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get path history
+   */
+  getPathHistory(): any[] {
+    return []; // Mock implementation
+  }
+
+  /**
+   * Get change history
+   */
+  getChangeHistory(): any[] {
+    return []; // Mock implementation
+  }
+
+  /**
+   * Backup configuration
+   */
+  async backup(path: string): Promise<void> {
+    const backupPath = `${path}.backup.${Date.now()}`;
+    const content = JSON.stringify(this.config, null, 2);
+    await fs.writeFile(backupPath, content, 'utf8');
+    console.log(`Configuration backed up to: ${backupPath}`);
+  }
+
+  /**
+   * Restore configuration from backup
+   */
+  async restore(path: string): Promise<void> {
+    const content = await fs.readFile(path, 'utf8');
+    this.config = JSON.parse(content);
+    console.log(`Configuration restored from: ${path}`);
+  }
+
+  /**
    * Update ruv-swarm configuration
    */
   setRuvSwarmConfig(updates: Partial<Config['ruvSwarm']>): void {

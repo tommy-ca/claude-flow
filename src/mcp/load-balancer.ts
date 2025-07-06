@@ -5,7 +5,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 
 import type { MCPLoadBalancerConfig, MCPRequest, MCPResponse, MCPSession } from '../utils/types.js';
 import type { ILogger } from '../core/logger.js';
-import type { MCPError } from '../utils/errors.js';
+import { MCPError } from '../utils/errors.js';
 
 export interface RequestMetrics {
   requestId: string;

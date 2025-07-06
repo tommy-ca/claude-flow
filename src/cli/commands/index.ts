@@ -1,16 +1,17 @@
+import chalk from 'chalk';
 import { getErrorMessage } from '../../utils/error-handler.js';
 import { CLI, success, error, warning, info, VERSION } from "../cli-core.js";
 import type { Command, CommandContext } from "../cli-core.js";
 import colors from "chalk";
 const { bold, blue, yellow } = colors;
-import type { Orchestrator } from "../../core/orchestrator-fixed.js";
-import type { ConfigManager } from "../../core/config.js";
+import { Orchestrator } from "../../core/orchestrator-fixed.js";
+import { ConfigManager } from "../../core/config.js";
 import type { MemoryManager } from "../../memory/manager.js";
 import { EventBus } from "../../core/event-bus.js";
-import type { Logger } from "../../core/logger.js";
+import { Logger } from "../../core/logger.js";
 import { JsonPersistenceManager } from "../../core/json-persistence.js";
 import { swarmAction } from "./swarm.js";
-import type { SimpleMemoryManager } from "./memory.js";
+import { SimpleMemoryManager } from "./memory.js";
 import { sparcAction } from "./sparc.js";
 import { createMigrateCommand } from "./migrate.js";
 import { enterpriseCommands } from "./enterprise.js";
@@ -1178,10 +1179,10 @@ Now, please proceed with the task: ${task}`;
               });
             });
             
-            if (status.success) {
+            if ((status as any).success) {
               success(`Claude instance ${instanceId} completed successfully`);
             } else {
-              error(`Claude instance ${instanceId} exited with code ${status.code}`);
+              error(`Claude instance ${instanceId} exited with code ${(status as any).code}`);
             }
             
           } catch (err) {
@@ -1263,8 +1264,8 @@ Now, please proceed with the task: ${task}`;
                     resolve({ success: code === 0, code });
                   });
                 });
-                if (!status.success) {
-                  error(`Task ${taskId} failed with code ${status.code}`);
+                if (!(status as any).success) {
+                  error(`Task ${taskId} failed with code ${(status as any).code}`);
                 }
               }
             }
@@ -1272,7 +1273,7 @@ Now, please proceed with the task: ${task}`;
             if (workflow.parallel && promises.length > 0) {
               success("All Claude instances spawned in parallel mode");
               const results = await Promise.all(promises);
-              const failed = results.filter(s => !s.success).length;
+              const failed = results.filter((s: any) => !s.success).length;
               if (failed > 0) {
                 warning(`${failed} tasks failed`);
               } else {

@@ -3,10 +3,24 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../swarm/types.js';
-import type { ILogger } from '../core/logger.js';
-import type { IEventBus } from '../core/event-bus.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { IEventBus } from '../../core/event-bus.js';
+import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
+
+// Type definitions for coordinator activities
+interface ResourceAssignment {
+  resource: string;
+  task: string;
+  utilization: number;
+  duration: string;
+}
+
+interface TaskProgressItem {
+  name: string;
+  status: string;
+  duration: string;
+}
 
 export class CoordinatorAgent extends BaseAgent {
   constructor(
@@ -96,7 +110,7 @@ export class CoordinatorAgent extends BaseAgent {
     };
   }
 
-  async executeTask(task: TaskDefinition): Promise<any> {
+  override async executeTask(task: TaskDefinition): Promise<any> {
     this.logger.info('Coordinator executing task', {
       agentId: this.id,
       taskType: task.type,
@@ -235,9 +249,9 @@ export class CoordinatorAgent extends BaseAgent {
   }
 
   private async allocateResources(task: TaskDefinition): Promise<any> {
-    const resources = task.parameters?.resources || [];
-    const requirements = task.parameters?.requirements || [];
-    const constraints = task.parameters?.constraints || [];
+    const resources = task.input?.resources || [];
+    const requirements = task.input?.requirements || [];
+    const constraints = task.input?.constraints || [];
 
     this.logger.info('Allocating resources', {
       resources: resources.length,
@@ -249,11 +263,11 @@ export class CoordinatorAgent extends BaseAgent {
       resources,
       requirements,
       constraints,
-      assignments: [],
+      assignments: [] as ResourceAssignment[],
       utilization: {},
-      conflicts: [],
-      optimizations: [],
-      recommendations: [],
+      conflicts: [] as any[],
+      optimizations: [] as any[],
+      recommendations: [] as any[],
       efficiency: 0,
       timestamp: new Date()
     };
@@ -282,9 +296,9 @@ export class CoordinatorAgent extends BaseAgent {
   }
 
   private async manageWorkflow(task: TaskDefinition): Promise<any> {
-    const workflow = task.parameters?.workflow;
-    const stage = task.parameters?.stage || 'planning';
-    const automation = task.parameters?.automation || false;
+    const workflow = task.input?.workflow;
+    const stage = task.input?.stage || 'planning';
+    const automation = task.input?.automation || false;
 
     this.logger.info('Managing workflow', {
       workflow,
@@ -296,11 +310,11 @@ export class CoordinatorAgent extends BaseAgent {
       workflow,
       stage,
       automation,
-      stages: [],
-      transitions: [],
-      approvals: [],
-      bottlenecks: [],
-      optimizations: [],
+      stages: [] as TaskProgressItem[],
+      transitions: [] as any[],
+      approvals: [] as any[],
+      bottlenecks: [] as any[],
+      optimizations: [] as any[],
       sla_compliance: {
         on_time: 0,
         quality: 0,
@@ -370,10 +384,10 @@ export class CoordinatorAgent extends BaseAgent {
   }
 
   private async generateStatusReport(task: TaskDefinition): Promise<any> {
-    const scope = task.parameters?.scope || 'project';
-    const period = task.parameters?.period || 'weekly';
-    const audience = task.parameters?.audience || 'stakeholders';
-    const format = task.parameters?.format || 'summary';
+    const scope = task.input?.scope || 'project';
+    const period = task.input?.period || 'weekly';
+    const audience = task.input?.audience || 'stakeholders';
+    const format = task.input?.format || 'summary';
 
     this.logger.info('Generating status report', {
       scope,
@@ -389,14 +403,14 @@ export class CoordinatorAgent extends BaseAgent {
       format,
       executive_summary: '',
       key_metrics: {},
-      achievements: [],
-      challenges: [],
-      next_steps: [],
-      risks: [],
-      recommendations: [],
+      achievements: [] as string[],
+      challenges: [] as any[],
+      next_steps: [] as any[],
+      risks: [] as any[],
+      recommendations: [] as any[],
       appendix: {
         detailed_metrics: {},
-        charts: [],
+        charts: [] as any[],
         raw_data: {}
       },
       timestamp: new Date()
@@ -436,7 +450,7 @@ export class CoordinatorAgent extends BaseAgent {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  getAgentStatus(): any {
+  override getAgentStatus(): any {
     return {
       ...super.getAgentStatus(),
       specialization: 'Task Orchestration & Project Management',
@@ -465,7 +479,38 @@ export const createCoordinatorAgent = (
   eventBus: IEventBus,
   memory: DistributedMemorySystem
 ): CoordinatorAgent => {
-  const defaultConfig = new CoordinatorAgent(id, {} as AgentConfig, {} as AgentEnvironment, logger, eventBus, memory).getDefaultConfig();
+  const defaultConfig = {
+    autonomyLevel: 0.9,
+    learningEnabled: true,
+    adaptationEnabled: true,
+    maxTasksPerHour: 20,
+    maxConcurrentTasks: 5,
+    timeoutThreshold: 180000,
+    reportingInterval: 30000,
+    heartbeatInterval: 15000,
+    permissions: [
+      'task-orchestration',
+      'resource-allocation',
+      'progress-tracking',
+      'team-coordination',
+      'reporting',
+      'workflow-management'
+    ],
+    trustedAgents: [],
+    expertise: {
+      'task-orchestration': 0.98,
+      'resource-allocation': 0.95,
+      'progress-tracking': 0.92,
+      'team-coordination': 0.90,
+      'workflow-management': 0.94
+    },
+    preferences: {
+      coordinationStyle: 'collaborative',
+      reportingFrequency: 'regular',
+      escalationThreshold: 'medium',
+      teamSize: 'medium'
+    }
+  };
   const defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',

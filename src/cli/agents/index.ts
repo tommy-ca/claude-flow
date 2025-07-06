@@ -13,8 +13,8 @@ export { CoordinatorAgent, createCoordinatorAgent } from './coordinator.js';
 
 // Systems
 export { AgentCapabilitySystem } from './capabilities.js';
-export { AgentManager } from './agent-manager.js';
-export { AgentRegistry } from './agent-registry.js';
+export { AgentManager } from '../../agents/agent-manager.js';
+export { AgentRegistry } from '../../agents/agent-registry.js';
 
 // Types
 export type { AgentState } from './base-agent.js';
@@ -25,10 +25,10 @@ export type {
 } from './capabilities.js';
 
 // Agent Factory
-import type { AgentType, AgentConfig, AgentEnvironment } from '../swarm/types.js';
-import type { ILogger } from '../core/logger.js';
-import type { IEventBus } from '../core/event-bus.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { AgentType, AgentConfig, AgentEnvironment } from '../../swarm/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { IEventBus } from '../../core/event-bus.js';
+import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
 import { BaseAgent } from './base-agent.js';
 import { createResearcherAgent } from './researcher.js';
 import { createCoderAgent } from './coder.js';
@@ -36,7 +36,7 @@ import { createAnalystAgent } from './analyst.js';
 import { createArchitectAgent } from './architect.js';
 import { createTesterAgent } from './tester.js';
 import { createCoordinatorAgent } from './coordinator.js';
-import { generateId } from '../utils/helpers.js';
+import { generateId } from '../../utils/helpers.js';
 
 export interface AgentFactoryConfig {
   logger: ILogger;
@@ -209,7 +209,12 @@ export class AgentFactory {
       analyst: 'Focused on data analysis, performance optimization, and insights',
       architect: 'Designs system architecture, technical specifications, and solutions',
       tester: 'Specializes in testing, quality assurance, and validation',
-      coordinator: 'Manages task orchestration, planning, and team coordination'
+      coordinator: 'Manages task orchestration, planning, and team coordination',
+      reviewer: 'Reviews and validates work quality and standards',
+      optimizer: 'Optimizes performance and efficiency across systems',
+      documenter: 'Creates and maintains comprehensive documentation',
+      monitor: 'Monitors system health and performance metrics',
+      specialist: 'Provides domain-specific expertise and specialized knowledge'
     };
   }
 

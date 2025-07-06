@@ -6,10 +6,10 @@ import { promises as fs } from 'node:fs';
 
 import { Command } from '@cliffy/command';
 import chalk from 'chalk';
-import type { Confirm } from '@cliffy/prompt';
-import type { ProcessManager } from './process-manager.js';
-import type { ProcessUI } from './process-ui.js';
-import type { SystemMonitor } from './system-monitor.js';
+import { Confirm } from '@cliffy/prompt';
+import { ProcessManager } from './process-manager.js';
+import { ProcessUI } from './process-ui.js';
+import { SystemMonitor } from './system-monitor.js';
 import type { StartOptions } from './types.js';
 import { eventBus } from '../../../core/event-bus.js';
 import { logger } from '../../../core/logger.js';

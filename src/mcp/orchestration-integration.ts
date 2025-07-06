@@ -6,12 +6,12 @@ import { getErrorMessage } from '../utils/error-handler.js';
 
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../core/logger.js';
-import type { MCPConfig, MCPSession, MCPTool, SystemEvents } from '../utils/types.js';
-import type { MCPError } from '../utils/errors.js';
-import type { MCPServer, IMCPServer } from './server.js';
-import type { MCPLifecycleManager, LifecycleState } from './lifecycle-manager.js';
-import type { MCPPerformanceMonitor } from './performance-monitor.js';
-import type { MCPProtocolManager } from './protocol-manager.js';
+import { MCPConfig, MCPSession, MCPTool, SystemEvents } from '../utils/types.js';
+import { MCPError } from '../utils/errors.js';
+import { MCPServer, IMCPServer } from './server.js';
+import { MCPLifecycleManager, LifecycleState } from './lifecycle-manager.js';
+import { MCPPerformanceMonitor } from './performance-monitor.js';
+import { MCPProtocolManager } from './protocol-manager.js';
 
 export interface OrchestrationComponents {
   orchestrator?: any;

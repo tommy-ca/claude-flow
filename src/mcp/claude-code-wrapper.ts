@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { getErrorMessage } from '../utils/error-handler.js';
-import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import type { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import type {
+import { Server } from '@modelcontextprotocol/sdk/server/index.js';
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
   Tool,

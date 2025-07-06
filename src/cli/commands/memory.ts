@@ -1,11 +1,12 @@
+import chalk from 'chalk';
 import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * Memory management commands
  */
 
-import { Command } from '@cliffy/command';
+import { Command } from 'commander';
 import { promises as fs } from 'node:fs';
-import type { Table } from '@cliffy/table';
+import * as Table from 'cli-table3';
 
 interface MemoryEntry {
   key: string;
@@ -29,7 +30,7 @@ export class SimpleMemoryManager {
   }
 
   async save() {
-    await Deno.mkdir("./memory", { recursive: true });
+    await fs.mkdir("./memory", { recursive: true });
     await fs.writeFile(this.filePath, JSON.stringify(this.data, null, 2));
   }
 
@@ -98,7 +99,7 @@ export class SimpleMemoryManager {
   }
 
   async importData(filePath: string) {
-    const content = await fs.readFile(filePath);
+    const content = await fs.readFile(filePath, 'utf8');
     this.data = JSON.parse(content);
     await this.save();
   }
@@ -121,134 +122,141 @@ export class SimpleMemoryManager {
 }
 
 export const memoryCommand = new Command()
+  .name('memory')
   .description('Manage memory bank')
   .action(() => {
-    memoryCommand.outputHelp();
-  })
-  // Store command
-  .command('store', new Command()
-    .description('Store information in memory')
-    .arguments('<key:string> <value:string>')
-    .option('-n, --namespace <namespace:string>', 'Target namespace', { default: 'default' })
-    .action(async (options: any, key: string, value: string) => {
-      try {
-        const memory = new SimpleMemoryManager();
-        await memory.store(key, value, options.namespace);
-        console.log(chalk.green('✅ Stored successfully'));
-        console.log(`📝 Key: ${key}`);
-        console.log(`📦 Namespace: ${options.namespace}`);
-        console.log(`💾 Size: ${new TextEncoder().encode(value).length} bytes`);
-      } catch (error) {
-        console.error(chalk.red('Failed to store:'), (error as Error).message);
-      }
-    })
-  )
-  // Query command
-  .command('query', new Command()
-    .description('Search memory entries')
-    .arguments('<search:string>')
-    .option('-n, --namespace <namespace:string>', 'Filter by namespace')
-    .option('-l, --limit <limit:number>', 'Limit results', { default: 10 })
-    .action(async (options: any, search: string) => {
-      try {
-        const memory = new SimpleMemoryManager();
-        const results = await memory.query(search, options.namespace);
-        
-        if (results.length === 0) {
-          console.log(chalk.yellow('No results found'));
-          return;
-        }
+    memoryCommand.help();
+  });
 
-        console.log(chalk.green(`✅ Found ${results.length} results:`));
-        
-        const limited = results.slice(0, options.limit);
-        for (const entry of limited) {
-          console.log(chalk.blue(`\n📌 ${entry.key}`));
-          console.log(`   Namespace: ${entry.namespace}`);
-          console.log(`   Value: ${entry.value.substring(0, 100)}${entry.value.length > 100 ? '...' : ''}`);
-          console.log(`   Stored: ${new Date(entry.timestamp).toLocaleString()}`);
-        }
+// Store command
+memoryCommand
+  .command('store')
+  .description('Store information in memory')
+  .arguments('<key> <value>')
+  .option('-n, --namespace <namespace>', 'Target namespace', 'default')
+  .action(async (key: string, value: string, options: any) => {
+    try {
+      const memory = new SimpleMemoryManager();
+      await memory.store(key, value, options.namespace);
+      console.log(chalk.green('✅ Stored successfully'));
+      console.log(`📝 Key: ${key}`);
+      console.log(`📦 Namespace: ${options.namespace}`);
+      console.log(`💾 Size: ${new TextEncoder().encode(value).length} bytes`);
+    } catch (error) {
+      console.error(chalk.red('Failed to store:'), (error as Error).message);
+    }
+  });
 
-        if (results.length > options.limit) {
-          console.log(chalk.gray(`\n... and ${results.length - options.limit} more results`));
+// Query command
+memoryCommand
+  .command('query')
+  .description('Search memory entries')
+  .arguments('<search>')
+  .option('-n, --namespace <namespace>', 'Filter by namespace')
+  .option('-l, --limit <limit>', 'Limit results', '10')
+  .action(async (search: string, options: any) => {
+    try {
+      const memory = new SimpleMemoryManager();
+      const results = await memory.query(search, options.namespace);
+      
+      if (results.length === 0) {
+        console.log(chalk.yellow('No results found'));
+        return;
+      }
+
+      console.log(chalk.green(`✅ Found ${results.length} results:`));
+      
+      const limited = results.slice(0, parseInt(options.limit));
+      for (const entry of limited) {
+        console.log(chalk.blue(`\n📌 ${entry.key}`));
+        console.log(`   Namespace: ${entry.namespace}`);
+        console.log(`   Value: ${entry.value.substring(0, 100)}${entry.value.length > 100 ? '...' : ''}`);
+        console.log(`   Stored: ${new Date(entry.timestamp).toLocaleString()}`);
+      }
+
+      if (results.length > parseInt(options.limit)) {
+        console.log(chalk.gray(`\n... and ${results.length - parseInt(options.limit)} more results`));
+      }
+    } catch (error) {
+      console.error(chalk.red('Failed to query:'), (error as Error).message);
+    }
+  });
+
+// Export command
+memoryCommand
+  .command('export')
+  .description('Export memory to file')
+  .arguments('<file>')
+  .action(async (file: string, options: any) => {
+    try {
+      const memory = new SimpleMemoryManager();
+      await memory.exportData(file);
+      const stats = await memory.getStats();
+      console.log(chalk.green('✅ Memory exported successfully'));
+      console.log(`📁 File: ${file}`);
+      console.log(`📊 Entries: ${stats.totalEntries}`);
+      console.log(`💾 Size: ${(stats.sizeBytes / 1024).toFixed(2)} KB`);
+    } catch (error) {
+      console.error(chalk.red('Failed to export:'), (error as Error).message);
+    }
+  });
+
+// Import command
+memoryCommand
+  .command('import')
+  .description('Import memory from file')
+  .arguments('<file>')
+  .action(async (file: string, options: any) => {
+    try {
+      const memory = new SimpleMemoryManager();
+      await memory.importData(file);
+      const stats = await memory.getStats();
+      console.log(chalk.green('✅ Memory imported successfully'));
+      console.log(`📁 File: ${file}`);
+      console.log(`📊 Entries: ${stats.totalEntries}`);
+      console.log(`🗂️  Namespaces: ${stats.namespaces}`);
+    } catch (error) {
+      console.error(chalk.red('Failed to import:'), (error as Error).message);
+    }
+  });
+
+// Stats command
+memoryCommand
+  .command('stats')
+  .description('Show memory statistics')
+  .action(async () => {
+    try {
+      const memory = new SimpleMemoryManager();
+      const stats = await memory.getStats();
+      
+      console.log(chalk.green('📊 Memory Bank Statistics:'));
+      console.log(`   Total Entries: ${stats.totalEntries}`);
+      console.log(`   Namespaces: ${stats.namespaces}`);
+      console.log(`   Size: ${(stats.sizeBytes / 1024).toFixed(2)} KB`);
+      
+      if (stats.namespaces > 0) {
+        console.log(chalk.blue('\n📁 Namespace Breakdown:'));
+        for (const [namespace, count] of Object.entries(stats.namespaceStats)) {
+          console.log(`   ${namespace}: ${count} entries`);
         }
-      } catch (error) {
-        console.error(chalk.red('Failed to query:'), (error as Error).message);
       }
-    })
-  )
-  // Export command
-  .command('export', new Command()
-    .description('Export memory to file')
-    .arguments('<file:string>')
-    .action(async (options: any, file: string) => {
-      try {
-        const memory = new SimpleMemoryManager();
-        await memory.exportData(file);
-        const stats = await memory.getStats();
-        console.log(chalk.green('✅ Memory exported successfully'));
-        console.log(`📁 File: ${file}`);
-        console.log(`📊 Entries: ${stats.totalEntries}`);
-        console.log(`💾 Size: ${(stats.sizeBytes / 1024).toFixed(2)} KB`);
-      } catch (error) {
-        console.error(chalk.red('Failed to export:'), (error as Error).message);
-      }
-    })
-  )
-  // Import command
-  .command('import', new Command()
-    .description('Import memory from file')
-    .arguments('<file:string>')
-    .action(async (options: any, file: string) => {
-      try {
-        const memory = new SimpleMemoryManager();
-        await memory.importData(file);
-        const stats = await memory.getStats();
-        console.log(chalk.green('✅ Memory imported successfully'));
-        console.log(`📁 File: ${file}`);
-        console.log(`📊 Entries: ${stats.totalEntries}`);
-        console.log(`🗂️  Namespaces: ${stats.namespaces}`);
-      } catch (error) {
-        console.error(chalk.red('Failed to import:'), (error as Error).message);
-      }
-    })
-  )
-  // Stats command
-  .command('stats', new Command()
-    .description('Show memory statistics')
-    .action(async () => {
-      try {
-        const memory = new SimpleMemoryManager();
-        const stats = await memory.getStats();
-        
-        console.log(chalk.green('📊 Memory Bank Statistics:'));
-        console.log(`   Total Entries: ${stats.totalEntries}`);
-        console.log(`   Namespaces: ${stats.namespaces}`);
-        console.log(`   Size: ${(stats.sizeBytes / 1024).toFixed(2)} KB`);
-        
-        if (stats.namespaces > 0) {
-          console.log(chalk.blue('\n📁 Namespace Breakdown:'));
-          for (const [namespace, count] of Object.entries(stats.namespaceStats)) {
-            console.log(`   ${namespace}: ${count} entries`);
-          }
-        }
-      } catch (error) {
-        console.error(chalk.red('Failed to get stats:'), (error as Error).message);
-      }
-    })
-  )
-  // Cleanup command
-  .command('cleanup', new Command()
-    .description('Clean up old entries')
-    .option('-d, --days <days:number>', 'Entries older than n days', { default: 30 })
-    .action(async (options: any) => {
-      try {
-        const memory = new SimpleMemoryManager();
-        const removed = await memory.cleanup(options.days);
-        console.log(chalk.green('✅ Cleanup completed'));
-        console.log(`🗑️  Removed: ${removed} entries older than ${options.days} days`);
-      } catch (error) {
-        console.error(chalk.red('Failed to cleanup:'), (error as Error).message);
-      }
-    })
-  );
+    } catch (error) {
+      console.error(chalk.red('Failed to get stats:'), (error as Error).message);
+    }
+  });
+
+// Cleanup command
+memoryCommand
+  .command('cleanup')
+  .description('Clean up old entries')
+  .option('-d, --days <days>', 'Entries older than n days', '30')
+  .action(async (options: any) => {
+    try {
+      const memory = new SimpleMemoryManager();
+      const removed = await memory.cleanup(parseInt(options.days));
+      console.log(chalk.green('✅ Cleanup completed'));
+      console.log(`🗑️  Removed: ${removed} entries older than ${options.days} days`);
+    } catch (error) {
+      console.error(chalk.red('Failed to cleanup:'), (error as Error).message);
+    }
+  });

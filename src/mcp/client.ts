@@ -7,7 +7,7 @@ import { EventEmitter } from 'node:events';
 import type { ITransport } from './transports/base.js';
 import { logger } from '../core/logger.js';
 import type { MCPRequest, MCPResponse, MCPNotification, MCPConfig } from '../utils/types.js';
-import type { RecoveryManager, RecoveryConfig } from './recovery/index.js';
+import { RecoveryManager, RecoveryConfig } from './recovery/index.js';
 
 export interface MCPClientConfig {
   transport: ITransport;

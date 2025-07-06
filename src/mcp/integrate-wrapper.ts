@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { getErrorMessage } from '../utils/error-handler.js';
 import { spawn } from 'child_process';
-import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
-import type { ClaudeCodeMCPWrapper } from './claude-code-wrapper.js';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import { ClaudeCodeMCPWrapper } from './claude-code-wrapper.js';
 
 /**
  * Integration script that connects the Claude-Flow MCP wrapper

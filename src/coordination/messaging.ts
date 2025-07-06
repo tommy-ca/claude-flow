@@ -3,7 +3,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Inter-agent messaging system
  */
 
-import type { Message, CoordinationConfig, SystemEvents } from '../utils/types.js';
+import { Message, CoordinationConfig, SystemEvents } from '../utils/types.js';
 import type { IEventBus } from '../core/event-bus.js';
 import type { ILogger } from '../core/logger.js';
 import type { CoordinationError } from '../utils/errors.js';

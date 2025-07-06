@@ -1,4 +1,7 @@
 import { getErrorMessage } from '../utils/error-handler.js';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 /**
  * Migration Runner - Executes migration strategies
  */
@@ -15,10 +18,10 @@ import type {
   MigrationProgress,
   MigrationManifest
 } from './types.js';
-import type { MigrationAnalyzer } from './migration-analyzer.js';
+import { MigrationAnalyzer } from './migration-analyzer.js';
 import { logger } from './logger.js';
-import type { ProgressReporter } from './progress-reporter.js';
-import type { MigrationValidator } from './migration-validator.js';
+import { ProgressReporter } from './progress-reporter.js';
+import { MigrationValidator } from './migration-validator.js';
 import { glob } from 'glob';
 import * as inquirer from 'inquirer';
 import * as chalk from 'chalk';

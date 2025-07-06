@@ -65,7 +65,7 @@ export async function monitorSwarm(swarmId: string): Promise<void> {
     }
     
     console.log(`[MONITOR] Swarm ${swarmId} - Agents: ${swarm.agents.length}`);
-    console.log(`[MONITOR] Active: ${swarm.agents.filter(a => a.status === 'active').length}`);
+    console.log(`[MONITOR] Active: ${swarm.agents.filter((a: any) => a.status === 'active').length}`);
   }, 5000);
   
   // Stop monitoring after timeout

@@ -1,3 +1,6 @@
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname = dirname(fileURLToPath(import.meta.url));
 import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * Direct Task Executor for Swarm
@@ -8,7 +11,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import type { TaskDefinition, AgentState, TaskResult } from './types.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type { Logger } from '../core/logger.js';
+import { Logger } from '../core/logger.js';
 
 export interface DirectExecutorConfig {
   logger?: Logger;

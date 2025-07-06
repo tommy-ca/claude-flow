@@ -4,7 +4,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  */
 
 import type { Task } from '../utils/types.js';
-import type { TaskDependencyError } from '../utils/errors.js';
+import { TaskDependencyError } from '../utils/errors.js';
 import type { ILogger } from '../core/logger.js';
 
 export interface DependencyNode {

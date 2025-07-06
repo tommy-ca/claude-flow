@@ -4,15 +4,15 @@ import { getErrorMessage } from '../utils/error-handler.js';
  */
 
 import chalk from 'chalk';
-import Table from 'cli-table3';
+import * as Table from 'cli-table3';
 // Using cli-table3 instead of @cliffy/table for Node.js compatibility
 import type { AgentProfile, Task, MemoryEntry, HealthStatus } from '../utils/types.js';
-import process from 'process';
+import * as process from 'process';
 
 /**
  * Formats an error for display
  */
-export function formatError(error): string {
+export function formatError(error: unknown): string {
   if (error instanceof Error) {
     let message = (error instanceof Error ? error.message : String(error));
     
@@ -149,9 +149,9 @@ export function formatHealthStatus(health: HealthStatus): string {
  * Creates a table for agent listing
  */
 export function createAgentTable(agents: AgentProfile[]): Table {
-  const table = new Table()
-    .header(['ID', 'Name', 'Type', 'Priority', 'Max Tasks'])
-    .border(true);
+  const table = new Table({
+    head: ['ID', 'Name', 'Type', 'Priority', 'Max Tasks']
+  });
 
   for (const agent of agents) {
     table.push([
@@ -170,9 +170,9 @@ export function createAgentTable(agents: AgentProfile[]): Table {
  * Creates a table for task listing
  */
 export function createTaskTable(tasks: Task[]): Table {
-  const table = new Table()
-    .header(['ID', 'Type', 'Description', 'Status', 'Agent'])
-    .border(true);
+  const table = new Table({
+    head: ['ID', 'Type', 'Description', 'Status', 'Agent']
+  });
 
   for (const task of tasks) {
     const statusCell = {
@@ -256,7 +256,7 @@ export function displayVersion(version: string, buildDate: string): void {
     chalk.white('  • MCP Server'),
     chalk.white('  • Task Coordination'),
     '',
-    chalk.blue('Homepage: ') + colors.underline('https://github.com/anthropics/claude-code-flow'),
+    chalk.blue('Homepage: ') + chalk.underline('https://github.com/anthropics/claude-code-flow'),
   ];
   
   console.log(info.join('\n'));

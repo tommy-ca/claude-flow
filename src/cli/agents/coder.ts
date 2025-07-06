@@ -3,10 +3,28 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../swarm/types.js';
-import type { ILogger } from '../core/logger.js';
-import type { IEventBus } from '../core/event-bus.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { IEventBus } from '../../core/event-bus.js';
+import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
+
+// Type definitions for coder activities
+interface CodeFile {
+  path: string;
+  content: string;
+  type: string;
+}
+
+interface TestFile {
+  path: string;
+  content: string;
+  framework: string;
+}
+
+interface DatabaseTable {
+  name: string;
+  columns: string[];
+}
 
 export class CoderAgent extends BaseAgent {
   constructor(
@@ -134,7 +152,7 @@ export class CoderAgent extends BaseAgent {
     };
   }
 
-  async executeTask(task: TaskDefinition): Promise<any> {
+  override async executeTask(task: TaskDefinition): Promise<any> {
     this.logger.info('Coder executing task', {
       agentId: this.id,
       taskType: task.type,
@@ -173,10 +191,10 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async generateCode(task: TaskDefinition): Promise<any> {
-    const requirements = task.parameters?.requirements || task.description;
-    const language = task.parameters?.language || 'typescript';
-    const framework = task.parameters?.framework;
-    const style = task.parameters?.style || 'functional';
+    const requirements = task.input?.requirements || task.description;
+    const language = task.input?.language || 'typescript';
+    const framework = task.input?.framework;
+    const style = task.input?.style || 'functional';
 
     this.logger.info('Generating code', {
       requirements,
@@ -190,8 +208,8 @@ export class CoderAgent extends BaseAgent {
       language,
       framework,
       style,
-      files: [],
-      tests: [],
+      files: [] as CodeFile[],
+      tests: [] as TestFile[],
       documentation: '',
       metrics: {
         linesOfCode: 0,
@@ -199,8 +217,8 @@ export class CoderAgent extends BaseAgent {
         testCoverage: 0,
         quality: 0
       },
-      dependencies: [],
-      buildInstructions: '',
+      dependencies: [] as string[],
+      buildInstructions: [] as string[],
       timestamp: new Date()
     };
 
@@ -247,8 +265,8 @@ export class CoderAgent extends BaseAgent {
       quality: 0.92
     };
     
-    result.dependencies = this.suggestDependencies(language, framework);
-    result.buildInstructions = this.generateBuildInstructions(language, framework);
+    result.dependencies = this.suggestDependencies(language, framework) as any[];
+    result.buildInstructions = this.generateBuildInstructions(language, framework) as string[];
 
     // Store final results
     await this.memory.store(`code:${task.id}:results`, result, {
@@ -261,9 +279,9 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async reviewCode(task: TaskDefinition): Promise<any> {
-    const code = task.parameters?.code;
-    const files = task.parameters?.files || [];
-    const focus = task.parameters?.focus || ['quality', 'security', 'performance'];
+    const code = task.input?.code;
+    const files = task.input?.files || [];
+    const focus = task.input?.focus || ['quality', 'security', 'performance'];
 
     this.logger.info('Reviewing code', {
       filesCount: files.length,
@@ -271,10 +289,10 @@ export class CoderAgent extends BaseAgent {
     });
 
     const review = {
-      files: [],
+      files: [] as any[],
       overallScore: 0,
-      issues: [],
-      suggestions: [],
+      issues: [] as any[],
+      suggestions: [] as any[],
       metrics: {
         maintainability: 0,
         readability: 0,
@@ -282,8 +300,8 @@ export class CoderAgent extends BaseAgent {
         security: 0,
         testability: 0
       },
-      recommendations: [],
-      priorityFixes: [],
+      recommendations: [] as any[],
+      priorityFixes: [] as any[],
       timestamp: new Date()
     };
 
@@ -322,9 +340,9 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async refactorCode(task: TaskDefinition): Promise<any> {
-    const code = task.parameters?.code;
-    const goals = task.parameters?.goals || ['maintainability', 'performance'];
-    const preserveAPI = task.parameters?.preserveAPI || true;
+    const code = task.input?.code;
+    const goals = task.input?.goals || ['maintainability', 'performance'];
+    const preserveAPI = task.input?.preserveAPI || true;
 
     this.logger.info('Refactoring code', {
       goals,
@@ -332,16 +350,16 @@ export class CoderAgent extends BaseAgent {
     });
 
     const refactoring = {
-      originalFiles: [],
-      refactoredFiles: [],
-      changes: [],
+      originalFiles: [] as any[],
+      refactoredFiles: [] as any[],
+      changes: [] as string[],
       improvements: {
         maintainability: 0,
         performance: 0,
         readability: 0,
         testability: 0
       },
-      breakingChanges: [],
+      breakingChanges: [] as any[],
       migrationGuide: '',
       testResults: {
         passed: 0,
@@ -372,10 +390,10 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async writeTests(task: TaskDefinition): Promise<any> {
-    const code = task.parameters?.code;
-    const testType = task.parameters?.type || 'unit';
-    const coverage = task.parameters?.coverage || 80;
-    const framework = task.parameters?.framework || 'jest';
+    const code = task.input?.code;
+    const testType = task.input?.type || 'unit';
+    const coverage = task.input?.coverage || 80;
+    const framework = task.input?.framework || 'jest';
 
     this.logger.info('Writing tests', {
       testType,
@@ -387,8 +405,8 @@ export class CoderAgent extends BaseAgent {
       testType,
       framework,
       targetCoverage: coverage,
-      testFiles: [],
-      testSuites: [],
+      testFiles: [] as any[],
+      testSuites: [] as any[],
       coverage: {
         lines: 0,
         functions: 0,
@@ -439,10 +457,10 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async debugCode(task: TaskDefinition): Promise<any> {
-    const code = task.parameters?.code;
-    const error = task.parameters?.error;
-    const symptoms = task.parameters?.symptoms || [];
-    const environment = task.parameters?.environment || 'development';
+    const code = task.input?.code;
+    const error = task.input?.error;
+    const symptoms = task.input?.symptoms || [];
+    const environment = task.input?.environment || 'development';
 
     this.logger.info('Debugging code', {
       error: error?.message,
@@ -454,12 +472,12 @@ export class CoderAgent extends BaseAgent {
       error,
       symptoms,
       environment,
-      investigation: [],
+      investigation: [] as string[],
       rootCause: '',
       solution: '',
-      fixes: [],
-      preventionMeasures: [],
-      testCases: [],
+      fixes: [] as any[],
+      preventionMeasures: [] as string[],
+      testCases: [] as any[],
       confidence: 0,
       timestamp: new Date()
     };
@@ -482,10 +500,10 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async developAPI(task: TaskDefinition): Promise<any> {
-    const spec = task.parameters?.spec;
-    const framework = task.parameters?.framework || 'express';
-    const database = task.parameters?.database || 'postgresql';
-    const auth = task.parameters?.auth || 'jwt';
+    const spec = task.input?.spec;
+    const framework = task.input?.framework || 'express';
+    const database = task.input?.database || 'postgresql';
+    const auth = task.input?.auth || 'jwt';
 
     this.logger.info('Developing API', {
       framework,
@@ -497,9 +515,9 @@ export class CoderAgent extends BaseAgent {
       framework,
       database,
       auth,
-      endpoints: [],
-      models: [],
-      middleware: [],
+      endpoints: [] as any[],
+      models: [] as any[],
+      middleware: [] as any[],
       documentation: '',
       security: {
         authentication: auth,
@@ -536,9 +554,9 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async designDatabase(task: TaskDefinition): Promise<any> {
-    const requirements = task.parameters?.requirements;
-    const dbType = task.parameters?.type || 'relational';
-    const engine = task.parameters?.engine || 'postgresql';
+    const requirements = task.input?.requirements;
+    const dbType = task.input?.type || 'relational';
+    const engine = task.input?.engine || 'postgresql';
 
     this.logger.info('Designing database', {
       dbType,
@@ -549,7 +567,7 @@ export class CoderAgent extends BaseAgent {
       type: dbType,
       engine,
       schema: {},
-      tables: [],
+      tables: [] as DatabaseTable[],
       relationships: [],
       indexes: [],
       constraints: [],
@@ -575,9 +593,9 @@ export class CoderAgent extends BaseAgent {
   }
 
   private async optimizePerformance(task: TaskDefinition): Promise<any> {
-    const code = task.parameters?.code;
-    const metrics = task.parameters?.metrics;
-    const targets = task.parameters?.targets || ['speed', 'memory'];
+    const code = task.input?.code;
+    const metrics = task.input?.metrics;
+    const targets = task.input?.targets || ['speed', 'memory'];
 
     this.logger.info('Optimizing performance', {
       targets
@@ -586,9 +604,9 @@ export class CoderAgent extends BaseAgent {
     const optimization = {
       targets,
       analysis: {
-        bottlenecks: [],
-        hotspots: [],
-        recommendations: []
+        bottlenecks: [] as string[],
+        hotspots: [] as string[],
+        recommendations: [] as string[]
       },
       optimizations: [],
       results: {
@@ -805,23 +823,23 @@ npm test
     return deps;
   }
 
-  private generateBuildInstructions(language: string, framework?: string): string {
+  private generateBuildInstructions(language: string, framework?: string): string[] {
     const instructions = {
-      typescript: 'npm run build && npm start',
-      javascript: 'npm start',
-      python: 'python -m pip install -r requirements.txt && python main.py',
-      rust: 'cargo build --release && cargo run',
-      go: 'go build && ./main'
+      typescript: ['npm install', 'npm run build', 'npm start'],
+      javascript: ['npm install', 'npm start'],
+      python: ['python -m pip install -r requirements.txt', 'python main.py'],
+      rust: ['cargo build --release', 'cargo run'],
+      go: ['go mod tidy', 'go build', './main']
     };
 
-    return instructions[language as keyof typeof instructions] || 'Build instructions not available';
+    return instructions[language as keyof typeof instructions] || ['Build instructions not available'];
   }
 
   private async delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  getAgentStatus(): any {
+  override getAgentStatus(): any {
     return {
       ...super.getAgentStatus(),
       specialization: 'Software Development & Code Generation',
@@ -845,7 +863,38 @@ export const createCoderAgent = (
   eventBus: IEventBus,
   memory: DistributedMemorySystem
 ): CoderAgent => {
-  const defaultConfig = new CoderAgent(id, {} as AgentConfig, {} as AgentEnvironment, logger, eventBus, memory).getDefaultConfig();
+  const defaultConfig = {
+    autonomyLevel: 0.7,
+    learningEnabled: true,
+    adaptationEnabled: true,
+    maxTasksPerHour: 15,
+    maxConcurrentTasks: 2,
+    timeoutThreshold: 300000,
+    reportingInterval: 45000,
+    heartbeatInterval: 20000,
+    permissions: [
+      'file-read',
+      'file-write',
+      'directory-create',
+      'code-execution',
+      'package-management',
+      'git-operations'
+    ],
+    trustedAgents: [],
+    expertise: {
+      'code-generation': 0.95,
+      'debugging': 0.90,
+      'refactoring': 0.88,
+      'testing': 0.85,
+      'performance-optimization': 0.87
+    },
+    preferences: {
+      codingStyle: 'clean',
+      testingApproach: 'comprehensive',
+      documentationLevel: 'moderate',
+      refactoringFrequency: 'regular'
+    }
+  };
   const defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',

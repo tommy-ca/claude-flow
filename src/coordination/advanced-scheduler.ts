@@ -3,13 +3,13 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Advanced task scheduler with intelligent agent selection and priority handling
  */
 
-import type { Task, TaskStatus, CoordinationConfig, SystemEvents, AgentProfile } from '../utils/types.js';
+import { Task, TaskStatus, CoordinationConfig, SystemEvents, AgentProfile } from '../utils/types.js';
 import type { IEventBus } from '../core/event-bus.js';
 import type { ILogger } from '../core/logger.js';
-import type { TaskScheduler } from './scheduler.js';
-import type { WorkStealingCoordinator } from './work-stealing.js';
-import type { DependencyGraph } from './dependency-graph.js';
-import type { CircuitBreakerManager, CircuitBreakerConfig } from './circuit-breaker.js';
+import { TaskScheduler } from './scheduler.js';
+import { WorkStealingCoordinator } from './work-stealing.js';
+import { DependencyGraph } from './dependency-graph.js';
+import { CircuitBreakerManager, CircuitBreakerConfig } from './circuit-breaker.js';
 
 export interface SchedulingStrategy {
   name: string;

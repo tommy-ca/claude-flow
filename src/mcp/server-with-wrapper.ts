@@ -4,7 +4,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * MCP Server entry point that uses the wrapper by default
  */
 
-import type { ClaudeCodeMCPWrapper } from './claude-code-wrapper.js';
+import { ClaudeCodeMCPWrapper } from './claude-code-wrapper.js';
 
 // Check if we should use the legacy server
 const useLegacy = process.env.CLAUDE_FLOW_LEGACY_MCP === 'true' || 

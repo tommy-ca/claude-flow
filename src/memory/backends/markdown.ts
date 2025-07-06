@@ -8,7 +8,7 @@ import path from 'path';
 import type { IMemoryBackend } from './base.js';
 import type { MemoryEntry, MemoryQuery } from '../../utils/types.js';
 import type { ILogger } from '../../core/logger.js';
-import type { MemoryBackendError } from '../../utils/errors.js';
+import { MemoryBackendError } from '../../utils/errors.js';
 
 /**
  * Markdown-based memory backend

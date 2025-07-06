@@ -5,9 +5,9 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Helps existing projects migrate to optimized prompts and configurations
  */
 
-import type { Command } from "@cliffy/command";
-import type { MigrationRunner } from './migration-runner.js';
-import type { MigrationAnalyzer } from './migration-analyzer.js';
+import { Command } from "@cliffy/command";
+import { MigrationRunner } from './migration-runner.js';
+import { MigrationAnalyzer } from './migration-analyzer.js';
 import type { MigrationStrategy } from './types.js';
 import { logger } from './logger.js';
 import * as chalk from 'chalk';

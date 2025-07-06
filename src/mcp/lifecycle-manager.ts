@@ -7,7 +7,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../core/logger.js';
 import type { MCPConfig, MCPSession, MCPMetrics, HealthStatus } from '../utils/types.js';
-import type { MCPError } from '../utils/errors.js';
+import { MCPError } from '../utils/errors.js';
 import type { IMCPServer } from './server.js';
 
 export enum LifecycleState {

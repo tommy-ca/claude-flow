@@ -5,12 +5,12 @@ import { getErrorMessage } from '../utils/error-handler.js';
 
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 type Mock = jest.MockedFunction<any>;
-import type { MCPServer } from '../server.js';
-import type { MCPLifecycleManager, LifecycleState } from '../lifecycle-manager.js';
-import type { MCPPerformanceMonitor } from '../performance-monitor.js';
-import type { MCPProtocolManager } from '../protocol-manager.js';
-import type { MCPOrchestrationIntegration } from '../orchestration-integration.js';
-import type { ToolRegistry } from '../tools.js';
+import { MCPServer } from '../server.js';
+import { MCPLifecycleManager, LifecycleState } from '../lifecycle-manager.js';
+import { MCPPerformanceMonitor } from '../performance-monitor.js';
+import { MCPProtocolManager } from '../protocol-manager.js';
+import { MCPOrchestrationIntegration } from '../orchestration-integration.js';
+import { ToolRegistry } from '../tools.js';
 import type { AuthManager } from '../auth.js';
 import type { ILogger } from '../../core/logger.js';
 import type { MCPConfig, MCPInitializeParams, MCPRequest, MCPSession } from '../../utils/types.js';

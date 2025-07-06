@@ -7,7 +7,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import type { TaskDefinition, AgentState, TaskResult } from './types.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
-import type { Logger } from '../core/logger.js';
+import { Logger } from '../core/logger.js';
 
 export interface SparcPhase {
   name: string;

@@ -6,11 +6,11 @@
 import { EventBus } from '../core/event-bus.js';
 import { Logger } from '../core/logger.js';
 import type { ConfigManager } from '../config/config-manager.js';
-import type { MemoryManager } from '../memory/manager.js';
-import type { AgentManager } from '../agents/agent-manager.js';
-import type { TaskEngine } from '../task/engine.js';
-import type { RealTimeMonitor } from '../monitoring/real-time-monitor.js';
-import type { McpServer } from '../mcp/server.js';
+import { MemoryManager } from '../memory/manager.js';
+import { AgentManager } from '../agents/agent-manager.js';
+import { TaskEngine } from '../task/engine.js';
+import { RealTimeMonitor } from '../monitoring/real-time-monitor.js';
+import { McpServer } from '../mcp/server.js';
 import { getErrorMessage } from '../utils/error-handler.js';
 import type { IntegrationConfig, SystemHealth, ComponentStatus } from './types.js';
 

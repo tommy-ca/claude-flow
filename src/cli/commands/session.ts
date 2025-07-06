@@ -3,89 +3,106 @@ import { getErrorMessage } from '../../utils/error-handler.js';
  * Session management commands for Claude-Flow
  */
 
-import { Command } from '@cliffy/command';
+import { Command } from 'commander';
 import { promises as fs, existsSync } from 'node:fs';
 import * as path from 'node:path';
-import { Table } from '@cliffy/table';
-import { confirm, input } from '@cliffy/prompt';
+import * as Table from 'cli-table3';
+import inquirer from 'inquirer';
 import { formatDuration, formatStatusIndicator } from '../formatter.js';
 import { generateId } from '../../utils/helpers.js';
 import chalk from 'chalk';
 
 export const sessionCommand = new Command()
+  .name('session')
   .description('Manage Claude-Flow sessions')
   .action(() => {
-    console.log(sessionCommand.toString());
-  })
-  .command('list', new Command()
-    .description('List all saved sessions')
-    .option('-a, --active', 'Show only active sessions')
-    .option('--format <format:string>', 'Output format (table, json)', { default: 'table' })
-    .action(async (options: any) => {
-      await listSessions(options);
-    }),
-  )
-  .command('save', new Command()
-    .description('Save current session state')
-    .arguments('[name:string]')
-    .option('-d, --description <desc:string>', 'Session description')
-    .option('-t, --tags <tags:string>', 'Comma-separated tags')
-    .option('--auto', 'Auto-generate session name')
-    .action(async (options: any, name: string | undefined) => {
-      await saveSession(name, options);
-    }),
-  )
-  .command('restore', new Command()
-    .description('Restore a saved session')
-    .arguments('<session-id:string>')
-    .option('-f, --force', 'Force restore without confirmation')
-    .option('--merge', 'Merge with current session instead of replacing')
-    .action(async (options: any, sessionId: string) => {
-      await restoreSession(sessionId, options);
-    }),
-  )
-  .command('delete', new Command()
-    .description('Delete a saved session')
-    .arguments('<session-id:string>')
-    .option('-f, --force', 'Skip confirmation prompt')
-    .action(async (options: any, sessionId: string) => {
-      await deleteSession(sessionId, options);
-    }),
-  )
-  .command('export', new Command()
-    .description('Export session to file')
-    .arguments('<session-id:string> <output-file:string>')
-    .option('--format <format:string>', 'Export format (json, yaml)', { default: 'json' })
-    .option('--include-memory', 'Include agent memory in export')
-    .action(async (options: any, sessionId: string, outputFile: string) => {
-      await exportSession(sessionId, outputFile, options);
-    }),
-  )
-  .command('import', new Command()
-    .description('Import session from file')
-    .arguments('<input-file:string>')
-    .option('-n, --name <name:string>', 'Custom session name')
-    .option('--overwrite', 'Overwrite existing session with same ID')
-    .action(async (options: any, inputFile: string) => {
-      await importSession(inputFile, options);
-    }),
-  )
-  .command('info', new Command()
-    .description('Show detailed session information')
-    .arguments('<session-id:string>')
-    .action(async (options: any, sessionId: string) => {
-      await showSessionInfo(sessionId);
-    }),
-  )
-  .command('clean', new Command()
-    .description('Clean up old or orphaned sessions')
-    .option('--older-than <days:number>', 'Delete sessions older than N days', { default: 30 })
-    .option('--dry-run', 'Show what would be deleted without deleting')
-    .option('--orphaned', 'Only clean orphaned sessions')
-    .action(async (options: any) => {
-      await cleanSessions(options);
-    }),
-  );
+    sessionCommand.help();
+  });
+
+// List command
+sessionCommand
+  .command('list')
+  .description('List all saved sessions')
+  .option('-a, --active', 'Show only active sessions')
+  .option('--format <format>', 'Output format (table, json)', 'table')
+  .action(async (options: any) => {
+    await listSessions(options);
+  });
+
+// Save command
+sessionCommand
+  .command('save')
+  .description('Save current session state')
+  .arguments('[name]')
+  .option('-d, --description <desc>', 'Session description')
+  .option('-t, --tags <tags>', 'Comma-separated tags')
+  .option('--auto', 'Auto-generate session name')
+  .action(async (name: string | undefined, options: any) => {
+    await saveSession(name, options);
+  });
+
+// Restore command
+sessionCommand
+  .command('restore')
+  .description('Restore a saved session')
+  .arguments('<session-id>')
+  .option('-f, --force', 'Force restore without confirmation')
+  .option('--merge', 'Merge with current session instead of replacing')
+  .action(async (sessionId: string, options: any) => {
+    await restoreSession(sessionId, options);
+  });
+
+// Delete command
+sessionCommand
+  .command('delete')
+  .description('Delete a saved session')
+  .arguments('<session-id>')
+  .option('-f, --force', 'Skip confirmation prompt')
+  .action(async (sessionId: string, options: any) => {
+    await deleteSession(sessionId, options);
+  });
+
+// Export command
+sessionCommand
+  .command('export')
+  .description('Export session to file')
+  .arguments('<session-id> <output-file>')
+  .option('--format <format>', 'Export format (json, yaml)', 'json')
+  .option('--include-memory', 'Include agent memory in export')
+  .action(async (sessionId: string, outputFile: string, options: any) => {
+    await exportSession(sessionId, outputFile, options);
+  });
+
+// Import command
+sessionCommand
+  .command('import')
+  .description('Import session from file')
+  .arguments('<input-file>')
+  .option('-n, --name <name>', 'Custom session name')
+  .option('--overwrite', 'Overwrite existing session with same ID')
+  .action(async (inputFile: string, options: any) => {
+    await importSession(inputFile, options);
+  });
+
+// Info command
+sessionCommand
+  .command('info')
+  .description('Show detailed session information')
+  .arguments('<session-id>')
+  .action(async (sessionId: string, options: any) => {
+    await showSessionInfo(sessionId);
+  });
+
+// Clean command
+sessionCommand
+  .command('clean')
+  .description('Clean up old or orphaned sessions')
+  .option('--older-than <days>', 'Delete sessions older than N days', '30')
+  .option('--dry-run', 'Show what would be deleted without deleting')
+  .option('--orphaned', 'Only clean orphaned sessions')
+  .action(async (options: any) => {
+    await cleanSessions(options);
+  });
 
 interface SessionData {
   id: string;
@@ -143,12 +160,9 @@ async function listSessions(options: any): Promise<void> {
     console.log(chalk.cyan.bold(`Sessions (${filteredSessions.length})`));
     console.log('─'.repeat(60));
 
-    const table = new Table()
-      .header(['ID', 'Name', 'Description', 'Agents', 'Tasks', 'Created'])
-      .border(true);
-
+    const rows = [];
     for (const session of filteredSessions) {
-      table.body.push([
+      rows.push([
         chalk.gray(session.id.substring(0, 8) + '...'),
         chalk.white(session.name),
         session.description ? session.description.substring(0, 30) + (session.description.length > 30 ? '...' : '') : '-',
@@ -158,7 +172,13 @@ async function listSessions(options: any): Promise<void> {
       ]);
     }
 
-    table.render();
+    const table = new Table({
+      head: ['ID', 'Name', 'Description', 'Agents', 'Tasks', 'Created']
+    });
+    for (const row of rows) {
+      table.push(row);
+    }
+    console.log(table.toString());
   } catch (error) {
     console.error(chalk.red('Failed to list sessions:'), (error as Error).message);
   }
@@ -173,10 +193,13 @@ async function saveSession(name: string | undefined, options: any): Promise<void
       if (options.auto) {
         name = `session-${new Date().toISOString().split('T')[0]}-${Date.now().toString().slice(-4)}`;
       } else {
-        name = await input({
+        const response = await inquirer.prompt({
+          type: 'input',
+          name: 'sessionName',
           message: 'Enter session name:',
           default: `session-${new Date().toISOString().split('T')[0]}`,
         });
+        name = response.sessionName;
       }
     }
 
@@ -235,10 +258,13 @@ async function restoreSession(sessionId: string, options: any): Promise<void> {
     // Confirmation
     if (!options.force) {
       const action = options.merge ? 'merge with current session' : 'replace current session';
-      const confirmed = await confirm({
+      const response = await inquirer.prompt({
+        type: 'confirm',
+        name: 'confirmed',
         message: `Are you sure you want to ${action}?`,
         default: false,
       });
+      const confirmed = response.confirmed;
 
       if (!confirmed) {
         console.log(chalk.gray('Restore cancelled'));
@@ -252,10 +278,13 @@ async function restoreSession(sessionId: string, options: any): Promise<void> {
       console.log(chalk.yellow('⚠ Warning: Session checksum mismatch. Data may be corrupted.'));
       
       if (!options.force) {
-        const proceed = await confirm({
+        const response = await inquirer.prompt({
+          type: 'confirm',
+          name: 'proceed',
           message: 'Continue anyway?',
           default: false,
         });
+        const proceed = response.proceed;
         
         if (!proceed) {
           console.log(chalk.gray('Restore cancelled'));
@@ -305,10 +334,13 @@ async function deleteSession(sessionId: string, options: any): Promise<void> {
       console.log(`${chalk.white('Session:')} ${session.name}`);
       console.log(`${chalk.white('Created:')} ${session.createdAt.toLocaleString()}`);
       
-      const confirmed = await confirm({
+      const response = await inquirer.prompt({
+        type: 'confirm',
+        name: 'confirmed',
         message: 'Are you sure you want to delete this session?',
         default: false,
       });
+      const confirmed = response.confirmed;
 
       if (!confirmed) {
         console.log(chalk.gray('Delete cancelled'));
@@ -360,7 +392,7 @@ async function exportSession(sessionId: string, outputFile: string, options: any
     console.log(chalk.green('✓ Session exported successfully'));
     console.log(`${chalk.white('File:')} ${outputFile}`);
     console.log(`${chalk.white('Format:')} ${options.format}`);
-    console.log(`${chalk.white('Size:')} ${new Blob([content]).size} bytes`);
+    console.log(`${chalk.white('Size:')} ${Buffer.from(content).length} bytes`);
   } catch (error) {
     console.error(chalk.red('Failed to export session:'), (error as Error).message);
   }
@@ -477,7 +509,7 @@ async function cleanSessions(options: any): Promise<void> {
     const sessions = await loadAllSessions();
     
     const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - options.olderThan);
+    cutoffDate.setDate(cutoffDate.getDate() - parseInt(options.olderThan));
     
     let toDelete = sessions.filter(session => session.createdAt < cutoffDate);
     
@@ -505,10 +537,13 @@ async function cleanSessions(options: any): Promise<void> {
     }
 
     console.log();
-    const confirmed = await Confirm.prompt({
+    const response = await inquirer.prompt({
+      type: 'confirm',
+      name: 'confirmed',
       message: `Delete ${toDelete.length} sessions?`,
       default: false,
     });
+    const confirmed = response.confirmed;
 
     if (!confirmed) {
       console.log(chalk.gray('Clean cancelled'));
@@ -538,7 +573,7 @@ async function loadAllSessions(): Promise<SessionData[]> {
   try {
     const entries = await fs.readdir(SESSION_DIR, { withFileTypes: true });
     for (const entry of entries) {
-      if (entry.isFile && entry.name.endsWith('.json')) {
+      if (entry.isFile() && entry.name.endsWith('.json')) {
         try {
           const content = await fs.readFile(`${SESSION_DIR}/${entry.name}`, 'utf-8');
           const session = JSON.parse(content) as SessionData;

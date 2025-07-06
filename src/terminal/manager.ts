@@ -1,4 +1,5 @@
 import { getErrorMessage } from '../utils/error-handler.js';
+import * as process from 'node:process';
 /**
  * Terminal manager interface and implementation
  */

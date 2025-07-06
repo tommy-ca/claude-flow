@@ -54,7 +54,7 @@ export class AsyncFileManager {
   async writeFile(path: string, data: string | Buffer): Promise<FileOperationResult> {
     const start = Date.now();
     
-    return this.writeQueue.add(async () => {
+    return await this.writeQueue.add(async () => {
       try {
         // Ensure directory exists
         await this.ensureDirectory(dirname(path));
@@ -73,7 +73,7 @@ export class AsyncFileManager {
         
         return {
           path,
-          operation: 'write',
+          operation: 'write' as const,
           success: true,
           duration,
           size
@@ -84,7 +84,7 @@ export class AsyncFileManager {
         
         return {
           path,
-          operation: 'write',
+          operation: 'write' as const,
           success: false,
           duration: Date.now() - start,
           error: error as Error
@@ -96,7 +96,7 @@ export class AsyncFileManager {
   async readFile(path: string): Promise<FileOperationResult & { data?: string }> {
     const start = Date.now();
     
-    return this.readQueue.add(async () => {
+    return await this.readQueue.add(async () => {
       try {
         const data = await fs.readFile(path, 'utf8');
         const duration = Date.now() - start;

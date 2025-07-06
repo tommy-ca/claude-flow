@@ -258,7 +258,7 @@ const findings = await retrieveCoordinationData(
 
   batchOperations: `
 // Example: Coordinated batch operations
-import type { TaskCoordinator } from './task.js';
+import { TaskCoordinator } from './task.js';
 
 const results = await coordinator.coordinateBatchOperations([
   {

@@ -3,11 +3,30 @@ import { getErrorMessage } from '../../utils/error-handler.js';
  * Monitor command for Claude-Flow - Live dashboard mode
  */
 
-import { Command } from '@cliffy/command';
+import { Command } from 'commander';
 import { promises as fs } from 'node:fs';
+import { existsSync } from 'fs';
 import chalk from 'chalk';
-import type { Table } from '@cliffy/table';
+import * as Table from 'cli-table3';
 import { formatProgressBar, formatDuration, formatStatusIndicator } from '../formatter.js';
+
+// Type definitions
+interface ComponentStatus {
+  status: 'healthy' | 'degraded' | 'error';
+  load: number;
+  uptime?: number;
+  errors?: number;
+  lastError?: string;
+}
+
+interface AlertData {
+  id: string;
+  type: 'warning' | 'error' | 'info';
+  message: string;
+  component: string;
+  timestamp: number;
+  acknowledged: boolean;
+}
 
 export const monitorCommand = new Command()
   .description('Start live monitoring dashboard')
@@ -37,24 +56,29 @@ class Dashboard {
   private data: MonitorData[] = [];
   private maxDataPoints = 60; // 2 minutes at 2-second intervals
   private running = true;
+  private alerts: AlertData[] = [];
+  private startTime = Date.now();
+  private exportData: MonitorData[] = [];
 
-  constructor(private options: any) {}
+  constructor(private options: any) {
+    this.options.threshold = this.options.threshold || 80;
+  }
 
   async start(): Promise<void> {
     // Hide cursor and clear screen
-    Deno.stdout.writeSync(new TextEncoder().encode('\x1b[?25l'));
+    process.stdout.write('\x1b[?25l');
     console.clear();
 
     // Setup signal handlers
     const cleanup = () => {
       this.running = false;
-      Deno.stdout.writeSync(new TextEncoder().encode('\x1b[?25h')); // Show cursor
+      process.stdout.write('\x1b[?25h'); // Show cursor
       console.log('\n' + chalk.gray('Monitor stopped'));
       process.exit(0);
     };
 
-    Deno.addSignalListener('SIGINT', cleanup);
-    Deno.addSignalListener('SIGTERM', cleanup);
+    process.on('SIGINT', cleanup);
+    process.on('SIGTERM', cleanup);
 
     // Start monitoring loop
     await this.monitoringLoop();
@@ -167,22 +191,20 @@ class Dashboard {
     console.log(chalk.white.bold('Components'));
     console.log('─'.repeat(40));
     
-    const table = new Table()
-      .header(['Component', 'Status', 'Load'])
-      .border(false);
+    const tableData: any[] = [];
 
     for (const [name, component] of Object.entries(data.components)) {
       const statusIcon = formatStatusIndicator(component.status);
       const loadBar = this.createMiniProgressBar(component.load, 100, 10);
       
-      table.body([[
-        chalk.cyan(name),
-        `${statusIcon} ${component.status}`,
-        `${loadBar} ${component.load.toFixed(0)}%`
-      ]]);
+      tableData.push({
+        Component: name,
+        Status: `${statusIcon} ${component.status}`,
+        Load: `${loadBar} ${component.load.toFixed(0)}%`
+      });
     }
     
-    table.render();
+    console.table(tableData);
     console.log();
   }
 
@@ -192,9 +214,10 @@ class Dashboard {
     console.log('─'.repeat(40));
     
     if (data.agents.length > 0) {
-      const agentTable = new Table()
-        .header(['ID', 'Type', 'Status', 'Tasks'])
-        .border(false);
+      const agentTable = new Table({
+        head: ['Agent ID', 'Type', 'Status', 'Tasks'],
+        style: { border: [], head: [] }
+      });
 
       for (const agent of data.agents.slice(0, 5)) {
         const statusIcon = formatStatusIndicator(agent.status);
@@ -207,7 +230,7 @@ class Dashboard {
         ]);
       }
       
-      agentTable.render();
+      console.log(agentTable.toString());
     } else {
       console.log(chalk.gray('No active agents'));
     }
@@ -218,9 +241,10 @@ class Dashboard {
     console.log('─'.repeat(40));
     
     if (data.tasks.length > 0) {
-      const taskTable = new Table()
-        .header(['ID', 'Type', 'Status', 'Duration'])
-        .border(false);
+      const taskTable = new Table({
+        head: ['Task ID', 'Type', 'Status', 'Duration'],
+        style: { border: [], head: [] }
+      });
 
       for (const task of data.tasks.slice(0, 5)) {
         const statusIcon = formatStatusIndicator(task.status);
@@ -233,7 +257,7 @@ class Dashboard {
         ]);
       }
       
-      taskTable.render();
+      console.log(taskTable.toString());
     } else {
       console.log(chalk.gray('No recent tasks'));
     }

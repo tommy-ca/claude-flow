@@ -57,6 +57,8 @@ export interface MessageMetadata {
   encoding: string;
   checksum?: string;
   route?: string[];
+  deadLetterReason?: string;
+  deadLetterTimestamp?: Date;
 }
 
 export interface MessageChannel {

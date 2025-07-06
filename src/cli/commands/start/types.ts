@@ -50,11 +50,15 @@ export interface SystemStats {
 }
 
 export interface StartOptions {
+  force?: boolean;
+  healthCheck?: boolean;
+  timeout?: number;
+  verbose?: boolean;
+  config?: string;
+  dry?: boolean;
   daemon?: boolean;
   port?: number;
   mcpTransport?: string;
-  config?: string;
-  verbose?: boolean;
   ui?: boolean;
   autoStart?: boolean;
 }

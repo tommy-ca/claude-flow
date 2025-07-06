@@ -3,7 +3,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * MCP (Model Context Protocol) server implementation
  */
 
-import type {
+import {
   MCPConfig,
   MCPRequest,
   MCPResponse,
@@ -21,13 +21,13 @@ import type { IEventBus } from '../core/event-bus.js';
 import type { ILogger } from '../core/logger.js';
 import { MCPError as MCPErrorClass, MCPMethodNotFoundError } from '../utils/errors.js';
 import type { ITransport } from './transports/base.js';
-import type { StdioTransport } from './transports/stdio.js';
-import type { HttpTransport } from './transports/http.js';
-import type { ToolRegistry } from './tools.js';
-import type { RequestRouter } from './router.js';
-import type { SessionManager, ISessionManager } from './session-manager.js';
-import type { AuthManager, IAuthManager } from './auth.js';
-import type { LoadBalancer, ILoadBalancer, RequestQueue } from './load-balancer.js';
+import { StdioTransport } from './transports/stdio.js';
+import { HttpTransport } from './transports/http.js';
+import { ToolRegistry } from './tools.js';
+import { RequestRouter } from './router.js';
+import { SessionManager, ISessionManager } from './session-manager.js';
+import { AuthManager, IAuthManager } from './auth.js';
+import { LoadBalancer, ILoadBalancer, RequestQueue } from './load-balancer.js';
 import { createClaudeFlowTools, ClaudeFlowToolContext } from './claude-flow-tools.js';
 import { createSwarmTools, SwarmToolContext } from './swarm-tools.js';
 import { createRuvSwarmTools, RuvSwarmToolContext, isRuvSwarmAvailable, initializeRuvSwarmIntegration } from './ruv-swarm-tools.js';

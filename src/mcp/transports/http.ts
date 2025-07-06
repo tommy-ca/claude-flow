@@ -1,11 +1,11 @@
-import { getErrorMessage } from '../utils/error-handler.js';
+import { getErrorMessage } from '../../utils/error-handler.js';
 /**
  * HTTP transport for MCP
  */
 
 import express, { Express, Request, Response } from 'express';
 import { createServer, Server } from 'node:http';
-import type { WebSocketServer, WebSocket } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import cors from 'cors';
 import helmet from 'helmet';
 import { join, dirname } from 'node:path';
@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
 import type { ITransport, RequestHandler, NotificationHandler } from './base.js';
 import type { MCPRequest, MCPResponse, MCPNotification, MCPConfig } from '../../utils/types.js';
 import type { ILogger } from '../../core/logger.js';
-import type { MCPTransportError } from '../../utils/errors.js';
+import { MCPTransportError } from '../../utils/errors.js';
 
 /**
  * HTTP transport implementation

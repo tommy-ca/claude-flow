@@ -8,6 +8,8 @@ import { getErrorMessage } from '../utils/error-handler.js';
 // Import and run the simple CLI which doesn't have external dependencies
 import "./simple-cli.ts";
 // Spinner import removed - not available in current cliffy version
+import { Command } from 'commander';
+import chalk from 'chalk';
 import { logger } from '../core/logger.js';
 import { configManager } from '../core/config.js';
 import { startCommand } from './commands/start.js';
@@ -23,7 +25,7 @@ import { helpCommand } from './commands/help.js';
 import { mcpCommand } from './commands/mcp.js';
 import { formatError, displayBanner, displayVersion } from './formatter.js';
 import { startREPL } from './repl.js';
-import type { CompletionGenerator } from './completion.js';
+import { CompletionGenerator } from './completion.js';
 
 // Version information
 const VERSION = '1.0.71';
@@ -47,7 +49,7 @@ const cli = new Command()
   .globalOption('--no-color', 'Disable colored output')
   .globalOption('--json', 'Output in JSON format where applicable')
   .globalOption('--profile <profile:string>', 'Use named configuration profile')
-  .action(async (options) => {
+  .action(async (options: any) => {
     // If no subcommand, show banner and start REPL
     await setupLogging(options);
     
@@ -76,7 +78,7 @@ cli
     .description('Start interactive REPL mode with command completion')
     .option('--no-banner', 'Skip welcome banner')
     .option('--history-file <path:string>', 'Custom history file path')
-    .action(async (options) => {
+    .action(async (options: any) => {
       await setupLogging(options);
       if (options.banner !== false) {
         displayBanner(VERSION);
@@ -87,7 +89,7 @@ cli
   .command('version', new Command()
     .description('Show detailed version information')
     .option('--short', 'Show version number only')
-    .action(async (options) => {
+    .action(async (options: any) => {
       if (options.short) {
         console.log(VERSION);
       } else {
@@ -99,7 +101,7 @@ cli
     .description('Generate shell completion scripts')
     .arguments('[shell:string]')
     .option('--install', 'Install completion script automatically')
-    .action(async (options, shell) => {
+    .action(async (options: any, shell: any) => {
       const generator = new CompletionGenerator();
       await generator.generate(shell || 'detect', options.install === true);
     }),

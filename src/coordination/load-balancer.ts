@@ -13,7 +13,7 @@ import type {
   TaskId,
   LoadBalancingStrategy 
 } from '../swarm/types.js';
-import type { WorkStealingCoordinator } from './work-stealing.js';
+import { WorkStealingCoordinator } from './work-stealing.js';
 
 export interface LoadBalancerConfig {
   strategy: LoadBalancingStrategy;

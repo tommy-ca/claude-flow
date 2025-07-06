@@ -6,12 +6,12 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import type { MemoryEntry, MemoryQuery, MemoryConfig } from '../utils/types.js';
 import type { IEventBus } from '../core/event-bus.js';
 import type { ILogger } from '../core/logger.js';
-import type { MemoryError } from '../utils/errors.js';
+import { MemoryError } from '../utils/errors.js';
 import type { IMemoryBackend } from './backends/base.js';
-import type { SQLiteBackend } from './backends/sqlite.js';
-import type { MarkdownBackend } from './backends/markdown.js';
-import type { MemoryCache } from './cache.js';
-import type { MemoryIndexer } from './indexer.js';
+import { SQLiteBackend } from './backends/sqlite.js';
+import { MarkdownBackend } from './backends/markdown.js';
+import { MemoryCache } from './cache.js';
+import { MemoryIndexer } from './indexer.js';
 
 export interface IMemoryManager {
   initialize(): Promise<void>;

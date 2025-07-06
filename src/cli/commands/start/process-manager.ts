@@ -3,20 +3,20 @@ import { getErrorMessage } from '../../../utils/error-handler.js';
  * Process Manager - Handles lifecycle of system processes
  */
 
-import type { EventEmitter } from './event-emitter.js';
+import { EventEmitter } from './event-emitter.js';
 import chalk from 'chalk';
-import type { 
+import { 
   ProcessInfo, 
   ProcessType, 
   ProcessStatus, 
   ProcessMetrics,
   SystemStats 
 } from './types.js';
-import type { Orchestrator } from '../../../core/orchestrator.js';
-import type { TerminalManager } from '../../../terminal/manager.js';
-import type { MemoryManager } from '../../../memory/manager.js';
-import type { CoordinationManager } from '../../../coordination/manager.js';
-import type { MCPServer } from '../../../mcp/server.js';
+import { Orchestrator } from '../../../core/orchestrator.js';
+import { TerminalManager } from '../../../terminal/manager.js';
+import { MemoryManager } from '../../../memory/manager.js';
+import { CoordinationManager } from '../../../coordination/manager.js';
+import { MCPServer } from '../../../mcp/server.js';
 import { eventBus } from '../../../core/event-bus.js';
 import { logger } from '../../../core/logger.js';
 import { configManager } from '../../../core/config.js';

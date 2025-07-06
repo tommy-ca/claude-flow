@@ -3,10 +3,62 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../swarm/types.js';
-import type { ILogger } from '../core/logger.js';
-import type { IEventBus } from '../core/event-bus.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { IEventBus } from '../../core/event-bus.js';
+import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
+
+// Type definitions for architect analysis
+interface ArchitectureIssue {
+  category: string;
+  severity: string;
+  description: string;
+  component: string;
+  recommendation: string;
+}
+
+interface ArchitectureRecommendation {
+  category: string;
+  priority: string;
+  description: string;
+  benefits: string[];
+  implementation: string;
+}
+
+interface ApiEndpoint {
+  method: string;
+  path: string;
+  description: string;
+  auth: boolean;
+  rateLimit: string;
+}
+
+interface MicroserviceComponent {
+  service: string;
+  purpose: string;
+}
+
+interface ServiceComponent {
+  name: string;
+  responsibility: string;
+  database: string;
+  api: string;
+  dependencies: string[];
+}
+
+interface DatabaseComponent {
+  name: string;
+  type: string;
+  purpose: string;
+  size: string;
+}
+
+interface InfrastructureComponent {
+  name: string;
+  type: string;
+  purpose: string;
+  specifications: any;
+}
 
 export class ArchitectAgent extends BaseAgent {
   constructor(
@@ -118,7 +170,7 @@ export class ArchitectAgent extends BaseAgent {
     };
   }
 
-  async executeTask(task: TaskDefinition): Promise<any> {
+  override async executeTask(task: TaskDefinition): Promise<any> {
     this.logger.info('Architect executing task', {
       agentId: this.id,
       taskType: task.type,
@@ -157,10 +209,10 @@ export class ArchitectAgent extends BaseAgent {
   }
 
   private async designSystem(task: TaskDefinition): Promise<any> {
-    const requirements = task.parameters?.requirements;
-    const scale = task.parameters?.scale || 'medium';
-    const constraints = task.parameters?.constraints || [];
-    const style = task.parameters?.style || 'microservices';
+    const requirements = task.input?.requirements;
+    const scale = task.input?.scale || 'medium';
+    const constraints = task.input?.constraints || [];
+    const style = task.input?.style || 'microservices';
 
     this.logger.info('Designing system', {
       requirements: requirements?.length || 0,
@@ -173,19 +225,19 @@ export class ArchitectAgent extends BaseAgent {
       scale,
       style,
       architecture: {
-        components: [],
-        services: [],
-        databases: [],
-        queues: [],
-        caches: []
+        components: [] as any[],
+        services: [] as any[],
+        databases: [] as any[],
+        queues: [] as any[],
+        caches: [] as any[]
       },
-      patterns: [],
+      patterns: [] as string[],
       technologies: {
-        backend: [],
-        frontend: [],
-        database: [],
-        infrastructure: [],
-        monitoring: []
+        backend: [] as string[],
+        frontend: [] as string[],
+        database: [] as string[],
+        infrastructure: [] as string[],
+        monitoring: [] as string[]
       },
       diagrams: [],
       documentation: {
@@ -235,7 +287,7 @@ export class ArchitectAgent extends BaseAgent {
         purpose: 'Data processing and analytics',
         technology: 'Python/FastAPI'
       }
-    ];
+    ] as any[];
     
     design.patterns = [
       'Microservices Architecture',
@@ -244,14 +296,14 @@ export class ArchitectAgent extends BaseAgent {
       'Event Sourcing',
       'CQRS',
       'Circuit Breaker'
-    ];
+    ] as string[];
     
     design.technologies = {
-      backend: ['Node.js', 'Python', 'TypeScript'],
-      frontend: ['React', 'TypeScript'],
-      database: ['PostgreSQL', 'Redis', 'MongoDB'],
-      infrastructure: ['Kubernetes', 'Docker', 'AWS'],
-      monitoring: ['Prometheus', 'Grafana', 'Jaeger']
+      backend: ['Node.js', 'Python', 'TypeScript'] as string[],
+      frontend: ['React', 'TypeScript'] as string[],
+      database: ['PostgreSQL', 'Redis', 'MongoDB'] as string[],
+      infrastructure: ['Kubernetes', 'Docker', 'AWS'] as string[],
+      monitoring: ['Prometheus', 'Grafana', 'Jaeger'] as string[]
     };
 
     // Store final design
@@ -279,23 +331,23 @@ export class ArchitectAgent extends BaseAgent {
       focus,
       standards,
       scores: {},
-      issues: [],
-      recommendations: [],
+      issues: [] as ArchitectureIssue[],
+      recommendations: [] as ArchitectureRecommendation[],
       compliance: {
-        passed: [],
-        failed: [],
-        warnings: []
+        passed: [] as any[],
+        failed: [] as any[],
+        warnings: [] as any[]
       },
       patterns: {
-        identified: [],
-        missing: [],
-        antipatterns: []
+        identified: [] as any[],
+        missing: [] as any[],
+        antipatterns: [] as any[]
       },
-      improvements: [],
+      improvements: [] as any[],
       riskAssessment: {
-        technical: [],
-        security: [],
-        operational: []
+        technical: [] as any[],
+        security: [] as any[],
+        operational: [] as any[]
       },
       timestamp: new Date()
     };
@@ -349,8 +401,8 @@ export class ArchitectAgent extends BaseAgent {
       style,
       version,
       auth,
-      endpoints: [],
-      schemas: [],
+      endpoints: [] as ApiEndpoint[],
+      schemas: [] as any[],
       security: {
         authentication: auth,
         authorization: 'RBAC',
@@ -423,13 +475,13 @@ export class ArchitectAgent extends BaseAgent {
       budget,
       compliance,
       infrastructure: {
-        compute: [],
-        storage: [],
-        network: [],
-        database: [],
-        security: []
+        compute: [] as any[],
+        storage: [] as any[],
+        network: [] as any[],
+        database: [] as any[],
+        security: [] as any[]
       },
-      services: [],
+      services: [] as any[],
       deployment: {
         strategy: 'blue-green',
         automation: 'terraform',
@@ -486,7 +538,7 @@ export class ArchitectAgent extends BaseAgent {
       domain,
       communication,
       dataConsistency,
-      services: [],
+      services: [] as ServiceComponent[],
       patterns: {
         communication: ['API Gateway', 'Service Mesh', 'Event Bus'],
         data: ['Database per Service', 'Saga Pattern', 'CQRS'],
@@ -505,8 +557,8 @@ export class ArchitectAgent extends BaseAgent {
         ci_cd: 'jenkins',
         configuration: 'helm'
       },
-      challenges: [],
-      solutions: [],
+      challenges: [] as any[],
+      solutions: [] as any[],
       timestamp: new Date()
     };
 
@@ -519,14 +571,14 @@ export class ArchitectAgent extends BaseAgent {
         responsibility: 'User management',
         database: 'PostgreSQL',
         api: 'REST',
-        dependencies: []
+        dependencies: [] as string[]
       },
       {
         name: 'Order Service',
         responsibility: 'Order processing',
         database: 'MongoDB',
         api: 'REST + Events',
-        dependencies: ['User Service', 'Payment Service']
+        dependencies: ['User Service', 'Payment Service'] as string[]
       }
     ];
 
@@ -550,15 +602,15 @@ export class ArchitectAgent extends BaseAgent {
       sensitivity,
       compliance,
       threatModel: {
-        assets: [],
-        threats: [],
-        vulnerabilities: [],
-        risks: []
+        assets: [] as any[],
+        threats: [] as any[],
+        vulnerabilities: [] as any[],
+        risks: [] as any[]
       },
       controls: {
-        preventive: [],
-        detective: [],
-        corrective: []
+        preventive: [] as any[],
+        detective: [] as any[],
+        corrective: [] as any[]
       },
       architecture: {
         authentication: 'OAuth2 + JWT',
@@ -612,10 +664,10 @@ export class ArchitectAgent extends BaseAgent {
       constraints,
       budget,
       strategies: {
-        horizontal: [],
-        vertical: [],
-        caching: [],
-        database: []
+        horizontal: [] as any[],
+        vertical: [] as any[],
+        caching: [] as any[],
+        database: [] as any[]
       },
       implementation: {
         autoScaling: true,
@@ -671,7 +723,7 @@ export class ArchitectAgent extends BaseAgent {
       dataTypes,
       scale,
       consistency,
-      databases: [],
+      databases: [] as DatabaseComponent[],
       patterns: {
         data: ['Database per Service', 'Shared Database', 'Data Lake'],
         consistency: ['ACID', 'BASE', 'Eventual Consistency'],
@@ -732,7 +784,7 @@ export class ArchitectAgent extends BaseAgent {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  getAgentStatus(): any {
+  override getAgentStatus(): any {
     return {
       ...super.getAgentStatus(),
       specialization: 'System Architecture & Design',
@@ -755,7 +807,38 @@ export const createArchitectAgent = (
   eventBus: IEventBus,
   memory: DistributedMemorySystem
 ): ArchitectAgent => {
-  const defaultConfig = new ArchitectAgent(id, {} as AgentConfig, {} as AgentEnvironment, logger, eventBus, memory).getDefaultConfig();
+  const defaultConfig = {
+    autonomyLevel: 0.8,
+    learningEnabled: true,
+    adaptationEnabled: true,
+    maxTasksPerHour: 12,
+    maxConcurrentTasks: 3,
+    timeoutThreshold: 300000,
+    reportingInterval: 60000,
+    heartbeatInterval: 30000,
+    permissions: [
+      'file-read',
+      'file-write',
+      'system-analysis',
+      'architecture-design',
+      'api-access'
+    ],
+    trustedAgents: [],
+    expertise: {
+      'system-architecture': 0.95,
+      'cloud-architecture': 0.90,
+      'microservices-design': 0.92,
+      'api-design': 0.88,
+      'database-architecture': 0.85,
+      'security-architecture': 0.87
+    },
+    preferences: {
+      designMethodology: 'domain-driven',
+      architecturalStyle: 'microservices',
+      documentationLevel: 'comprehensive',
+      reviewThoroughness: 'detailed'
+    }
+  };
   const defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',

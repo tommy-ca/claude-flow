@@ -3,10 +3,10 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../swarm/types.js';
-import type { ILogger } from '../core/logger.js';
-import type { IEventBus } from '../core/event-bus.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { IEventBus } from '../../core/event-bus.js';
+import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
 
 export class ResearcherAgent extends BaseAgent {
   constructor(
@@ -100,7 +100,7 @@ export class ResearcherAgent extends BaseAgent {
     };
   }
 
-  async executeTask(task: TaskDefinition): Promise<any> {
+  override async executeTask(task: TaskDefinition): Promise<any> {
     this.logger.info('Researcher executing task', {
       agentId: this.id,
       taskType: task.type,
@@ -145,10 +145,10 @@ export class ResearcherAgent extends BaseAgent {
 
     const results = {
       query,
-      sources: [],
+      sources: [] as any[],
       summary: '',
-      findings: [],
-      recommendations: [],
+      findings: [] as string[],
+      recommendations: [] as string[],
       confidence: 0,
       metadata: {
         searchTime: new Date(),
@@ -197,8 +197,8 @@ export class ResearcherAgent extends BaseAgent {
   }
 
   private async analyzeData(task: TaskDefinition): Promise<any> {
-    const data = task.parameters?.data;
-    const analysisType = task.parameters?.type || 'general';
+    const data = task.input?.data;
+    const analysisType = task.input?.type || 'general';
 
     this.logger.info('Analyzing data', {
       analysisType,
@@ -207,9 +207,9 @@ export class ResearcherAgent extends BaseAgent {
 
     const analysis = {
       type: analysisType,
-      insights: [],
-      patterns: [],
-      anomalies: [],
+      insights: [] as string[],
+      patterns: [] as any[],
+      anomalies: [] as any[],
       confidence: 0,
       methodology: analysisType,
       timestamp: new Date()
@@ -229,8 +229,8 @@ export class ResearcherAgent extends BaseAgent {
   }
 
   private async verifyFacts(task: TaskDefinition): Promise<any> {
-    const claims = task.parameters?.claims || [];
-    const sources = task.parameters?.sources || ['reliable', 'academic'];
+    const claims = task.input?.claims || [];
+    const sources = task.input?.sources || ['reliable', 'academic'];
 
     this.logger.info('Fact-checking claims', {
       claimsCount: claims.length,
@@ -238,9 +238,9 @@ export class ResearcherAgent extends BaseAgent {
     });
 
     const verification = {
-      claims: [],
+      claims: [] as any[],
       overallAccuracy: 0,
-      sourcesChecked: [],
+      sourcesChecked: [] as string[],
       methodology: 'cross-reference',
       timestamp: new Date()
     };
@@ -255,9 +255,9 @@ export class ResearcherAgent extends BaseAgent {
   }
 
   private async conductLiteratureReview(task: TaskDefinition): Promise<any> {
-    const topic = task.parameters?.topic || task.description;
-    const timeframe = task.parameters?.timeframe || '5-years';
-    const scope = task.parameters?.scope || 'broad';
+    const topic = task.input?.topic || task.description;
+    const timeframe = task.input?.timeframe || '5-years';
+    const scope = task.input?.scope || 'broad';
 
     this.logger.info('Conducting literature review', {
       topic,
@@ -269,10 +269,10 @@ export class ResearcherAgent extends BaseAgent {
       topic,
       timeframe,
       scope,
-      papers: [],
-      keyFindings: [],
-      gaps: [],
-      recommendations: [],
+      papers: [] as any[],
+      keyFindings: [] as string[],
+      gaps: [] as any[],
+      recommendations: [] as any[],
       confidence: 0,
       methodology: 'systematic-review',
       timestamp: new Date()
@@ -292,8 +292,8 @@ export class ResearcherAgent extends BaseAgent {
   }
 
   private async analyzeMarket(task: TaskDefinition): Promise<any> {
-    const market = task.parameters?.market || 'general';
-    const metrics = task.parameters?.metrics || ['size', 'growth', 'competition'];
+    const market = task.input?.market || 'general';
+    const metrics = task.input?.metrics || ['size', 'growth', 'competition'];
 
     this.logger.info('Analyzing market', {
       market,
@@ -303,9 +303,9 @@ export class ResearcherAgent extends BaseAgent {
     const analysis = {
       market,
       metrics: {},
-      trends: [],
-      opportunities: [],
-      threats: [],
+      trends: [] as string[],
+      opportunities: [] as any[],
+      threats: [] as any[],
       confidence: 0,
       timestamp: new Date()
     };
@@ -336,7 +336,7 @@ export class ResearcherAgent extends BaseAgent {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  getAgentStatus(): any {
+  override getAgentStatus(): any {
     return {
       ...super.getAgentStatus(),
       specialization: 'Research & Information Gathering',
@@ -364,7 +364,37 @@ export const createResearcherAgent = (
   eventBus: IEventBus,
   memory: DistributedMemorySystem
 ): ResearcherAgent => {
-  const defaultConfig = new ResearcherAgent(id, {} as AgentConfig, {} as AgentEnvironment, logger, eventBus, memory).getDefaultConfig();
+  const defaultConfig = {
+    autonomyLevel: 0.8,
+    learningEnabled: true,
+    adaptationEnabled: true,
+    maxTasksPerHour: 10,
+    maxConcurrentTasks: 3,
+    timeoutThreshold: 600000,
+    reportingInterval: 120000,
+    heartbeatInterval: 60000,
+    permissions: [
+      'web-search',
+      'data-access',
+      'file-read',
+      'api-access',
+      'research-tools'
+    ],
+    trustedAgents: [],
+    expertise: {
+      'information-gathering': 0.95,
+      'fact-checking': 0.92,
+      'data-analysis': 0.88,
+      'literature-review': 0.90,
+      'market-research': 0.85
+    },
+    preferences: {
+      searchDepth: 'comprehensive',
+      sourceVerification: 'rigorous',
+      reportingDetail: 'detailed',
+      timeInvestment: 'thorough'
+    }
+  };
   const defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',

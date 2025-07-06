@@ -5,7 +5,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  */
 
 import type { TaskDefinition, AgentState, TaskResult } from './types.js';
-import type { Logger } from '../core/logger.js';
+import { Logger } from '../core/logger.js';
 import * as path from 'node:path';
 import { spawn } from 'node:child_process';
 import { getClaudeFlowBin } from '../utils/paths.js';

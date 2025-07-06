@@ -5,7 +5,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 
 import { EventEmitter } from 'events';
 import express from 'express';
-import type { WebSocketServer } from 'ws';
+import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import { spawn } from 'child_process';
 import path from 'path';

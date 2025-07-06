@@ -3,7 +3,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Main orchestrator for Claude-Flow
  */
 
-import type {
+import {
   Config,
   SystemEvents,
   AgentProfile,
@@ -14,13 +14,13 @@ import type {
   TaskStatus,
   OrchestratorMetrics,
 } from '../utils/types.js';
-import type { IEventBus } from './event-bus.js';
+import { IEventBus } from './event-bus.js';
 import type { ILogger } from './logger.js';
 import type { ITerminalManager } from '../terminal/manager.js';
 import type { IMemoryManager } from '../memory/manager.js';
 import type { ICoordinationManager } from '../coordination/manager.js';
 import type { IMCPServer } from '../mcp/server.js';
-import type { SystemError, InitializationError, ShutdownError } from '../utils/errors.js';
+import { SystemError, InitializationError, ShutdownError } from '../utils/errors.js';
 import { delay, retry, circuitBreaker, CircuitBreaker } from '../utils/helpers.js';
 import { mkdir, writeFile, readFile } from 'fs/promises';
 import { join, dirname } from 'path';

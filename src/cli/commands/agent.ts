@@ -30,7 +30,7 @@ async function initializeAgentManager(): Promise<AgentManager> {
   const logger = new Logger({ level: 'info', format: 'text', destination: 'console' });
   const eventBus = EventBus.getInstance();
   const memorySystem = new DistributedMemorySystem(
-    { backend: 'sqlite' as const, path: './memory/agents.db' },
+    {}, // Use default config
     eventBus,
     logger
   );

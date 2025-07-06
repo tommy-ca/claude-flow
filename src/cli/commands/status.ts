@@ -4,16 +4,17 @@ import { promises as fs } from 'node:fs';
  * Status command for Claude-Flow
  */
 
-import { Command } from '@cliffy/command';
+import { Command } from 'commander';
 import chalk from 'chalk';
-import type { Table } from '@cliffy/table';
+import * as Table from 'cli-table3';
 import { formatHealthStatus, formatDuration, formatStatusIndicator } from '../formatter.js';
 
 export const statusCommand = new Command()
+  .name('status')
   .description('Show Claude-Flow system status')
   .option('-w, --watch', 'Watch mode - continuously update status')
-  .option('-i, --interval <seconds:number>', 'Update interval in seconds', { default: 5 })
-  .option('-c, --component <name:string>', 'Show status for specific component')
+  .option('-i, --interval <seconds>', 'Update interval in seconds', '5')
+  .option('-c, --component <name>', 'Show status for specific component')
   .option('--json', 'Output in JSON format')
   .action(async (options: any) => {
     if (options.watch) {
@@ -49,7 +50,7 @@ async function showStatus(options: any): Promise<void> {
 }
 
 async function watchStatus(options: any): Promise<void> {
-  const interval = options.interval * 1000;
+  const interval = parseInt(options.interval) * 1000;
   
   console.log(chalk.cyan('Watching Claude-Flow status...'));
   console.log(chalk.gray(`Update interval: ${options.interval}s`));
@@ -102,12 +103,12 @@ function showFullStatus(status: any): void {
     ]);
   }
   
-  const componentTable = new Table()
-    .header(['Component', 'Status', 'Uptime', 'Details'])
-    .body(componentRows)
-    .border(true);
+  const componentTable = new Table({
+    head: ['Component', 'Status', 'Uptime', 'Details']
+  });
+  componentTable.push(...componentRows);
   
-  componentTable.render();
+  console.log(componentTable.toString());
   console.log();
 
   // Resource usage
@@ -129,12 +130,12 @@ function showFullStatus(status: any): void {
       ]);
     }
     
-    const resourceTable = new Table()
-      .header(['Resource', 'Used', 'Total', 'Percentage'])
-      .body(resourceRows)
-      .border(true);
+    const resourceTable = new Table({
+      head: ['Resource', 'Used', 'Total', 'Percentage']
+    });
+    resourceTable.push(...resourceRows);
     
-    resourceTable.render();
+    console.log(resourceTable.toString());
     console.log();
   }
 
@@ -158,12 +159,12 @@ function showFullStatus(status: any): void {
         ]);
       }
       
-      const agentTable = new Table()
-        .header(['ID', 'Name', 'Type', 'Status', 'Tasks'])
-        .body(agentRows)
-        .border(true);
+      const agentTable = new Table({
+        head: ['ID', 'Name', 'Type', 'Status', 'Tasks']
+      });
+      agentTable.push(...agentRows);
       
-      agentTable.render();
+      console.log(agentTable.toString());
     } else {
       console.log(chalk.gray('No active agents'));
     }
@@ -190,12 +191,12 @@ function showFullStatus(status: any): void {
         ]);
       }
       
-      const taskTable = new Table()
-        .header(['ID', 'Type', 'Status', 'Duration', 'Agent'])
-        .body(taskRows)
-        .border(true);
+      const taskTable = new Table({
+        head: ['ID', 'Type', 'Status', 'Duration', 'Agent']
+      });
+      taskTable.push(...taskRows);
       
-      taskTable.render();
+      console.log(taskTable.toString());
     } else {
       console.log(chalk.gray('No recent tasks'));
     }
@@ -230,16 +231,15 @@ function showComponentStatus(status: any, componentName: string): void {
     for (const [name, value] of Object.entries(component.metrics)) {
       metricRows.push([
         chalk.white(name),
-        value.toString()
+        (value as any).toString()
       ]);
     }
     
-    const metricsTable = new Table()
-      .header(['Metric', 'Value'])
-      .body(metricRows)
-      .border(true);
-    
-    metricsTable.render();
+    const metricsTable = new Table({
+      head: ['Metric', 'Value']
+    });
+    metricsTable.push(...metricRows);
+    console.log(metricsTable.toString());
   }
   
   if (component.errors && component.errors.length > 0) {
@@ -254,12 +254,11 @@ function showComponentStatus(status: any, componentName: string): void {
       ]);
     }
     
-    const errorTable = new Table()
-      .header(['Time', 'Error'])
-      .body(errorRows)
-      .border(true);
-    
-    errorTable.render();
+    const errorTable = new Table({
+      head: ['Time', 'Error']
+    });
+    errorTable.push(...errorRows);
+    console.log(errorTable.toString());
   }
 }
 

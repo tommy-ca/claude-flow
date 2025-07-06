@@ -148,15 +148,15 @@ function printVersion() {
   console.log(`Claude-Flow v${VERSION}`);
 }
 
-function printError(message) {
+function printError(message: string) {
   console.error(`❌ Error: ${message}`);
 }
 
-function printSuccess(message) {
+function printSuccess(message: string) {
   console.log(`✅ ${message}`);
 }
 
-function printWarning(message) {
+function printWarning(message: string) {
   console.warn(`⚠️  Warning: ${message}`);
 }
 
@@ -205,8 +205,8 @@ async function main() {
     try {
       await executeCommand(command, parsedArgs, flags);
       return;
-    } catch (err) {
-      printError(err.message);
+    } catch (err: unknown) {
+      printError((err as Error).message);
       return;
     }
   }
@@ -376,7 +376,7 @@ async function main() {
           if (commandsFlag >= 0) {
             const commands = subArgs[commandsFlag + 1].split(',');
             printSuccess(`Executing ${commands.length} commands in sequence`);
-            commands.forEach((cmd, i) => {
+            commands.forEach((cmd: string, i: number) => {
               console.log(`  ${i + 1}. ${cmd}`);
             });
           } else if (fileFlag >= 0) {
@@ -1425,8 +1425,8 @@ ${flags.mode === 'full' || !flags.mode ? `Full-stack development covering all as
               } else {
                 printError(`Claude instance ${instanceId} exited with code ${status.code}`);
               }
-            } catch (err) {
-              printError(`Failed to spawn Claude: ${err.message}`);
+            } catch (err: unknown) {
+              printError(`Failed to spawn Claude: ${(err as Error).message}`);
               console.log('Make sure you have the Claude CLI installed.');
             }
           }
@@ -2110,7 +2110,7 @@ Shortcuts:
       });
     },
     
-    config: async (key) => {
+    config: async (key: string) => {
       try {
         const config = JSON.parse(await fs.readFile('claude-flow.config.json'));
         if (key) {
@@ -2130,7 +2130,7 @@ Shortcuts:
   };
   
   // Process REPL commands
-  async function processReplCommand(input) {
+  async function processReplCommand(input: string) {
     const trimmed = input.trim();
     if (!trimmed) return true;
     
@@ -2160,8 +2160,8 @@ Shortcuts:
         if (stderr.length > 0) {
           console.error(new TextDecoder().decode(stderr));
         }
-      } catch (err) {
-        console.error(`Shell error: ${err.message}`);
+      } catch (err: unknown) {
+        console.error(`Shell error: ${(err as Error).message}`);
       }
       return true;
     }
@@ -2207,7 +2207,7 @@ Shortcuts:
   }
   
   // Agent command handler
-  async function handleAgentCommand(args, state) {
+  async function handleAgentCommand(args: string[], state: any) {
     const subCmd = args[0];
     switch (subCmd) {
       case 'spawn':
@@ -2229,7 +2229,7 @@ Shortcuts:
           console.log('No active agents');
         } else {
           console.log('Active agents:');
-          state.context.agents.forEach(agent => {
+          state.context.agents.forEach((agent: any) => {
             console.log(`  ${agent.id} - ${agent.name} (${agent.type}) - ${agent.status}`);
           });
         }
@@ -2237,7 +2237,7 @@ Shortcuts:
         
       case 'info':
         const agentId = args[1];
-        const foundAgent = state.context.agents.find(a => a.id === agentId || a.name === agentId);
+        const foundAgent = state.context.agents.find((a: any) => a.id === agentId || a.name === agentId);
         if (foundAgent) {
           console.log(`Agent: ${foundAgent.name}`);
           console.log(`  ID: ${foundAgent.id}`);
@@ -2251,7 +2251,7 @@ Shortcuts:
         
       case 'terminate':
         const termId = args[1];
-        const index = state.context.agents.findIndex(a => a.id === termId || a.name === termId);
+        const index = state.context.agents.findIndex((a: any) => a.id === termId || a.name === termId);
         if (index >= 0) {
           const removed = state.context.agents.splice(index, 1)[0];
           printSuccess(`Terminated agent: ${removed.name}`);
@@ -2266,7 +2266,7 @@ Shortcuts:
   }
   
   // Task command handler
-  async function handleTaskCommand(args, state) {
+  async function handleTaskCommand(args: string[], state: any) {
     const subCmd = args[0];
     switch (subCmd) {
       case 'create':
@@ -2290,7 +2290,7 @@ Shortcuts:
           console.log('No active tasks');
         } else {
           console.log('Active tasks:');
-          state.context.tasks.forEach(task => {
+          state.context.tasks.forEach((task: any) => {
             console.log(`  ${task.id} - ${task.type} - ${task.status}`);
             console.log(`    ${task.description}`);
           });
@@ -2300,8 +2300,8 @@ Shortcuts:
       case 'assign':
         const taskId = args[1];
         const assignAgentId = args[2];
-        const foundTask = state.context.tasks.find(t => t.id === taskId);
-        const assignAgent = state.context.agents.find(a => a.id === assignAgentId || a.name === assignAgentId);
+        const foundTask = state.context.tasks.find((t: any) => t.id === taskId);
+        const assignAgent = state.context.agents.find((a: any) => a.id === assignAgentId || a.name === assignAgentId);
         
         if (foundTask && assignAgent) {
           foundTask.assignedTo = assignAgent.id;
@@ -2314,7 +2314,7 @@ Shortcuts:
         
       case 'status':
         const statusId = args[1];
-        const statusTask = state.context.tasks.find(t => t.id === statusId);
+        const statusTask = state.context.tasks.find((t: any) => t.id === statusId);
         if (statusTask) {
           console.log(`Task: ${statusTask.id}`);
           console.log(`  Type: ${statusTask.type}`);
@@ -2335,7 +2335,7 @@ Shortcuts:
   }
   
   // Memory command handler
-  async function handleMemoryCommand(args, state) {
+  async function handleMemoryCommand(args: string[], state: any) {
     const subCmd = args[0];
     switch (subCmd) {
       case 'store':
@@ -2381,7 +2381,7 @@ Shortcuts:
   }
   
   // Terminal command handler
-  async function handleTerminalCommand(args, state) {
+  async function handleTerminalCommand(args: string[], state: any) {
     const subCmd = args[0];
     switch (subCmd) {
       case 'create':
@@ -2400,7 +2400,7 @@ Shortcuts:
           console.log('No active terminals');
         } else {
           console.log('Active terminals:');
-          state.context.terminals.forEach(term => {
+          state.context.terminals.forEach((term: any) => {
             console.log(`  ${term.id} - ${term.status}`);
           });
         }
@@ -2826,8 +2826,8 @@ async function createSparcStructureManually() {
     
     console.log('  ✅ Basic SPARC structure created successfully');
     
-  } catch (err) {
-    console.log(`  ❌ Failed to create SPARC structure: ${err.message}`);
+  } catch (err: unknown) {
+    console.log(`  ❌ Failed to create SPARC structure: ${(err as Error).message}`);
   }
 }
 

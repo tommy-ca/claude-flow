@@ -14,11 +14,11 @@ import type {
   AgentError,
   TaskDefinition,
   TaskId
-} from '../swarm/types.js';
-import type { ILogger } from '../core/logger.js';
-import type { IEventBus } from '../core/event-bus.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
-import { generateId } from '../utils/helpers.js';
+} from '../../swarm/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { IEventBus } from '../../core/event-bus.js';
+import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
+import { generateId } from '../../utils/helpers.js';
 
 export interface AgentState {
   id: AgentId;
@@ -83,7 +83,7 @@ export abstract class BaseAgent extends EventEmitter {
     this.memory = memory;
     
     // Merge with defaults
-    this.capabilities = { ...this.getDefaultCapabilities(), ...config.capabilities };
+    this.capabilities = { ...this.getDefaultCapabilities(), ...(config as any).capabilities };
     this.config = { ...this.getDefaultConfig(), ...config };
     this.environment = { ...this.getDefaultEnvironment(), ...environment };
     this.metrics = this.createDefaultMetrics();

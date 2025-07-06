@@ -6,7 +6,7 @@ import { getErrorMessage } from '../../../utils/error-handler.js';
 
 import chalk from 'chalk';
 import type { ProcessManager } from './process-manager.js';
-import type { ProcessInfo, ProcessStatus, SystemStats } from './types.js';
+import { ProcessInfo, ProcessStatus, SystemStats } from './types.js';
 
 export class ProcessUI {
   private processManager: ProcessManager;
@@ -95,7 +95,7 @@ export class ProcessUI {
       case 'h':
       case 'help':
       case '?':
-        this.outputHelp();
+        this.help();
         break;
         
       default:

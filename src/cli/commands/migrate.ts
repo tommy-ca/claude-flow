@@ -4,9 +4,9 @@ import { getErrorMessage } from '../../utils/error-handler.js';
  */
 
 import { Command } from 'commander';
-import type { MigrationRunner } from '../../migration/migration-runner.js';
-import type { MigrationAnalyzer } from '../../migration/migration-analyzer.js';
-import type { RollbackManager } from '../../migration/rollback-manager.js';
+import { MigrationRunner } from '../../migration/migration-runner.js';
+import { MigrationAnalyzer } from '../../migration/migration-analyzer.js';
+import { RollbackManager } from '../../migration/rollback-manager.js';
 import type { MigrationStrategy } from '../../migration/types.js';
 import { logger } from '../../migration/logger.js';
 import * as path from 'path';

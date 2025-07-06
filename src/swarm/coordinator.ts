@@ -1,6 +1,6 @@
 import { getErrorMessage } from '../utils/error-handler.js';
 import { promises as fs } from 'node:fs';
-import type { Logger } from '../core/logger.js';
+import { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
 import {
   SwarmId, AgentId, TaskId, AgentState, TaskDefinition, SwarmObjective,
@@ -9,7 +9,7 @@ import {
   SwarmEvent, EventType, SwarmEventEmitter, ValidationResult,
   SWARM_CONSTANTS
 } from './types.js';
-import type { AutoStrategy } from './strategies/auto.js';
+import { AutoStrategy } from './strategies/auto.js';
 import { getClaudeFlowRoot, getClaudeFlowBin } from '../utils/paths.js';
 
 export class SwarmCoordinator extends EventEmitter implements SwarmEventEmitter {

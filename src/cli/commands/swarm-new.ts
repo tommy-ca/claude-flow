@@ -4,9 +4,9 @@ import { promises as fs } from 'node:fs';
  * Enhanced Swarm Command - Integration with new comprehensive swarm system
  */
 
-import type { SwarmCoordinator } from '../../swarm/coordinator.js';
-import type { TaskExecutor } from '../../swarm/executor.js';
-import type { SwarmMemoryManager } from '../../swarm/memory.js';
+import { SwarmCoordinator } from '../../swarm/coordinator.js';
+import { TaskExecutor } from '../../swarm/executor.js';
+import { SwarmMemoryManager } from '../../swarm/memory.js';
 import { generateId } from '../../utils/helpers.js';
 import { success, error, warning, info } from "../cli-core.js";
 import type { CommandContext } from "../cli-core.js";
@@ -628,14 +628,18 @@ async function setupIncrementalUpdates(
         status: initialObjective.status,
         progress: initialObjective.progress || 0
       } : null,
-      agents: initialAgents.map(a => ({
-        id: a.id,
-        name: a.name,
-        type: a.type,
-        status: a.status,
-        currentTask: a.currentTask,
-        tasksCompleted: a.completedTasks?.length || 0
-      })),
+      agents: {
+        total: initialAgents.length,
+        active: initialAgents.filter(a => a.status === 'active').length,
+        list: initialAgents.map(a => ({
+          id: a.id,
+          name: a.name,
+          type: a.type,
+          status: a.status,
+          currentTask: a.currentTask,
+          tasksCompleted: a.completedTasks?.length || 0
+        }))
+      },
       tasks: {
         total: initialTasks.length,
         completed: initialTasks.filter(t => t.status === 'completed').length,
@@ -684,14 +688,18 @@ Agents: ${initialStatus.agents.active}/${initialStatus.agents.total} active
           status: objective.status,
           progress: objective.progress || 0
         } : null,
-        agents: agents.map(a => ({
-          id: a.id,
-          name: a.name,
-          type: a.type,
-          status: a.status,
-          currentTask: a.currentTask,
-          tasksCompleted: a.completedTasks?.length || 0
-        })),
+        agents: {
+          total: agents.length,
+          active: agents.filter(a => a.status === 'active').length,
+          list: agents.map(a => ({
+            id: a.id,
+            name: a.name,
+            type: a.type,
+            status: a.status,
+            currentTask: a.currentTask,
+            tasksCompleted: a.completedTasks?.length || 0
+          }))
+        },
         tasks: {
           total: tasks.length,
           completed: tasks.filter(t => t.status === 'completed').length,

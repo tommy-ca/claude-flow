@@ -7,7 +7,7 @@ import { EventEmitter } from 'node:events';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as crypto from 'node:crypto';
-import type { Logger } from '../core/logger.js';
+import { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
 import {
   MemoryEntry, MemoryPartition, SwarmMemory, AccessLevel, ConsistencyLevel,

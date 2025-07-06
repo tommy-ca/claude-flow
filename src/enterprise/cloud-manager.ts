@@ -2,8 +2,8 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import { EventEmitter } from 'events';
 import { writeFile, readFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
-import type { Logger } from '../core/logger.js';
-import type { ConfigManager } from '../core/config.js';
+import { Logger } from '../core/logger.js';
+import { ConfigManager } from '../core/config.js';
 
 export interface CloudProvider {
   id: string;
@@ -1096,7 +1096,10 @@ export class CloudManager extends EventEmitter {
       if (!Array.from(this.providers.values()).some(p => p.name === providerData.name)) {
         const provider: CloudProvider = {
           id: `provider-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: providerData.name,
+          type: providerData.type,
           credentials: {},
+          configuration: providerData.configuration,
           status: 'inactive',
           quotas: {
             computeInstances: 20,
@@ -1104,9 +1107,9 @@ export class CloudManager extends EventEmitter {
             bandwidth: 1000,
             requests: 1000000
           },
+          pricing: providerData.pricing,
           createdAt: new Date(),
-          updatedAt: new Date(),
-          ...providerData
+          updatedAt: new Date()
         };
 
         this.providers.set(provider.id, provider);

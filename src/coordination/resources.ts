@@ -3,10 +3,10 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Resource manager for preventing conflicts and deadlocks
  */
 
-import type { Resource, CoordinationConfig, SystemEvents } from '../utils/types.js';
+import { Resource, CoordinationConfig, SystemEvents } from '../utils/types.js';
 import type { IEventBus } from '../core/event-bus.js';
 import type { ILogger } from '../core/logger.js';
-import type { ResourceLockError } from '../utils/errors.js';
+import { ResourceLockError } from '../utils/errors.js';
 import { delay, timeout } from '../utils/helpers.js';
 
 interface LockRequest {

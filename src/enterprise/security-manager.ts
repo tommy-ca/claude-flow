@@ -3,8 +3,8 @@ import { EventEmitter } from 'events';
 import { writeFile, readFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
 import { spawn } from 'child_process';
-import type { Logger } from '../core/logger.js';
-import type { ConfigManager } from '../core/config.js';
+import { Logger } from '../core/logger.js';
+import { ConfigManager } from '../core/config.js';
 
 export interface SecurityScan {
   id: string;
@@ -1165,7 +1165,7 @@ export class SecurityManager extends EventEmitter {
           remediation: {
             description: vuln.recommendation || 'Update to a secure version',
             effort: 'low' as const,
-            priority: vuln.severity as SecuritySeverity,
+            priority: vuln.severity === 'info' ? 'low' : vuln.severity as 'low' | 'medium' | 'high' | 'critical',
             autoFixable: true,
             steps: [`npm update ${packageName}`],
             references: vuln.url ? [vuln.url] : []

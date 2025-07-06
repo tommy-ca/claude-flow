@@ -484,7 +484,10 @@ export const enterpriseCommands: Command[] = [
                     region: ctx.flags.region as string || 'us-east-1',
                     provider: (ctx.flags.provider as any) || 'aws',
                     endpoints: ctx.flags.endpoints ? 
-                      (ctx.flags.endpoints as string).split(',') : []
+                      (ctx.flags.endpoints as string).split(',') : [],
+                    secrets: {},
+                    environment_variables: {},
+                    resources: { cpu: '1', memory: '1Gi', storage: '10Gi' }
                   }
                 });
 
@@ -585,7 +588,10 @@ export const enterpriseCommands: Command[] = [
                   configuration: {
                     defaultRegion: ctx.flags.region as string || 'us-east-1',
                     availableRegions: ctx.flags.regions ? 
-                      (ctx.flags.regions as string).split(',') : []
+                      (ctx.flags.regions as string).split(',') : [],
+                    services: ['compute', 'storage', 'network'],
+                    endpoints: { api: 'https://api.example.com' },
+                    features: ['scaling', 'monitoring', 'backup']
                   }
                 });
 
@@ -1437,6 +1443,9 @@ export const enterpriseCommands: Command[] = [
               type: reportType,
               scope: {
                 timeRange: { start, end: now },
+                systems: ['all'],
+                users: ['all'],
+                events: ['all'],
                 compliance: ctx.flags.framework ? [ctx.flags.framework as string] : []
               }
             });

@@ -32,6 +32,9 @@ export interface DistributedMemoryConfig {
   shardingEnabled: boolean;
   cacheSize: number;
   cacheTtl: number;
+  backend?: string;
+  timeout?: number;
+  retryAttempts?: number;
 }
 
 export interface MemoryNode {

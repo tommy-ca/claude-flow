@@ -210,7 +210,17 @@ export type TaskType =
   | 'optimization'   // Performance optimization
   | 'validation'     // Validation and verification
   | 'integration'    // System integration
-  | 'custom';        // Custom task type
+  | 'custom'         // Custom task type
+  // Analyst-specific task types
+  | 'data-analysis'
+  | 'performance-analysis'
+  | 'statistical-analysis'
+  | 'visualization'
+  | 'predictive-modeling'
+  | 'anomaly-detection'
+  | 'trend-analysis'
+  | 'business-intelligence'
+  | 'quality-analysis' | 'system-design' | 'architecture-review' | 'api-design' | 'cloud-architecture' | 'microservices-design' | 'security-architecture' | 'scalability-design' | 'database-architecture' | 'code-generation' | 'code-review' | 'refactoring' | 'debugging' | 'api-development' | 'database-design' | 'performance-optimization' | 'task-orchestration' | 'progress-tracking' | 'resource-allocation' | 'workflow-management' | 'team-coordination' | 'status-reporting' | 'fact-check' | 'literature-review' | 'market-analysis' | 'unit-testing' | 'integration-testing' | 'e2e-testing' | 'performance-testing' | 'security-testing' | 'api-testing' | 'test-automation' | 'test-analysis';
 
 export type TaskStatus = 
   | 'created'        // Task has been created
@@ -320,6 +330,7 @@ export interface TaskDefinition {
   // Execution details
   instructions: string;
   context: Record<string, any>;
+  parameters?: Record<string, any>;
   examples?: any[];
   
   // Tracking

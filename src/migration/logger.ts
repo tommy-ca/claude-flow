@@ -1,4 +1,5 @@
 import { getErrorMessage } from '../utils/error-handler.js';
+import * as process from 'node:process';
 /**
  * Migration Logger - Structured logging for migration operations
  */

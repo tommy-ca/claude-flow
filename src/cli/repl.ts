@@ -60,7 +60,7 @@ class CommandHistory {
   private async loadHistory(): Promise<void> {
     try {
       const content = await fs.readFile(this.historyFile);
-      this.history = content.split('\n').filter(line => line.trim());
+      this.history = content.split('\n').filter((line: string) => line.trim());
     } catch {
       // History file doesn't exist yet
     }

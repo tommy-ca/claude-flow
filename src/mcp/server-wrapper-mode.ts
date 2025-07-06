@@ -6,7 +6,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * This version uses the Claude Code MCP wrapper approach instead of templates.
  */
 
-import type { ClaudeCodeMCPWrapper } from './claude-code-wrapper.js';
+import { ClaudeCodeMCPWrapper } from './claude-code-wrapper.js';
 
 // Check if running as wrapper mode
 const isWrapperMode = process.env.CLAUDE_FLOW_WRAPPER_MODE === 'true' || 

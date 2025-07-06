@@ -5,7 +5,7 @@ import { getErrorMessage } from '../../../utils/error-handler.js';
 
 import chalk from 'chalk';
 import type { ProcessManager } from './process-manager.js';
-import type { SystemEvents } from '../../../utils/types.js';
+import { SystemEvents } from '../../../utils/types.js';
 import { eventBus } from '../../../core/event-bus.js';
 
 export class SystemMonitor {

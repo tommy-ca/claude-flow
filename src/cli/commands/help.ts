@@ -3,14 +3,14 @@ import { getErrorMessage } from '../../utils/error-handler.js';
  * Comprehensive help system for Claude-Flow CLI
  */
 
-import { Command } from '@cliffy/command';
+import { Command } from 'commander';
 import chalk from 'chalk';
-import type { Table } from '@cliffy/table';
-import type { Select } from '@cliffy/prompt';
+import * as Table from 'cli-table3';
+import inquirer from 'inquirer';
 
 export const helpCommand = new Command()
   .description('Comprehensive help system with examples and tutorials')
-  .arguments('[topic:string]')
+  .argument('[topic:string]')
   .option('-i, --interactive', 'Start interactive help mode')
   .option('-e, --examples', 'Show examples for the topic')
   .option('--tutorial', 'Show tutorial for the topic')
@@ -654,9 +654,10 @@ function showAllTopics(): void {
   console.log(chalk.cyan.bold('All Help Topics'));
   console.log('─'.repeat(50));
   
-  const table = new Table()
-    .header(['Topic', 'Category', 'Description'])
-    .border(true);
+  const table = new Table({
+    head: ['Topic', 'Category', 'Description'],
+    style: { head: ['cyan'] }
+  });
 
   for (const topic of HELP_TOPICS) {
     table.push([
@@ -666,7 +667,7 @@ function showAllTopics(): void {
     ]);
   }
   
-  table.render();
+  console.log(table.toString());
   
   console.log();
   console.log(chalk.gray('Use "claude-flow help <topic>" for detailed information.'));
@@ -794,12 +795,14 @@ async function startInteractiveHelp(): Promise<void> {
       { name: 'Exit', value: 'exit' }
     ];
     
-    const result = await Select.prompt({
+    const result = await inquirer.prompt([{
+      type: 'list',
+      name: 'choice',
       message: 'What would you like help with?',
-      options: categories,
-    });
+      choices: categories,
+    }]);
     
-    const choice = typeof result === 'string' ? result : result.value;
+    const choice = result.choice;
     
     if (choice === 'exit') {
       console.log(chalk.gray('Goodbye!'));

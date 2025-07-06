@@ -7,10 +7,10 @@ import { getErrorMessage } from '../../utils/error-handler.js';
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../../core/logger.js';
 import type { MCPClient } from '../client.js';
-import type { ConnectionHealthMonitor, HealthStatus } from './connection-health-monitor.js';
-import type { ReconnectionManager } from './reconnection-manager.js';
-import type { FallbackCoordinator } from './fallback-coordinator.js';
-import type { ConnectionStateManager } from './connection-state-manager.js';
+import { ConnectionHealthMonitor, HealthStatus } from './connection-health-monitor.js';
+import { ReconnectionManager } from './reconnection-manager.js';
+import { FallbackCoordinator } from './fallback-coordinator.js';
+import { ConnectionStateManager } from './connection-state-manager.js';
 import type { MCPConfig, MCPRequest } from '../../utils/types.js';
 
 export interface RecoveryConfig {

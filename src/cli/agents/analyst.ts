@@ -3,10 +3,255 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../swarm/types.js';
-import type { ILogger } from '../core/logger.js';
-import type { IEventBus } from '../core/event-bus.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
+import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type { ILogger } from '../../core/logger.js';
+import type { IEventBus } from '../../core/event-bus.js';
+import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
+
+// Type definitions for analysis
+interface AnalysisVisualization {
+  type: string;
+  title: string;
+  description: string;
+  dataPoints: number;
+  interactive: boolean;
+}
+
+interface AnalysisBottleneck {
+  component: string;
+  impact: string;
+  description: string;
+  recommendation: string;
+}
+
+interface AnalysisAnomaly {
+  id: string;
+  timestamp: Date;
+  severity: string;
+  score: number;
+  description: string;
+  features: string[];
+}
+
+interface AnalysisTrend {
+  metric: string;
+  direction: string;
+  slope: number;
+  significance: number;
+  period: string;
+}
+
+interface QualityIssue {
+  category: string;
+  severity: string;
+  description: string;
+  impact: string;
+}
+
+interface DataAnalysis {
+  dataset: {
+    name: string;
+    size: number;
+    columns: string[];
+    types: Record<string, string>;
+  };
+  analysisType: string;
+  summary: {
+    rowCount: number;
+    columnCount: number;
+    missingValues: number;
+    duplicateRows: number;
+    outliers: number;
+  };
+  descriptiveStats: Record<string, any>;
+  correlations: Record<string, any>;
+  distributions: Record<string, any>;
+  insights: string[];
+  recommendations: string[];
+  visualizations: AnalysisVisualization[];
+  confidence: number;
+  methodology: string;
+  timestamp: Date;
+}
+
+interface PerformanceAnalysis {
+  system?: string;
+  timeframe?: string;
+  metrics: Record<string, any>;
+  benchmarks?: Record<string, any>;
+  bottlenecks: AnalysisBottleneck[];
+  anomalies: AnalysisAnomaly[];
+  trends: AnalysisTrend[];
+  insights: string[];
+  recommendations: string[];
+  visualizations: AnalysisVisualization[];
+  optimizationPotential: number;
+  projectedImprovement: number;
+  confidence: number;
+  timestamp: Date;
+  alertsTriggered?: any[];
+  slaCompliance?: {
+    availability: number;
+    responseTime: number;
+    throughput: number;
+  };
+  comparison?: {
+    baseline: string;
+    improvements: string[];
+    regressions: string[];
+  };
+}
+
+interface QualityAnalysis {
+  codeQuality: {
+    complexity: number;
+    maintainability: number;
+    testCoverage: number;
+    technicalDebt: number;
+  };
+  issues: QualityIssue[];
+  patterns: string[];
+  recommendations: string[];
+  visualizations: AnalysisVisualization[];
+  overallScore: number;
+  confidence: number;
+  timestamp: Date;
+}
+
+interface StatisticalAnalysis {
+  tests: Record<string, any>;
+  hypothesis: string;
+  alpha: number;
+  results: Record<string, any>;
+  interpretation: Record<string, any>;
+  assumptions: {
+    normality: boolean;
+    independence: boolean;
+    homogeneity: boolean;
+  };
+  powerAnalysis: {
+    power: number;
+    sampleSize: number;
+    effectSize: number;
+  };
+  conclusions: string[];
+  limitations: string[];
+  timestamp: Date;
+}
+
+interface VisualizationResult {
+  chartType: string;
+  style: string;
+  interactive: boolean;
+  charts: any[];
+  dashboard: any;
+  insights: string[];
+  recommendations: string[];
+  exportFormats: string[];
+  accessibility: {
+    colorBlind: boolean;
+    screenReader: boolean;
+    highContrast: boolean;
+  };
+  timestamp: Date;
+}
+
+interface AnomalyDetectionResult {
+  method: string;
+  sensitivity: number;
+  threshold: string | number;
+  detected: AnalysisAnomaly[];
+  summary: {
+    total: number;
+    severity: {
+      low: number;
+      medium: number;
+      high: number;
+      critical: number;
+    };
+  };
+  patterns: string[];
+  recommendations: string[];
+  falsePositiveRate: number;
+  confidence: number;
+  timestamp: Date;
+}
+
+interface TrendAnalysisResult {
+  timeframe: string;
+  metrics: string[];
+  trends: AnalysisTrend[];
+  correlations: Record<string, number>;
+  patterns: {
+    seasonal: boolean;
+    cyclical: boolean;
+    trending: boolean;
+  };
+  forecasts: any[];
+  insights: string[];
+  recommendations: string[];
+  confidence: number;
+  timestamp: Date;
+}
+
+interface PredictiveModelResult {
+  algorithm: string;
+  features: string[];
+  target: string;
+  performance: {
+    accuracy: number;
+    precision: number;
+    recall: number;
+    f1Score: number;
+    rmse?: number;
+    mse?: number;
+    auc?: number;
+  };
+  validation: {
+    method: string;
+    splits: number;
+    crossValidation: any;
+  };
+  predictions: any[];
+  featureImportance: Record<string, number>;
+  insights: string[];
+  recommendations: string[];
+  modelMetadata: {
+    parameters: Record<string, any>;
+    training: {
+      epochs: number;
+      convergence: boolean;
+      finalLoss: number;
+    };
+  };
+  confidence: number;
+  timestamp: Date;
+}
+
+interface BusinessIntelligenceResult {
+  scope: string;
+  timeframe: string;
+  kpis: Record<string, any>;
+  trends: AnalysisTrend[];
+  insights: string[];
+  recommendations: string[];
+  actionItems: string[];
+  riskFactors: string[];
+  opportunities: string[];
+  marketAnalysis: {
+    competitors: any[];
+    positioning: string;
+    threats: string[];
+    opportunities: string[];
+  };
+  financialProjections: {
+    revenue: any[];
+    costs: any[];
+    profitability: any[];
+  };
+  confidence: number;
+  timestamp: Date;
+}
 
 export class AnalystAgent extends BaseAgent {
   constructor(
@@ -127,7 +372,7 @@ export class AnalystAgent extends BaseAgent {
     };
   }
 
-  async executeTask(task: TaskDefinition): Promise<any> {
+  override async executeTask(task: TaskDefinition): Promise<any> {
     this.logger.info('Analyst executing task', {
       agentId: this.id,
       taskType: task.type,
@@ -168,10 +413,10 @@ export class AnalystAgent extends BaseAgent {
   }
 
   private async analyzeData(task: TaskDefinition): Promise<any> {
-    const dataset = task.parameters?.dataset;
-    const analysisType = task.parameters?.type || 'exploratory';
-    const metrics = task.parameters?.metrics || ['central_tendency', 'distribution', 'correlation'];
-    const outputFormat = task.parameters?.format || 'report';
+    const dataset = task.context?.dataset;
+    const analysisType = task.context?.type || 'exploratory';
+    const metrics = task.context?.metrics || ['central_tendency', 'distribution', 'correlation'];
+    const outputFormat = task.context?.format || 'report';
 
     this.logger.info('Analyzing data', {
       analysisType,
@@ -179,7 +424,7 @@ export class AnalystAgent extends BaseAgent {
       outputFormat
     });
 
-    const analysis = {
+    const analysis: DataAnalysis = {
       dataset: {
         name: dataset?.name || 'Unknown',
         size: dataset?.size || 0,
@@ -197,9 +442,9 @@ export class AnalystAgent extends BaseAgent {
       descriptiveStats: {},
       correlations: {},
       distributions: {},
-      insights: [],
-      recommendations: [],
-      visualizations: [],
+      insights: [] as string[],
+      recommendations: [] as string[],
+      visualizations: [] as AnalysisVisualization[],
       confidence: 0,
       methodology: 'statistical-analysis',
       timestamp: new Date()
@@ -254,10 +499,10 @@ export class AnalystAgent extends BaseAgent {
   }
 
   private async analyzePerformance(task: TaskDefinition): Promise<any> {
-    const system = task.parameters?.system;
-    const metrics = task.parameters?.metrics || ['response_time', 'throughput', 'error_rate'];
-    const timeframe = task.parameters?.timeframe || '24h';
-    const baseline = task.parameters?.baseline;
+    const system = task.context?.system;
+    const metrics = task.context?.metrics || ['response_time', 'throughput', 'error_rate'];
+    const timeframe = task.context?.timeframe || '24h';
+    const baseline = task.context?.baseline;
 
     this.logger.info('Analyzing performance', {
       system,
@@ -265,15 +510,15 @@ export class AnalystAgent extends BaseAgent {
       timeframe
     });
 
-    const performance = {
+    const performance: PerformanceAnalysis = {
       system,
       timeframe,
       metrics: {},
       benchmarks: {},
-      bottlenecks: [],
-      trends: [],
-      recommendations: [],
-      alertsTriggered: [],
+      bottlenecks: [] as AnalysisBottleneck[],
+      trends: [] as AnalysisTrend[],
+      recommendations: [] as string[],
+      alertsTriggered: [] as any[],
       slaCompliance: {
         availability: 0,
         responseTime: 0,
@@ -281,10 +526,16 @@ export class AnalystAgent extends BaseAgent {
       },
       comparison: {
         baseline: baseline || 'previous_week',
-        improvements: [],
-        regressions: []
+        improvements: [] as string[],
+        regressions: [] as string[]
       },
-      timestamp: new Date()
+      timestamp: new Date(),
+      anomalies: [] as AnalysisAnomaly[],
+      insights: [] as string[],
+      visualizations: [] as AnalysisVisualization[],
+      optimizationPotential: 0,
+      projectedImprovement: 0,
+      confidence: 0
     };
 
     // Simulate performance analysis
@@ -323,11 +574,11 @@ export class AnalystAgent extends BaseAgent {
     return performance;
   }
 
-  private async performStatisticalAnalysis(task: TaskDefinition): Promise<any> {
-    const data = task.parameters?.data;
-    const tests = task.parameters?.tests || ['normality', 'correlation', 'significance'];
-    const alpha = task.parameters?.alpha || 0.05;
-    const hypothesis = task.parameters?.hypothesis;
+  private async performStatisticalAnalysis(task: TaskDefinition): Promise<StatisticalAnalysis> {
+    const data = task.context?.data;
+    const tests = task.context?.tests || ['normality', 'correlation', 'significance'];
+    const alpha = task.context?.alpha || 0.05;
+    const hypothesis = task.context?.hypothesis;
 
     this.logger.info('Performing statistical analysis', {
       tests,
@@ -335,7 +586,7 @@ export class AnalystAgent extends BaseAgent {
       hypothesis
     });
 
-    const statistics = {
+    const statistics: StatisticalAnalysis = {
       tests: {},
       hypothesis: hypothesis || 'no_hypothesis',
       alpha,
@@ -351,8 +602,8 @@ export class AnalystAgent extends BaseAgent {
         sampleSize: 0,
         effectSize: 0
       },
-      conclusions: [],
-      limitations: [],
+      conclusions: [] as string[],
+      limitations: [] as string[],
       timestamp: new Date()
     };
 
@@ -374,20 +625,20 @@ export class AnalystAgent extends BaseAgent {
       }
     };
     
-    statistics.conclusions = [
+    statistics.conclusions.push(
       'Null hypothesis rejected at α = 0.05 level',
       'Effect size is large (Cohen\'s d = 0.8)',
       'Results are statistically and practically significant'
-    ];
+    );
 
     return statistics;
   }
 
-  private async createVisualization(task: TaskDefinition): Promise<any> {
-    const data = task.parameters?.data;
-    const chartType = task.parameters?.type || 'auto';
-    const style = task.parameters?.style || 'professional';
-    const interactive = task.parameters?.interactive || false;
+  private async createVisualization(task: TaskDefinition): Promise<VisualizationResult> {
+    const data = task.context?.data;
+    const chartType = task.context?.type || 'auto';
+    const style = task.context?.style || 'professional';
+    const interactive = task.context?.interactive || false;
 
     this.logger.info('Creating visualization', {
       chartType,
@@ -395,14 +646,14 @@ export class AnalystAgent extends BaseAgent {
       interactive
     });
 
-    const visualization = {
+    const visualization: VisualizationResult = {
       chartType,
       style,
       interactive,
-      charts: [],
+      charts: [] as any[],
       dashboard: null,
-      insights: [],
-      recommendations: [],
+      insights: [] as string[],
+      recommendations: [] as string[],
       exportFormats: ['png', 'svg', 'pdf', 'html'],
       accessibility: {
         colorBlind: true,
@@ -415,7 +666,7 @@ export class AnalystAgent extends BaseAgent {
     // Simulate visualization creation
     await this.delay(1500);
 
-    visualization.charts = [
+    visualization.charts.push(
       {
         type: 'line',
         title: 'Trend Analysis Over Time',
@@ -430,22 +681,22 @@ export class AnalystAgent extends BaseAgent {
         dataPoints: 500,
         interactive: false
       }
-    ];
+    );
     
-    visualization.insights = [
+    visualization.insights.push(
       'Clear upward trend visible in Q3-Q4',
       'Seasonal patterns repeat every 3 months',
       'Strong correlation between variables X and Y'
-    ];
+    );
 
     return visualization;
   }
 
-  private async buildPredictiveModel(task: TaskDefinition): Promise<any> {
-    const data = task.parameters?.data;
-    const target = task.parameters?.target;
-    const algorithm = task.parameters?.algorithm || 'auto';
-    const validation = task.parameters?.validation || 'k-fold';
+  private async buildPredictiveModel(task: TaskDefinition): Promise<PredictiveModelResult> {
+    const data = task.context?.data;
+    const target = task.context?.target;
+    const algorithm = task.context?.algorithm || 'auto';
+    const validation = task.context?.validation || 'k-fold';
 
     this.logger.info('Building predictive model', {
       target,
@@ -453,32 +704,40 @@ export class AnalystAgent extends BaseAgent {
       validation
     });
 
-    const model = {
+    const model: PredictiveModelResult = {
       algorithm: algorithm === 'auto' ? 'random_forest' : algorithm,
-      target,
       features: [],
-      validation,
+      target: target || 'default_target',
       performance: {
         accuracy: 0,
         precision: 0,
         recall: 0,
         f1Score: 0,
-        auc: 0,
-        rmse: 0
+        rmse: 0,
+        mse: 0
       },
-      featureImportance: {},
-      crossValidation: {
-        folds: 5,
-        avgScore: 0,
-        stdDev: 0
+      validation: {
+        method: validation,
+        splits: 5,
+        crossValidation: {
+          folds: 5,
+          avgScore: 0,
+          stdDev: 0
+        }
       },
-      hyperparameters: {},
       predictions: [],
-      interpretability: {
-        explainable: true,
-        shap: true,
-        lime: false
+      featureImportance: {},
+      insights: [],
+      recommendations: [],
+      modelMetadata: {
+        parameters: {},
+        training: {
+          epochs: 100,
+          convergence: true,
+          finalLoss: 0.15
+        }
       },
+      confidence: 0,
       timestamp: new Date()
     };
 
@@ -504,22 +763,22 @@ export class AnalystAgent extends BaseAgent {
     return model;
   }
 
-  private async detectAnomalies(task: TaskDefinition): Promise<any> {
-    const data = task.parameters?.data;
-    const method = task.parameters?.method || 'isolation_forest';
-    const sensitivity = task.parameters?.sensitivity || 0.1;
-    const threshold = task.parameters?.threshold;
+  private async detectAnomalies(task: TaskDefinition): Promise<AnomalyDetectionResult> {
+    const data = task.context?.data;
+    const method = task.context?.method || 'isolation_forest';
+    const sensitivity = task.context?.sensitivity || 0.1;
+    const threshold = task.context?.threshold;
 
     this.logger.info('Detecting anomalies', {
       method,
       sensitivity
     });
 
-    const anomalies = {
+    const anomalies: AnomalyDetectionResult = {
       method,
       sensitivity,
       threshold: threshold || 'auto',
-      detected: [],
+      detected: ([] as any) as any[],
       summary: {
         total: 0,
         severity: {
@@ -529,8 +788,8 @@ export class AnalystAgent extends BaseAgent {
           critical: 0
         }
       },
-      patterns: [],
-      recommendations: [],
+      patterns: ([] as any) as string[],
+      recommendations: ([] as any) as string[],
       falsePositiveRate: 0,
       confidence: 0,
       timestamp: new Date()
@@ -539,7 +798,7 @@ export class AnalystAgent extends BaseAgent {
     // Simulate anomaly detection
     await this.delay(2000);
 
-    anomalies.detected = [
+    (anomalies.detected as any).push(
       {
         id: 'anom_001',
         timestamp: new Date('2024-01-15'),
@@ -556,7 +815,7 @@ export class AnalystAgent extends BaseAgent {
         description: 'Abnormal response time pattern',
         features: ['response_time', 'request_size']
       }
-    ];
+    );
     
     anomalies.summary = {
       total: 15,
@@ -573,11 +832,11 @@ export class AnalystAgent extends BaseAgent {
     return anomalies;
   }
 
-  private async analyzeTrends(task: TaskDefinition): Promise<any> {
-    const data = task.parameters?.data;
-    const timeframe = task.parameters?.timeframe || '3-months';
-    const granularity = task.parameters?.granularity || 'daily';
-    const forecast = task.parameters?.forecast || false;
+  private async analyzeTrends(task: TaskDefinition): Promise<TrendAnalysisResult> {
+    const data = task.context?.data;
+    const timeframe = task.context?.timeframe || '3-months';
+    const granularity = task.context?.granularity || 'daily';
+    const forecast = task.context?.forecast || false;
 
     this.logger.info('Analyzing trends', {
       timeframe,
@@ -585,20 +844,19 @@ export class AnalystAgent extends BaseAgent {
       forecast
     });
 
-    const trends = {
+    const trends: TrendAnalysisResult = {
       timeframe,
-      granularity,
-      trends: [],
+      metrics: ([] as any) as string[],
+      trends: ([] as any) as any[],
+      correlations: {},
       patterns: {
         seasonal: false,
         cyclical: false,
         trending: false
       },
-      forecast: forecast ? {} : null,
-      changePoints: [],
-      volatility: 0,
-      strength: 0,
-      direction: 'neutral',
+      forecasts: forecast ? ([] as any) : [],
+      insights: ([] as any) as string[],
+      recommendations: ([] as any) as string[],
       confidence: 0,
       timestamp: new Date()
     };
@@ -606,7 +864,7 @@ export class AnalystAgent extends BaseAgent {
     // Simulate trend analysis
     await this.delay(2500);
 
-    trends.trends = [
+    (trends.trends as any).push(
       {
         metric: 'user_engagement',
         direction: 'increasing',
@@ -621,7 +879,7 @@ export class AnalystAgent extends BaseAgent {
         significance: 0.23,
         period: 'Q4-2023'
       }
-    ];
+    );
     
     trends.patterns = {
       seasonal: true,
@@ -634,11 +892,11 @@ export class AnalystAgent extends BaseAgent {
     return trends;
   }
 
-  private async generateBusinessIntelligence(task: TaskDefinition): Promise<any> {
-    const domain = task.parameters?.domain || 'general';
-    const metrics = task.parameters?.metrics || ['revenue', 'growth', 'efficiency'];
-    const timeframe = task.parameters?.timeframe || 'quarterly';
-    const audience = task.parameters?.audience || 'executive';
+  private async generateBusinessIntelligence(task: TaskDefinition): Promise<BusinessIntelligenceResult> {
+    const domain = task.context?.domain || 'general';
+    const metrics = task.context?.metrics || ['revenue', 'growth', 'efficiency'];
+    const timeframe = task.context?.timeframe || 'quarterly';
+    const audience = task.context?.audience || 'executive';
 
     this.logger.info('Generating business intelligence', {
       domain,
@@ -647,19 +905,27 @@ export class AnalystAgent extends BaseAgent {
       audience
     });
 
-    const intelligence = {
-      domain,
+    const intelligence: BusinessIntelligenceResult = {
+      scope: domain,
       timeframe,
-      audience,
       kpis: {},
+      trends: [],
       insights: [],
       recommendations: [],
-      risks: [],
-      opportunities: [],
-      competitiveAnalysis: {},
-      marketTrends: [],
       actionItems: [],
-      executive_summary: '',
+      riskFactors: [],
+      opportunities: [],
+      marketAnalysis: {
+        competitors: [],
+        positioning: '',
+        threats: [],
+        opportunities: []
+      },
+      financialProjections: {
+        revenue: [],
+        costs: [],
+        profitability: []
+      },
       confidence: 0,
       timestamp: new Date()
     };
@@ -692,11 +958,11 @@ export class AnalystAgent extends BaseAgent {
     return intelligence;
   }
 
-  private async analyzeQuality(task: TaskDefinition): Promise<any> {
-    const subject = task.parameters?.subject;
-    const criteria = task.parameters?.criteria || ['accuracy', 'completeness', 'consistency'];
-    const standards = task.parameters?.standards || 'industry';
-    const benchmark = task.parameters?.benchmark;
+  private async analyzeQuality(task: TaskDefinition): Promise<QualityAnalysis> {
+    const subject = task.context?.subject;
+    const criteria = task.context?.criteria || ['accuracy', 'completeness', 'consistency'];
+    const standards = task.context?.standards || 'industry';
+    const benchmark = task.context?.benchmark;
 
     this.logger.info('Analyzing quality', {
       subject,
@@ -704,45 +970,44 @@ export class AnalystAgent extends BaseAgent {
       standards
     });
 
-    const quality = {
-      subject,
-      criteria,
-      standards,
-      scores: {},
-      overall: 0,
-      issues: [],
-      improvements: [],
-      compliance: {
-        passed: [],
-        failed: [],
-        warnings: []
+    const quality: QualityAnalysis = {
+      codeQuality: {
+        complexity: 0,
+        maintainability: 0,
+        testCoverage: 0,
+        technicalDebt: 0
       },
-      recommendations: [],
-      benchmark: benchmark || 'industry_average',
+      issues: ([] as any) as QualityIssue[],
+      patterns: ([] as any) as string[],
+      recommendations: ([] as any) as string[],
+      visualizations: ([] as any) as AnalysisVisualization[],
+      overallScore: 0,
+      confidence: 0,
       timestamp: new Date()
     };
 
     // Simulate quality analysis
     await this.delay(2000);
 
-    quality.scores = {
-      accuracy: 0.94,
-      completeness: 0.87,
-      consistency: 0.91,
-      timeliness: 0.89,
-      validity: 0.93
+    quality.codeQuality = {
+      complexity: 3.2,
+      maintainability: 0.87,
+      testCoverage: 0.91,
+      technicalDebt: 0.23
     };
     
-    quality.overall = 0.91;
+    quality.overallScore = 0.91;
     
-    quality.issues = [
-      {
-        category: 'completeness',
-        severity: 'medium',
-        description: 'Missing values in 13% of records',
-        impact: 'Affects downstream analysis accuracy'
-      }
-    ];
+    (quality.issues as any).push({
+      category: 'completeness',
+      severity: 'medium',
+      description: 'Missing values in 13% of records',
+      impact: 'Affects downstream analysis accuracy'
+    });
+    
+    (quality.patterns as any).push('High complexity in authentication module');
+    (quality.recommendations as any).push('Implement automated testing coverage');
+    quality.confidence = 0.89;
 
     return quality;
   }
@@ -760,7 +1025,7 @@ export class AnalystAgent extends BaseAgent {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
-  getAgentStatus(): any {
+  override getAgentStatus(): any {
     return {
       ...super.getAgentStatus(),
       specialization: 'Data Analysis & Performance Optimization',
@@ -790,7 +1055,8 @@ export const createAnalystAgent = (
   eventBus: IEventBus,
   memory: DistributedMemorySystem
 ): AnalystAgent => {
-  const defaultConfig = new AnalystAgent(id, {} as AgentConfig, {} as AgentEnvironment, logger, eventBus, memory).getDefaultConfig();
+  const tempAgent = new AnalystAgent(id, {} as AgentConfig, {} as AgentEnvironment, logger, eventBus, memory);
+  const defaultConfig = (tempAgent as any).getDefaultConfig();
   const defaultEnv = {
     runtime: 'deno' as const,
     version: '1.40.0',

@@ -7,7 +7,7 @@ import { Command } from '@cliffy/command';
 import chalk from 'chalk';
 import { logger } from '../../core/logger.js';
 import { configManager } from '../../core/config.js';
-import type { MCPServer } from '../../mcp/server.js';
+import { MCPServer } from '../../mcp/server.js';
 import { eventBus } from '../../core/event-bus.js';
 
 let mcpServer: MCPServer | null = null;

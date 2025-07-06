@@ -469,16 +469,16 @@ async function executeClaudeWithSparc(
       stdio: "inherit",
     });
 
-    const status = await new Promise((resolve) => {
+    const status = await new Promise<{ success: boolean; code: number | null }>((resolve) => {
       child.on("close", (code) => {
         resolve({ success: code === 0, code });
       });
     });
 
-    if (status.success) {
+    if ((status as any).success) {
       success(`SPARC instance ${instanceId} completed successfully`);
     } else {
-      error(`SPARC instance ${instanceId} exited with code ${status.code}`);
+      error(`SPARC instance ${instanceId} exited with code ${(status as any).code}`);
     }
   } catch (err) {
     error(`Failed to execute Claude: ${(err as Error).message}`);

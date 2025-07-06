@@ -3,9 +3,12 @@ import { getErrorMessage } from '../../utils/error-handler.js';
  * Workflow execution commands for Claude-Flow
  */
 
-import { Command } from '@cliffy/command';
+import { Command } from 'commander';
 import { promises as fs } from 'node:fs';
-import type { Table } from '@cliffy/table';
+import chalk from 'chalk';
+import inquirer from 'inquirer';
+import * as Table from 'cli-table3';
+import { generateId } from '../../utils/helpers.js';
 import { formatDuration, formatStatusIndicator, formatProgressBar } from '../formatter.js';
 
 export const workflowCommand = new Command()
@@ -15,7 +18,7 @@ export const workflowCommand = new Command()
   })
   .command('run', new Command()
     .description('Execute a workflow from file')
-    .arguments('<workflow-file:string>')
+    .argument('<workflow-file:string>')
     .option('-d, --dry-run', 'Validate workflow without executing')
     .option('-v, --variables <vars:string>', 'Override variables (JSON format)')
     .option('-w, --watch', 'Watch workflow execution progress')
@@ -27,7 +30,7 @@ export const workflowCommand = new Command()
   )
   .command('validate', new Command()
     .description('Validate a workflow file')
-    .arguments('<workflow-file:string>')
+    .argument('<workflow-file:string>')
     .option('--strict', 'Use strict validation mode')
     .action(async (options: any, workflowFile: string) => {
       await validateWorkflow(workflowFile, options);
@@ -43,7 +46,7 @@ export const workflowCommand = new Command()
   )
   .command('status', new Command()
     .description('Show workflow execution status')
-    .arguments('<workflow-id:string>')
+    .argument('<workflow-id:string>')
     .option('-w, --watch', 'Watch workflow progress')
     .action(async (options: any, workflowId: string) => {
       await showWorkflowStatus(workflowId, options);
@@ -51,7 +54,7 @@ export const workflowCommand = new Command()
   )
   .command('stop', new Command()
     .description('Stop a running workflow')
-    .arguments('<workflow-id:string>')
+    .argument('<workflow-id:string>')
     .option('-f, --force', 'Force stop without cleanup')
     .action(async (options: any, workflowId: string) => {
       await stopWorkflow(workflowId, options);
@@ -59,7 +62,7 @@ export const workflowCommand = new Command()
   )
   .command('template', new Command()
     .description('Generate workflow templates')
-    .arguments('<template-type:string>')
+    .argument('<template-type:string>')
     .option('-o, --output <file:string>', 'Output file path')
     .option('--format <format:string>', 'Template format (json, yaml)', { default: 'json' })
     .action(async (options: any, templateType: string) => {

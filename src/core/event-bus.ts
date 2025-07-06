@@ -3,8 +3,9 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Event bus implementation for Claude-Flow
  */
 
-import type { SystemEvents, EventMap } from '../utils/types.js';
-import type { TypedEventEmitter } from '../utils/helpers.js';
+import { SystemEvents } from '../utils/types.js';
+import type { EventMap } from '../utils/types.js';
+import { TypedEventEmitter } from '../utils/helpers.js';
 
 export interface IEventBus {
   emit(event: string, data?: unknown): void;

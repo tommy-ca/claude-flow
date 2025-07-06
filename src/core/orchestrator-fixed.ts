@@ -6,7 +6,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import type { EventBus } from './event-bus.js';
 import type { Logger } from './logger.js';
 import type { ConfigManager } from './config.js';
-import type { JsonPersistenceManager } from './json-persistence.js';
+import { JsonPersistenceManager } from './json-persistence.js';
 
 export interface AgentInfo {
   id: string;
