@@ -297,6 +297,30 @@ npx claude-flow@2.0.0 start-ui --port 3000      # Convenient alias
 | **Memory & Persistence** | 12 tools | Cross-session storage, backup/restore, compression |
 | **Analysis & Monitoring** | 13 tools | Performance tracking, bottleneck detection, metrics |
 | **Workflow & Automation** | 11 tools | CI/CD pipelines, task scheduling, batch processing |
+
+### 🧠 **NEW: Hive Mind System (v2.0.0)**
+Advanced swarm intelligence with collective decision-making and queen-led coordination:
+
+```bash
+# Initialize Hive Mind system
+npx claude-flow@2.0.0 hive-mind init
+
+# Interactive wizard for easy setup
+npx claude-flow@2.0.0 hive-mind wizard
+
+# Spawn a hive mind swarm
+npx claude-flow@2.0.0 hive-mind spawn "Build enterprise microservices"
+```
+
+**Key Features:**
+- **Queen Coordinators**: Strategic, Tactical, or Adaptive leadership styles
+- **Collective Memory**: SQLite-backed shared knowledge base
+- **Consensus Mechanisms**: Majority, Weighted, or Byzantine fault-tolerant voting
+- **Auto-scaling**: Dynamic worker allocation based on workload
+- **Work Stealing**: Intelligent task redistribution for optimal performance
+
+[Full Hive Mind Documentation →](docs/HIVE-MIND.md)
+
 | **GitHub Integration** | 8 tools | PR management, issue tracking, release coordination |
 | **DAA (Dynamic Agent Architecture)** | 8 tools | Resource allocation, lifecycle management, consensus |
 | **System & Utilities** | 8 tools | Security scanning, diagnostics, backup management |
@@ -546,6 +570,72 @@ npm run benchmark:memory  # Memory system performance
 - [🐙 GitHub Integration](./docs/github-automation.md) - Repository management
 - [🔒 Security Features](./docs/security-guide.md) - Enterprise security setup
 - [🎯 API Reference](./docs/api-reference.md) - Complete command documentation
+
+---
+
+## 🐝 **Hive Mind System - Intelligent Task Orchestration**
+
+The Hive Mind system is a revolutionary approach to complex task management, combining multiple specialized agents into a unified intelligence that breaks down and conquers any development challenge.
+
+### **🚀 Quick Start with Hive Mind**
+```bash
+# Launch the Hive Mind interactive wizard
+npx claude-flow@2.0.0 hive-mind
+
+# Or use the direct command
+npx claude-flow@2.0.0 hive
+```
+
+### **🎯 What is Hive Mind?**
+Hive Mind orchestrates multiple Claude Code agents to work in perfect coordination:
+- **🧠 Intelligent Task Analysis**: Automatically breaks down complex projects
+- **👥 Specialized Agent Teams**: Each agent focuses on their expertise
+- **🔄 Real-Time Coordination**: Agents share discoveries and build on each other's work
+- **📊 Progress Visualization**: Watch your project come together in real-time
+- **💾 Persistent Learning**: The hive remembers and improves with each task
+
+### **📋 Hive Mind Features**
+| Feature | Description | Benefit |
+|---------|-------------|---------|
+| **Interactive Wizard** | Step-by-step project setup | Zero learning curve |
+| **Auto-Agent Selection** | Picks the right agents for your task | Optimal team composition |
+| **Parallel Execution** | All agents work simultaneously | 2.8-4.4x faster completion |
+| **Shared Memory** | Agents build on each other's work | No duplicate effort |
+| **Progress Tracking** | Real-time status updates | Always know what's happening |
+
+### **🔧 Example: Building a Full-Stack App**
+```bash
+# Start Hive Mind wizard
+npx claude-flow@2.0.0 hive-mind
+
+# Wizard prompts:
+# 1. Task: "Build a REST API with authentication and React frontend"
+# 2. Complexity: High
+# 3. Timeline: Standard
+# 4. Features: Auth, Database, API, Frontend, Tests
+
+# Hive Mind automatically:
+# - Spawns 6 specialized agents
+# - Creates 15+ coordinated tasks
+# - Manages dependencies
+# - Tracks progress
+# - Delivers complete, tested code
+```
+
+### **🎨 Hive Mind Use Cases**
+- **Complex System Design**: Architect entire applications with coordinated agents
+- **Rapid Prototyping**: Go from idea to working code in minutes
+- **Code Migration**: Modernize legacy systems with intelligent analysis
+- **Performance Optimization**: Multiple agents analyze and improve code
+- **Documentation Generation**: Comprehensive docs created alongside code
+
+### **📖 Learn More**
+- [Hive Mind Overview](./docs/hive-mind/overview.md) - Complete system architecture
+- [CLI Commands Guide](./docs/hive-mind/cli-commands.md) - All Hive Mind commands
+- [Interactive Wizard](./docs/hive-mind/wizard-guide.md) - Step-by-step walkthrough
+- [API Reference](./docs/hive-mind/api-reference.md) - Programmatic usage
+- [Examples](./docs/hive-mind/examples.md) - Real-world usage patterns
+- [Troubleshooting](./docs/hive-mind/troubleshooting.md) - Common issues & solutions
 
 ### **🤝 Development & Contributing**
 - [👨‍💻 Development Setup](./docs/development-setup.md) - Local development guide

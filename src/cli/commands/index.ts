@@ -2155,6 +2155,81 @@ Now, please proceed with the task: ${task}`;
   console.log();
   console.log('For detailed help on enhanced commands: claude-flow help <command>');
 
+  // Hive Mind command
+  cli.command({
+    name: "hive-mind",
+    description: "Collective intelligence swarm management",
+    aliases: ["hive", "swarm"],
+    options: [
+      {
+        name: "command",
+        description: "Hive Mind command (init, spawn, status, task, wizard)",
+        type: "string"
+      },
+      {
+        name: "swarm-id",
+        short: "s",
+        description: "Swarm ID to operate on",
+        type: "string"
+      },
+      {
+        name: "topology",
+        short: "t", 
+        description: "Swarm topology (mesh, hierarchical, ring, star)",
+        type: "string",
+        default: "hierarchical"
+      },
+      {
+        name: "max-agents",
+        short: "m",
+        description: "Maximum number of agents",
+        type: "number",
+        default: 8
+      },
+      {
+        name: "interactive",
+        short: "i",
+        description: "Run in interactive mode",
+        type: "boolean"
+      }
+    ],
+    action: async (ctx: CommandContext) => {
+      try {
+        const subcommand = ctx.args[0] || "wizard";
+        
+        // Import hive-mind commands dynamically
+        const { hiveMindCommand } = await import('./hive-mind/index.js');
+        
+        // Execute the appropriate subcommand
+        switch (subcommand) {
+          case "init":
+            const { initCommand } = await import('./hive-mind/init.js');
+            await initCommand.parseAsync(process.argv.slice(3));
+            break;
+          case "spawn":
+            const { spawnCommand } = await import('./hive-mind/spawn.js');
+            await spawnCommand.parseAsync(process.argv.slice(3));
+            break;
+          case "status":
+            const { statusCommand } = await import('./hive-mind/status.js');
+            await statusCommand.parseAsync(process.argv.slice(3));
+            break;
+          case "task":
+            const { taskCommand } = await import('./hive-mind/task.js');
+            await taskCommand.parseAsync(process.argv.slice(3));
+            break;
+          case "wizard":
+          default:
+            const { wizardCommand } = await import('./hive-mind/wizard.js');
+            await wizardCommand.parseAsync(process.argv.slice(3));
+            break;
+        }
+      } catch (err) {
+        error(`Hive Mind error: ${getErrorMessage(err)}`);
+      }
+    }
+  });
+
   // Add enterprise commands
   for (const command of enterpriseCommands) {
     cli.command(command);

@@ -17,6 +17,7 @@ import { analysisAction } from './simple-commands/analysis.js';
 import { automationAction } from './simple-commands/automation.js';
 import { coordinationAction } from './simple-commands/coordination.js';
 import { hooksAction } from './simple-commands/hooks.js';
+import { hiveMindCommand } from './simple-commands/hive-mind.js';
 // Note: TypeScript imports commented out for Node.js compatibility
 // import { ruvSwarmAction } from './commands/ruv-swarm.ts';
 // import { configIntegrationAction } from './commands/config-integration.ts';
@@ -183,6 +184,41 @@ First-time users should run: npx claude-flow@latest init --sparc`
     ]
   });
 
+  commandRegistry.set('hive-mind', {
+    handler: hiveMindCommand,
+    description: 'Advanced Hive Mind swarm intelligence with collective decision-making',
+    usage: 'hive-mind <subcommand> [options]',
+    examples: [
+      'hive-mind init                          # Initialize hive mind system',
+      'hive-mind spawn "Build microservices"   # Create swarm with objective',
+      'hive-mind wizard                        # Interactive setup wizard',
+      'hive-mind status                        # View active swarms',
+      'hive-mind consensus                     # View consensus decisions',
+      'hive-mind metrics                       # Performance analytics'
+    ],
+    details: `
+Hive Mind System Features:
+  • Queen-led coordination with specialized worker agents
+  • Collective memory and knowledge sharing
+  • Consensus building for critical decisions  
+  • Auto-scaling based on workload
+  • Parallel task execution with work stealing
+  • Real-time monitoring and metrics
+  • SQLite-backed persistence
+  • MCP tool integration for 87+ operations
+
+Queen Types:
+  • Strategic - Long-term planning and optimization
+  • Tactical - Task prioritization and rapid response
+  • Adaptive - Learning and strategy evolution
+
+Worker Types:
+  • Researcher, Coder, Analyst, Tester
+  • Architect, Reviewer, Optimizer, Documenter
+
+Use 'hive-mind wizard' for interactive setup or 'hive-mind help' for full documentation.`
+  });
+
   commandRegistry.set('batch', {
     handler: batchManagerCommand,
     description: 'Batch operation management and configuration utilities',
@@ -326,6 +362,62 @@ Hooks commands:
   • session-end: Execute at session termination (cleanup & export)
   
 Enables automated preparation & cleanup, performance tracking, and coordination synchronization.`
+  });
+
+  commandRegistry.set('hive', {
+    handler: async (args, flags) => {
+      try {
+        // Try to load the hive command module
+        const { hiveAction } = await import('./commands/hive.js');
+        return hiveAction({ args, flags, command: 'hive' });
+      } catch (error) {
+        // Fallback to simple implementation if module not found
+        console.log('🐝 Hive Mind - Advanced Multi-Agent Coordination');
+        console.log('');
+        console.log('The Hive Mind system provides:');
+        console.log('  • Consensus-based decision making');
+        console.log('  • Distributed task orchestration');
+        console.log('  • Quality-driven execution');
+        console.log('  • Real-time swarm monitoring');
+        console.log('');
+        console.log('Usage: hive <objective> [options]');
+        console.log('');
+        console.log('For full functionality, ensure the hive module is properly built.');
+      }
+    },
+    description: 'Hive Mind - Advanced multi-agent swarm with consensus',
+    usage: 'hive <objective> [options]',
+    examples: [
+      'hive "Build microservices architecture"',
+      'hive "Optimize database performance" --consensus unanimous',
+      'hive "Develop ML pipeline" --topology mesh --monitor',
+      'hive "Create REST API" --sparc --max-agents 8',
+      'hive "Research cloud patterns" --background --quality-threshold 0.9'
+    ],
+    details: `
+Hive Mind features:
+  • 👑 Queen-led orchestration with specialized agents
+  • 🗳️ Consensus mechanisms (quorum, unanimous, weighted, leader)
+  • 🏗️ Multiple topologies (hierarchical, mesh, ring, star)
+  • 📊 Real-time monitoring dashboard
+  • 🧪 SPARC methodology integration
+  • 💾 Distributed memory and knowledge sharing
+  
+Agent types:
+  • Queen: Orchestrator and decision maker
+  • Architect: System design and planning  
+  • Worker: Implementation and execution
+  • Scout: Research and exploration
+  • Guardian: Quality and validation
+  
+Options:
+  --topology <type>         Swarm topology (default: hierarchical)
+  --consensus <type>        Decision mechanism (default: quorum)
+  --max-agents <n>          Maximum agents (default: 8)
+  --quality-threshold <n>   Min quality 0-1 (default: 0.8)
+  --sparc                   Use SPARC methodology
+  --monitor                 Real-time monitoring
+  --background              Run in background`
   });
 
   // Temporarily commented out for Node.js compatibility
