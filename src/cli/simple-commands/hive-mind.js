@@ -673,17 +673,24 @@ async function showMetrics(flags) {
     // Get overall metrics
     const overallStats = db.prepare(`
       SELECT 
-        COUNT(DISTINCT s.id) as total_swarms,
-        COUNT(DISTINCT a.id) as total_agents,
-        COUNT(DISTINCT t.id) as total_tasks,
-        SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks
-      FROM swarms s
-      LEFT JOIN agents a ON s.id = a.swarm_id
-      LEFT JOIN tasks t ON s.id = t.swarm_id
+        (SELECT COUNT(*) FROM swarms) as total_swarms,
+        (SELECT COUNT(*) FROM agents) as total_agents,
+        (SELECT COUNT(*) FROM tasks) as total_tasks,
+        (SELECT COUNT(*) FROM tasks WHERE status = 'completed') as completed_tasks
     `).get();
     
     console.log(chalk.bold('\n📊 Hive Mind Performance Metrics\n'));
     
+    // Get task status breakdown
+    const taskBreakdown = db.prepare(`
+      SELECT 
+        status,
+        COUNT(*) as count
+      FROM tasks
+      GROUP BY status
+      ORDER BY count DESC
+    `).all();
+
     console.log(chalk.cyan('Overall Statistics:'));
     console.log(`  Total Swarms: ${overallStats.total_swarms}`);
     console.log(`  Total Agents: ${overallStats.total_agents}`);
@@ -692,6 +699,20 @@ async function showMetrics(flags) {
     console.log(`  Success Rate: ${overallStats.total_tasks > 0 
       ? ((overallStats.completed_tasks / overallStats.total_tasks) * 100).toFixed(1) + '%'
       : 'N/A'}`);
+    
+    if (taskBreakdown.length > 0) {
+      console.log('\n' + chalk.cyan('Task Status Breakdown:'));
+      taskBreakdown.forEach(status => {
+        const percentage = overallStats.total_tasks > 0 
+          ? ((status.count / overallStats.total_tasks) * 100).toFixed(1)
+          : '0';
+        const statusColor = 
+          status.status === 'completed' ? 'green' :
+          status.status === 'in_progress' ? 'yellow' :
+          status.status === 'failed' ? 'red' : 'gray';
+        console.log(`  ${chalk[statusColor](status.status.charAt(0).toUpperCase() + status.status.slice(1))}: ${status.count} (${percentage}%)`);
+      });
+    }
     
     // Get agent performance
     const agentPerf = db.prepare(`
@@ -730,18 +751,13 @@ async function showMetrics(flags) {
       SELECT 
         s.name,
         s.objective,
-        COUNT(DISTINCT a.id) as agent_count,
-        COUNT(DISTINCT t.id) as task_count,
-        SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_count,
-        COUNT(DISTINCT cm.id) as memory_entries,
-        COUNT(DISTINCT cd.id) as consensus_count
+        (SELECT COUNT(*) FROM agents a WHERE a.swarm_id = s.id) as agent_count,
+        (SELECT COUNT(*) FROM tasks t WHERE t.swarm_id = s.id) as task_count,
+        (SELECT COUNT(*) FROM tasks t WHERE t.swarm_id = s.id AND t.status = 'completed') as completed_count,
+        (SELECT COUNT(*) FROM collective_memory cm WHERE cm.swarm_id = s.id) as memory_entries,
+        (SELECT COUNT(*) FROM consensus_decisions cd WHERE cd.swarm_id = s.id) as consensus_count
       FROM swarms s
-      LEFT JOIN agents a ON s.id = a.swarm_id
-      LEFT JOIN tasks t ON s.id = t.swarm_id
-      LEFT JOIN collective_memory cm ON s.id = cm.swarm_id
-      LEFT JOIN consensus_decisions cd ON s.id = cd.swarm_id
       WHERE s.status = 'active'
-      GROUP BY s.id
       ORDER BY s.created_at DESC
       LIMIT 5
     `).all();
@@ -757,6 +773,49 @@ async function showMetrics(flags) {
         console.log(`  Agents: ${swarm.agent_count}, Tasks: ${swarm.completed_count}/${swarm.task_count} (${successRate}%)`);
         console.log(`  Memory: ${swarm.memory_entries} entries, Consensus: ${swarm.consensus_count} decisions`);
       });
+    }
+    
+    // Get performance insights
+    const avgTaskTime = db.prepare(`
+      SELECT 
+        AVG(CASE WHEN completed_at IS NOT NULL 
+          THEN (julianday(completed_at) - julianday(created_at)) * 24 * 60 
+          ELSE NULL END) as avg_minutes
+      FROM tasks
+      WHERE status = 'completed'
+    `).get();
+    
+    const agentTypePerf = db.prepare(`
+      SELECT 
+        a.type,
+        COUNT(t.id) as total_tasks,
+        SUM(CASE WHEN t.status = 'completed' THEN 1 ELSE 0 END) as completed_tasks,
+        AVG(CASE WHEN t.completed_at IS NOT NULL 
+          THEN (julianday(t.completed_at) - julianday(t.created_at)) * 24 * 60 
+          ELSE NULL END) as avg_completion_minutes
+      FROM agents a
+      LEFT JOIN tasks t ON a.id = t.agent_id
+      GROUP BY a.type
+      HAVING total_tasks > 0
+      ORDER BY completed_tasks DESC
+    `).all();
+    
+    if (avgTaskTime.avg_minutes) {
+      console.log('\n' + chalk.cyan('Performance Insights:'));
+      console.log(`  Average Task Completion Time: ${avgTaskTime.avg_minutes.toFixed(1)} minutes`);
+      
+      if (agentTypePerf.length > 0) {
+        console.log('\n' + chalk.cyan('Agent Type Performance:'));
+        agentTypePerf.forEach(type => {
+          const successRate = type.total_tasks > 0 
+            ? ((type.completed_tasks / type.total_tasks) * 100).toFixed(1)
+            : '0';
+          console.log(`  ${type.type.charAt(0).toUpperCase() + type.type.slice(1)}: ${type.completed_tasks}/${type.total_tasks} (${successRate}%)`);
+          if (type.avg_completion_minutes) {
+            console.log(`    Average time: ${type.avg_completion_minutes.toFixed(1)} minutes`);
+          }
+        });
+      }
     }
     
     console.log('\n');
