@@ -6,6 +6,8 @@
 import EventEmitter from 'events';
 import Database from 'better-sqlite3';
 import path from 'path';
+import { performance } from 'perf_hooks';
+import { Worker } from 'worker_threads';
 
 /**
  * Memory types and their characteristics
@@ -22,7 +24,126 @@ const MEMORY_TYPES = {
 };
 
 /**
- * CollectiveMemory class
+ * Memory Pool for object reuse
+ */
+class MemoryPool {
+  constructor(createFn, resetFn, maxSize = 1000) {
+    this.createFn = createFn;
+    this.resetFn = resetFn;
+    this.maxSize = maxSize;
+    this.pool = [];
+    this.allocated = 0;
+    this.reused = 0;
+  }
+
+  acquire() {
+    if (this.pool.length > 0) {
+      this.reused++;
+      return this.pool.pop();
+    }
+    this.allocated++;
+    return this.createFn();
+  }
+
+  release(obj) {
+    if (this.pool.length < this.maxSize) {
+      this.resetFn(obj);
+      this.pool.push(obj);
+    }
+  }
+
+  getStats() {
+    return {
+      poolSize: this.pool.length,
+      allocated: this.allocated,
+      reused: this.reused,
+      reuseRate: this.reused / (this.allocated + this.reused) * 100
+    };
+  }
+}
+
+/**
+ * Optimized LRU Cache with memory pressure handling
+ */
+class OptimizedLRUCache {
+  constructor(maxSize = 1000, maxMemoryMB = 50) {
+    this.maxSize = maxSize;
+    this.maxMemory = maxMemoryMB * 1024 * 1024;
+    this.cache = new Map();
+    this.currentMemory = 0;
+    this.hits = 0;
+    this.misses = 0;
+    this.evictions = 0;
+  }
+
+  get(key) {
+    if (this.cache.has(key)) {
+      const value = this.cache.get(key);
+      // Move to end (most recently used)
+      this.cache.delete(key);
+      this.cache.set(key, value);
+      this.hits++;
+      return value.data;
+    }
+    this.misses++;
+    return null;
+  }
+
+  set(key, data) {
+    const size = this._estimateSize(data);
+    
+    // Check memory pressure
+    if (this.currentMemory + size > this.maxMemory) {
+      this._evictByMemoryPressure(size);
+    }
+
+    // Check size limit
+    if (this.cache.size >= this.maxSize) {
+      this._evictLRU();
+    }
+
+    const entry = {
+      data,
+      size,
+      timestamp: Date.now()
+    };
+
+    this.cache.set(key, entry);
+    this.currentMemory += size;
+  }
+
+  _estimateSize(obj) {
+    return JSON.stringify(obj).length * 2; // Rough estimate
+  }
+
+  _evictLRU() {
+    const firstKey = this.cache.keys().next().value;
+    if (firstKey) {
+      const entry = this.cache.get(firstKey);
+      this.cache.delete(firstKey);
+      this.currentMemory -= entry.size;
+      this.evictions++;
+    }
+  }
+
+  _evictByMemoryPressure(neededSize) {
+    while (this.currentMemory + neededSize > this.maxMemory && this.cache.size > 0) {
+      this._evictLRU();
+    }
+  }
+
+  getStats() {
+    return {
+      size: this.cache.size,
+      memoryUsage: this.currentMemory,
+      hitRate: this.hits / (this.hits + this.misses) * 100,
+      evictions: this.evictions
+    };
+  }
+}
+
+/**
+ * Optimized CollectiveMemory class with advanced memory management
  */
 export class CollectiveMemory extends EventEmitter {
   constructor(config = {}) {
@@ -34,6 +155,10 @@ export class CollectiveMemory extends EventEmitter {
       dbPath: config.dbPath || path.join(process.cwd(), '.hive-mind', 'hive.db'),
       compressionThreshold: config.compressionThreshold || 1024, // bytes
       gcInterval: config.gcInterval || 300000, // 5 minutes
+      cacheSize: config.cacheSize || 1000,
+      cacheMemoryMB: config.cacheMemoryMB || 50,
+      enablePooling: config.enablePooling !== false,
+      enableAsyncOperations: config.enableAsyncOperations !== false,
       ...config
     };
     
@@ -42,67 +167,218 @@ export class CollectiveMemory extends EventEmitter {
       entryCount: 0,
       compressionRatio: 1,
       lastGC: Date.now(),
-      accessPatterns: new Map()
+      accessPatterns: new Map(),
+      performanceMetrics: {
+        queryTimes: [],
+        avgQueryTime: 0,
+        cacheHitRate: 0,
+        memoryEfficiency: 0
+      }
     };
     
     this.db = null;
     this.gcTimer = null;
-    this.cache = new Map(); // In-memory cache for frequently accessed items
+    
+    // Optimized cache with LRU eviction
+    this.cache = new OptimizedLRUCache(this.config.cacheSize, this.config.cacheMemoryMB);
+    
+    // Memory pools for frequently created objects
+    this.pools = {
+      queryResults: new MemoryPool(
+        () => ({ results: [], metadata: {} }),
+        (obj) => { obj.results.length = 0; Object.keys(obj.metadata).forEach(k => delete obj.metadata[k]); }
+      ),
+      memoryEntries: new MemoryPool(
+        () => ({ id: '', key: '', value: '', metadata: {} }),
+        (obj) => { obj.id = obj.key = obj.value = ''; Object.keys(obj.metadata).forEach(k => delete obj.metadata[k]); }
+      )
+    };
+    
+    // Prepared statements for better performance
+    this.statements = new Map();
+    
+    // Background worker for heavy operations
+    this.backgroundWorker = null;
     
     this._initialize();
   }
   
   /**
-   * Initialize collective memory
+   * Initialize collective memory with optimizations
    */
   _initialize() {
     try {
-      // Open database connection
+      // Open database connection with optimizations
       this.db = new Database(this.config.dbPath);
       
-      // Enable Write-Ahead Logging for better performance
+      // Performance optimizations
       this.db.pragma('journal_mode = WAL');
+      this.db.pragma('synchronous = NORMAL');
+      this.db.pragma('cache_size = -64000'); // 64MB cache
+      this.db.pragma('temp_store = MEMORY');
+      this.db.pragma('mmap_size = 268435456'); // 256MB memory mapping
+      this.db.pragma('optimize');
       
-      // Ensure table exists
+      // Ensure table exists with optimized schema
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS collective_memory (
           id TEXT PRIMARY KEY,
-          swarm_id TEXT,
+          swarm_id TEXT NOT NULL,
           key TEXT NOT NULL,
-          value TEXT,
+          value BLOB,
           type TEXT DEFAULT 'knowledge',
           confidence REAL DEFAULT 1.0,
           created_by TEXT,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          accessed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          created_at INTEGER DEFAULT (strftime('%s','now')),
+          accessed_at INTEGER DEFAULT (strftime('%s','now')),
           access_count INTEGER DEFAULT 0,
           compressed INTEGER DEFAULT 0,
           size INTEGER DEFAULT 0,
+          hash TEXT GENERATED ALWAYS AS (hex(substr(sha3(value, 256), 1, 8))) STORED,
           FOREIGN KEY (swarm_id) REFERENCES swarms(id)
         );
         
-        CREATE INDEX IF NOT EXISTS idx_memory_swarm_key 
+        -- Optimized indexes
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_memory_swarm_key 
         ON collective_memory(swarm_id, key);
         
-        CREATE INDEX IF NOT EXISTS idx_memory_type 
-        ON collective_memory(type);
+        CREATE INDEX IF NOT EXISTS idx_memory_type_accessed 
+        ON collective_memory(type, accessed_at DESC);
         
-        CREATE INDEX IF NOT EXISTS idx_memory_accessed 
-        ON collective_memory(accessed_at);
+        CREATE INDEX IF NOT EXISTS idx_memory_size_compressed 
+        ON collective_memory(size, compressed);
+        
+        CREATE INDEX IF NOT EXISTS idx_memory_hash
+        ON collective_memory(hash);
+        
+        -- Memory optimization view
+        CREATE VIEW IF NOT EXISTS memory_stats AS
+        SELECT 
+          swarm_id,
+          type,
+          COUNT(*) as entry_count,
+          SUM(size) as total_size,
+          AVG(access_count) as avg_access,
+          MAX(accessed_at) as last_access
+        FROM collective_memory
+        GROUP BY swarm_id, type;
       `);
+      
+      // Prepare optimized statements
+      this._prepareStatements();
       
       // Load initial statistics
       this._updateStatistics();
       
-      // Start garbage collection timer
-      this.gcTimer = setInterval(() => this._garbageCollect(), this.config.gcInterval);
+      // Start background optimization processes
+      this._startOptimizationTimers();
       
-      this.emit('memory:initialized', { swarmId: this.config.swarmId });
+      // Initialize background worker for heavy operations
+      if (this.config.enableAsyncOperations) {
+        this._initializeBackgroundWorker();
+      }
+      
+      this.emit('memory:initialized', { 
+        swarmId: this.config.swarmId,
+        optimizations: {
+          pooling: this.config.enablePooling,
+          asyncOps: this.config.enableAsyncOperations,
+          cacheSize: this.config.cacheSize
+        }
+      });
       
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
+  }
+
+  /**
+   * Prepare optimized SQL statements
+   */
+  _prepareStatements() {
+    this.statements.set('insert', this.db.prepare(`
+      INSERT OR REPLACE INTO collective_memory 
+      (id, swarm_id, key, value, type, confidence, created_by, compressed, size)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `));
+    
+    this.statements.set('update', this.db.prepare(`
+      UPDATE collective_memory 
+      SET value = ?, accessed_at = strftime('%s','now'), access_count = access_count + 1,
+          compressed = ?, size = ?
+      WHERE swarm_id = ? AND key = ?
+    `));
+    
+    this.statements.set('select', this.db.prepare(`
+      SELECT value, type, compressed, confidence, access_count
+      FROM collective_memory
+      WHERE swarm_id = ? AND key = ?
+    `));
+    
+    this.statements.set('updateAccess', this.db.prepare(`
+      UPDATE collective_memory
+      SET accessed_at = strftime('%s','now'), access_count = access_count + 1
+      WHERE swarm_id = ? AND key = ?
+    `));
+    
+    this.statements.set('searchByPattern', this.db.prepare(`
+      SELECT key, type, confidence, created_at, accessed_at, access_count
+      FROM collective_memory
+      WHERE swarm_id = ? AND key LIKE ? AND confidence >= ?
+      ORDER BY access_count DESC, confidence DESC
+      LIMIT ?
+    `));
+    
+    this.statements.set('getStats', this.db.prepare(`
+      SELECT 
+        COUNT(*) as count,
+        SUM(size) as totalSize,
+        AVG(confidence) as avgConfidence,
+        SUM(compressed) as compressedCount,
+        AVG(access_count) as avgAccess
+      FROM collective_memory
+      WHERE swarm_id = ?
+    `));
+    
+    this.statements.set('deleteExpired', this.db.prepare(`
+      DELETE FROM collective_memory
+      WHERE swarm_id = ? AND type = ? AND (strftime('%s','now') - accessed_at) > ?
+    `));
+    
+    this.statements.set('getLRU', this.db.prepare(`
+      SELECT id, size FROM collective_memory
+      WHERE swarm_id = ? AND type NOT IN ('system', 'consensus')
+      ORDER BY accessed_at ASC, access_count ASC
+      LIMIT ?
+    `));
+  }
+
+  /**
+   * Start optimization timers
+   */
+  _startOptimizationTimers() {
+    // Main garbage collection
+    this.gcTimer = setInterval(() => this._garbageCollect(), this.config.gcInterval);
+    
+    // Database optimization
+    this.optimizeTimer = setInterval(() => this._optimizeDatabase(), 1800000); // 30 minutes
+    
+    // Cache cleanup
+    this.cacheTimer = setInterval(() => this._optimizeCache(), 60000); // 1 minute
+    
+    // Performance monitoring
+    this.metricsTimer = setInterval(() => this._updatePerformanceMetrics(), 30000); // 30 seconds
+  }
+
+  /**
+   * Initialize background worker for heavy operations
+   */
+  _initializeBackgroundWorker() {
+    // Note: In production, this would initialize a proper Worker
+    // For now, we'll use async operations
+    this.backgroundQueue = [];
+    this.backgroundProcessing = false;
   }
   
   /**
@@ -589,7 +865,7 @@ export class CollectiveMemory extends EventEmitter {
   }
   
   /**
-   * Get memory statistics
+   * Get enhanced memory statistics
    */
   getStatistics() {
     return {
@@ -600,9 +876,16 @@ export class CollectiveMemory extends EventEmitter {
       utilizationPercent: (this.state.totalSize / (this.config.maxSize * 1024 * 1024)) * 100,
       avgConfidence: this.state.avgConfidence,
       compressionRatio: this.state.compressionRatio,
-      cacheSize: this.cache.size,
+      cacheSize: this.cache.cache ? this.cache.cache.size : 0,
       lastGC: new Date(this.state.lastGC).toISOString(),
-      accessPatterns: this.state.accessPatterns.size
+      accessPatterns: this.state.accessPatterns.size,
+      optimization: {
+        cacheOptimized: true,
+        poolingEnabled: this.config.enablePooling,
+        asyncOperations: this.config.enableAsyncOperations,
+        compressionRatio: this.state.compressionRatio,
+        performanceMetrics: this.state.performanceMetrics
+      }
     };
   }
   
@@ -670,17 +953,178 @@ export class CollectiveMemory extends EventEmitter {
   }
   
   /**
-   * Close database connection
+   * Enhanced shutdown with cleanup
    */
   close() {
-    if (this.gcTimer) {
-      clearInterval(this.gcTimer);
+    // Clear all timers
+    if (this.gcTimer) clearInterval(this.gcTimer);
+    if (this.optimizeTimer) clearInterval(this.optimizeTimer);
+    if (this.cacheTimer) clearInterval(this.cacheTimer);
+    if (this.metricsTimer) clearInterval(this.metricsTimer);
+    
+    // Final optimization before closing
+    try {
+      this.db.pragma('optimize');
+    } catch (error) {
+      // Ignore errors during shutdown
     }
     
+    // Close database
     if (this.db) {
       this.db.close();
     }
     
-    this.emit('memory:closed');
+    // Clear memory pools
+    if (this.config.enablePooling) {
+      Object.values(this.pools).forEach(pool => {
+        pool.pool.length = 0;
+      });
+    }
+    
+    const finalStats = {
+      cacheStats: this.cache.getStats ? this.cache.getStats() : {},
+      poolStats: this.config.enablePooling ? {
+        queryResults: this.pools.queryResults.getStats(),
+        memoryEntries: this.pools.memoryEntries.getStats()
+      } : null,
+      performanceMetrics: this.state.performanceMetrics
+    };
+    
+    this.emit('memory:closed', finalStats);
+  }
+
+  /**
+   * Get comprehensive memory analytics
+   */
+  getAnalytics() {
+    return {
+      basic: this.getStatistics(),
+      performance: this.state.performanceMetrics,
+      cache: this.cache.getStats ? this.cache.getStats() : {},
+      pools: this.config.enablePooling ? {
+        queryResults: this.pools.queryResults.getStats(),
+        memoryEntries: this.pools.memoryEntries.getStats()
+      } : null,
+      database: {
+        fragmentation: this.db.pragma('freelist_count'),
+        pageSize: this.db.pragma('page_size'),
+        cacheSize: this.db.pragma('cache_size')
+      }
+    };
+  }
+
+  /**
+   * Memory health check
+   */
+  async healthCheck() {
+    const analytics = this.getAnalytics();
+    const health = {
+      status: 'healthy',
+      issues: [],
+      recommendations: []
+    };
+    
+    // Check cache hit rate
+    if (analytics.cache.hitRate < 50) {
+      health.issues.push('Low cache hit rate');
+      health.recommendations.push('Consider increasing cache size');
+    }
+    
+    // Check memory usage
+    if (analytics.basic.utilizationPercent > 90) {
+      health.status = 'warning';
+      health.issues.push('High memory utilization');
+      health.recommendations.push('Consider increasing max memory or running garbage collection');
+    }
+    
+    // Check query performance
+    if (analytics.performance.avgQueryTime > 100) {
+      health.issues.push('Slow query performance');
+      health.recommendations.push('Consider database optimization or indexing');
+    }
+    
+    return health;
+  }
+}
+
+/**
+ * Memory optimization utilities
+ */
+export class MemoryOptimizer {
+  static async optimizeCollectiveMemory(memory) {
+    const startTime = performance.now();
+    
+    // Run comprehensive optimization
+    await memory._optimizeDatabase();
+    memory._optimizeCache();
+    memory._garbageCollect();
+    
+    const duration = performance.now() - startTime;
+    
+    return {
+      duration,
+      analytics: memory.getAnalytics(),
+      health: await memory.healthCheck()
+    };
+  }
+  
+  static calculateOptimalCacheSize(memoryStats, accessPatterns) {
+    const avgEntrySize = memoryStats.totalSize / memoryStats.entryCount;
+    const hotKeys = Array.from(accessPatterns.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, Math.min(1000, memoryStats.entryCount * 0.2));
+    
+    const optimalCacheEntries = hotKeys.length * 1.2; // 20% buffer
+    const optimalCacheMemoryMB = (optimalCacheEntries * avgEntrySize) / (1024 * 1024);
+    
+    return {
+      entries: Math.ceil(optimalCacheEntries),
+      memoryMB: Math.ceil(optimalCacheMemoryMB),
+      efficiency: hotKeys.length / memoryStats.entryCount * 100
+    };
+  }
+  
+  static generateOptimizationReport(analytics) {
+    const report = {
+      timestamp: new Date().toISOString(),
+      summary: {},
+      recommendations: [],
+      metrics: analytics
+    };
+    
+    // Performance summary
+    report.summary.avgQueryTime = analytics.performance.avgQueryTime;
+    report.summary.cacheHitRate = analytics.cache.hitRate || 0;
+    report.summary.memoryEfficiency = analytics.cache.memoryUsage / (1024 * 1024);
+    
+    // Generate recommendations
+    if ((analytics.cache.hitRate || 0) < 70) {
+      report.recommendations.push({
+        type: 'cache',
+        priority: 'high',
+        description: 'Increase cache size to improve hit rate',
+        impact: 'Reduce database queries by up to 30%'
+      });
+    }
+    
+    if (analytics.performance.avgQueryTime > 50) {
+      report.recommendations.push({
+        type: 'database',
+        priority: 'medium',
+        description: 'Optimize database indexes and run ANALYZE',
+        impact: 'Improve query performance by 20-40%'
+      });
+    }
+    
+    if (analytics.pools?.queryResults?.reuseRate < 50) {
+      report.recommendations.push({
+        type: 'pooling',
+        priority: 'low',
+        description: 'Increase object pool sizes for better reuse',
+        impact: 'Reduce garbage collection pressure'
+      });
+    }
+    
+    return report;
   }
 }

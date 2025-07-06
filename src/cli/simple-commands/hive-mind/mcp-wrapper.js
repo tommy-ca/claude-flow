@@ -103,7 +103,7 @@ export class MCPToolWrapper {
   }
   
   /**
-   * Execute multiple tools in parallel
+   * Execute multiple tools in parallel with optimized batching
    */
   async executeParallel(toolCalls) {
     if (!this.config.parallel) {
@@ -115,19 +115,155 @@ export class MCPToolWrapper {
       return results;
     }
     
-    // Execute in parallel with concurrency limit
-    const concurrencyLimit = 5;
-    const results = [];
-    
-    for (let i = 0; i < toolCalls.length; i += concurrencyLimit) {
-      const batch = toolCalls.slice(i, i + concurrencyLimit);
-      const batchResults = await Promise.all(
-        batch.map(call => this.executeTool(call.tool, call.params))
-      );
-      results.push(...batchResults);
+    if (!Array.isArray(toolCalls) || toolCalls.length === 0) {
+      return [];
     }
     
-    return results;
+    const startTime = Date.now();
+    
+    // Intelligent concurrency limit based on tool types
+    const concurrencyLimit = this._calculateOptimalConcurrency(toolCalls);
+    
+    // Group tools by priority and dependency
+    const toolGroups = this._groupToolsByPriority(toolCalls);
+    const allResults = [];
+    
+    try {
+      // Execute high-priority tools first
+      for (const group of toolGroups) {
+        const groupResults = [];
+        
+        for (let i = 0; i < group.length; i += concurrencyLimit) {
+          const batch = group.slice(i, i + concurrencyLimit);
+          
+          // Execute batch with timeout and retry logic
+          const batchPromises = batch.map(call => 
+            this._executeWithTimeout(call, this.config.timeout)
+          );
+          
+          const batchResults = await Promise.allSettled(batchPromises);
+          
+          // Process results and handle failures
+          for (let j = 0; j < batchResults.length; j++) {
+            const result = batchResults[j];
+            if (result.status === 'fulfilled') {
+              groupResults.push(result.value);
+            } else {
+              console.warn(`Tool execution failed: ${batch[j].tool}`, result.reason);
+              groupResults.push({ error: result.reason.message, tool: batch[j].tool });
+            }
+          }
+        }
+        
+        allResults.push(...groupResults);
+      }
+      
+      // Track performance metrics
+      const executionTime = Date.now() - startTime;
+      this._trackBatchPerformance(toolCalls.length, executionTime, concurrencyLimit);
+      
+      return allResults;
+      
+    } catch (error) {
+      console.error('Parallel execution failed:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Calculate optimal concurrency based on tool types
+   */
+  _calculateOptimalConcurrency(toolCalls) {
+    const toolTypes = toolCalls.map(call => this._getToolCategory(call.tool));
+    const uniqueTypes = new Set(toolTypes);
+    
+    // Heavy operations (neural, github) need lower concurrency
+    const heavyTypes = ['neural', 'github', 'workflow'];
+    const hasHeavyOps = toolTypes.some(type => heavyTypes.includes(type));
+    
+    if (hasHeavyOps) {
+      return Math.min(3, Math.max(1, Math.floor(toolCalls.length / 2)));
+    }
+    
+    // Light operations (memory, performance) can handle higher concurrency
+    return Math.min(8, Math.max(2, Math.floor(toolCalls.length / 1.5)));
+  }
+  
+  /**
+   * Group tools by execution priority
+   */
+  _groupToolsByPriority(toolCalls) {
+    const priorities = {
+      critical: [],  // swarm_init, swarm_destroy
+      high: [],      // agent_spawn, memory operations
+      medium: [],    // task operations, monitoring
+      low: []        // analytics, reporting
+    };
+    
+    toolCalls.forEach(call => {
+      const category = this._getToolCategory(call.tool);
+      const tool = call.tool;
+      
+      if (['swarm_init', 'swarm_destroy', 'memory_backup'].includes(tool)) {
+        priorities.critical.push(call);
+      } else if (['agent_spawn', 'memory_usage', 'neural_train'].includes(tool)) {
+        priorities.high.push(call);
+      } else if (category === 'performance' || tool.includes('report')) {
+        priorities.low.push(call);
+      } else {
+        priorities.medium.push(call);
+      }
+    });
+    
+    // Return groups in priority order, filtering empty groups
+    return [priorities.critical, priorities.high, priorities.medium, priorities.low]
+      .filter(group => group.length > 0);
+  }
+  
+  /**
+   * Execute tool with timeout wrapper
+   */
+  async _executeWithTimeout(call, timeout) {
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`Tool ${call.tool} timed out after ${timeout}ms`));
+      }, timeout);
+      
+      this.executeTool(call.tool, call.params)
+        .then(result => {
+          clearTimeout(timer);
+          resolve(result);
+        })
+        .catch(error => {
+          clearTimeout(timer);
+          reject(error);
+        });
+    });
+  }
+  
+  /**
+   * Track batch execution performance
+   */
+  _trackBatchPerformance(toolCount, executionTime, concurrency) {
+    if (!this.batchStats) {
+      this.batchStats = {
+        totalBatches: 0,
+        totalTools: 0,
+        totalTime: 0,
+        avgConcurrency: 0,
+        avgToolsPerBatch: 0,
+        avgTimePerTool: 0
+      };
+    }
+    
+    this.batchStats.totalBatches++;
+    this.batchStats.totalTools += toolCount;
+    this.batchStats.totalTime += executionTime;
+    this.batchStats.avgConcurrency = 
+      (this.batchStats.avgConcurrency * (this.batchStats.totalBatches - 1) + concurrency) / 
+      this.batchStats.totalBatches;
+    this.batchStats.avgToolsPerBatch = this.batchStats.totalTools / this.batchStats.totalBatches;
+    this.batchStats.avgTimePerTool = this.batchStats.totalTime / this.batchStats.totalTools;
   }
   
   /**
@@ -231,14 +367,72 @@ export class MCPToolWrapper {
   }
   
   /**
-   * Get tool statistics
+   * Get comprehensive tool statistics
    */
   getStatistics() {
-    const stats = {};
+    const toolStats = {};
     this.toolStats.forEach((value, key) => {
-      stats[key] = { ...value };
+      toolStats[key] = { ...value };
     });
-    return stats;
+    
+    return {
+      tools: toolStats,
+      batch: this.batchStats || {
+        totalBatches: 0,
+        totalTools: 0,
+        totalTime: 0,
+        avgConcurrency: 0,
+        avgToolsPerBatch: 0,
+        avgTimePerTool: 0
+      },
+      spawn: this.spawnStats || {
+        totalSpawns: 0,
+        totalAgents: 0,
+        totalTime: 0,
+        avgTimePerAgent: 0,
+        bestTime: 0,
+        worstTime: 0
+      },
+      performance: {
+        totalCalls: Array.from(this.toolStats.values()).reduce((sum, stat) => sum + stat.calls, 0),
+        successRate: this._calculateOverallSuccessRate(),
+        avgLatency: this._calculateAvgLatency(),
+        throughput: this._calculateThroughput()
+      }
+    };
+  }
+  
+  /**
+   * Calculate overall success rate
+   */
+  _calculateOverallSuccessRate() {
+    const total = Array.from(this.toolStats.values())
+      .reduce((sum, stat) => sum + stat.calls, 0);
+    const successes = Array.from(this.toolStats.values())
+      .reduce((sum, stat) => sum + stat.successes, 0);
+    
+    return total > 0 ? (successes / total * 100).toFixed(2) : 100;
+  }
+  
+  /**
+   * Calculate average latency
+   */
+  _calculateAvgLatency() {
+    const stats = Array.from(this.toolStats.values()).filter(stat => stat.calls > 0);
+    if (stats.length === 0) return 0;
+    
+    const totalLatency = stats.reduce((sum, stat) => sum + stat.avgDuration, 0);
+    return (totalLatency / stats.length).toFixed(2);
+  }
+  
+  /**
+   * Calculate throughput (operations per second)
+   */
+  _calculateThroughput() {
+    const batchStats = this.batchStats;
+    if (!batchStats || batchStats.totalTime === 0) return 0;
+    
+    return (batchStats.totalTools / (batchStats.totalTime / 1000)).toFixed(2);
   }
   
   /**
@@ -252,35 +446,153 @@ export class MCPToolWrapper {
   }
   
   /**
-   * Execute swarm initialization sequence
+   * Execute swarm initialization sequence with optimization
    */
   async initializeSwarm(config) {
-    const batch = [
-      { tool: 'swarm_init', params: { 
-        topology: config.topology || 'hierarchical',
-        maxAgents: config.maxAgents || 8,
-        strategy: 'auto'
-      }},
-      { tool: 'memory_namespace', params: { 
-        action: 'create',
-        namespace: config.swarmId 
-      }},
-      { tool: 'neural_status', params: {} }
-    ];
+    const swarmId = config.swarmId || `swarm-${Date.now()}`;
+    const startTime = Date.now();
     
-    return await this.executeParallel(batch);
+    try {
+      // Phase 1: Critical initialization (sequential)
+      const criticalOps = [
+        { tool: 'swarm_init', params: { 
+          topology: config.topology || 'hierarchical',
+          maxAgents: config.maxAgents || 8,
+          strategy: 'auto',
+          swarmId
+        }}
+      ];
+      
+      const [swarmInitResult] = await this.executeParallel(criticalOps);
+      
+      // Phase 2: Supporting services (parallel)
+      const supportingOps = [
+        { tool: 'memory_namespace', params: { 
+          action: 'create',
+          namespace: swarmId,
+          maxSize: config.memorySize || 100
+        }},
+        { tool: 'neural_status', params: {} },
+        { tool: 'performance_report', params: { format: 'summary' } },
+        { tool: 'features_detect', params: { component: 'swarm' } }
+      ];
+      
+      const supportingResults = await this.executeParallel(supportingOps);
+      
+      // Store initialization metadata
+      const initTime = Date.now() - startTime;
+      await this.storeMemory(swarmId, 'init_performance', {
+        initTime,
+        topology: config.topology,
+        maxAgents: config.maxAgents,
+        timestamp: Date.now()
+      }, 'metrics');
+      
+      return [swarmInitResult, ...supportingResults];
+      
+    } catch (error) {
+      console.error('Swarm initialization failed:', error);
+      throw error;
+    }
   }
   
   /**
-   * Spawn multiple agents in parallel
+   * Spawn multiple agents in parallel with optimization
    */
   async spawnAgents(types, swarmId) {
-    const batch = types.map(type => ({
-      tool: 'agent_spawn',
-      params: { type, swarmId }
-    }));
+    if (!Array.isArray(types) || types.length === 0) {
+      return [];
+    }
     
-    return await this.executeParallel(batch);
+    const startTime = Date.now();
+    
+    // Optimize agent spawning by grouping similar types
+    const groupedTypes = this._groupAgentTypes(types);
+    const allResults = [];
+    
+    try {
+      // Spawn each group in parallel
+      for (const group of groupedTypes) {
+        const batch = group.map(type => ({
+          tool: 'agent_spawn',
+          params: { 
+            type, 
+            swarmId,
+            timestamp: Date.now(),
+            batchId: `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          }
+        }));
+        
+        const groupResults = await this.executeParallel(batch);
+        allResults.push(...groupResults);
+      }
+      
+      // Track spawn performance
+      const spawnTime = Date.now() - startTime;
+      this._trackSpawnPerformance(types.length, spawnTime);
+      
+      return allResults;
+      
+    } catch (error) {
+      console.error('Agent spawning failed:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Group agent types for optimized spawning
+   */
+  _groupAgentTypes(types) {
+    // Group complementary agent types that work well together
+    const groups = {
+      development: ['coder', 'architect', 'reviewer'],
+      analysis: ['researcher', 'analyst', 'optimizer'],
+      quality: ['tester', 'documenter'],
+      coordination: ['coordinator']
+    };
+    
+    const result = [];
+    const remaining = [...types];
+    
+    // Create groups of complementary agents
+    Object.values(groups).forEach(groupTypes => {
+      const groupAgents = remaining.filter(type => groupTypes.includes(type));
+      if (groupAgents.length > 0) {
+        result.push(groupAgents);
+        groupAgents.forEach(type => {
+          const index = remaining.indexOf(type);
+          if (index > -1) remaining.splice(index, 1);
+        });
+      }
+    });
+    
+    // Add remaining agents as individual groups
+    remaining.forEach(type => result.push([type]));
+    
+    return result;
+  }
+  
+  /**
+   * Track agent spawn performance
+   */
+  _trackSpawnPerformance(agentCount, spawnTime) {
+    if (!this.spawnStats) {
+      this.spawnStats = {
+        totalSpawns: 0,
+        totalAgents: 0,
+        totalTime: 0,
+        avgTimePerAgent: 0,
+        bestTime: Infinity,
+        worstTime: 0
+      };
+    }
+    
+    this.spawnStats.totalSpawns++;
+    this.spawnStats.totalAgents += agentCount;
+    this.spawnStats.totalTime += spawnTime;
+    this.spawnStats.avgTimePerAgent = this.spawnStats.totalTime / this.spawnStats.totalAgents;
+    this.spawnStats.bestTime = Math.min(this.spawnStats.bestTime, spawnTime);
+    this.spawnStats.worstTime = Math.max(this.spawnStats.worstTime, spawnTime);
   }
   
   /**
@@ -327,12 +639,37 @@ export class MCPToolWrapper {
   }
   
   /**
-   * Orchestrate task with monitoring
+   * Orchestrate task with monitoring and optimization
    */
-  async orchestrateTask(task, strategy = 'parallel') {
+  async orchestrateTask(task, strategy = 'parallel', metadata = {}) {
+    const taskId = metadata.taskId || `task-${Date.now()}`;
+    const complexity = metadata.complexity || 'medium';
+    
+    // Adjust monitoring frequency based on task complexity
+    const monitoringInterval = {
+      low: 10000,
+      medium: 5000,
+      high: 2000
+    }[complexity] || 5000;
+    
     const batch = [
-      { tool: 'task_orchestrate', params: { task, strategy }},
-      { tool: 'swarm_monitor', params: { interval: 5000 }}
+      { tool: 'task_orchestrate', params: { 
+        task, 
+        strategy,
+        taskId,
+        priority: metadata.priority || 5,
+        estimatedDuration: metadata.estimatedDuration || 30000
+      }},
+      { tool: 'swarm_monitor', params: { 
+        interval: monitoringInterval,
+        taskId,
+        metrics: ['performance', 'progress', 'bottlenecks']
+      }},
+      // Add performance tracking for high-priority tasks
+      ...(metadata.priority > 7 ? [{
+        tool: 'performance_report', 
+        params: { format: 'detailed', taskId }
+      }] : [])
     ];
     
     return await this.executeParallel(batch);

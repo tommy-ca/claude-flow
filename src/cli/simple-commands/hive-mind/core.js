@@ -5,6 +5,7 @@
 
 import EventEmitter from 'events';
 import { MCPToolWrapper } from './mcp-wrapper.js';
+import { PerformanceOptimizer } from './performance-optimizer.js';
 
 /**
  * HiveMindCore - Main orchestration class
@@ -47,7 +48,18 @@ export class HiveMindCore extends EventEmitter {
       timeout: this.config.taskTimeout * 60 * 1000
     });
     
+    // Initialize performance optimizer
+    this.performanceOptimizer = new PerformanceOptimizer({
+      enableAsyncQueue: true,
+      enableBatchProcessing: true,
+      enableAutoTuning: true,
+      asyncQueueConcurrency: Math.min(this.config.maxWorkers * 2, 20),
+      batchMaxSize: 50,
+      metricsInterval: 30000
+    });
+    
     this._initializeEventHandlers();
+    this._initializePerformanceMonitoring();
   }
   
   /**
@@ -64,6 +76,11 @@ export class HiveMindCore extends EventEmitter {
       this._updatePerformanceMetrics();
     });
     
+    this.on('task:failed', (data) => {
+      console.warn(`Task failed: ${data.task.id}`, data.error);
+      this._handleTaskFailure(data.task, data.error);
+    });
+    
     this.on('decision:reached', (decision) => {
       this.state.metrics.decisionsReached++;
     });
@@ -76,6 +93,77 @@ export class HiveMindCore extends EventEmitter {
       console.error('Hive Mind Error:', error);
       this._handleError(error);
     });
+  }
+  
+  /**
+   * Initialize performance monitoring
+   */
+  _initializePerformanceMonitoring() {
+    // Listen to performance optimizer events
+    this.performanceOptimizer.on('auto_tune', (data) => {
+      console.log(`Performance auto-tuned: ${data.type} = ${data.newValue}`);
+      this.emit('performance:auto_tuned', data);
+    });
+    
+    this.performanceOptimizer.on('error', (error) => {
+      console.error('Performance optimizer error:', error);
+      this.emit('error', { type: 'performance_optimizer_error', error });
+    });
+    
+    // Periodic performance reporting
+    setInterval(() => {
+      const stats = this.performanceOptimizer.getPerformanceStats();
+      this.emit('performance:stats', stats);
+      
+      // Log performance warnings
+      if (parseFloat(stats.asyncQueue.utilization) > 90) {
+        console.warn('High async queue utilization:', stats.asyncQueue.utilization + '%');
+      }
+      
+      if (parseFloat(stats.asyncQueue.successRate) < 95) {
+        console.warn('Low async operation success rate:', stats.asyncQueue.successRate + '%');
+      }
+    }, 60000); // Every minute
+  }
+  
+  /**
+   * Handle task failure with recovery logic
+   */
+  _handleTaskFailure(task, error) {
+    // Update metrics
+    this.state.metrics.tasksFailed = (this.state.metrics.tasksFailed || 0) + 1;
+    
+    // Attempt task retry for recoverable failures
+    if (task.retryCount < 2 && this._isRecoverableError(error)) {
+      task.retryCount = (task.retryCount || 0) + 1;
+      task.status = 'pending';
+      
+      // Find another worker for retry
+      setTimeout(() => {
+        const worker = this._findBestWorker(task);
+        if (worker) {
+          this._assignTask(worker.id, task.id);
+        }
+      }, 5000); // Wait 5 seconds before retry
+      
+      console.log(`Retrying task ${task.id} (attempt ${task.retryCount})`);
+    }
+  }
+  
+  /**
+   * Check if error is recoverable
+   */
+  _isRecoverableError(error) {
+    const recoverableErrors = [
+      'timeout',
+      'network',
+      'temporary',
+      'connection'
+    ];
+    
+    return recoverableErrors.some(type => 
+      error.message.toLowerCase().includes(type)
+    );
   }
   
   /**
@@ -162,74 +250,290 @@ export class HiveMindCore extends EventEmitter {
   }
   
   /**
-   * Spawn worker agents
+   * Spawn worker agents with batch optimization
    */
   async spawnWorkers(workerTypes) {
-    const spawnResults = await this.mcpWrapper.spawnAgents(workerTypes, this.state.swarmId);
+    const startTime = Date.now();
     
-    spawnResults.forEach((result, index) => {
-      const worker = {
-        id: `worker-${index}`,
-        agentId: result.agentId,
-        type: workerTypes[index],
-        status: 'idle',
-        tasksCompleted: 0,
-        currentTask: null
-      };
+    try {
+      // Batch spawn agents in parallel with optimized chunking
+      const chunkSize = Math.min(workerTypes.length, 5); // Optimal batch size
+      const chunks = [];
       
-      this.state.workers.set(worker.id, worker);
-    });
-    
-    // Store worker info in memory
-    await this.mcpWrapper.storeMemory(
-      this.state.swarmId,
-      'workers',
-      Array.from(this.state.workers.values()),
-      'system'
-    );
-    
-    this.emit('workers:spawned', this.state.workers.size);
-    return Array.from(this.state.workers.values());
+      for (let i = 0; i < workerTypes.length; i += chunkSize) {
+        chunks.push(workerTypes.slice(i, i + chunkSize));
+      }
+      
+      // Process chunks in parallel with Promise.all
+      const allResults = await Promise.all(
+        chunks.map(chunk => this.mcpWrapper.spawnAgents(chunk, this.state.swarmId))
+      );
+      
+      // Flatten results
+      const spawnResults = allResults.flat();
+      
+      // Batch create worker objects
+      const workers = [];
+      const workerUpdates = [];
+      
+      spawnResults.forEach((result, index) => {
+        const worker = {
+          id: `worker-${index}`,
+          agentId: result.agentId,
+          type: workerTypes[index],
+          status: 'idle',
+          tasksCompleted: 0,
+          currentTask: null,
+          spawnedAt: Date.now(),
+          performance: {
+            avgTaskTime: 0,
+            successRate: 1.0
+          }
+        };
+        
+        workers.push(worker);
+        this.state.workers.set(worker.id, worker);
+        
+        workerUpdates.push({
+          type: 'worker_spawned',
+          workerId: worker.id,
+          workerType: worker.type,
+          timestamp: worker.spawnedAt
+        });
+      });
+      
+      // Batch memory operations
+      await Promise.all([
+        this.mcpWrapper.storeMemory(
+          this.state.swarmId,
+          'workers',
+          workers,
+          'system'
+        ),
+        this.mcpWrapper.storeMemory(
+          this.state.swarmId,
+          'worker_spawn_batch',
+          {
+            count: workers.length,
+            types: workerTypes,
+            spawnTime: Date.now() - startTime,
+            updates: workerUpdates
+          },
+          'metrics'
+        )
+      ]);
+      
+      // Emit batch completion event
+      this.emit('workers:spawned', {
+        count: this.state.workers.size,
+        batchSize: workers.length,
+        spawnTime: Date.now() - startTime,
+        workers: workers
+      });
+      
+      return workers;
+      
+    } catch (error) {
+      this.emit('error', { 
+        type: 'spawn_batch_failed', 
+        error, 
+        workerTypes,
+        spawnTime: Date.now() - startTime 
+      });
+      throw error;
+    }
   }
   
   /**
-   * Create and distribute task
+   * Create and distribute task with performance optimization
    */
-  async createTask(description, priority = 5) {
+  async createTask(description, priority = 5, metadata = {}) {
+    const taskId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const createdAt = Date.now();
+    
     const task = {
-      id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: taskId,
       swarmId: this.state.swarmId,
       description,
       priority,
       status: 'pending',
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(createdAt).toISOString(),
       assignedTo: null,
-      result: null
+      result: null,
+      metadata: {
+        estimatedDuration: this._estimateTaskDuration(description),
+        complexity: this._analyzeTaskComplexity(description),
+        ...metadata
+      }
     };
     
-    this.state.tasks.set(task.id, task);
+    // Parallel operations: task storage, orchestration, and worker finding
+    const [orchestrateResult, bestWorker] = await Promise.all([
+      this.mcpWrapper.orchestrateTask(description, 'adaptive'),
+      this._findBestWorkerAsync(task),
+      // Store task immediately in parallel
+      (async () => {
+        this.state.tasks.set(task.id, task);
+        await this.mcpWrapper.storeMemory(
+          this.state.swarmId,
+          `task-${task.id}`,
+          task,
+          'task'
+        );
+      })()
+    ]);
     
-    // Orchestrate task with MCP
-    const [orchestrateResult] = await this.mcpWrapper.orchestrateTask(
-      description,
-      'adaptive'
-    );
-    
-    task.orchestrationId = orchestrateResult.taskId;
+    task.orchestrationId = orchestrateResult[0].taskId;
     
     this.emit('task:created', task);
     
-    // Find best worker for task
-    const worker = this._findBestWorker(task);
-    if (worker) {
-      await this._assignTask(worker.id, task.id);
+    // Assign task if worker available
+    if (bestWorker) {
+      // Use non-blocking assignment
+      setImmediate(() => this._assignTask(bestWorker.id, task.id));
     }
     
     return task;
   }
   
   /**
-   * Find best worker for task
+   * Estimate task duration based on description analysis
+   */
+  _estimateTaskDuration(description) {
+    const words = description.toLowerCase().split(/\s+/);
+    const complexityKeywords = {
+      simple: ['list', 'show', 'display', 'get', 'read'],
+      medium: ['create', 'update', 'modify', 'change', 'build'],
+      complex: ['analyze', 'optimize', 'refactor', 'implement', 'design']
+    };
+    
+    let score = 1;
+    for (const word of words) {
+      if (complexityKeywords.complex.includes(word)) score += 3;
+      else if (complexityKeywords.medium.includes(word)) score += 2;
+      else if (complexityKeywords.simple.includes(word)) score += 1;
+    }
+    
+    return Math.min(score * 5000, 60000); // Cap at 1 minute
+  }
+  
+  /**
+   * Analyze task complexity
+   */
+  _analyzeTaskComplexity(description) {
+    const words = description.toLowerCase().split(/\s+/);
+    const indicators = {
+      high: ['optimize', 'refactor', 'architecture', 'design', 'algorithm'],
+      medium: ['implement', 'build', 'create', 'develop', 'integrate'],
+      low: ['list', 'show', 'get', 'read', 'display']
+    };
+    
+    for (const [level, keywords] of Object.entries(indicators)) {
+      if (keywords.some(keyword => words.includes(keyword))) {
+        return level;
+      }
+    }
+    
+    return 'medium';
+  }
+  
+  /**
+   * Find best worker for task (optimized async version)
+   */
+  async _findBestWorkerAsync(task) {
+    const availableWorkers = Array.from(this.state.workers.values())
+      .filter(w => w.status === 'idle');
+    
+    if (availableWorkers.length === 0) {
+      return null;
+    }
+    
+    // Use cached analysis if available
+    const cacheKey = `worker_match_${task.description.substring(0, 50)}`;
+    const cachedMatch = await this.mcpWrapper.retrieveMemory(this.state.swarmId, cacheKey);
+    
+    if (cachedMatch && cachedMatch.timestamp > Date.now() - 300000) { // 5 min cache
+      const cachedWorker = availableWorkers.find(w => w.type === cachedMatch.workerType);
+      if (cachedWorker) return cachedWorker;
+    }
+    
+    // Enhanced matching algorithm with performance scoring
+    const taskLower = task.description.toLowerCase();
+    const taskWords = taskLower.split(/\s+/);
+    
+    // Enhanced priority mapping with weights
+    const priorityMap = {
+      researcher: { keywords: ['research', 'investigate', 'analyze', 'study', 'explore'], weight: 1.2 },
+      coder: { keywords: ['code', 'implement', 'build', 'develop', 'fix', 'create', 'program'], weight: 1.0 },
+      analyst: { keywords: ['analyze', 'data', 'metrics', 'performance', 'report', 'statistics'], weight: 1.1 },
+      tester: { keywords: ['test', 'validate', 'check', 'verify', 'quality', 'qa'], weight: 1.0 },
+      architect: { keywords: ['design', 'architecture', 'structure', 'plan', 'system'], weight: 1.3 },
+      reviewer: { keywords: ['review', 'feedback', 'improve', 'refactor', 'audit'], weight: 1.0 },
+      optimizer: { keywords: ['optimize', 'performance', 'speed', 'efficiency', 'enhance'], weight: 1.4 },
+      documenter: { keywords: ['document', 'explain', 'write', 'describe', 'manual'], weight: 0.9 }
+    };
+    
+    // Calculate scores for each worker
+    const workerScores = availableWorkers.map(worker => {
+      const typeInfo = priorityMap[worker.type] || { keywords: [], weight: 1.0 };
+      
+      // Keyword matching score
+      const keywordScore = typeInfo.keywords.reduce((score, keyword) => {
+        return score + (taskWords.includes(keyword) ? 1 : 0);
+      }, 0);
+      
+      // Performance history score
+      const performanceScore = worker.performance ? 
+        (worker.performance.successRate * 0.5 + (1 / (worker.performance.avgTaskTime + 1)) * 0.5) : 0.5;
+      
+      // Task completion rate
+      const completionScore = worker.tasksCompleted > 0 ? 
+        Math.min(worker.tasksCompleted / 10, 1) : 0;
+      
+      // Combined score
+      const totalScore = (
+        keywordScore * 2 +           // Keyword relevance
+        performanceScore * 1.5 +    // Historical performance
+        completionScore * 1.0       // Experience
+      ) * typeInfo.weight;
+      
+      return {
+        worker,
+        score: totalScore,
+        breakdown: {
+          keyword: keywordScore,
+          performance: performanceScore,
+          completion: completionScore,
+          weight: typeInfo.weight
+        }
+      };
+    });
+    
+    // Sort by score and select best
+    workerScores.sort((a, b) => b.score - a.score);
+    const bestMatch = workerScores[0];
+    
+    // Cache the result for future use
+    if (bestMatch.score > 0) {
+      setImmediate(async () => {
+        await this.mcpWrapper.storeMemory(
+          this.state.swarmId,
+          cacheKey,
+          {
+            workerType: bestMatch.worker.type,
+            score: bestMatch.score,
+            timestamp: Date.now()
+          },
+          'cache'
+        );
+      });
+    }
+    
+    return bestMatch ? bestMatch.worker : availableWorkers[0];
+  }
+  
+  /**
+   * Synchronous version for backward compatibility
    */
   _findBestWorker(task) {
     const availableWorkers = Array.from(this.state.workers.values())
@@ -239,10 +543,8 @@ export class HiveMindCore extends EventEmitter {
       return null;
     }
     
-    // Simple heuristic: match task keywords to worker types
+    // Simplified scoring for sync version
     const taskLower = task.description.toLowerCase();
-    
-    // Priority matching
     const priorityMap = {
       researcher: ['research', 'investigate', 'analyze', 'study'],
       coder: ['code', 'implement', 'build', 'develop', 'fix', 'create'],
@@ -254,21 +556,22 @@ export class HiveMindCore extends EventEmitter {
       documenter: ['document', 'explain', 'write', 'describe']
     };
     
-    // Find worker with best type match
     let bestWorker = null;
     let bestScore = 0;
     
     for (const worker of availableWorkers) {
       const keywords = priorityMap[worker.type] || [];
-      const score = keywords.filter(k => taskLower.includes(k)).length;
+      const keywordScore = keywords.filter(k => taskLower.includes(k)).length;
+      const performanceBonus = worker.performance ? worker.performance.successRate * 0.5 : 0;
+      const totalScore = keywordScore + performanceBonus;
       
-      if (score > bestScore) {
-        bestScore = score;
+      if (totalScore > bestScore) {
+        bestScore = totalScore;
         bestWorker = worker;
       }
     }
     
-    return bestWorker || availableWorkers[0]; // Default to first available
+    return bestWorker || availableWorkers[0];
   }
   
   /**
@@ -300,38 +603,98 @@ export class HiveMindCore extends EventEmitter {
   }
   
   /**
-   * Execute task (simulated)
+   * Execute task with performance optimization
    */
   async _executeTask(workerId, taskId) {
     const worker = this.state.workers.get(workerId);
     const task = this.state.tasks.get(taskId);
+    const startTime = Date.now();
     
-    // Simulate task execution with random duration
-    const duration = Math.random() * 30000 + 10000; // 10-40 seconds
-    
-    setTimeout(async () => {
-      // Mark task as completed
+    try {
+      // Use performance optimizer for async execution
+      const result = await this.performanceOptimizer.optimizeAsyncOperation(
+        async () => {
+          // Simulate task execution based on complexity
+          const baseDuration = {
+            low: 5000,
+            medium: 15000,
+            high: 30000
+          }[task.metadata?.complexity || 'medium'];
+          
+          const duration = baseDuration + (Math.random() * baseDuration * 0.5);
+          
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              resolve({
+                status: 'completed',
+                result: `Task completed by ${worker.type} worker`,
+                processingTime: Date.now() - startTime,
+                complexity: task.metadata?.complexity || 'medium'
+              });
+            }, duration);
+          });
+        },
+        { priority: task.priority }
+      );
+      
+      // Update task and worker
       task.status = 'completed';
       task.completedAt = new Date().toISOString();
-      task.result = `Task completed by ${worker.type} worker`;
+      task.result = result.result;
+      task.actualDuration = result.processingTime;
       
-      // Update worker
       worker.status = 'idle';
       worker.currentTask = null;
       worker.tasksCompleted++;
       
-      // Store result in memory
-      await this.mcpWrapper.storeMemory(
-        this.state.swarmId,
-        `result-${taskId}`,
-        task,
-        'result'
+      // Update worker performance metrics
+      if (!worker.performance.avgTaskTime) {
+        worker.performance.avgTaskTime = result.processingTime;
+      } else {
+        worker.performance.avgTaskTime = 
+          (worker.performance.avgTaskTime * (worker.tasksCompleted - 1) + result.processingTime) / 
+          worker.tasksCompleted;
+      }
+      
+      // Batch store results for better performance
+      await this.performanceOptimizer.optimizeBatchOperation(
+        'task_results',
+        {
+          key: `result-${taskId}`,
+          value: task,
+          type: 'result'
+        },
+        async (items) => {
+          // Batch store all results
+          await Promise.all(items.map(item => 
+            this.mcpWrapper.storeMemory(
+              this.state.swarmId,
+              item.key,
+              item.value,
+              item.type
+            )
+          ));
+          return items.map(() => ({ success: true }));
+        }
       );
       
       this.emit('task:completed', task);
       this.emit('worker:idle', workerId);
       
-    }, duration);
+    } catch (error) {
+      // Handle task failure
+      task.status = 'failed';
+      task.error = error.message;
+      task.failedAt = new Date().toISOString();
+      
+      worker.status = 'idle';
+      worker.currentTask = null;
+      worker.performance.successRate = 
+        (worker.performance.successRate * worker.tasksCompleted) / (worker.tasksCompleted + 1);
+      
+      this.emit('task:failed', { task, error });
+      this.emit('worker:idle', workerId);
+    }
   }
   
   /**
@@ -561,43 +924,115 @@ export class HiveMindCore extends EventEmitter {
   }
   
   /**
-   * Get current status
+   * Get current status with performance metrics
    */
   getStatus() {
+    const tasks = Array.from(this.state.tasks.values());
+    const workers = Array.from(this.state.workers.values());
+    
     return {
       swarmId: this.state.swarmId,
       status: this.state.status,
       queen: this.state.queen,
-      workers: Array.from(this.state.workers.values()),
+      workers: workers,
       tasks: {
         total: this.state.tasks.size,
-        pending: Array.from(this.state.tasks.values()).filter(t => t.status === 'pending').length,
-        inProgress: Array.from(this.state.tasks.values()).filter(t => t.status === 'in_progress').length,
-        completed: Array.from(this.state.tasks.values()).filter(t => t.status === 'completed').length
+        pending: tasks.filter(t => t.status === 'pending').length,
+        inProgress: tasks.filter(t => t.status === 'in_progress').length,
+        completed: tasks.filter(t => t.status === 'completed').length,
+        failed: tasks.filter(t => t.status === 'failed').length
       },
-      metrics: this.state.metrics,
-      decisions: this.state.decisions.size
+      metrics: {
+        ...this.state.metrics,
+        averageTaskTime: this._calculateAverageTaskTime(tasks),
+        workerEfficiency: this._calculateWorkerEfficiency(workers),
+        throughput: this._calculateThroughput(tasks)
+      },
+      decisions: this.state.decisions.size,
+      performance: this.performanceOptimizer.getPerformanceStats()
     };
   }
   
   /**
-   * Shutdown hive mind
+   * Calculate average task completion time
+   */
+  _calculateAverageTaskTime(tasks) {
+    const completedTasks = tasks.filter(t => t.status === 'completed' && t.actualDuration);
+    if (completedTasks.length === 0) return 0;
+    
+    const totalTime = completedTasks.reduce((sum, task) => sum + task.actualDuration, 0);
+    return Math.round(totalTime / completedTasks.length);
+  }
+  
+  /**
+   * Calculate worker efficiency
+   */
+  _calculateWorkerEfficiency(workers) {
+    if (workers.length === 0) return 0;
+    
+    const efficiencies = workers.map(worker => worker.performance?.successRate || 1.0);
+    return (efficiencies.reduce((sum, eff) => sum + eff, 0) / workers.length * 100).toFixed(2);
+  }
+  
+  /**
+   * Calculate system throughput (tasks per minute)
+   */
+  _calculateThroughput(tasks) {
+    const completedTasks = tasks.filter(t => t.status === 'completed' && t.completedAt);
+    if (completedTasks.length < 2) return 0;
+    
+    const firstCompleted = new Date(completedTasks[0].completedAt).getTime();
+    const lastCompleted = new Date(completedTasks[completedTasks.length - 1].completedAt).getTime();
+    const timeSpanMinutes = (lastCompleted - firstCompleted) / (1000 * 60);
+    
+    return timeSpanMinutes > 0 ? (completedTasks.length / timeSpanMinutes).toFixed(2) : 0;
+  }
+  
+  /**
+   * Shutdown hive mind with cleanup
    */
   async shutdown() {
     this.state.status = 'shutting_down';
     
-    // Save final state
-    await this.mcpWrapper.storeMemory(
-      this.state.swarmId,
-      'final_state',
-      this.getStatus(),
-      'system'
-    );
-    
-    // Destroy swarm
-    await this.mcpWrapper.destroySwarm(this.state.swarmId);
-    
-    this.state.status = 'shutdown';
-    this.emit('shutdown');
+    try {
+      // Generate final performance report
+      const performanceReport = this.performanceOptimizer.generatePerformanceReport();
+      
+      // Save final state and performance report
+      await Promise.all([
+        this.mcpWrapper.storeMemory(
+          this.state.swarmId,
+          'final_state',
+          this.getStatus(),
+          'system'
+        ),
+        this.mcpWrapper.storeMemory(
+          this.state.swarmId,
+          'final_performance_report',
+          performanceReport,
+          'metrics'
+        )
+      ]);
+      
+      // Close performance optimizer
+      await this.performanceOptimizer.close();
+      
+      // Destroy swarm
+      await this.mcpWrapper.destroySwarm(this.state.swarmId);
+      
+      this.state.status = 'shutdown';
+      this.emit('shutdown', { performanceReport });
+      
+    } catch (error) {
+      this.emit('error', { type: 'shutdown_failed', error });
+      throw error;
+    }
+  }
+  
+  /**
+   * Get performance insights and recommendations
+   */
+  getPerformanceInsights() {
+    return this.performanceOptimizer.generatePerformanceReport();
   }
 }

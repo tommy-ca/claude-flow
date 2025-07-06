@@ -616,8 +616,19 @@ export class DatabaseManager extends EventEmitter {
 
   // Utility operations
 
-  async deleteMemory(key: string, namespace: string): Promise<void> {
-    this.db.prepare('DELETE FROM memory WHERE key = ? AND namespace = ?').run(key, namespace);
+  async deleteMemoryEntry(key: string, namespace: string): Promise<void> {
+    const startTime = performance.now();
+    
+    try {
+      this.db.prepare('DELETE FROM memory WHERE key = ? AND namespace = ?').run(key, namespace);
+      
+      const duration = performance.now() - startTime;
+      this.recordPerformance('delete_memory', duration);
+      
+    } catch (error) {
+      this.recordPerformance('delete_memory_error', performance.now() - startTime);
+      throw error;
+    }
   }
 
   /**
