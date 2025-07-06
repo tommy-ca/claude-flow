@@ -18,6 +18,7 @@ import { automationAction } from './simple-commands/automation.js';
 import { coordinationAction } from './simple-commands/coordination.js';
 import { hooksAction } from './simple-commands/hooks.js';
 import { hiveMindCommand } from './simple-commands/hive-mind.js';
+import { showUnifiedMetrics, fixTaskAttribution } from './simple-commands/swarm-metrics-integration.js';
 // Note: TypeScript imports commented out for Node.js compatibility
 // import { ruvSwarmAction } from './commands/ruv-swarm.ts';
 // import { configIntegrationAction } from './commands/config-integration.ts';
@@ -217,6 +218,37 @@ Worker Types:
   • Architect, Reviewer, Optimizer, Documenter
 
 Use 'hive-mind wizard' for interactive setup or 'hive-mind help' for full documentation.`
+  });
+
+  commandRegistry.set('swarm-metrics', {
+    handler: async (args, flags) => {
+      const subcommand = args[0];
+      if (subcommand === 'fix') {
+        return await fixTaskAttribution();
+      } else {
+        return await showUnifiedMetrics();
+      }
+    },
+    description: 'Unified swarm metrics and task attribution diagnostics',
+    usage: 'swarm-metrics [fix] [options]',
+    examples: [
+      'swarm-metrics                    # Show unified metrics from all swarm systems',
+      'swarm-metrics fix                # Fix task attribution issues between systems'
+    ],
+    details: `
+Swarm Metrics Integration Features:
+  • Unified view of hive-mind and ruv-swarm metrics
+  • Task attribution diagnosis and repair
+  • Cross-system swarm performance comparison
+  • Database integration status checking
+  • Automatic sample task creation for empty swarms
+
+This command helps resolve issues where:
+  • Overall task statistics show correctly but per-swarm shows 0/0
+  • Multiple swarm systems are not properly integrated
+  • Task assignments are missing or incorrectly attributed
+
+Use 'swarm-metrics fix' to automatically repair attribution issues.`
   });
 
   commandRegistry.set('batch', {
