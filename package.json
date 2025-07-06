@@ -117,6 +117,7 @@
     "node-pty": "^1.0.0",
     "ora": "^7.0.1",
     "p-queue": "^8.1.0",
+    "ruv-swarm": "^1.0.14",
     "ws": "^8.18.3"
   },
   "devDependencies": {
