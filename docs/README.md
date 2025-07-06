@@ -1,31 +1,35 @@
-# 📚 Claude-Flow Documentation Hub
+# 📚 Claude Flow v2.0.0 Documentation
 
-Welcome to the comprehensive documentation for Claude-Flow v1.0.50!
+Welcome to the comprehensive documentation for Claude Flow v2.0.0 - Intelligent AI Agent Coordination Platform!
 
 ## 🚀 Getting Started
 
 ### Quick Links
 - **[Quick Start Guide](./quick-start.md)** - Get up and running in minutes
-- **[Installation Guide](./01-getting-started.md)** - Detailed installation instructions
+- **[Claude Code Integration](./claude-code-setup.md)** - MCP configuration guide
 - **[CLI Reference](./cli-reference.md)** - Complete command reference
+
+## 👑 Hive Mind System (NEW!)
+
+### Core Features
+- **[Hive Mind Overview](./hive-mind/overview.md)** - Queen-led swarm intelligence
+- **[Interactive Wizard](./hive-mind/wizard-guide.md)** - Easy setup walkthrough
+- **[CLI Commands](./hive-mind/cli-commands.md)** - Complete command reference
+- **[Examples](./hive-mind/examples.md)** - Real-world usage patterns
 
 ## 📖 Core Documentation
 
 ### Architecture & Configuration
 - **[Architecture Overview](./02-architecture-overview.md)** - System design and components
-- **[Configuration Guide](./03-configuration-guide.md)** - Complete configuration options
-- **[Memory System](./memory-system.md)** - Understanding the memory bank
+- **[Neural Networks](./neural-networks.md)** - WASM neural processing
+- **[Memory Systems](./memory-management.md)** - Persistent storage and collective memory
+- **[Swarm Coordination](./swarm-coordination.md)** - Multi-agent orchestration
 
-### Agent Management
-- **[Agent Management](./04-agent-management.md)** - Managing AI agents and hierarchies
-- **[Task Coordination](./05-task-coordination.md)** - Coordinating complex workflows
-- **[Claude Spawning](./11-claude-spawning.md)** - Advanced agent spawning techniques
-
-### Integration & Advanced Features
-- **[MCP Integration](./07-mcp-integration.md)** - Model Context Protocol setup
-- **[Terminal Management](./08-terminal-management.md)** - Terminal pool management
-- **[Swarm Documentation](./SWARM_DOCUMENTATION.md)** - Advanced swarm coordination
-- **[Advanced Usage](./10-advanced-usage.md)** - Power user features
+### Enterprise Features
+- **[Workflow Automation](./workflow-automation.md)** - CI/CD pipeline setup
+- **[GitHub Integration](./github-automation.md)** - Repository management
+- **[WebUI Guide](./webui-guide.md)** - Browser interface
+- **[Security Guide](./security-guide.md)** - Enterprise security setup
 
 ## 🛠️ Specialized Guides
 
@@ -42,14 +46,18 @@ Welcome to the comprehensive documentation for Claude-Flow v1.0.50!
 
 ## 📊 Reports & Analysis
 
-### Test Reports
-- **[CLI Test Results](./reports/CLI_TEST_RESULTS_REPORT.md)** - CLI functionality validation
-- **[Comprehensive Test Results](./reports/COMPREHENSIVE_TEST_RESULTS.md)** - Full test suite analysis
+### Performance Reports
+- **[Benchmark Analysis](./reports/COMPREHENSIVE_BENCHMARK_ANALYSIS_REPORT.md)** - Performance benchmarks
+- **[Hive Mind Performance](./reports/hive-mind-performance-analysis.md)** - Swarm optimization results
+- **[TypeScript Validation](./reports/typescript-validation-report.md)** - Code quality metrics
 
-### Implementation Documentation  
-- **[Migration System Summary](./implementation/MIGRATION_SYSTEM_SUMMARY.md)** - System migration details
-- **[Optimized Init Summary](./implementation/OPTIMIZED-INIT-SUMMARY.md)** - Initialization optimizations
-- **[Prompt Copier Implementation](./implementation/PROMPT-COPIER-IMPLEMENTATION.md)** - Prompt management system
+### Development Documentation  
+- **[Directory Reorganization](./development/DIRECTORY_REORGANIZATION_SUMMARY.md)** - Project structure improvements
+- **[Test Consolidation](./development/TEST_CONSOLIDATION_SUMMARY.md)** - Testing strategy
+- **[Cleanup Summary](./development/CLEANUP_SUMMARY.md)** - Code maintenance
+
+### Strategy Analysis
+- **[Hive Mind Optimization](./analysis/HIVE_MIND_OPTIMIZATION_STRATEGY.md)** - System optimization strategies
 
 ## 🎮 User Guides
 
@@ -74,12 +82,12 @@ Welcome to the comprehensive documentation for Claude-Flow v1.0.50!
 
 ## 📝 Version History
 
-### v1.0.50 Highlights
-- **BatchTool Integration**: 10 concurrent agents support
-- **TypeScript Improvements**: 91% error reduction (379→32)
-- **Enhanced Testing**: Parallel test execution framework
-- **Performance Optimization**: 71% faster parallel execution
-- **Build Process**: Streamlined Deno compilation
+### v2.0.0 Highlights
+- **Hive Mind System**: Queen-led swarm intelligence with collective memory
+- **87 MCP Tools**: Complete integration with Claude Code
+- **Neural Networks**: Real WASM neural processing with training
+- **Performance**: 2.8-4.4x speed improvements, 32.3% token reduction
+- **Enterprise Ready**: Security, monitoring, and production features
 
 ## 🤝 Contributing
 

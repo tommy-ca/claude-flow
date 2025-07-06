@@ -32,6 +32,7 @@ Claude Flow v2.0.0 reimagines AI development from the ground up:
 
 - **🧠 Working Neural Networks**: Using **Rust-based QUDAG** architecture and **ruv-FANN**, we've implemented actual WASM neural processing that runs in your environment - not in the cloud, not simulated, but real neural computation
 - **🐝 Genuine Parallel Processing**: **ruv-swarm WASM** enables agents to truly work simultaneously, sharing memory and coordinating through 87 purpose-built MCP tools
+- **👑 Hive Mind Intelligence**: **Queen-led swarms** with collective memory and consensus decision-making deliver enterprise-grade coordination that scales from simple tasks to complex system development
 - **💾 Memory That Persists**: **DAA (Dynamic Agent Architecture)** maintains context across sessions, learning from patterns and improving over time
 - **⚡ Measurable Performance**: Real-world testing shows 2.8-4.4x speed improvements and 32.3% token reduction - not theoretical, but measured
 - **🔗 Native Claude Code Integration**: Works directly with Claude Code through MCP, no adapters or workarounds needed
@@ -298,28 +299,23 @@ npx claude-flow@2.0.0 start-ui --port 3000      # Convenient alias
 | **Analysis & Monitoring** | 13 tools | Performance tracking, bottleneck detection, metrics |
 | **Workflow & Automation** | 11 tools | CI/CD pipelines, task scheduling, batch processing |
 
-### 🧠 **NEW: Hive Mind System (v2.0.0)**
+### 👑 **NEW: Hive Mind System (v2.0.0)**
 Advanced swarm intelligence with collective decision-making and queen-led coordination:
 
 ```bash
-# Initialize Hive Mind system
-npx claude-flow@2.0.0 hive-mind init
-
 # Interactive wizard for easy setup
 npx claude-flow@2.0.0 hive-mind wizard
 
-# Spawn a hive mind swarm
+# Spawn intelligent swarm with objective
 npx claude-flow@2.0.0 hive-mind spawn "Build enterprise microservices"
 ```
 
 **Key Features:**
-- **Queen Coordinators**: Strategic, Tactical, or Adaptive leadership styles
+- **Queen Coordinators**: Strategic, Tactical, or Adaptive leadership
 - **Collective Memory**: SQLite-backed shared knowledge base
 - **Consensus Mechanisms**: Majority, Weighted, or Byzantine fault-tolerant voting
 - **Auto-scaling**: Dynamic worker allocation based on workload
-- **Work Stealing**: Intelligent task redistribution for optimal performance
-
-[Full Hive Mind Documentation →](docs/HIVE-MIND.md)
+- **Real-time Metrics**: Performance analytics and swarm monitoring
 
 | **GitHub Integration** | 8 tools | PR management, issue tracking, release coordination |
 | **DAA (Dynamic Agent Architecture)** | 8 tools | Resource allocation, lifecycle management, consensus |
