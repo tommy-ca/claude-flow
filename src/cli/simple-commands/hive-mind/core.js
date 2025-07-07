@@ -348,7 +348,9 @@ export class HiveMindCore extends EventEmitter {
    * Create and distribute task with performance optimization
    */
   async createTask(description, priority = 5, metadata = {}) {
-    const taskId = `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const timestamp = Date.now();
+    const randomPart = Math.random().toString(36).substring(2, 11); // Use substring instead of substr
+    const taskId = `task-${timestamp}-${randomPart}`;
     const createdAt = Date.now();
     
     const task = {

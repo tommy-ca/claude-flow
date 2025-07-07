@@ -384,7 +384,26 @@ async function spawnSwarm(args, flags) {
       mkdirSync(dbDir, { recursive: true });
     }
     
-    const db = new Database(dbPath);
+    // Check if database file exists and try to create a clean one if needed
+    let db;
+    try {
+      db = new Database(dbPath);
+      // Test the database with a simple query
+      db.prepare('SELECT 1').get();
+    } catch (error) {
+      console.warn('Database issue detected, recreating...', error.message);
+      // Remove corrupted database
+      if (existsSync(dbPath)) {
+        try {
+          const fs = await import('fs');
+          fs.unlinkSync(dbPath);
+        } catch (e) {
+          console.warn('Could not remove corrupted database:', e.message);
+        }
+      }
+      // Create new database
+      db = new Database(dbPath);
+    }
     
     // Initialize database schema if not exists
     db.exec(`
@@ -422,8 +441,10 @@ async function spawnSwarm(args, flags) {
       );
     `);
     
-    // Create swarm record
-    const swarmId = `swarm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    // Create swarm record with safe ID generation
+    const timestamp = Date.now();
+    const randomPart = Math.random().toString(36).substring(2, 11); // Use substring instead of substr
+    const swarmId = `swarm-${timestamp}-${randomPart}`;
     db.prepare(`
       INSERT INTO swarms (id, name, objective, queen_type)
       VALUES (?, ?, ?, ?)

@@ -116,7 +116,7 @@ export async function initCommand(subArgs, flags) {
   // Default to enhanced Claude Flow v2 init
   // Use --basic flag for old behavior
   if (!flags.basic && !flags.minimal && !flags.sparc) {
-    return await enhancedClaudeFlowInit(flags);
+    return await enhancedClaudeFlowInit(flags, subArgs);
   }
   
   // Check for validation and rollback commands
@@ -495,16 +495,16 @@ export async function initCommand(subArgs, flags) {
       }
       
       // Check for Claude Code and set up MCP servers (always enabled by default)
-      if (!initDryRun && isClaudeCodeInstalled()) {
+      if (!dryRun && isClaudeCodeInstalled()) {
         console.log('\n🔍 Claude Code CLI detected!');
-        const skipMcp = subArgs && subArgs.includes && subArgs.includes('--skip-mcp');
+        const skipMcp = args && args.includes && args.includes('--skip-mcp');
         
         if (!skipMcp) {
-          await setupMcpServers(initDryRun);
+          await setupMcpServers(dryRun);
         } else {
           console.log('  ℹ️  Skipping MCP setup (--skip-mcp flag used)');
         }
-      } else if (!initDryRun && !isClaudeCodeInstalled()) {
+      } else if (!dryRun && !isClaudeCodeInstalled()) {
         console.log('\n⚠️  Claude Code CLI not detected!');
         console.log('  📥 Install with: npm install -g @anthropics/claude-code');
         console.log('  📋 Then add MCP servers manually with:');
@@ -591,6 +591,10 @@ async function handleBatchInit(subArgs, flags) {
 async function enhancedInitCommand(subArgs, flags) {
   console.log('🛡️  Starting enhanced initialization with validation and rollback...');
   
+  // Store parameters to avoid scope issues in async context
+  const args = subArgs || [];
+  const options = flags || {};
+  
   // Get the working directory
   const workingDir = Deno.env.get('PWD') || Deno.cwd();
   
@@ -602,19 +606,19 @@ async function enhancedInitCommand(subArgs, flags) {
   
   try {
     // Parse options
-    const options = {
-      force: subArgs.includes('--force') || subArgs.includes('-f') || flags.force,
-      minimal: subArgs.includes('--minimal') || subArgs.includes('-m') || flags.minimal,
-      sparc: subArgs.includes('--sparc') || subArgs.includes('-s') || flags.sparc,
-      skipPreValidation: subArgs.includes('--skip-pre-validation'),
-      skipBackup: subArgs.includes('--skip-backup'),
-      validateOnly: subArgs.includes('--validate-only')
+    const initOptions = {
+      force: args.includes('--force') || args.includes('-f') || options.force,
+      minimal: args.includes('--minimal') || args.includes('-m') || options.minimal,
+      sparc: args.includes('--sparc') || args.includes('-s') || options.sparc,
+      skipPreValidation: args.includes('--skip-pre-validation'),
+      skipBackup: args.includes('--skip-backup'),
+      validateOnly: args.includes('--validate-only')
     };
 
     // Phase 1: Pre-initialization validation
-    if (!options.skipPreValidation) {
+    if (!initOptions.skipPreValidation) {
       console.log('\n🔍 Phase 1: Pre-initialization validation...');
-      const preValidation = await validationSystem.validatePreInit(options);
+      const preValidation = await validationSystem.validatePreInit(initOptions);
       
       if (!preValidation.success) {
         printError('Pre-initialization validation failed:');
@@ -945,12 +949,16 @@ async function setupCoordinationSystem(workingDir) {
 /**
  * Enhanced Claude Flow v2.0.0 initialization
  */
-async function enhancedClaudeFlowInit(flags) {
+async function enhancedClaudeFlowInit(flags, subArgs = []) {
   console.log('🚀 Initializing Claude Flow v2.0.0 with enhanced features...');
   
   const workingDir = process.cwd();
   const force = flags.force || flags.f;
   const dryRun = flags.dryRun || flags['dry-run'] || flags.d;
+  
+  // Store parameters to avoid scope issues in async context
+  const args = subArgs || [];
+  const options = flags || {};
   
   // Import fs module for Node.js
   const fs = await import('fs/promises');
@@ -1102,7 +1110,7 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
     // Check for Claude Code and set up MCP servers (always enabled by default)
     if (!dryRun && isClaudeCodeInstalled()) {
       console.log('\n🔍 Claude Code CLI detected!');
-      const skipMcp = (flags && flags['skip-mcp']) || (subArgs && subArgs.includes && subArgs.includes('--skip-mcp'));
+      const skipMcp = (options && options['skip-mcp']) || (args && args.includes && args.includes('--skip-mcp'));
       
       if (!skipMcp) {
         await setupMcpServers(dryRun);
