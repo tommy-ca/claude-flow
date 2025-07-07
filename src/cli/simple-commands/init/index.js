@@ -7,6 +7,7 @@ import { createSparcStructureManually } from './sparc-structure.js';
 import { createClaudeSlashCommands } from './claude-commands/slash-commands.js';
 import { createOptimizedClaudeSlashCommands } from './claude-commands/optimized-slash-commands.js';
 import { execSync } from 'child_process';
+import { promises as fs } from 'fs';
 import { 
   createSparcClaudeMd, 
   createFullClaudeMd, 
@@ -1036,7 +1037,7 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
       // Unix wrapper
       const unixWrapper = createWrapperScript('unix');
       await Deno.writeTextFile(`${workingDir}/claude-flow`, unixWrapper);
-      await require('fs').promises.chmod(`${workingDir}/claude-flow`, 0o755);
+      await fs.chmod(`${workingDir}/claude-flow`, 0o755);
       
       // Windows wrapper
       await Deno.writeTextFile(`${workingDir}/claude-flow.bat`, createWrapperScript('windows'));
@@ -1056,7 +1057,7 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
         const content = createHelperScript(helper);
         if (content) {
           await Deno.writeTextFile(`${claudeDir}/helpers/${helper}`, content);
-          await require('fs').promises.chmod(`${claudeDir}/helpers/${helper}`, 0o755);
+          await fs.chmod(`${claudeDir}/helpers/${helper}`, 0o755);
         }
       }
     }
