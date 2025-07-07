@@ -1,8 +1,11 @@
 // executable-wrapper.js - Create local executable wrapper
 
+import { writeFile, chmod } from 'fs/promises';
+import { platform } from 'os';
+
 export async function createLocalExecutable(workingDir) {
   try {
-    if (Deno.build.os === 'windows') {
+    if (platform() === 'win32') {
       // Create Windows batch file
       const wrapperScript = `@echo off
 REM Claude-Flow local wrapper
@@ -43,7 +46,7 @@ npx claude-flow %*
 `;
 
       // Write the Windows batch file
-      await Deno.writeTextFile(`${workingDir}/claude-flow.cmd`, wrapperScript);
+      await writeFile(`${workingDir}/claude-flow.cmd`, wrapperScript, 'utf8');
       console.log('  ✓ Created local claude-flow.cmd executable wrapper');
       console.log('    You can now use: claude-flow instead of npx claude-flow');
       
@@ -97,10 +100,10 @@ fi
 `;
 
       // Write the wrapper script
-      await Deno.writeTextFile(`${workingDir}/claude-flow`, wrapperScript);
+      await writeFile(`${workingDir}/claude-flow`, wrapperScript, 'utf8');
       
       // Make it executable
-      await Deno.chmod(`${workingDir}/claude-flow`, 0o755);
+      await chmod(`${workingDir}/claude-flow`, 0o755);
       
       console.log('  ✓ Created local claude-flow executable wrapper');
       console.log('    You can now use: ./claude-flow instead of npx claude-flow');

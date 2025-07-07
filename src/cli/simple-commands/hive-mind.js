@@ -12,6 +12,7 @@ import inquirer from 'inquirer';
 import chalk from 'chalk';
 import ora from 'ora';
 import { args, cwd, exit, writeTextFile, readTextFile, mkdirAsync } from '../node-compat.js';
+import { isInteractive, isRawModeSupported, warnNonInteractive, checkNonInteractiveAuth } from '../utils/interactive-detector.js';
 
 // Import SQLite for persistence
 import Database from 'better-sqlite3';
@@ -84,6 +85,7 @@ ${chalk.bold('OPTIONS:')}
   --spawn                Alias for --claude
   --auto-spawn           Automatically spawn Claude Code instances
   --execute              Execute Claude Code spawn commands immediately
+  --auto                 Auto-approve Claude permissions (uses --dangerously-skip-permissions)
 
 ${chalk.bold('For more information:')}
 ${chalk.blue('https://github.com/ruvnet/claude-code-flow/docs/hive-mind.md')}
@@ -963,6 +965,11 @@ export async function hiveMindCommand(args, flags) {
     return;
   }
   
+  // Warn about non-interactive environments for certain commands
+  if ((subcommand === 'spawn' && (flags.claude || flags.spawn)) || subcommand === 'wizard') {
+    warnNonInteractive('hive-mind ' + subcommand);
+  }
+  
   switch (subcommand) {
     case 'init':
       await initHiveMind(flags);
@@ -1342,133 +1349,103 @@ async function exportMemoryBackup() {
 }
 
 /**
- * Spawn Claude Code instances with detailed MCP tool coordination instructions
+ * Spawn Claude Code with Hive Mind coordination instructions
  */
 async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, flags) {
-  console.log('\n' + chalk.bold('🚀 Spawning Claude Code Instances'));
+  console.log('\n' + chalk.bold('🚀 Launching Claude Code with Hive Mind Coordination'));
   console.log(chalk.gray('─'.repeat(60)));
   
-  const spinner = ora('Preparing Claude Code coordination instructions...').start();
+  const spinner = ora('Preparing Hive Mind coordination prompt...').start();
   
   try {
-    // Generate detailed coordination instructions
-    const coordinationInstructions = generateCoordinationInstructions(swarmId, swarmName, objective, workers);
-    
-    spinner.text = 'Creating Claude Code spawn commands...';
-    
-    // Create spawn commands for each worker type
-    const spawnCommands = [];
+    // Generate comprehensive Hive Mind prompt
     const workerGroups = groupWorkersByType(workers);
+    const hiveMindPrompt = generateHiveMindPrompt(swarmId, swarmName, objective, workers, workerGroups, flags);
     
-    for (const [workerType, typeWorkers] of Object.entries(workerGroups)) {
-      const spawnCommand = createClaudeCodeSpawnCommand(swarmId, swarmName, objective, workerType, typeWorkers, coordinationInstructions);
-      spawnCommands.push(spawnCommand);
-    }
+    spinner.succeed('Hive Mind coordination prompt ready!');
     
-    spinner.succeed('Claude Code coordination prepared!');
-    
-    // Display coordination details
-    console.log('\n' + chalk.bold('🧠 Hive Mind + Claude Code Coordination'));
+    // Display coordination summary
+    console.log('\n' + chalk.bold('🧠 Hive Mind Configuration'));
     console.log(chalk.gray('─'.repeat(60)));
     console.log(chalk.cyan('Swarm ID:'), swarmId);
     console.log(chalk.cyan('Objective:'), objective);
+    console.log(chalk.cyan('Queen Type:'), flags.queenType || 'strategic');
+    console.log(chalk.cyan('Worker Count:'), workers.length);
     console.log(chalk.cyan('Worker Types:'), Object.keys(workerGroups).join(', '));
-    console.log(chalk.cyan('MCP Tools:'), 'Full ruv-swarm integration enabled');
-    console.log(chalk.cyan('Coordination:'), 'Hive Mind collective intelligence');
+    console.log(chalk.cyan('Consensus Algorithm:'), flags.consensus || 'majority');
+    console.log(chalk.cyan('MCP Tools:'), 'Full Claude-Flow integration enabled');
     
-    // Show spawn commands
-    console.log('\n' + chalk.bold('📋 Claude Code Spawn Commands'));
-    console.log(chalk.gray('─'.repeat(60)));
-    
-    spawnCommands.forEach((command, index) => {
-      console.log(chalk.yellow(`\n${index + 1}. ${command.title}`));
-      console.log(chalk.gray('   Command:'));
-      console.log(chalk.green(`   ${command.command}`));
-      
-      if (flags.verbose) {
-        console.log(chalk.gray('   Context:'));
-        console.log(chalk.blue(`   "${command.context.substring(0, 100)}..."`));
-      }
-    });
-    
-    // Spawn Claude Code instances when requested
-    if (flags.claude || flags.spawn || flags.autoSpawn || flags.execute) {
-      console.log('\n' + chalk.yellow('🚀 Spawning Claude Code instances...'));
-      
-      const { spawn: childSpawn, execSync } = await import('child_process');
-      
+    try {
       // Check if claude command exists
+      const { spawn: childSpawn, execSync } = await import('child_process');
       let claudeAvailable = false;
+      
       try {
         execSync('which claude', { stdio: 'ignore' });
         claudeAvailable = true;
       } catch {
         console.log(chalk.yellow('\n⚠️  Claude Code CLI not found in PATH'));
         console.log(chalk.gray('Install it with: npm install -g @anthropic/claude-code-cli'));
+        console.log(chalk.gray('\nFalling back to displaying instructions...'));
       }
       
-      for (const command of spawnCommands) {
-        console.log(chalk.gray(`\nSpawning: ${command.title}`));
+      
+      if (claudeAvailable && !flags.dryRun) {
+        // Pass the prompt directly as an argument to claude
+        const claudeArgs = [hiveMindPrompt];
         
-        if (!claudeAvailable && !flags.dryRun) {
-          console.log(chalk.blue('Command to run manually:'));
-          console.log(chalk.green(`  ${command.command}`));
-          continue;
+        // Add auto-permission flag if requested
+        if (flags.auto || flags['dangerously-skip-permissions']) {
+          claudeArgs.push('--dangerously-skip-permissions');
+          console.log(chalk.yellow('🔓 Automatically using --dangerously-skip-permissions for seamless execution'));
         }
         
-        if (flags.dryRun) {
-          console.log(chalk.blue('Dry run - would execute:'));
-          console.log(chalk.green(`  ${command.command}`));
-          console.log(chalk.gray('Context length:'), command.context.length, 'characters');
-          continue;
-        }
+        // Spawn claude with the prompt as the first argument
+        const claudeProcess = childSpawn('claude', claudeArgs, {
+          stdio: 'inherit',
+          shell: false
+        });
         
-        try {
-          // Create Claude args
-          const claudeArgs = [];
-          
-          // Add auto-permission flag if requested
-          if (flags.auto || flags['dangerously-skip-permissions']) {
-            claudeArgs.push('--dangerously-skip-permissions');
-          }
-          
-          // Spawn claude process
-          const claudeProcess = childSpawn('claude', claudeArgs, {
-            stdio: ['pipe', 'inherit', 'inherit'],
-            shell: false
-          });
-          
-          // Write the context to stdin and close it
-          claudeProcess.stdin.write(command.context);
-          claudeProcess.stdin.end();
-          
-          console.log(chalk.green('✓ Claude Code instance spawned for'), command.title);
-          console.log(chalk.blue('  Context provided with MCP tool coordination instructions'));
-          
-          // Don't wait for completion - let them run in parallel
-        } catch (error) {
-          console.error(chalk.red(`Failed to spawn Claude Code for ${command.title}:`), error.message);
-        }
+        console.log(chalk.green('\n✓ Claude Code launched with Hive Mind coordination'));
+        console.log(chalk.blue('  The Queen coordinator will orchestrate all worker agents'));
+        console.log(chalk.blue('  Use MCP tools for collective intelligence and task distribution'));
+        
+      } else if (flags.dryRun) {
+        console.log(chalk.blue('\nDry run - would execute Claude Code with prompt:'));
+        console.log(chalk.gray('Prompt length:'), hiveMindPrompt.length, 'characters');
+        console.log(chalk.gray('\nFirst 500 characters of prompt:'));
+        console.log(chalk.yellow(hiveMindPrompt.substring(0, 500) + '...'));
+        
+        // Save prompt to file for inspection
+        const promptFile = `hive-mind-prompt-${swarmId}.txt`;
+        await writeFile(promptFile, hiveMindPrompt, 'utf8');
+        console.log(chalk.green(`\n✓ Full prompt saved to: ${promptFile}`));
+        
+      } else {
+        // Claude not available - save prompt and show instructions
+        const promptFile = `hive-mind-prompt-${swarmId}.txt`;
+        await writeFile(promptFile, hiveMindPrompt, 'utf8');
+        
+        console.log(chalk.yellow('\n📋 Manual Execution Instructions:'));
+        console.log(chalk.gray('─'.repeat(50)));
+        console.log(chalk.gray('1. Install Claude Code:'));
+        console.log(chalk.green('   npm install -g @anthropic/claude-code-cli'));
+        console.log(chalk.gray('\n2. Run with the saved prompt:'));
+        console.log(chalk.green(`   claude < ${promptFile}`));
+        console.log(chalk.gray('\n3. Or copy the prompt manually:'));
+        console.log(chalk.green(`   cat ${promptFile} | claude`));
+        console.log(chalk.gray('\n4. With auto-permissions:'));
+        console.log(chalk.green(`   claude --dangerously-skip-permissions < ${promptFile}`));
       }
       
-      console.log('\n' + chalk.bold.green('🎉 All Claude Code instances spawned and coordinated!'));
-      console.log(chalk.gray('Instances are running with Hive Mind coordination protocols.'));
-    } else {
-      // Provide coordination instructions
-      console.log('\n' + chalk.bold('🎯 Next Steps:'));
-      console.log(chalk.gray('─'.repeat(40)));
-      console.log('1. Copy and execute the spawn commands above');
-      console.log('2. Each Claude Code instance will have full MCP tool access');
-      console.log('3. Use ruv-swarm tools for coordination between instances');
-      console.log('4. Monitor progress with: claude-flow hive-mind status');
+    } catch (error) {
+      console.error(chalk.red('\nFailed to launch Claude Code:'), error.message);
       
-      console.log('\n' + chalk.bold('🔧 Available MCP Tools for Coordination:'));
-      console.log(chalk.gray('─'.repeat(50)));
-      console.log(chalk.cyan('• mcp__ruv-swarm__memory_usage') + ' - Share knowledge between instances');
-      console.log(chalk.cyan('• mcp__ruv-swarm__swarm_monitor') + ' - Real-time coordination tracking');
-      console.log(chalk.cyan('• mcp__ruv-swarm__task_orchestrate') + ' - Distribute work efficiently');
-      console.log(chalk.cyan('• mcp__ruv-swarm__neural_train') + ' - Learn from coordination patterns');
-      console.log(chalk.cyan('• mcp__ruv-swarm__consensus_vote') + ' - Make collective decisions');
+      // Save prompt as fallback
+      const promptFile = `hive-mind-prompt-${swarmId}-fallback.txt`;
+      await writeFile(promptFile, hiveMindPrompt, 'utf8');
+      console.log(chalk.green(`\n✓ Prompt saved to: ${promptFile}`));
+      console.log(chalk.yellow('\nYou can run Claude Code manually with the saved prompt'));
     }
     
     console.log('\n' + chalk.bold('💡 Pro Tips:'));
@@ -1482,6 +1459,164 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
     spinner.fail('Failed to prepare Claude Code coordination');
     console.error(chalk.red('Error:'), error.message);
   }
+}
+
+/**
+ * Generate comprehensive Hive Mind prompt for Claude Code
+ */
+function generateHiveMindPrompt(swarmId, swarmName, objective, workers, workerGroups, flags) {
+  const currentTime = new Date().toISOString();
+  const workerTypes = Object.keys(workerGroups);
+  const queenType = flags.queenType || 'strategic';
+  const consensusAlgorithm = flags.consensus || 'majority';
+  
+  return `🧠 HIVE MIND COLLECTIVE INTELLIGENCE SYSTEM
+═══════════════════════════════════════════════
+
+You are the Queen coordinator of a Hive Mind swarm with collective intelligence capabilities.
+
+HIVE MIND CONFIGURATION:
+📌 Swarm ID: ${swarmId}
+📌 Swarm Name: ${swarmName}
+🎯 Objective: ${objective}
+👑 Queen Type: ${queenType}
+🐝 Worker Count: ${workers.length}
+🤝 Consensus Algorithm: ${consensusAlgorithm}
+⏰ Initialized: ${currentTime}
+
+WORKER DISTRIBUTION:
+${workerTypes.map(type => `• ${type}: ${workerGroups[type].length} agents`).join('\n')}
+
+🔧 AVAILABLE MCP TOOLS FOR HIVE MIND COORDINATION:
+
+1️⃣ **COLLECTIVE INTELLIGENCE**
+   mcp__claude-flow__consensus_vote    - Democratic decision making
+   mcp__claude-flow__memory_share      - Share knowledge across the hive
+   mcp__claude-flow__neural_sync       - Synchronize neural patterns
+   mcp__claude-flow__swarm_think       - Collective problem solving
+
+2️⃣ **QUEEN COORDINATION**
+   mcp__claude-flow__queen_command     - Issue directives to workers
+   mcp__claude-flow__queen_monitor     - Monitor swarm health
+   mcp__claude-flow__queen_delegate    - Delegate complex tasks
+   mcp__claude-flow__queen_aggregate   - Aggregate worker results
+
+3️⃣ **WORKER MANAGEMENT**
+   mcp__claude-flow__agent_spawn       - Create specialized workers
+   mcp__claude-flow__agent_assign      - Assign tasks to workers
+   mcp__claude-flow__agent_communicate - Inter-agent communication
+   mcp__claude-flow__agent_metrics     - Track worker performance
+
+4️⃣ **TASK ORCHESTRATION**
+   mcp__claude-flow__task_create       - Create hierarchical tasks
+   mcp__claude-flow__task_distribute   - Distribute work efficiently
+   mcp__claude-flow__task_monitor      - Track task progress
+   mcp__claude-flow__task_aggregate    - Combine task results
+
+5️⃣ **MEMORY & LEARNING**
+   mcp__claude-flow__memory_store      - Store collective knowledge
+   mcp__claude-flow__memory_retrieve   - Access shared memory
+   mcp__claude-flow__neural_train      - Learn from experiences
+   mcp__claude-flow__pattern_recognize - Identify patterns
+
+📋 HIVE MIND EXECUTION PROTOCOL:
+
+As the Queen coordinator, you must:
+
+1. **INITIALIZE THE HIVE** (Single BatchTool Message):
+   [BatchTool]:
+   ${workerTypes.map(type => `   mcp__claude-flow__agent_spawn { "type": "${type}", "count": ${workerGroups[type].length} }`).join('\n')}
+   mcp__claude-flow__memory_store { "key": "hive/objective", "value": "${objective}" }
+   mcp__claude-flow__memory_store { "key": "hive/queen", "value": "${queenType}" }
+   mcp__claude-flow__swarm_think { "topic": "initial_strategy" }
+   TodoWrite { "todos": [/* Create 5-10 high-level tasks */] }
+
+2. **ESTABLISH COLLECTIVE INTELLIGENCE**:
+   - Use consensus_vote for major decisions
+   - Share all discoveries via memory_share
+   - Synchronize learning with neural_sync
+   - Coordinate strategy with swarm_think
+
+3. **QUEEN LEADERSHIP PATTERNS**:
+   ${queenType === 'strategic' ? `
+   - Focus on high-level planning and coordination
+   - Delegate implementation details to workers
+   - Monitor overall progress and adjust strategy
+   - Make executive decisions when consensus fails` : ''}
+   ${queenType === 'tactical' ? `
+   - Manage detailed task breakdowns and assignments
+   - Closely monitor worker progress and efficiency
+   - Optimize resource allocation and load balancing
+   - Intervene directly when workers need guidance` : ''}
+   ${queenType === 'adaptive' ? `
+   - Learn from swarm performance and adapt strategies
+   - Experiment with different coordination patterns
+   - Use neural training to improve over time
+   - Balance between strategic and tactical approaches` : ''}
+
+4. **WORKER COORDINATION**:
+   - Spawn workers based on task requirements
+   - Assign tasks according to worker specializations
+   - Enable peer-to-peer communication for collaboration
+   - Monitor and rebalance workloads as needed
+
+5. **CONSENSUS MECHANISMS**:
+   ${consensusAlgorithm === 'majority' ? '- Decisions require >50% worker agreement' : ''}
+   ${consensusAlgorithm === 'unanimous' ? '- All workers must agree for major decisions' : ''}
+   ${consensusAlgorithm === 'weighted' ? '- Worker votes weighted by expertise and performance' : ''}
+   ${consensusAlgorithm === 'quorum' ? '- Decisions require 2/3 worker participation' : ''}
+
+6. **COLLECTIVE MEMORY**:
+   - Store all important decisions in shared memory
+   - Tag memories with worker IDs and timestamps
+   - Use memory namespaces: hive/, queen/, workers/, tasks/
+   - Implement memory consensus for critical data
+
+7. **PERFORMANCE OPTIMIZATION**:
+   - Monitor swarm metrics continuously
+   - Identify and resolve bottlenecks
+   - Train neural networks on successful patterns
+   - Scale worker count based on workload
+
+💡 HIVE MIND BEST PRACTICES:
+
+✅ ALWAYS use BatchTool for parallel operations
+✅ Store decisions in collective memory immediately
+✅ Use consensus for critical path decisions
+✅ Monitor worker health and reassign if needed
+✅ Learn from failures and adapt strategies
+✅ Maintain constant inter-agent communication
+✅ Aggregate results before final delivery
+
+❌ NEVER make unilateral decisions without consensus
+❌ NEVER let workers operate in isolation
+❌ NEVER ignore performance metrics
+❌ NEVER skip memory synchronization
+❌ NEVER abandon failing workers
+
+🎯 OBJECTIVE EXECUTION STRATEGY:
+
+For the objective: "${objective}"
+
+1. Break down into major phases using swarm_think
+2. Create specialized worker teams for each phase
+3. Establish success criteria and checkpoints
+4. Implement feedback loops and adaptation
+5. Aggregate and synthesize all worker outputs
+6. Deliver comprehensive solution with consensus
+
+⚡ PARALLEL EXECUTION REMINDER:
+The Hive Mind operates with massive parallelism. Always batch operations:
+- Spawn ALL workers in one message
+- Create ALL initial tasks together
+- Store multiple memories simultaneously
+- Check all statuses in parallel
+
+🚀 BEGIN HIVE MIND EXECUTION:
+
+Initialize the swarm now with the configuration above. Use your collective intelligence to solve the objective efficiently. The Queen must coordinate, workers must collaborate, and the hive must think as one.
+
+Remember: You are not just coordinating agents - you are orchestrating a collective intelligence that is greater than the sum of its parts.`;
 }
 
 /**

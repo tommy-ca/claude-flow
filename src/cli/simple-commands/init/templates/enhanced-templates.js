@@ -1201,25 +1201,35 @@ function createEnhancedSettingsJsonFallback() {
       ]
     },
     hooks: {
-      preEdit: {
-        enabled: true,
-        actions: ["auto-assign-agents", "validate-syntax", "load-context"]
+      preEditHook: {
+        command: "npx",
+        args: ["claude-flow", "hook", "pre-edit", "--file", "${file}", "--auto-assign-agents", "true", "--load-context", "true"],
+        alwaysRun: false,
+        outputFormat: "json"
       },
-      postEdit: {
-        enabled: true,
-        actions: ["format-code", "update-memory", "train-neural", "analyze-performance"]
+      postEditHook: {
+        command: "npx",
+        args: ["claude-flow", "hook", "post-edit", "--file", "${file}", "--format", "true", "--update-memory", "true", "--train-neural", "true"],
+        alwaysRun: true,
+        outputFormat: "json"
       },
-      preCommand: {
-        enabled: true,
-        actions: ["validate-safety", "prepare-resources", "optimize-execution"]
+      preCommandHook: {
+        command: "npx",
+        args: ["claude-flow", "hook", "pre-command", "--command", "${command}", "--validate-safety", "true", "--prepare-resources", "true"],
+        alwaysRun: false,
+        outputFormat: "json"
       },
-      postCommand: {
-        enabled: true,
-        actions: ["track-metrics", "store-results", "update-telemetry"]
+      postCommandHook: {
+        command: "npx",
+        args: ["claude-flow", "hook", "post-command", "--command", "${command}", "--track-metrics", "true", "--store-results", "true"],
+        alwaysRun: false,
+        outputFormat: "json"
       },
-      sessionEnd: {
-        enabled: true,
-        actions: ["generate-summary", "persist-state", "export-metrics"]
+      sessionEndHook: {
+        command: "npx",
+        args: ["claude-flow", "hook", "session-end", "--generate-summary", "true", "--persist-state", "true", "--export-metrics", "true"],
+        alwaysRun: true,
+        outputFormat: "json"
       }
     },
     mcpServers: {

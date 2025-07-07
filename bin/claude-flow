@@ -2,8 +2,32 @@
 # Claude-Flow Smart Dispatcher - Detects and uses the best available runtime
 
 VERSION="2.0.0-alpha.1"
-SCRIPT_DIR=$(dirname "$0")
-ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
+
+# Determine the correct path based on how the script is invoked
+if [ -L "$0" ]; then
+  # Script is a symlink (npm global install)
+  REAL_PATH=$(readlink -f "$0" 2>/dev/null || readlink "$0")
+  SCRIPT_DIR=$(dirname "$REAL_PATH")
+else
+  # Script is executed directly
+  SCRIPT_DIR=$(dirname "$0")
+fi
+
+# Handle global npm installation vs local execution
+if [ -f "$SCRIPT_DIR/../src/cli/simple-cli.js" ]; then
+  # Local development or properly structured installation
+  ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
+else
+  # Global npm installation - files might be in different location
+  # Try to find the module root
+  NODE_ROOT=$(npm root -g 2>/dev/null)
+  if [ -n "$NODE_ROOT" ] && [ -f "$NODE_ROOT/claude-flow/src/cli/simple-cli.js" ]; then
+    ROOT_DIR="$NODE_ROOT/claude-flow"
+  else
+    # Fallback to relative path
+    ROOT_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
+  fi
+fi
 
 # Show help if no arguments provided
 if [ $# -eq 0 ]; then

@@ -19,6 +19,7 @@ export function showInitHelp() {
   console.log('  --sparc, -s          Initialize with SPARC development environment');
   console.log('  --minimal, -m        Create minimal configuration files');
   console.log('  --modes <list>       Initialize only specific SPARC modes (comma-separated)');
+  console.log('  --skip-mcp           Skip automatic MCP server setup in Claude Code');
   console.log();
   console.log('Advanced Options:');
   console.log('  --enhanced, --safe   Enhanced initialization with validation and rollback');
@@ -56,12 +57,13 @@ export function showInitHelp() {
   console.log('  claude-flow init --rollback --partial --phase sparc-init  # Rollback SPARC only');
   console.log('  claude-flow init --list-backups             # Show available backups');
   console.log();
-  console.log('What --sparc creates:');
+  console.log('What gets created:');
   console.log('  • .claude/commands/ directory with 20+ Claude Code slash commands');
-  console.log('  • CLAUDE.md with SPARC-enhanced project instructions');
+  console.log('  • CLAUDE.md with project instructions (v2.0.0 enhanced by default)');
   console.log('  • memory/ directory for persistent context storage');
   console.log('  • coordination/ directory for agent orchestration');
   console.log('  • ./claude-flow local executable wrapper');
+  console.log('  • Automatic MCP server setup if Claude Code CLI is installed');
   console.log('  • Pre-configured for TDD, architecture, and code generation');
   console.log();
   console.log('Claude Code Slash Commands Created:');

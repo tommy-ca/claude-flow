@@ -1,6 +1,6 @@
 // command-registry.js - Extensible command registration system
 import process from 'process';
-import { initCommand } from './simple-commands/init.js';
+import { initCommand } from './simple-commands/init/index.js';
 import { memoryCommand } from './simple-commands/memory.js';
 import { sparcCommand } from './simple-commands/sparc.js';
 import { agentCommand } from './simple-commands/agent.js';

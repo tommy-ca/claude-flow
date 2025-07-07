@@ -6,6 +6,7 @@ import { createLocalExecutable } from './executable-wrapper.js';
 import { createSparcStructureManually } from './sparc-structure.js';
 import { createClaudeSlashCommands } from './claude-commands/slash-commands.js';
 import { createOptimizedClaudeSlashCommands } from './claude-commands/optimized-slash-commands.js';
+import { execSync } from 'child_process';
 import { 
   createSparcClaudeMd, 
   createFullClaudeMd, 
@@ -47,6 +48,62 @@ import {
   createHelperScript,
   COMMAND_STRUCTURE
 } from './templates/enhanced-templates.js';
+
+/**
+ * Check if Claude Code CLI is installed
+ */
+function isClaudeCodeInstalled() {
+  try {
+    execSync('which claude', { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Set up MCP servers in Claude Code
+ */
+async function setupMcpServers(dryRun = false) {
+  console.log('\n🔌 Setting up MCP servers for Claude Code...');
+  
+  const servers = [
+    {
+      name: 'claude-flow',
+      command: 'claude-flow mcp start',
+      description: 'Claude Flow MCP server with swarm orchestration'
+    },
+    {
+      name: 'ruv-swarm',
+      command: 'npx ruv-swarm mcp start',
+      description: 'ruv-swarm MCP server for enhanced coordination'
+    }
+  ];
+  
+  for (const server of servers) {
+    try {
+      if (!dryRun) {
+        console.log(`  🔄 Adding ${server.name}...`);
+        execSync(`claude mcp add ${server.name} ${server.command}`, { stdio: 'inherit' });
+        console.log(`  ✅ Added ${server.name} - ${server.description}`);
+      } else {
+        console.log(`  [DRY RUN] Would add ${server.name} - ${server.description}`);
+      }
+    } catch (err) {
+      console.log(`  ⚠️  Failed to add ${server.name}: ${err.message}`);
+      console.log(`     You can add it manually with: claude mcp add ${server.name} ${server.command}`);
+    }
+  }
+  
+  if (!dryRun) {
+    console.log('\n  📋 Verifying MCP servers...');
+    try {
+      execSync('claude mcp list', { stdio: 'inherit' });
+    } catch (err) {
+      console.log('  ⚠️  Could not verify MCP servers');
+    }
+  }
+}
 
 export async function initCommand(subArgs, flags) {
   // Show help if requested
@@ -96,9 +153,6 @@ export async function initCommand(subArgs, flags) {
   const initDryRun = subArgs.includes('--dry-run') || subArgs.includes('-d') || flags.dryRun;
   const initOptimized = initSparc && initForce; // Use optimized templates when both flags are present
   const selectedModes = flags.modes ? flags.modes.split(',') : null; // Support selective mode initialization
-  if (initClaudeFlow) {
-    return enhancedClaudeFlowInit(subArgs, flags, initDryRun, initForce);
-  }
   
   // Get the actual working directory (where the command was run from)
   // Use PWD environment variable which preserves the original directory
@@ -437,6 +491,24 @@ export async function initCommand(subArgs, flags) {
         console.log('  • Use --parallel flags for concurrent operations');
         console.log('  • Enable batch processing for multiple related tasks');
         console.log('  • Monitor performance with real-time metrics');
+      }
+      
+      // Check for Claude Code and set up MCP servers
+      if (!initDryRun && isClaudeCodeInstalled()) {
+        console.log('\n🔍 Claude Code CLI detected!');
+        const setupMcp = !subArgs.includes('--skip-mcp');
+        
+        if (setupMcp) {
+          await setupMcpServers(initDryRun);
+        } else {
+          console.log('  ℹ️  Skipping MCP setup (--skip-mcp flag used)');
+        }
+      } else if (!initDryRun && !isClaudeCodeInstalled()) {
+        console.log('\n⚠️  Claude Code CLI not detected!');
+        console.log('  📥 Install with: npm install -g @anthropics/claude-code');
+        console.log('  📋 Then add MCP servers manually with:');
+        console.log('     claude mcp add claude-flow claude-flow mcp start');
+        console.log('     claude mcp add ruv-swarm npx ruv-swarm mcp start');
       }
     }
     
@@ -1026,14 +1098,42 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
       printSuccess('✓ Initialized memory system');
     }
     
+    // Check for Claude Code and set up MCP servers
+    if (!dryRun && isClaudeCodeInstalled()) {
+      console.log('\n🔍 Claude Code CLI detected!');
+      const setupMcp = !flags['skip-mcp'] && !subArgs.includes('--skip-mcp');
+      
+      if (setupMcp) {
+        await setupMcpServers(dryRun);
+      } else {
+        console.log('  ℹ️  Skipping MCP setup (use --skip-mcp to disable)');
+        console.log('\n  📋 To add MCP servers manually:');
+        console.log('     claude mcp add claude-flow claude-flow mcp start');
+        console.log('     claude mcp add ruv-swarm npx ruv-swarm mcp start');
+      }
+    } else if (!dryRun && !isClaudeCodeInstalled()) {
+      console.log('\n⚠️  Claude Code CLI not detected!');
+      console.log('\n  📥 To install Claude Code:');
+      console.log('     npm install -g @anthropics/claude-code');
+      console.log('\n  📋 After installing, add MCP servers:');
+      console.log('     claude mcp add claude-flow claude-flow mcp start');
+      console.log('     claude mcp add ruv-swarm npx ruv-swarm mcp start');
+    }
+    
     // Final instructions
-    console.log('\\n🎉 Claude Flow v2.0.0 initialization complete!');
-    console.log('\\n📚 Quick Start:');
-    console.log('1. Add MCP server: claude mcp add claude-flow npx claude-flow mcp start');
-    console.log('2. View available commands: ls .claude/commands/');
-    console.log('3. Run setup helper: .claude/helpers/setup-mcp.sh');
-    console.log('4. Start a swarm: npx claude-flow swarm init');
-    console.log('\\n💡 Tips:');
+    console.log('\n🎉 Claude Flow v2.0.0 initialization complete!');
+    console.log('\n📚 Quick Start:');
+    if (isClaudeCodeInstalled()) {
+      console.log('1. View available commands: ls .claude/commands/');
+      console.log('2. Start a swarm: npx claude-flow swarm init');
+      console.log('3. Use MCP tools in Claude Code for enhanced coordination');
+    } else {
+      console.log('1. Install Claude Code: npm install -g @anthropics/claude-code');
+      console.log('2. Add MCP servers (see instructions above)');
+      console.log('3. View available commands: ls .claude/commands/');
+      console.log('4. Start a swarm: npx claude-flow swarm init');
+    }
+    console.log('\n💡 Tips:');
     console.log('• Check .claude/commands/ for detailed documentation');
     console.log('• Use --help with any command for options');
     console.log('• Enable GitHub integration with .claude/helpers/github-setup.sh');

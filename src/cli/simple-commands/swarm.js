@@ -499,6 +499,7 @@ The swarm should be self-documenting - use memory_store to save all important in
       // Add auto-permission flag if requested
       if (flags.auto || flags['dangerously-skip-permissions']) {
         claudeArgs.push('--dangerously-skip-permissions');
+        console.log('🔓 Automatically using --dangerously-skip-permissions for seamless execution');
       }
       
       // Spawn claude with the prompt as the first argument
