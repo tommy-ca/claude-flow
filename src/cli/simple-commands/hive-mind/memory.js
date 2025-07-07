@@ -234,7 +234,6 @@ export class CollectiveMemory extends EventEmitter {
           access_count INTEGER DEFAULT 0,
           compressed INTEGER DEFAULT 0,
           size INTEGER DEFAULT 0,
-          hash TEXT GENERATED ALWAYS AS (hex(substr(sha3(value, 256), 1, 8))) STORED,
           FOREIGN KEY (swarm_id) REFERENCES swarms(id)
         );
         
@@ -247,9 +246,6 @@ export class CollectiveMemory extends EventEmitter {
         
         CREATE INDEX IF NOT EXISTS idx_memory_size_compressed 
         ON collective_memory(size, compressed);
-        
-        CREATE INDEX IF NOT EXISTS idx_memory_hash
-        ON collective_memory(hash);
         
         -- Memory optimization view
         CREATE VIEW IF NOT EXISTS memory_stats AS
