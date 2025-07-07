@@ -494,12 +494,12 @@ export async function initCommand(subArgs, flags) {
         console.log('  • Monitor performance with real-time metrics');
       }
       
-      // Check for Claude Code and set up MCP servers
+      // Check for Claude Code and set up MCP servers (always enabled by default)
       if (!initDryRun && isClaudeCodeInstalled()) {
         console.log('\n🔍 Claude Code CLI detected!');
-        const setupMcp = !subArgs.includes('--skip-mcp');
+        const skipMcp = subArgs && subArgs.includes && subArgs.includes('--skip-mcp');
         
-        if (setupMcp) {
+        if (!skipMcp) {
           await setupMcpServers(initDryRun);
         } else {
           console.log('  ℹ️  Skipping MCP setup (--skip-mcp flag used)');
@@ -1099,15 +1099,15 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
       printSuccess('✓ Initialized memory system');
     }
     
-    // Check for Claude Code and set up MCP servers
+    // Check for Claude Code and set up MCP servers (always enabled by default)
     if (!dryRun && isClaudeCodeInstalled()) {
       console.log('\n🔍 Claude Code CLI detected!');
-      const setupMcp = !flags['skip-mcp'] && !subArgs.includes('--skip-mcp');
+      const skipMcp = (flags && flags['skip-mcp']) || (subArgs && subArgs.includes && subArgs.includes('--skip-mcp'));
       
-      if (setupMcp) {
+      if (!skipMcp) {
         await setupMcpServers(dryRun);
       } else {
-        console.log('  ℹ️  Skipping MCP setup (use --skip-mcp to disable)');
+        console.log('  ℹ️  Skipping MCP setup (--skip-mcp flag used)');
         console.log('\n  📋 To add MCP servers manually:');
         console.log('     claude mcp add claude-flow claude-flow mcp start');
         console.log('     claude mcp add ruv-swarm npx ruv-swarm mcp start');

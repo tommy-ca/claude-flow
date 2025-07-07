@@ -3,7 +3,7 @@
 <div align="center">
 
 [![🌟 Star on GitHub](https://img.shields.io/github/stars/ruvnet/claude-code-flow?style=for-the-badge&logo=github&color=gold)](https://github.com/ruvnet/claude-code-flow)
-[![📦 NPX Ready](https://img.shields.io/npm/v/claude-flow?style=for-the-badge&logo=npm&color=blue&label=v2.0.0-alpha.7)](https://www.npmjs.com/package/claude-flow)
+[![📦 NPX Ready](https://img.shields.io/npm/v/claude-flow?style=for-the-badge&logo=npm&color=blue&label=v2.0.0-alpha.8)](https://www.npmjs.com/package/claude-flow)
 [![⚡ Claude Code](https://img.shields.io/badge/Claude%20Code-MCP%20Ready-green?style=for-the-badge&logo=anthropic)](https://github.com/ruvnet/claude-code-flow)
 [![🐝 ruv-swarm](https://img.shields.io/badge/ruv--swarm-87%20Tools-purple?style=for-the-badge&logo=gitswarm)](https://github.com/ruvnet/ruv-FANN)
 [![🧠 Neural](https://img.shields.io/badge/WASM-Neural%20Networks-red?style=for-the-badge&logo=webassembly)](https://github.com/ruvnet/claude-code-flow)
@@ -50,7 +50,7 @@ Instead of promising "AI magic," Claude Flow delivers practical improvements:
 
 ---
 
-## 🚀 **What's New in v2.0.0-alpha.7**
+## 🚀 **What's New in v2.0.0-alpha.8**
 
 ### 🔌 **Automatic MCP Setup (NEW!)**
 - **Smart Detection** - Automatically detects Claude Code CLI installation
