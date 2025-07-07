@@ -10,7 +10,8 @@ const loadTemplate = (filename) => {
   try {
     return readFileSync(join(__dirname, filename), 'utf8');
   } catch (error) {
-    console.error(`Failed to load template ${filename}:`, error);
+    // Silently fall back to hardcoded templates if files not found
+    // This handles npm packaging scenarios where template files may not be included
     return null;
   }
 };
@@ -47,6 +48,7 @@ export function createWrapperScript(type = 'unix') {
 export function createCommandDoc(category, command) {
   const template = loadTemplate(`commands/${category}/${command}.md`);
   if (!template) {
+    // Silently fall back to generated documentation
     return createCommandDocFallback(category, command);
   }
   return template;
