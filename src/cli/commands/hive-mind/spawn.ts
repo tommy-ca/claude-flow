@@ -10,9 +10,9 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import inquirer from 'inquirer';
-import { HiveMind } from '../../../hive-mind/core/HiveMind';
-import { AgentType, AgentCapability } from '../../../hive-mind/types';
-import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter';
+import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
+import { AgentType, AgentCapability } from '../../../hive-mind/types.js';
+import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
 
 const AGENT_TYPES: AgentType[] = [
   'coordinator', 'researcher', 'coder', 'analyst', 'architect',
@@ -129,8 +129,8 @@ export const spawnCommand = new Command('spawn')
       spawnedAgents.forEach((agent) => {
         console.log(formatInfo(`${agent.name} (${agent.id})`));
         console.log(chalk.gray(`  Capabilities: ${agent.capabilities.join(', ')}`));
-        if (agent.assignedTask) {
-          console.log(chalk.yellow(`  Assigned to: ${agent.assignedTask}`));
+        if (agent.currentTask) {
+          console.log(chalk.yellow(`  Assigned to: ${agent.currentTask}`));
         }
       });
       
@@ -147,13 +147,13 @@ export const spawnCommand = new Command('spawn')
       
     } catch (error) {
       spinner.fail(formatError('Failed to spawn agent'));
-      console.error(formatError(error.message));
+      console.error(formatError((error as Error).message));
       process.exit(1);
     }
   });
 
 async function getActiveSwarmId(): Promise<string | null> {
-  const { DatabaseManager } = await import('../../../hive-mind/core/DatabaseManager');
+  const { DatabaseManager } = await import('../../../hive-mind/core/DatabaseManager.js');
   const db = await DatabaseManager.getInstance();
   return db.getActiveSwarmId();
 }

@@ -1,4 +1,5 @@
 // command-registry.js - Extensible command registration system
+import process from 'process';
 import { initCommand } from './simple-commands/init.js';
 import { memoryCommand } from './simple-commands/memory.js';
 import { sparcCommand } from './simple-commands/sparc.js';
@@ -62,18 +63,21 @@ First-time users should run: npx claude-flow@latest init --sparc`
     ]
   });
 
-  // Add start-ui as a convenient alias for start --ui
+  // Add start-ui as a convenient alias for launching the UI
   commandRegistry.set('start-ui', {
     handler: async (args, flags) => {
-      // Call start command with --ui flag
-      return startCommand(args, { ...flags, ui: true });
+      // Import and use the direct UI launcher
+      const { launchUI } = await import('./simple-commands/start-ui.js');
+      // Pass the full raw arguments from process.argv
+      const fullArgs = process.argv.slice(3); // Skip node, script, and command
+      return launchUI(fullArgs);
     },
-    description: 'Start the UI interface (alias for start --ui)',
-    usage: 'start-ui [--port <port>] [--web]',
+    description: 'Start the UI interface (web UI by default)',
+    usage: 'start-ui [--port <port>] [--terminal]',
     examples: [
-      'start-ui                 # Launch terminal-based UI',
+      'start-ui                 # Launch web-based UI (default)',
       'start-ui --port 3000     # Use custom port',
-      'start-ui --web           # Launch web-based UI instead'
+      'start-ui --terminal      # Launch terminal-based UI instead'
     ]
   });
 

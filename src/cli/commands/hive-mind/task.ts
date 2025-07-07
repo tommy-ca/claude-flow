@@ -10,10 +10,10 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import ora from 'ora';
 import inquirer from 'inquirer';
-import { HiveMind } from '../../../hive-mind/core/HiveMind';
-import { TaskPriority, TaskStrategy } from '../../../hive-mind/types';
-import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter';
-import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager';
+import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
+import { TaskPriority, TaskStrategy } from '../../../hive-mind/types.js';
+import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
+import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager.js';
 
 export const taskCommand = new Command('task')
   .description('Submit and manage tasks in the Hive Mind')
@@ -166,7 +166,7 @@ export const taskCommand = new Command('task')
       
     } catch (error) {
       console.error(formatError('Failed to submit task'));
-      console.error(formatError(error.message));
+      console.error(formatError((error as Error).message));
       process.exit(1);
     }
   });
@@ -274,7 +274,7 @@ async function watchTaskProgress(hiveMind: HiveMind, taskId: string) {
     } catch (error) {
       clearInterval(interval);
       bar.stop();
-      console.error(formatError('Error watching task: ' + error.message));
+      console.error(formatError('Error watching task: ' + (error as Error).message));
     }
   }, 1000);
   
@@ -290,7 +290,7 @@ async function watchTaskProgress(hiveMind: HiveMind, taskId: string) {
 }
 
 function getPriorityBadge(priority: string): string {
-  const badges = {
+  const badges: Record<string, string> = {
     low: '🟢',
     medium: '🟡',
     high: '🟠',
@@ -300,7 +300,7 @@ function getPriorityBadge(priority: string): string {
 }
 
 function getTaskStatusBadge(status: string): string {
-  const badges = {
+  const badges: Record<string, string> = {
     pending: chalk.gray('⏳'),
     assigned: chalk.yellow('🔄'),
     in_progress: chalk.blue('▶️'),

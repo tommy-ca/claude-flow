@@ -43,23 +43,32 @@ export async function startCommand(subArgs, flags) {
       }
     }
     
-    // Check if we should launch the terminal UI mode
-    if (ui) {
+    // Check if we should launch the UI mode (web UI by default)
+    if (ui && !web) {
       try {
-        // Launch the enhanced JavaScript UI
-        const { launchEnhancedUI } = await import('./process-ui-enhanced.js');
-        await launchEnhancedUI();
+        // Launch the web UI by default when --ui is used
+        const { ClaudeCodeWebServer } = await import('./web-server.js');
+        const webServer = new ClaudeCodeWebServer(port);
+        await webServer.start();
+        
+        printSuccess('🌐 Claude Flow Web UI is running!');
+        console.log(`📍 Open your browser to: http://localhost:${port}/console`);
+        console.log('   Press Ctrl+C to stop the server');
+        console.log();
+        
+        // Keep process running
+        await new Promise(() => {});
         return;
       } catch (err) {
-        // Fallback to simple UI
+        // If web UI fails, fall back to terminal UI
+        printWarning('Web UI failed, launching terminal UI...');
         try {
-          printWarning('Enhanced UI failed, launching simple UI...');
-          const { launchProcessUI } = await import('./process-ui.js');
-          await launchProcessUI();
+          const { launchEnhancedUI } = await import('./process-ui-enhanced.js');
+          await launchEnhancedUI();
           return;
         } catch (fallbackErr) {
           // If both fail, show error
-          printError('Failed to launch terminal UI: ' + err.message);
+          printError('Failed to launch UI: ' + err.message);
           console.error(err.stack);
           return;
         }

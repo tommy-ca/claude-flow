@@ -654,7 +654,7 @@ function showAllTopics(): void {
   console.log(chalk.cyan.bold('All Help Topics'));
   console.log('─'.repeat(50));
   
-  const table = new Table({
+  const table = new Table.default({
     head: ['Topic', 'Category', 'Description'],
     style: { head: ['cyan'] }
   });

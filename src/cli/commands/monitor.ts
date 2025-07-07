@@ -241,7 +241,7 @@ class Dashboard {
     console.log('─'.repeat(40));
     
     if (data.tasks.length > 0) {
-      const taskTable = new Table({
+      const taskTable = new Table.default({
         head: ['Task ID', 'Type', 'Status', 'Duration'],
         style: { border: [], head: [] }
       });
@@ -464,7 +464,7 @@ class Dashboard {
       const hasErrors = Math.random() > 0.8;
       
       result[component] = {
-        status,
+        status: status as 'error' | 'healthy' | 'degraded',
         load: Math.random() * 100,
         uptime: Math.random() * 3600000, // Up to 1 hour
         errors: hasErrors ? Math.floor(Math.random() * 5) : 0,

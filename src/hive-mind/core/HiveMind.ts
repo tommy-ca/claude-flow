@@ -7,13 +7,13 @@
 
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
-import { Queen } from './Queen';
-import { Agent } from './Agent';
-import { Memory } from './Memory';
-import { Communication } from './Communication';
-import { DatabaseManager } from './DatabaseManager';
-import { SwarmOrchestrator } from '../integration/SwarmOrchestrator';
-import { ConsensusEngine } from '../integration/ConsensusEngine';
+import { Queen } from './Queen.js';
+import { Agent } from './Agent.js';
+import { Memory } from './Memory.js';
+import { Communication } from './Communication.js';
+import { DatabaseManager } from './DatabaseManager.js';
+import { SwarmOrchestrator } from '../integration/SwarmOrchestrator.js';
+import { ConsensusEngine } from '../integration/ConsensusEngine.js';
 import {
   HiveMindConfig,
   SwarmTopology,
@@ -24,7 +24,7 @@ import {
   SwarmStatus,
   AgentSpawnOptions,
   TaskSubmitOptions
-} from '../types';
+} from '../types.js';
 
 export class HiveMind extends EventEmitter {
   private id: string;

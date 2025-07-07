@@ -1,5 +1,4 @@
-import { assertEquals, assertStringIncludes } from "@std/assert/mod.ts";
-import { describe, it } from "@std/testing/bdd.ts";
+import { describe, it, expect } from '@jest/globals';
 import { 
   createSparcClaudeMd, 
   createFullClaudeMd, 
@@ -23,46 +22,46 @@ describe("Template Generation Tests", () => {
     it("should generate full CLAUDE.md with proper structure", () => {
       const content = createFullClaudeMd();
       
-      assertStringIncludes(content, "# Claude Code Configuration");
-      assertStringIncludes(content, "## Project Overview");
-      assertStringIncludes(content, "## Key Commands");
-      assertStringIncludes(content, "## Code Style");
-      assertStringIncludes(content, "## Project Architecture");
+      expect(content).toContain("# Claude Code Configuration");
+      expect(content).toContain("## Project Overview");
+      expect(content).toContain("## Key Commands");
+      expect(content).toContain("## Code Style");
+      expect(content).toContain("## Project Architecture");
     });
 
     it("should generate minimal CLAUDE.md with basic info", () => {
       const content = createMinimalClaudeMd();
       
-      assertStringIncludes(content, "# Claude Code Configuration");
-      assertStringIncludes(content, "Minimal project configuration");
+      expect(content).toContain("# Claude Code Configuration");
+      expect(content).toContain("Minimal project configuration");
       
       // Should be shorter than full version
       const fullContent = createFullClaudeMd();
-      assertEquals(content.length < fullContent.length, true);
+      expect(content.length).toBeLessThan(fullContent.length);
     });
 
     it("should generate SPARC-enhanced CLAUDE.md", () => {
       const content = createSparcClaudeMd();
       
-      assertStringIncludes(content, "SPARC Development Environment");
-      assertStringIncludes(content, "## SPARC Development Commands");
-      assertStringIncludes(content, "## SPARC Methodology Workflow");
-      assertStringIncludes(content, "### 1. Specification Phase");
-      assertStringIncludes(content, "### 2. Pseudocode Phase");
-      assertStringIncludes(content, "### 3. Architecture Phase");
-      assertStringIncludes(content, "### 4. Refinement Phase");
-      assertStringIncludes(content, "### 5. Completion Phase");
-      assertStringIncludes(content, "Test-Driven Development");
+      expect(content).toContain("SPARC Development Environment");
+      expect(content).toContain("## SPARC Development Commands");
+      expect(content).toContain("## SPARC Methodology Workflow");
+      expect(content).toContain("### 1. Specification Phase");
+      expect(content).toContain("### 2. Pseudocode Phase");
+      expect(content).toContain("### 3. Architecture Phase");
+      expect(content).toContain("### 4. Refinement Phase");
+      expect(content).toContain("### 5. Completion Phase");
+      expect(content).toContain("Test-Driven Development");
     });
 
     it("should include proper SPARC commands in SPARC template", () => {
       const content = createSparcClaudeMd();
       
       // Check for SPARC commands
-      assertStringIncludes(content, "npx claude-flow sparc modes");
-      assertStringIncludes(content, "npx claude-flow sparc run");
-      assertStringIncludes(content, "npx claude-flow sparc tdd");
-      assertStringIncludes(content, "npx claude-flow sparc info");
+      expect(content).toContain("npx claude-flow sparc modes");
+      expect(content).toContain("npx claude-flow sparc run");
+      expect(content).toContain("npx claude-flow sparc tdd");
+      expect(content).toContain("npx claude-flow sparc info");
     });
   });
 
@@ -70,22 +69,22 @@ describe("Template Generation Tests", () => {
     it("should generate full memory bank with sections", () => {
       const content = createFullMemoryBankMd();
       
-      assertStringIncludes(content, "# Memory Bank");
-      assertStringIncludes(content, "## Active Tasks");
-      assertStringIncludes(content, "## Key Decisions");
-      assertStringIncludes(content, "## Project Context");
-      assertStringIncludes(content, "## Technical Specifications");
+      expect(content).toContain("# Memory Bank");
+      expect(content).toContain("## Active Tasks");
+      expect(content).toContain("## Key Decisions");
+      expect(content).toContain("## Project Context");
+      expect(content).toContain("## Technical Specifications");
     });
 
     it("should generate minimal memory bank", () => {
       const content = createMinimalMemoryBankMd();
       
-      assertStringIncludes(content, "# Memory Bank");
-      assertStringIncludes(content, "Simple memory tracking");
+      expect(content).toContain("# Memory Bank");
+      expect(content).toContain("Simple memory tracking");
       
       // Should be shorter
       const fullContent = createFullMemoryBankMd();
-      assertEquals(content.length < fullContent.length, true);
+      expect(content.length).toBeLessThan(fullContent.length);
     });
   });
 
@@ -93,22 +92,22 @@ describe("Template Generation Tests", () => {
     it("should generate full coordination with agent structure", () => {
       const content = createFullCoordinationMd();
       
-      assertStringIncludes(content, "# Multi-Agent Coordination System");
-      assertStringIncludes(content, "## Coordination Structure");
-      assertStringIncludes(content, "## Agent Roles");
-      assertStringIncludes(content, "## Current Coordination State");
-      assertStringIncludes(content, "## Coordination Rules");
+      expect(content).toContain("# Multi-Agent Coordination System");
+      expect(content).toContain("## Coordination Structure");
+      expect(content).toContain("## Agent Roles");
+      expect(content).toContain("## Current Coordination State");
+      expect(content).toContain("## Coordination Rules");
     });
 
     it("should generate minimal coordination", () => {
       const content = createMinimalCoordinationMd();
       
-      assertStringIncludes(content, "# Multi-Agent Coordination");
-      assertStringIncludes(content, "Simple coordination tracking");
+      expect(content).toContain("# Multi-Agent Coordination");
+      expect(content).toContain("Simple coordination tracking");
       
       // Should be shorter
       const fullContent = createFullCoordinationMd();
-      assertEquals(content.length < fullContent.length, true);
+      expect(content.length).toBeLessThan(fullContent.length);
     });
   });
 
@@ -116,19 +115,19 @@ describe("Template Generation Tests", () => {
     it("should generate agents README with proper format", () => {
       const content = createAgentsReadme();
       
-      assertStringIncludes(content, "# Agent Memory Storage");
-      assertStringIncludes(content, "## Directory Structure");
-      assertStringIncludes(content, "## File Format");
-      assertStringIncludes(content, ".json");
+      expect(content).toContain("# Agent Memory Storage");
+      expect(content).toContain("## Directory Structure");
+      expect(content).toContain("## File Format");
+      expect(content).toContain(".json");
     });
 
     it("should generate sessions README with proper format", () => {
       const content = createSessionsReadme();
       
-      assertStringIncludes(content, "# Session Memory Storage");
-      assertStringIncludes(content, "## Directory Structure");
-      assertStringIncludes(content, "## File Format");
-      assertStringIncludes(content, "session_");
+      expect(content).toContain("# Session Memory Storage");
+      expect(content).toContain("## Directory Structure");
+      expect(content).toContain("## File Format");
+      expect(content).toContain("session_");
     });
   });
 
@@ -148,9 +147,9 @@ describe("Template Generation Tests", () => {
 
       for (const template of templates) {
         // All should start with a header
-        assertEquals(template.startsWith("#"), true);
+        expect(template.startsWith("#")).toBe(true);
         // All should have proper line endings
-        assertEquals(template.includes("\r"), false);
+        expect(template.includes("\r")).toBe(false);
       }
     });
 
@@ -158,9 +157,9 @@ describe("Template Generation Tests", () => {
       const sparcTemplate = createSparcClaudeMd();
       
       // Check for file extensions in examples
-      assertStringIncludes(sparcTemplate, ".json");
-      assertStringIncludes(sparcTemplate, ".md");
-      assertStringIncludes(sparcTemplate, ".ts");
+      expect(sparcTemplate).toContain(".json");
+      expect(sparcTemplate).toContain(".md");
+      expect(sparcTemplate).toContain(".ts");
     });
   });
 
@@ -169,43 +168,43 @@ describe("Template Generation Tests", () => {
       const content = createSparcClaudeMd();
       
       // Development modes
-      assertStringIncludes(content, "architect");
-      assertStringIncludes(content, "code");
-      assertStringIncludes(content, "tdd");
-      assertStringIncludes(content, "spec-pseudocode");
-      assertStringIncludes(content, "integration");
+      expect(content).toContain("architect");
+      expect(content).toContain("code");
+      expect(content).toContain("tdd");
+      expect(content).toContain("spec-pseudocode");
+      expect(content).toContain("integration");
       
       // Quality modes
-      assertStringIncludes(content, "debug");
-      assertStringIncludes(content, "security-review");
-      assertStringIncludes(content, "refinement-optimization-mode");
+      expect(content).toContain("debug");
+      expect(content).toContain("security-review");
+      expect(content).toContain("refinement-optimization-mode");
       
       // Support modes
-      assertStringIncludes(content, "docs-writer");
-      assertStringIncludes(content, "devops");
-      assertStringIncludes(content, "mcp");
-      assertStringIncludes(content, "swarm");
+      expect(content).toContain("docs-writer");
+      expect(content).toContain("devops");
+      expect(content).toContain("mcp");
+      expect(content).toContain("swarm");
     });
 
     it("should include workflow examples", () => {
       const content = createSparcClaudeMd();
       
-      assertStringIncludes(content, "### Feature Development Workflow");
-      assertStringIncludes(content, "### Bug Fix Workflow");
-      assertStringIncludes(content, "# 1. Start with specification");
-      assertStringIncludes(content, "# 2. Design architecture");
-      assertStringIncludes(content, "# 3. Implement with TDD");
+      expect(content).toContain("### Feature Development Workflow");
+      expect(content).toContain("### Bug Fix Workflow");
+      expect(content).toContain("# 1. Start with specification");
+      expect(content).toContain("# 2. Design architecture");
+      expect(content).toContain("# 3. Implement with TDD");
     });
 
     it("should include memory integration examples", () => {
       const content = createSparcClaudeMd();
       
-      assertStringIncludes(content, "## SPARC Memory Integration");
-      assertStringIncludes(content, "memory store spec_auth");
-      assertStringIncludes(content, "memory store arch_decisions");
-      assertStringIncludes(content, "memory store test_coverage");
-      assertStringIncludes(content, "memory query");
-      assertStringIncludes(content, "memory export");
+      expect(content).toContain("## SPARC Memory Integration");
+      expect(content).toContain("memory store spec_auth");
+      expect(content).toContain("memory store arch_decisions");
+      expect(content).toContain("memory store test_coverage");
+      expect(content).toContain("memory query");
+      expect(content).toContain("memory export");
     });
   });
 });

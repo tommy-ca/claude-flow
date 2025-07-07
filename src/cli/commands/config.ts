@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import { readFileSync, writeFileSync } from 'fs';
 import { ConfigManager } from '../../core/config.js';
 
-const configManager = new ConfigManager();
+const configManager = ConfigManager.getInstance();
 
 export const configCommand = new Command('config')
   .description('Configuration management commands');
@@ -17,7 +17,7 @@ configCommand
   .description('Get configuration value')
   .action(async (key: string) => {
     try {
-      const value = await configManager.get(key);
+      const value = configManager.getValue(key);
       console.log(chalk.green('✓'), `${key}:`, JSON.stringify(value, null, 2));
     } catch (error) {
       console.error(chalk.red('Failed to get configuration:'), (error as Error).message);

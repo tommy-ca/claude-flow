@@ -4,7 +4,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  */
 
 import chalk from 'chalk';
-import * as Table from 'cli-table3';
+import Table from 'cli-table3';
 // Using cli-table3 instead of @cliffy/table for Node.js compatibility
 import type { AgentProfile, Task, MemoryEntry, HealthStatus } from '../utils/types.js';
 import * as process from 'process';
@@ -148,7 +148,7 @@ export function formatHealthStatus(health: HealthStatus): string {
 /**
  * Creates a table for agent listing
  */
-export function createAgentTable(agents: AgentProfile[]): Table {
+export function createAgentTable(agents: AgentProfile[]): any {
   const table = new Table({
     head: ['ID', 'Name', 'Type', 'Priority', 'Max Tasks']
   });
@@ -169,7 +169,7 @@ export function createAgentTable(agents: AgentProfile[]): Table {
 /**
  * Creates a table for task listing
  */
-export function createTaskTable(tasks: Task[]): Table {
+export function createTaskTable(tasks: Task[]): any {
   const table = new Table({
     head: ['ID', 'Type', 'Description', 'Status', 'Agent']
   });
@@ -300,6 +300,27 @@ export function formatStatusIndicator(status: string): string {
   };
   
   return indicators[status as keyof typeof indicators] || status;
+}
+
+/**
+ * Formats a success message
+ */
+export function formatSuccess(message: string): string {
+  return chalk.green('✓') + ' ' + chalk.white(message);
+}
+
+/**
+ * Formats an info message
+ */
+export function formatInfo(message: string): string {
+  return chalk.blue('ℹ') + ' ' + chalk.white(message);
+}
+
+/**
+ * Formats a warning message
+ */
+export function formatWarning(message: string): string {
+  return chalk.yellow('⚠') + ' ' + chalk.white(message);
 }
 
 /**

@@ -11,9 +11,9 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import figlet from 'figlet';
 import gradient from 'gradient-string';
-import { HiveMind } from '../../../hive-mind/core/HiveMind';
-import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager';
-import { formatSuccess, formatError, formatInfo } from '../../formatter';
+import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
+import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager.js';
+import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
 
 type WizardAction = 
   | 'create_swarm'
@@ -86,7 +86,7 @@ export const wizardCommand = new Command('wizard')
       console.log('\n' + chalk.bold.yellow('👋 Thank you for using Hive Mind!'));
       
     } catch (error) {
-      console.error(formatError('Wizard error: ' + error.message));
+      console.error(formatError('Wizard error: ' + (error as Error).message));
       process.exit(1);
     }
   });

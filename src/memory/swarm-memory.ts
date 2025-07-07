@@ -603,4 +603,32 @@ export class SwarmMemoryManager extends EventEmitter {
 
     this.emit('memory:cleared', { agentId });
   }
+
+  // Compatibility methods for hive.ts
+  async store(key: string, value: any): Promise<void> {
+    // Extract namespace and actual key from the path
+    const parts = key.split('/');
+    const type = parts[0] as SwarmMemoryEntry['type'] || 'state';
+    const agentId = parts[1] || 'system';
+    
+    await this.remember(agentId, type, value, {
+      tags: [parts[0], parts[1]].filter(Boolean),
+      shareLevel: 'team'
+    });
+  }
+
+  async search(pattern: string, limit: number = 10): Promise<any[]> {
+    // Simple pattern matching on stored keys/content
+    const results: any[] = [];
+    
+    for (const entry of this.entries.values()) {
+      const entryString = JSON.stringify(entry);
+      if (entryString.includes(pattern.replace('*', ''))) {
+        results.push(entry.content);
+        if (results.length >= limit) break;
+      }
+    }
+    
+    return results;
+  }
 }

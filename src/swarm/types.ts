@@ -471,7 +471,6 @@ export interface SwarmConstraints {
   // Operational constraints
   allowedFailures: number;
   recoveryTime: number;
-  resourceLimits: Record<string, number>;
   maintenanceWindows?: TimeWindow[];
 }
 

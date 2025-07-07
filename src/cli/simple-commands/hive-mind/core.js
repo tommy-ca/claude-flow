@@ -749,11 +749,17 @@ export class HiveMindCore extends EventEmitter {
     decision.confidence = result.confidence;
     decision.status = 'completed';
     
+    // Convert Map to plain object for proper JSON serialization
+    const decisionForStorage = {
+      ...decision,
+      votes: decision.votes instanceof Map ? Object.fromEntries(decision.votes) : decision.votes
+    };
+
     // Store decision in memory
     await this.mcpWrapper.storeMemory(
       this.state.swarmId,
       `decision-${decision.id}`,
-      decision,
+      decisionForStorage,
       'consensus'
     );
     

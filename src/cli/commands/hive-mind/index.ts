@@ -6,11 +6,11 @@
  */
 
 import { Command } from 'commander';
-import { initCommand } from './init';
-import { spawnCommand } from './spawn';
-import { statusCommand } from './status';
-import { taskCommand } from './task';
-import { wizardCommand } from './wizard';
+import { initCommand } from './init.js';
+import { spawnCommand } from './spawn.js';
+import { statusCommand } from './status.js';
+import { taskCommand } from './task.js';
+import { wizardCommand } from './wizard.js';
 
 export const hiveMindCommand = new Command('hive-mind')
   .description('Hive Mind collective intelligence swarm management')

@@ -243,7 +243,7 @@ program
   .description('Rollback from backup')
   .action(async (manifestPath) => {
     try {
-      const { PromptCopier } = await import('./prompt-copier');
+      const { PromptCopier } = await import('./prompt-copier.js');
       const copier = new PromptCopier({
         source: '',
         destination: ''

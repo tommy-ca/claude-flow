@@ -6,15 +6,15 @@
  */
 
 import { EventEmitter } from 'events';
-import { DatabaseManager } from '../core/DatabaseManager';
-import { MCPToolWrapper } from './MCPToolWrapper';
+import { DatabaseManager } from '../core/DatabaseManager.js';
+import { MCPToolWrapper } from './MCPToolWrapper.js';
 import {
   ConsensusProposal,
   ConsensusVote,
   ConsensusResult,
   VotingStrategy,
   ConsensusMetrics
-} from '../types';
+} from '../types.js';
 
 export class ConsensusEngine extends EventEmitter {
   private threshold: number;

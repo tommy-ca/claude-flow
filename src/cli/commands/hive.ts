@@ -5,7 +5,7 @@
 import { CommandContext, success, error, warning, info } from '../cli-core.js';
 import { generateId } from '../../utils/helpers.js';
 import { SwarmCoordinator } from '../../coordination/swarm-coordinator.js';
-import { SwarmMemoryManager } from '../../memory/swarm-memory-manager.js';
+import { SwarmMemoryManager } from '../../memory/swarm-memory.js';
 
 interface HiveOptions {
   objective: string;
@@ -46,12 +46,12 @@ export async function hiveAction(ctx: CommandContext) {
     objective,
     topology: (ctx.flags.topology as any) || 'hierarchical',
     consensus: (ctx.flags.consensus as any) || 'quorum',
-    maxAgents: ctx.flags.maxAgents || ctx.flags['max-agents'] || 8,
-    timeout: ctx.flags.timeout || 60,
-    monitor: ctx.flags.monitor || false,
-    background: ctx.flags.background || false,
-    memoryNamespace: ctx.flags['memory-namespace'] || 'hive',
-    qualityThreshold: ctx.flags['quality-threshold'] || 0.8,
+    maxAgents: Number(ctx.flags.maxAgents || ctx.flags['max-agents']) || 8,
+    timeout: Number(ctx.flags.timeout) || 60,
+    monitor: Boolean(ctx.flags.monitor) || false,
+    background: Boolean(ctx.flags.background) || false,
+    memoryNamespace: String(ctx.flags['memory-namespace']) || 'hive',
+    qualityThreshold: Number(ctx.flags['quality-threshold']) || 0.8,
     sparc: ctx.flags.sparc !== false
   };
 
@@ -109,7 +109,7 @@ export async function hiveAction(ctx: CommandContext) {
     });
 
     // Create objective with Hive consensus
-    const objectiveId = await coordinator.createObjective(objective, 'hive');
+    const objectiveId = await coordinator.createObjective(objective, 'development');
     
     // Execute with consensus mechanisms
     if (options.sparc) {
@@ -123,16 +123,16 @@ export async function hiveAction(ctx: CommandContext) {
       // Show results
       const status = coordinator.getSwarmStatus();
       console.log(`\n📊 Hive Mind Summary:`);
-      console.log(`  - Consensus Rounds: ${status.customMetrics?.consensusRounds || 0}`);
-      console.log(`  - Decisions Made: ${status.customMetrics?.decisions || 0}`);
+      console.log(`  - Consensus Rounds: ${(status as any).customMetrics?.consensusRounds || 0}`);
+      console.log(`  - Decisions Made: ${(status as any).customMetrics?.decisions || 0}`);
       console.log(`  - Tasks Completed: ${status.tasks.completed}`);
-      console.log(`  - Quality Score: ${status.customMetrics?.qualityScore || 0}%`);
+      console.log(`  - Quality Score: ${(status as any).customMetrics?.qualityScore || 0}%`);
       
       success(`✅ Hive Mind ${hiveId} completed successfully`);
     }
 
   } catch (err) {
-    error(`Hive Mind error: ${err.message}`);
+    error(`Hive Mind error: ${(err as Error).message}`);
   }
 }
 
@@ -146,13 +146,13 @@ async function spawnHiveAgents(coordinator: SwarmCoordinator, options: HiveOptio
     const config = agentConfigs[i % agentConfigs.length];
     const agentId = await coordinator.registerAgent(
       `${config.type}-${i + 1}`,
-      config.role,
+      config.role as any,
       config.capabilities
     );
     
     agents.push({
       id: agentId,
-      type: config.type,
+      type: config.type as any,
       role: config.role,
       capabilities: config.capabilities,
       status: 'idle',

@@ -35,7 +35,7 @@ export class DatabaseManager extends EventEmitter {
   /**
    * Initialize database
    */
-  private async initialize(): Promise<void> {
+  async initialize(): Promise<void> {
     // Ensure data directory exists
     const dataDir = path.join(process.cwd(), 'data');
     await fs.mkdir(dataDir, { recursive: true });
@@ -629,6 +629,34 @@ export class DatabaseManager extends EventEmitter {
       this.recordPerformance('delete_memory_error', performance.now() - startTime);
       throw error;
     }
+  }
+
+  /**
+   * Get database analytics
+   */
+  getDatabaseAnalytics(): any {
+    try {
+      const stats = this.db.prepare('PRAGMA table_info(swarms)').all();
+      return {
+        fragmentation: 0, // Placeholder - could implement actual fragmentation detection
+        tableCount: stats.length,
+        schemaVersion: '1.0.0'
+      };
+    } catch (error) {
+      return {
+        fragmentation: 0,
+        tableCount: 0,
+        schemaVersion: 'unknown'
+      };
+    }
+  }
+
+  /**
+   * Record performance metric
+   */
+  private recordPerformance(operation: string, duration: number): void {
+    // Simple performance tracking - could be expanded
+    console.debug(`DB Operation ${operation}: ${duration.toFixed(2)}ms`);
   }
 
   /**

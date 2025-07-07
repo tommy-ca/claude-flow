@@ -445,6 +445,13 @@ export class ConfigManager {
   }
 
   /**
+   * Gets all configuration values (alias for get method for backward compatibility)
+   */
+  async getAll(): Promise<Config> {
+    return this.get();
+  }
+
+  /**
    * Updates configuration values with change tracking
    */
   update(updates: Partial<Config>, options: { user?: string, reason?: string, source?: 'cli' | 'api' | 'file' | 'env' } = {}): Config {
@@ -1112,6 +1119,121 @@ export class ConfigManager {
    */
   private validate(config: Config): void {
     this.validateWithDependencies(config);
+  }
+
+  /**
+   * Masks sensitive values in configuration
+   */
+  private maskSensitiveValues(config: Config): Config {
+    const maskedConfig = deepClone(config);
+    
+    // Recursively mask sensitive paths
+    const maskObject = (obj: any, path: string = ''): any => {
+      if (!obj || typeof obj !== 'object') return obj;
+      
+      const masked: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        const currentPath = path ? `${path}.${key}` : key;
+        
+        if (this.isSensitivePath(currentPath)) {
+          const classification = SECURITY_CLASSIFICATIONS[currentPath];
+          masked[key] = classification?.maskPattern || '****';
+        } else if (typeof value === 'object' && value !== null) {
+          masked[key] = maskObject(value, currentPath);
+        } else {
+          masked[key] = value;
+        }
+      }
+      return masked;
+    };
+    
+    return maskObject(maskedConfig);
+  }
+
+  /**
+   * Tracks changes to configuration
+   */
+  private trackChanges(oldConfig: Config, updates: Partial<Config>, options: { user?: string, reason?: string, source?: 'cli' | 'api' | 'file' | 'env' }): void {
+    // Simple implementation for tracking changes
+    for (const [key, value] of Object.entries(updates)) {
+      this.recordChange({
+        timestamp: new Date().toISOString(),
+        path: key,
+        oldValue: (oldConfig as any)[key],
+        newValue: value,
+        user: options.user,
+        reason: options.reason,
+        source: options.source || 'cli'
+      });
+    }
+  }
+
+  /**
+   * Records a configuration change
+   */
+  private recordChange(change: ConfigChange): void {
+    this.changeHistory.push(change);
+    
+    // Keep only last 1000 changes
+    if (this.changeHistory.length > 1000) {
+      this.changeHistory.shift();
+    }
+  }
+
+  /**
+   * Checks if a path contains sensitive information
+   */
+  private isSensitivePath(path: string): boolean {
+    return SENSITIVE_PATHS.some(sensitive => 
+      path.toLowerCase().includes(sensitive.toLowerCase())
+    );
+  }
+
+  /**
+   * Encrypts a sensitive value
+   */
+  private encryptValue(value: any): string {
+    if (!this.encryptionKey) {
+      return value; // Return original if encryption not available
+    }
+    
+    try {
+      // Simplified encryption - in production use proper encryption
+      const cipher = createCipher('aes256', this.encryptionKey);
+      let encrypted = cipher.update(JSON.stringify(value), 'utf8', 'hex');
+      encrypted += cipher.final('hex');
+      return `encrypted:${encrypted}`;
+    } catch (error) {
+      console.warn('Failed to encrypt value:', (error as Error).message);
+      return value;
+    }
+  }
+
+  /**
+   * Decrypts a sensitive value
+   */
+  private decryptValue(encryptedValue: string): any {
+    if (!this.encryptionKey || !this.isEncryptedValue(encryptedValue)) {
+      return encryptedValue;
+    }
+    
+    try {
+      const encrypted = encryptedValue.replace('encrypted:', '');
+      const decipher = createDecipher('aes256', this.encryptionKey);
+      let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+      return JSON.parse(decrypted);
+    } catch (error) {
+      console.warn('Failed to decrypt value:', (error as Error).message);
+      return encryptedValue;
+    }
+  }
+
+  /**
+   * Checks if a value is encrypted
+   */
+  private isEncryptedValue(value: any): boolean {
+    return typeof value === 'string' && value.startsWith('encrypted:');
   }
 }
 

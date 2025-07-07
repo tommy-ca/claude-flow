@@ -646,9 +646,43 @@ async function showConsensus(flags) {
       if (decision.votes) {
         const votes = JSON.parse(decision.votes);
         console.log(chalk.cyan('Votes:'));
-        Object.entries(votes).forEach(([agent, vote]) => {
-          console.log(`  - ${agent}: ${vote}`);
-        });
+        
+        // Handle vote summary format (for/against/abstain/details)
+        if (votes.for !== undefined || votes.against !== undefined || votes.abstain !== undefined) {
+          console.log(`  - for: ${votes.for || 0}`);
+          console.log(`  - against: ${votes.against || 0}`);
+          console.log(`  - abstain: ${votes.abstain || 0}`);
+          
+          // Display vote details properly if they exist
+          if (votes.details && Array.isArray(votes.details)) {
+            console.log('  - details:');
+            votes.details.forEach((detail, index) => {
+              if (typeof detail === 'object') {
+                // Extract available fields
+                const agent = detail.agentId || detail.agent || detail.id || detail.name || `agent-${index + 1}`;
+                const vote = detail.vote || detail.choice || detail.decision || 'unknown';
+                const reason = detail.reason || detail.justification || detail.rationale;
+                
+                // Build display string
+                let displayString = `    ${index + 1}. Agent: ${agent}, Vote: ${vote}`;
+                
+                // Add reason if available
+                if (reason && reason !== 'N/A' && reason !== '') {
+                  displayString += `, Reason: ${reason}`;
+                }
+                
+                console.log(displayString);
+              } else {
+                console.log(`    ${index + 1}. ${detail}`);
+              }
+            });
+          }
+        } else {
+          // Handle individual agent votes format
+          Object.entries(votes).forEach(([agent, vote]) => {
+            console.log(`  - ${agent}: ${vote}`);
+          });
+        }
       }
     });
     
@@ -831,8 +865,62 @@ async function showMetrics(flags) {
  * Manage collective memory wizard
  */
 async function manageMemoryWizard() {
-  // TODO: Implement memory management wizard
-  console.log(chalk.yellow('Memory management wizard coming soon...'));
+  console.log(chalk.blue('\n🧠 Collective Memory Management\n'));
+  
+  const { action } = await inquirer.prompt([
+    {
+      type: 'list',
+      name: 'action',
+      message: 'What would you like to do with collective memory?',
+      choices: [
+        { name: '📋 View all memories', value: 'list' },
+        { name: '🔍 Search memories', value: 'search' },
+        { name: '💾 Store new memory', value: 'store' },
+        { name: '📊 Memory statistics', value: 'stats' },
+        { name: '🗑️ Clean old memories', value: 'clean' },
+        { name: '📤 Export memory backup', value: 'export' },
+        { name: '⬅️ Back to main menu', value: 'back' }
+      ]
+    }
+  ]);
+  
+  switch (action) {
+    case 'list':
+      await listMemories();
+      break;
+    case 'search':
+      await searchMemories();
+      break;
+    case 'store':
+      await storeMemoryWizard();
+      break;
+    case 'stats':
+      await showMemoryStats();
+      break;
+    case 'clean':
+      await cleanMemories();
+      break;
+    case 'export':
+      await exportMemoryBackup();
+      break;
+    case 'back':
+      await hiveMindWizard();
+      return;
+  }
+  
+  // Ask if user wants to continue
+  const { continue: continueAction } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'continue',
+      message: 'Would you like to perform another memory operation?',
+      default: true
+    }
+  ]);
+  
+  if (continueAction) {
+    await manageMemoryWizard();
+  }
 }
 
 /**
@@ -900,6 +988,339 @@ export async function hiveMindCommand(args, flags) {
       console.log('Run "claude-flow hive-mind help" for usage information');
       exit(1);
   }
+}
+
+/**
+ * List all memories in the collective memory store
+ */
+async function listMemories() {
+  try {
+    console.log(chalk.blue('\n📋 Collective Memory Store\n'));
+    
+    // Use MCP wrapper to search for all memories (empty pattern matches all)
+    const mcpWrapper = await getMcpWrapper();
+    const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
+    
+    console.log('Debug - searchResult:', JSON.stringify(searchResult, null, 2));
+    
+    // Handle different possible response structures
+    let memories = [];
+    if (searchResult && Array.isArray(searchResult.results)) {
+      memories = searchResult.results;
+    } else if (searchResult && Array.isArray(searchResult)) {
+      memories = searchResult;
+    } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
+      memories = searchResult.data;
+    }
+    
+    if (!memories || memories.length === 0) {
+      console.log(chalk.yellow('No memories found in the collective store.'));
+      console.log(chalk.gray('Try storing some memories first using the "💾 Store new memory" option.'));
+      return;
+    }
+    
+    memories.forEach((memory, index) => {
+      console.log(chalk.cyan(`${index + 1}. ${memory.key || `memory-${index}`}`));
+      console.log(`   Category: ${memory.type || 'general'}`);
+      console.log(`   Created: ${new Date(memory.timestamp || Date.now()).toLocaleString()}`);
+      if (memory.value && typeof memory.value === 'object') {
+        console.log(`   Preview: ${JSON.stringify(memory.value).substring(0, 100)}...`);
+      } else {
+        console.log(`   Value: ${String(memory.value || memory).substring(0, 100)}...`);
+      }
+      console.log('');
+    });
+    
+  } catch (error) {
+    console.error(chalk.red('Error listing memories:'), error.message);
+    console.log(chalk.gray('This might be because no memories have been stored yet.'));
+  }
+}
+
+/**
+ * Search memories by keyword
+ */
+async function searchMemories() {
+  try {
+    const { searchTerm } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'searchTerm',
+        message: 'Enter search term:',
+        validate: input => input.length > 0
+      }
+    ]);
+    
+    console.log(chalk.blue(`\n🔍 Searching for: "${searchTerm}"\n`));
+    
+    const mcpWrapper = await getMcpWrapper();
+    const memories = await mcpWrapper.searchMemory('hive-mind', searchTerm);
+    
+    if (!memories || memories.length === 0) {
+      console.log(chalk.yellow('No memories found matching your search.'));
+      return;
+    }
+    
+    memories.forEach((memory, index) => {
+      console.log(chalk.green(`${index + 1}. ${memory.key || `result-${index}`}`));
+      console.log(`   Category: ${memory.type || 'general'}`);
+      console.log(`   Created: ${new Date(memory.timestamp || Date.now()).toLocaleString()}`);
+      console.log(`   Value: ${JSON.stringify(memory.value || memory, null, 2)}`);
+      console.log('');
+    });
+    
+  } catch (error) {
+    console.error(chalk.red('Error searching memories:'), error.message);
+  }
+}
+
+/**
+ * Store new memory wizard
+ */
+async function storeMemoryWizard() {
+  try {
+    const answers = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'key',
+        message: 'Memory key (identifier):',
+        validate: input => input.length > 0
+      },
+      {
+        type: 'list',
+        name: 'category',
+        message: 'Memory category:',
+        choices: [
+          'consensus',
+          'decision',
+          'pattern',
+          'learning',
+          'coordination',
+          'performance',
+          'configuration',
+          'general'
+        ]
+      },
+      {
+        type: 'editor',
+        name: 'value',
+        message: 'Memory content (JSON or text):'
+      }
+    ]);
+    
+    const mcpWrapper = await getMcpWrapper();
+    let memoryValue;
+    
+    // Try to parse as JSON, fall back to string
+    try {
+      memoryValue = JSON.parse(answers.value);
+    } catch {
+      memoryValue = answers.value;
+    }
+    
+    await mcpWrapper.storeMemory('hive-mind', answers.key, memoryValue, answers.category);
+    
+    console.log(chalk.green(`\n✅ Memory stored successfully!`));
+    console.log(`Key: ${answers.key}`);
+    console.log(`Category: ${answers.category}`);
+    
+  } catch (error) {
+    console.error(chalk.red('Error storing memory:'), error.message);
+  }
+}
+
+/**
+ * Show memory statistics
+ */
+async function showMemoryStats() {
+  try {
+    console.log(chalk.blue('\n📊 Memory Statistics\n'));
+    
+    const mcpWrapper = await getMcpWrapper();
+    
+    // Search for all memories with an empty pattern to get everything
+    const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
+    console.log('Debug - searchResult:', JSON.stringify(searchResult, null, 2));
+    
+    // Handle different possible response structures
+    let memories = [];
+    if (searchResult && Array.isArray(searchResult.results)) {
+      memories = searchResult.results;
+    } else if (searchResult && Array.isArray(searchResult)) {
+      memories = searchResult;
+    } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
+      memories = searchResult.data;
+    }
+    
+    if (!memories || memories.length === 0) {
+      console.log(chalk.yellow('No memories found.'));
+      console.log(chalk.gray('Use "Store new memory" to create your first memory.'));
+      return;
+    }
+    
+    // Calculate statistics
+    const stats = {
+      total: memories.length,
+      categories: {},
+      oldestDate: null,
+      newestDate: null,
+      totalSize: 0
+    };
+    
+    memories.forEach(memory => {
+      // Count by category
+      const category = memory.category || memory.type || 'general';
+      stats.categories[category] = (stats.categories[category] || 0) + 1;
+      
+      // Track dates
+      const date = new Date(memory.timestamp || Date.now());
+      if (!stats.oldestDate || date < stats.oldestDate) {
+        stats.oldestDate = date;
+      }
+      if (!stats.newestDate || date > stats.newestDate) {
+        stats.newestDate = date;
+      }
+      
+      // Estimate size
+      stats.totalSize += JSON.stringify(memory).length;
+    });
+    
+    console.log(chalk.cyan('Total memories:'), stats.total);
+    console.log(chalk.cyan('Estimated size:'), `${(stats.totalSize / 1024).toFixed(2)} KB`);
+    console.log(chalk.cyan('Date range:'), 
+      `${stats.oldestDate?.toLocaleDateString()} - ${stats.newestDate?.toLocaleDateString()}`);
+    
+    console.log(chalk.cyan('\nBy category:'));
+    Object.entries(stats.categories).forEach(([category, count]) => {
+      console.log(`  ${category}: ${count}`);
+    });
+    
+  } catch (error) {
+    console.error(chalk.red('Error getting memory stats:'), error.message);
+  }
+}
+
+/**
+ * Clean old memories
+ */
+async function cleanMemories() {
+  try {
+    const { days } = await inquirer.prompt([
+      {
+        type: 'number',
+        name: 'days',
+        message: 'Remove memories older than how many days?',
+        default: 30,
+        validate: input => input > 0
+      }
+    ]);
+    
+    const { confirm } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'confirm',
+        message: `Are you sure you want to delete memories older than ${days} days?`,
+        default: false
+      }
+    ]);
+    
+    if (!confirm) {
+      console.log(chalk.yellow('Operation cancelled.'));
+      return;
+    }
+    
+    const mcpWrapper = await getMcpWrapper();
+    
+    // Get all memories first
+    const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
+    
+    // Handle different possible response structures
+    let memories = [];
+    if (searchResult && Array.isArray(searchResult.results)) {
+      memories = searchResult.results;
+    } else if (searchResult && Array.isArray(searchResult)) {
+      memories = searchResult;
+    } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
+      memories = searchResult.data;
+    }
+    
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    
+    // Filter memories older than cutoff date
+    const oldMemories = memories.filter(memory => {
+      const memoryDate = new Date(memory.timestamp || 0);
+      return memoryDate < cutoffDate;
+    });
+    
+    if (oldMemories.length === 0) {
+      console.log(chalk.yellow('\n🎉 No old memories found to clean.'));
+      return;
+    }
+    
+    console.log(chalk.green(`\n✅ Found ${oldMemories.length} old memories to clean.`));
+    console.log(chalk.gray('Note: Individual memory deletion not yet implemented in MCPWrapper.'));
+    console.log(chalk.gray('Consider implementing batch deletion or memory lifecycle management.'));
+    
+  } catch (error) {
+    console.error(chalk.red('Error cleaning memories:'), error.message);
+  }
+}
+
+/**
+ * Export memory backup
+ */
+async function exportMemoryBackup() {
+  try {
+    const { filename } = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'filename',
+        message: 'Export filename:',
+        default: `hive-mind-memory-backup-${new Date().toISOString().split('T')[0]}.json`
+      }
+    ]);
+    
+    const mcpWrapper = await getMcpWrapper();
+    
+    // Get all memories using search
+    const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
+    
+    // Handle different possible response structures
+    let memories = [];
+    if (searchResult && Array.isArray(searchResult.results)) {
+      memories = searchResult.results;
+    } else if (searchResult && Array.isArray(searchResult)) {
+      memories = searchResult;
+    } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
+      memories = searchResult.data;
+    }
+    
+    const backup = {
+      exportDate: new Date().toISOString(),
+      version: '1.0',
+      totalMemories: memories.length,
+      namespace: 'hive-mind',
+      memories: memories
+    };
+    
+    const fs = await import('fs');
+    fs.writeFileSync(filename, JSON.stringify(backup, null, 2));
+    
+    console.log(chalk.green(`\n✅ Memory backup exported to: ${filename}`));
+    console.log(chalk.cyan(`Exported ${memories.length} memories`));
+    
+  } catch (error) {
+    console.error(chalk.red('Error exporting memory backup:'), error.message);
+  }
+}
+
+/**
+ * Get MCP wrapper instance
+ */
+async function getMcpWrapper() {
+  const { MCPToolWrapper } = await import('./hive-mind/mcp-wrapper.js');
+  return new MCPToolWrapper();
 }
 
 // Export for testing

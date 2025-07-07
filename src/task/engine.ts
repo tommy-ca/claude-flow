@@ -35,7 +35,7 @@ export interface TaskSchedule {
   timezone?: string;
 }
 
-export interface WorkflowTask extends Task {
+export interface WorkflowTask extends Omit<Task, 'dependencies'> {
   dependencies: TaskDependency[];
   resourceRequirements: ResourceRequirement[];
   schedule?: TaskSchedule;

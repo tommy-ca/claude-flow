@@ -6,9 +6,9 @@
 
 import { Command } from 'commander';
 import { CollectiveMemory, MemoryOptimizer } from '../../simple-commands/hive-mind/memory.js';
-import { MemoryMonitor } from '../../../hive-mind/core/MemoryMonitor';
-import { Memory } from '../../../hive-mind/core/Memory';
-import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager';
+import { MemoryMonitor } from '../../../hive-mind/core/MemoryMonitor.js';
+import { Memory } from '../../../hive-mind/core/Memory.js';
+import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager.js';
 import chalk from 'chalk';
 
 export function createOptimizeMemoryCommand(): Command {
@@ -51,7 +51,7 @@ export function createOptimizeMemoryCommand(): Command {
         }
 
       } catch (error) {
-        console.error(chalk.red('❌ Memory optimization failed:'), error.message);
+        console.error(chalk.red('❌ Memory optimization failed:'), (error as Error).message);
         process.exit(1);
       }
     });
@@ -134,7 +134,7 @@ async function analyzeMemoryPerformance(): Promise<void> {
     await memory.shutdown();
 
   } catch (error) {
-    console.error(chalk.red('❌ Analysis failed:'), error.message);
+    console.error(chalk.red('❌ Analysis failed:'), (error as Error).message);
   }
 }
 
@@ -217,7 +217,7 @@ async function runMemoryOptimization(options: any): Promise<void> {
     await memory.shutdown();
 
   } catch (error) {
-    console.error(chalk.red('❌ Optimization failed:'), error.message);
+    console.error(chalk.red('❌ Optimization failed:'), (error as Error).message);
   }
 }
 
@@ -281,7 +281,7 @@ async function startMemoryMonitoring(): Promise<void> {
     console.log(chalk.gray('Real-time metrics will appear below...\n'));
 
   } catch (error) {
-    console.error(chalk.red('❌ Monitoring startup failed:'), error.message);
+    console.error(chalk.red('❌ Monitoring startup failed:'), (error as Error).message);
   }
 }
 
@@ -376,7 +376,7 @@ async function generateMemoryReport(): Promise<void> {
     await memory.shutdown();
 
   } catch (error) {
-    console.error(chalk.red('❌ Report generation failed:'), error.message);
+    console.error(chalk.red('❌ Report generation failed:'), (error as Error).message);
   }
 }
 
@@ -410,7 +410,7 @@ async function performMemoryCleanup(): Promise<void> {
     await memory.shutdown();
 
   } catch (error) {
-    console.error(chalk.red('❌ Cleanup failed:'), error.message);
+    console.error(chalk.red('❌ Cleanup failed:'), (error as Error).message);
   }
 }
 
@@ -440,7 +440,7 @@ async function showMemoryOverview(): Promise<void> {
  */
 
 function getStatusBadge(status: string): string {
-  const colors = {
+  const colors: Record<string, string> = {
     'excellent': 'green',
     'good': 'cyan',
     'fair': 'yellow',
@@ -448,7 +448,7 @@ function getStatusBadge(status: string): string {
     'critical': 'red'
   };
   const color = colors[status] || 'gray';
-  return chalk[color].bold(status.toUpperCase());
+  return (chalk as any)[color].bold(status.toUpperCase());
 }
 
 function formatMetric(value: number, unit: string, threshold: number, inverse = false): string {
@@ -458,7 +458,7 @@ function formatMetric(value: number, unit: string, threshold: number, inverse = 
 }
 
 function getTrendIndicator(trend: string): string {
-  const indicators = {
+  const indicators: Record<string, string> = {
     'improving': chalk.green('📈 Improving'),
     'stable': chalk.blue('➡️ Stable'),
     'degrading': chalk.red('📉 Degrading'),

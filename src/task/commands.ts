@@ -1,6 +1,7 @@
 // Task command creators
+import type { TaskCommandContext } from './types.js';
 
-export function createTaskCreateCommand(context: any) {
+export function createTaskCreateCommand(context: TaskCommandContext) {
   return {
     name: 'create',
     description: 'Create a new task',
@@ -11,7 +12,7 @@ export function createTaskCreateCommand(context: any) {
   };
 }
 
-export function createTaskListCommand(context: any) {
+export function createTaskListCommand(context: TaskCommandContext) {
   return {
     name: 'list',
     description: 'List all tasks',
@@ -22,7 +23,7 @@ export function createTaskListCommand(context: any) {
   };
 }
 
-export function createTaskStatusCommand(context: any) {
+export function createTaskStatusCommand(context: TaskCommandContext) {
   return {
     name: 'status',
     description: 'Get task status',
@@ -33,7 +34,7 @@ export function createTaskStatusCommand(context: any) {
   };
 }
 
-export function createTaskCancelCommand(context: any) {
+export function createTaskCancelCommand(context: TaskCommandContext) {
   return {
     name: 'cancel',
     description: 'Cancel a task',
@@ -44,7 +45,7 @@ export function createTaskCancelCommand(context: any) {
   };
 }
 
-export function createTaskWorkflowCommand(context: any) {
+export function createTaskWorkflowCommand(context: TaskCommandContext) {
   return {
     name: 'workflow',
     description: 'Manage task workflows',

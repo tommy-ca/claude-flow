@@ -7,8 +7,8 @@
 
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
-import { Memory } from './Memory';
-import { DatabaseManager } from './DatabaseManager';
+import { Memory } from './Memory.js';
+import { DatabaseManager } from './DatabaseManager.js';
 
 interface MemoryAlert {
   level: 'info' | 'warning' | 'critical';

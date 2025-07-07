@@ -5,20 +5,20 @@
  */
 
 // Core classes
-export { HiveMind } from './core/HiveMind';
-export { Queen } from './core/Queen';
-export { Agent } from './core/Agent';
-export { Memory } from './core/Memory';
-export { Communication } from './core/Communication';
-export { DatabaseManager } from './core/DatabaseManager';
+export { HiveMind } from './core/HiveMind.js';
+export { Queen } from './core/Queen.js';
+export { Agent } from './core/Agent.js';
+export { Memory } from './core/Memory.js';
+export { Communication } from './core/Communication.js';
+export { DatabaseManager } from './core/DatabaseManager.js';
 
 // Integration layer
-export { MCPToolWrapper } from './integration/MCPToolWrapper';
-export { SwarmOrchestrator } from './integration/SwarmOrchestrator';
-export { ConsensusEngine } from './integration/ConsensusEngine';
+export { MCPToolWrapper } from './integration/MCPToolWrapper.js';
+export { SwarmOrchestrator } from './integration/SwarmOrchestrator.js';
+export { ConsensusEngine } from './integration/ConsensusEngine.js';
 
 // Types
-export * from './types';
+export * from './types.js';
 
 // Default export
-export { HiveMind as default } from './core/HiveMind';
+export { HiveMind as default } from './core/HiveMind.js';

@@ -24,6 +24,27 @@ export class ClaudeCodeWebServer {
     this.isRunning = false;
   }
 
+  async createAPIRoutes() {
+    const express = await import('express');
+    const router = express.Router();
+    
+    // Health check endpoint
+    router.get('/health', (req, res) => {
+      res.json({ status: 'ok', uptime: process.uptime() });
+    });
+    
+    // System status endpoint
+    router.get('/status', (req, res) => {
+      res.json({
+        connections: this.connections.size,
+        isRunning: this.isRunning,
+        port: this.port
+      });
+    });
+    
+    return router;
+  }
+  
   /**
    * Start the web server
    */
@@ -34,10 +55,28 @@ export class ClaudeCodeWebServer {
     }
 
     try {
-      // Create HTTP server
-      this.server = createServer((req, res) => {
-        this.handleRequest(req, res);
+      // Create HTTP server with express
+      const express = await import('express');
+      const app = express.default();
+      
+      // Enable CORS
+      app.use((req, res, next) => {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+        res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        next();
       });
+      
+      // Serve static files
+      app.use('/console', express.static(this.uiPath));
+      app.use('/api', await this.createAPIRoutes());
+      
+      // Default route redirects to console
+      app.get('/', (req, res) => {
+        res.redirect('/console');
+      });
+      
+      this.server = createServer(app);
 
       // Create WebSocket server
       this.wss = new WebSocketServer({ 

@@ -3,7 +3,8 @@
  * Specialized agents for the Hive Mind swarm system
  */
 
-import { BaseAgent, AgentCapability } from './base-agent.js';
+import { BaseAgent } from './base-agent.js';
+import type { AgentCapabilities, AgentConfig, TaskDefinition } from '../../swarm/types.js';
 
 export interface HiveAgentConfig {
   type: 'queen' | 'worker' | 'scout' | 'guardian' | 'architect';
@@ -16,17 +17,76 @@ export interface HiveAgentConfig {
  * Queen Agent - Orchestrator and decision maker
  */
 export class QueenAgent extends BaseAgent {
-  constructor(name: string) {
-    super(name, 'coordinator', [
-      AgentCapability.Coordination,
-      AgentCapability.Planning,
-      AgentCapability.Communication,
-      AgentCapability.DecisionMaking
-    ]);
+  constructor(
+    id: string,
+    config: AgentConfig,
+    environment: any,
+    logger: any,
+    eventBus: any,
+    memory: any
+  ) {
+    super(id, 'coordinator', config, environment, logger, eventBus, memory);
+  }
+
+  protected getDefaultCapabilities(): AgentCapabilities {
+    return {
+      // Core capabilities
+      codeGeneration: false,
+      codeReview: true,
+      testing: false,
+      documentation: true,
+      research: true,
+      analysis: true,
+      
+      // Communication capabilities
+      webSearch: true,
+      apiIntegration: true,
+      fileSystem: true,
+      terminalAccess: false,
+      
+      // Specialized capabilities
+      languages: ['javascript', 'typescript'],
+      frameworks: ['node.js'],
+      domains: ['orchestration', 'coordination'],
+      tools: ['consensus', 'delegation'],
+      
+      // Resource limits
+      maxConcurrentTasks: 5,
+      maxMemoryUsage: 512,
+      maxExecutionTime: 300000,
+      
+      // Performance characteristics
+      reliability: 0.95,
+      speed: 0.8,
+      quality: 0.9
+    };
+  }
+
+  protected getDefaultConfig(): Partial<AgentConfig> {
+    return {
+      autonomyLevel: 0.8,
+      learningEnabled: true,
+      adaptationEnabled: true,
+      maxTasksPerHour: 20,
+      maxConcurrentTasks: 5,
+      timeoutThreshold: 30000,
+      reportingInterval: 5000,
+      heartbeatInterval: 10000,
+      permissions: ['orchestrate', 'delegate', 'consensus']
+    };
+  }
+
+  public async executeTask(task: TaskDefinition): Promise<any> {
+    // Queen agent execution logic
+    return {
+      result: 'orchestrated',
+      taskId: task.id,
+      timestamp: new Date().toISOString()
+    };
   }
 
   getSystemPrompt(): string {
-    return `You are ${this.name}, a Queen agent in the Hive Mind swarm.
+    return `You are ${this.id}, a Queen agent in the Hive Mind swarm.
 
 ROLE: Orchestrator and Decision Maker
 - Coordinate all swarm activities
@@ -69,18 +129,81 @@ COMMUNICATION STYLE:
  * Worker Agent - Implementation and execution
  */
 export class WorkerAgent extends BaseAgent {
-  constructor(name: string, specialization: string = 'general') {
-    super(name, 'coder', [
-      AgentCapability.Coding,
-      AgentCapability.Testing,
-      AgentCapability.Implementation,
-      AgentCapability.Debugging
-    ]);
-    this.metadata.specialization = specialization;
+  private specialization: string;
+
+  constructor(
+    id: string,
+    config: AgentConfig,
+    environment: any,
+    logger: any,
+    eventBus: any,
+    memory: any,
+    specialization: string = 'general'
+  ) {
+    super(id, 'coder', config, environment, logger, eventBus, memory);
+    this.specialization = specialization;
+  }
+
+  protected getDefaultCapabilities(): AgentCapabilities {
+    return {
+      // Core capabilities
+      codeGeneration: true,
+      codeReview: false,
+      testing: true,
+      documentation: false,
+      research: false,
+      analysis: false,
+      
+      // Communication capabilities
+      webSearch: false,
+      apiIntegration: true,
+      fileSystem: true,
+      terminalAccess: true,
+      
+      // Specialized capabilities
+      languages: ['javascript', 'typescript', 'python'],
+      frameworks: ['node.js', 'react', 'express'],
+      domains: ['backend', 'frontend', 'fullstack'],
+      tools: ['git', 'npm', 'docker'],
+      
+      // Resource limits
+      maxConcurrentTasks: 3,
+      maxMemoryUsage: 1024,
+      maxExecutionTime: 600000,
+      
+      // Performance characteristics
+      reliability: 0.9,
+      speed: 0.9,
+      quality: 0.85
+    };
+  }
+
+  protected getDefaultConfig(): Partial<AgentConfig> {
+    return {
+      autonomyLevel: 0.7,
+      learningEnabled: true,
+      adaptationEnabled: true,
+      maxTasksPerHour: 15,
+      maxConcurrentTasks: 3,
+      timeoutThreshold: 60000,
+      reportingInterval: 10000,
+      heartbeatInterval: 15000,
+      permissions: ['code', 'test', 'debug', 'build']
+    };
+  }
+
+  public async executeTask(task: TaskDefinition): Promise<any> {
+    // Worker agent execution logic
+    return {
+      result: 'implemented',
+      taskId: task.id,
+      specialization: this.specialization,
+      timestamp: new Date().toISOString()
+    };
   }
 
   getSystemPrompt(): string {
-    return `You are ${this.name}, a Worker agent in the Hive Mind swarm.
+    return `You are ${this.id}, a Worker agent in the Hive Mind swarm.
 
 ROLE: Implementation and Execution Specialist
 - Execute assigned tasks efficiently
@@ -88,7 +211,7 @@ ROLE: Implementation and Execution Specialist
 - Collaborate with other workers
 - Report progress and issues
 
-SPECIALIZATION: ${this.metadata.specialization || 'general'}
+SPECIALIZATION: ${this.specialization || 'general'}
 
 RESPONSIBILITIES:
 1. Task implementation
@@ -113,7 +236,7 @@ COMMUNICATION STYLE:
   async estimateEffort(task: any): Promise<number> {
     // Estimate based on task type and specialization match
     const baseEffort = task.complexity || 5;
-    const specializationBonus = task.type === this.metadata.specialization ? 0.8 : 1.0;
+    const specializationBonus = task.type === this.specialization ? 0.8 : 1.0;
     return Math.round(baseEffort * specializationBonus);
   }
 }
@@ -122,17 +245,77 @@ COMMUNICATION STYLE:
  * Scout Agent - Research and exploration
  */
 export class ScoutAgent extends BaseAgent {
-  constructor(name: string) {
-    super(name, 'researcher', [
-      AgentCapability.Research,
-      AgentCapability.Analysis,
-      AgentCapability.WebSearch,
-      AgentCapability.Documentation
-    ]);
+  constructor(
+    id: string,
+    config: AgentConfig,
+    environment: any,
+    logger: any,
+    eventBus: any,
+    memory: any
+  ) {
+    super(id, 'researcher', config, environment, logger, eventBus, memory);
+  }
+
+  protected getDefaultCapabilities(): AgentCapabilities {
+    return {
+      // Core capabilities
+      codeGeneration: false,
+      codeReview: false,
+      testing: false,
+      documentation: true,
+      research: true,
+      analysis: true,
+      
+      // Communication capabilities
+      webSearch: true,
+      apiIntegration: true,
+      fileSystem: false,
+      terminalAccess: false,
+      
+      // Specialized capabilities
+      languages: [],
+      frameworks: [],
+      domains: ['research', 'analysis', 'discovery'],
+      tools: ['web-search', 'data-analysis'],
+      
+      // Resource limits
+      maxConcurrentTasks: 4,
+      maxMemoryUsage: 768,
+      maxExecutionTime: 300000,
+      
+      // Performance characteristics
+      reliability: 0.85,
+      speed: 0.95,
+      quality: 0.9
+    };
+  }
+
+  protected getDefaultConfig(): Partial<AgentConfig> {
+    return {
+      autonomyLevel: 0.9,
+      learningEnabled: true,
+      adaptationEnabled: true,
+      maxTasksPerHour: 25,
+      maxConcurrentTasks: 4,
+      timeoutThreshold: 45000,
+      reportingInterval: 8000,
+      heartbeatInterval: 12000,
+      permissions: ['research', 'analyze', 'web-search']
+    };
+  }
+
+  public async executeTask(task: TaskDefinition): Promise<any> {
+    // Scout agent execution logic
+    return {
+      result: 'researched',
+      taskId: task.id,
+      findings: [],
+      timestamp: new Date().toISOString()
+    };
   }
 
   getSystemPrompt(): string {
-    return `You are ${this.name}, a Scout agent in the Hive Mind swarm.
+    return `You are ${this.id}, a Scout agent in the Hive Mind swarm.
 
 ROLE: Research and Exploration Specialist
 - Explore new territories and solutions
@@ -174,17 +357,77 @@ COMMUNICATION STYLE:
  * Guardian Agent - Quality and validation
  */
 export class GuardianAgent extends BaseAgent {
-  constructor(name: string) {
-    super(name, 'reviewer', [
-      AgentCapability.Review,
-      AgentCapability.Testing,
-      AgentCapability.Security,
-      AgentCapability.QualityAssurance
-    ]);
+  constructor(
+    id: string,
+    config: AgentConfig,
+    environment: any,
+    logger: any,
+    eventBus: any,
+    memory: any
+  ) {
+    super(id, 'reviewer', config, environment, logger, eventBus, memory);
+  }
+
+  protected getDefaultCapabilities(): AgentCapabilities {
+    return {
+      // Core capabilities
+      codeGeneration: false,
+      codeReview: true,
+      testing: true,
+      documentation: false,
+      research: false,
+      analysis: true,
+      
+      // Communication capabilities
+      webSearch: false,
+      apiIntegration: false,
+      fileSystem: true,
+      terminalAccess: false,
+      
+      // Specialized capabilities
+      languages: ['javascript', 'typescript'],
+      frameworks: ['jest', 'eslint'],
+      domains: ['quality-assurance', 'security', 'review'],
+      tools: ['linting', 'testing', 'security-scan'],
+      
+      // Resource limits
+      maxConcurrentTasks: 2,
+      maxMemoryUsage: 512,
+      maxExecutionTime: 180000,
+      
+      // Performance characteristics
+      reliability: 0.98,
+      speed: 0.7,
+      quality: 0.95
+    };
+  }
+
+  protected getDefaultConfig(): Partial<AgentConfig> {
+    return {
+      autonomyLevel: 0.6,
+      learningEnabled: true,
+      adaptationEnabled: false,
+      maxTasksPerHour: 10,
+      maxConcurrentTasks: 2,
+      timeoutThreshold: 90000,
+      reportingInterval: 15000,
+      heartbeatInterval: 20000,
+      permissions: ['review', 'test', 'validate']
+    };
+  }
+
+  public async executeTask(task: TaskDefinition): Promise<any> {
+    // Guardian agent execution logic
+    return {
+      result: 'reviewed',
+      taskId: task.id,
+      quality: 'high',
+      timestamp: new Date().toISOString()
+    };
   }
 
   getSystemPrompt(): string {
-    return `You are ${this.name}, a Guardian agent in the Hive Mind swarm.
+    return `You are ${this.id}, a Guardian agent in the Hive Mind swarm.
 
 ROLE: Quality Assurance and Protection
 - Ensure code quality and standards
@@ -227,17 +470,77 @@ COMMUNICATION STYLE:
  * Architect Agent - System design and planning
  */
 export class ArchitectAgent extends BaseAgent {
-  constructor(name: string) {
-    super(name, 'architect', [
-      AgentCapability.Architecture,
-      AgentCapability.Planning,
-      AgentCapability.Design,
-      AgentCapability.Documentation
-    ]);
+  constructor(
+    id: string,
+    config: AgentConfig,
+    environment: any,
+    logger: any,
+    eventBus: any,
+    memory: any
+  ) {
+    super(id, 'architect', config, environment, logger, eventBus, memory);
+  }
+
+  protected getDefaultCapabilities(): AgentCapabilities {
+    return {
+      // Core capabilities
+      codeGeneration: false,
+      codeReview: true,
+      testing: false,
+      documentation: true,
+      research: true,
+      analysis: true,
+      
+      // Communication capabilities
+      webSearch: true,
+      apiIntegration: false,
+      fileSystem: true,
+      terminalAccess: false,
+      
+      // Specialized capabilities
+      languages: ['javascript', 'typescript'],
+      frameworks: ['architecture-patterns'],
+      domains: ['system-design', 'architecture', 'planning'],
+      tools: ['design-patterns', 'documentation'],
+      
+      // Resource limits
+      maxConcurrentTasks: 2,
+      maxMemoryUsage: 1024,
+      maxExecutionTime: 240000,
+      
+      // Performance characteristics
+      reliability: 0.92,
+      speed: 0.75,
+      quality: 0.95
+    };
+  }
+
+  protected getDefaultConfig(): Partial<AgentConfig> {
+    return {
+      autonomyLevel: 0.85,
+      learningEnabled: true,
+      adaptationEnabled: true,
+      maxTasksPerHour: 8,
+      maxConcurrentTasks: 2,
+      timeoutThreshold: 120000,
+      reportingInterval: 20000,
+      heartbeatInterval: 25000,
+      permissions: ['design', 'plan', 'architect']
+    };
+  }
+
+  public async executeTask(task: TaskDefinition): Promise<any> {
+    // Architect agent execution logic
+    return {
+      result: 'designed',
+      taskId: task.id,
+      architecture: 'planned',
+      timestamp: new Date().toISOString()
+    };
   }
 
   getSystemPrompt(): string {
-    return `You are ${this.name}, an Architect agent in the Hive Mind swarm.
+    return `You are ${this.id}, an Architect agent in the Hive Mind swarm.
 
 ROLE: System Design and Architecture
 - Design system architecture
@@ -280,22 +583,29 @@ COMMUNICATION STYLE:
  * Factory for creating Hive agents
  */
 export class HiveAgentFactory {
-  static createAgent(config: HiveAgentConfig & { name: string }): BaseAgent {
+  static createAgent(
+    config: HiveAgentConfig & { name: string },
+    agentConfig: AgentConfig,
+    environment: any,
+    logger: any,
+    eventBus: any,
+    memory: any
+  ): BaseAgent {
     switch (config.type) {
       case 'queen':
-        return new QueenAgent(config.name);
+        return new QueenAgent(config.name, agentConfig, environment, logger, eventBus, memory);
       
       case 'worker':
-        return new WorkerAgent(config.name, config.specialization);
+        return new WorkerAgent(config.name, agentConfig, environment, logger, eventBus, memory, config.specialization);
       
       case 'scout':
-        return new ScoutAgent(config.name);
+        return new ScoutAgent(config.name, agentConfig, environment, logger, eventBus, memory);
       
       case 'guardian':
-        return new GuardianAgent(config.name);
+        return new GuardianAgent(config.name, agentConfig, environment, logger, eventBus, memory);
       
       case 'architect':
-        return new ArchitectAgent(config.name);
+        return new ArchitectAgent(config.name, agentConfig, environment, logger, eventBus, memory);
       
       default:
         throw new Error(`Unknown Hive agent type: ${config.type}`);
@@ -305,11 +615,19 @@ export class HiveAgentFactory {
   /**
    * Create a balanced swarm for an objective
    */
-  static createBalancedSwarm(objective: string, maxAgents: number = 8): BaseAgent[] {
+  static createBalancedSwarm(
+    objective: string,
+    maxAgents: number = 8,
+    agentConfig: AgentConfig,
+    environment: any,
+    logger: any,
+    eventBus: any,
+    memory: any
+  ): BaseAgent[] {
     const agents: BaseAgent[] = [];
     
     // Always include a Queen
-    agents.push(new QueenAgent('Queen-Genesis'));
+    agents.push(new QueenAgent('Queen-Genesis', agentConfig, environment, logger, eventBus, memory));
     
     // Determine agent composition based on objective
     const needsDesign = objective.toLowerCase().includes('build') || 
@@ -318,11 +636,11 @@ export class HiveAgentFactory {
                          objective.toLowerCase().includes('analyze');
     
     if (needsDesign && agents.length < maxAgents) {
-      agents.push(new ArchitectAgent('Architect-Prime'));
+      agents.push(new ArchitectAgent('Architect-Prime', agentConfig, environment, logger, eventBus, memory));
     }
     
     if (needsResearch && agents.length < maxAgents) {
-      agents.push(new ScoutAgent('Scout-Alpha'));
+      agents.push(new ScoutAgent('Scout-Alpha', agentConfig, environment, logger, eventBus, memory));
     }
     
     // Add workers based on remaining slots
@@ -330,12 +648,12 @@ export class HiveAgentFactory {
     for (let i = 0; i < workerCount; i++) {
       const specializations = ['backend', 'frontend', 'database', 'integration'];
       const spec = specializations[i % specializations.length];
-      agents.push(new WorkerAgent(`Worker-${i + 1}`, spec));
+      agents.push(new WorkerAgent(`Worker-${i + 1}`, agentConfig, environment, logger, eventBus, memory, spec));
     }
     
     // Always include a Guardian if space
     if (agents.length < maxAgents) {
-      agents.push(new GuardianAgent('Guardian-Omega'));
+      agents.push(new GuardianAgent('Guardian-Omega', agentConfig, environment, logger, eventBus, memory));
     }
     
     return agents;

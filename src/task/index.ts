@@ -25,9 +25,12 @@ export {
   createTaskListCommand,
   createTaskStatusCommand,
   createTaskCancelCommand,
-  createTaskWorkflowCommand,
-  type TaskCommandContext
+  createTaskWorkflowCommand
 } from './commands.js';
+
+export {
+  type TaskCommandContext
+} from './types.js';
 
 export {
   TaskCoordinator,
@@ -68,6 +71,7 @@ export async function initializeTaskManagement(
 
   const commandContext: TaskCommandContext = {
     taskEngine,
+    taskCoordinator,
     memoryManager: config.memoryManager,
     logger: config.logger
   };
@@ -107,7 +111,8 @@ export async function createTaskTodos(
 
   const context: CoordinationContext = {
     sessionId: `session-${Date.now()}`,
-    coordinationMode: options.batchOptimized ? 'distributed' : 'centralized'
+    coordinationMode: options.batchOptimized ? 'distributed' : 'centralized',
+    agents: []
   };
 
   return await coordinator.createTaskTodos(objective, context, options);
@@ -133,7 +138,8 @@ export async function launchParallelAgents(
 
   const context: CoordinationContext = {
     sessionId: `session-${Date.now()}`,
-    coordinationMode: 'distributed'
+    coordinationMode: 'distributed',
+    agents: []
   };
 
   return await coordinator.launchParallelAgents(tasks, context);
@@ -370,8 +376,6 @@ claude-flow task workflow visualize workflow-123 \\
 };
 
 export default {
-  TaskEngine,
-  TaskCoordinator,
   initializeTaskManagement,
   createTaskTodos,
   launchParallelAgents,

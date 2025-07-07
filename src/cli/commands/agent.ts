@@ -31,8 +31,8 @@ async function initializeAgentManager(): Promise<AgentManager> {
   const eventBus = EventBus.getInstance();
   const memorySystem = new DistributedMemorySystem(
     {}, // Use default config
-    eventBus,
-    logger
+    logger,
+    eventBus
   );
   
   await memorySystem.initialize();

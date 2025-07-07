@@ -9,9 +9,9 @@
 import { Command } from 'commander';
 import chalk from 'chalk';
 import Table from 'cli-table3';
-import { HiveMind } from '../../../hive-mind/core/HiveMind';
-import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter';
-import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager';
+import { HiveMind } from '../../../hive-mind/core/HiveMind.js';
+import { formatSuccess, formatError, formatInfo, formatWarning } from '../../formatter.js';
+import { DatabaseManager } from '../../../hive-mind/core/DatabaseManager.js';
 
 export const statusCommand = new Command('status')
   .description('Display Hive Mind swarm status and metrics')
@@ -170,7 +170,7 @@ export const statusCommand = new Command('status')
       
     } catch (error) {
       console.error(formatError('Failed to get swarm status'));
-      console.error(formatError(error.message));
+      console.error(formatError((error as Error).message));
       process.exit(1);
     }
   });
@@ -181,7 +181,7 @@ async function getActiveSwarmId(): Promise<string | null> {
 }
 
 function getStatusEmoji(health: string): string {
-  const emojis = {
+  const emojis: Record<string, string> = {
     healthy: '🟢',
     degraded: '🟡',
     critical: '🔴',
@@ -191,7 +191,7 @@ function getStatusEmoji(health: string): string {
 }
 
 function getAgentStatusBadge(status: string): string {
-  const badges = {
+  const badges: Record<string, string> = {
     active: chalk.green('● Active'),
     idle: chalk.yellow('● Idle'),
     busy: chalk.blue('● Busy'),
@@ -201,7 +201,7 @@ function getAgentStatusBadge(status: string): string {
 }
 
 function getTaskStatusBadge(status: string): string {
-  const badges = {
+  const badges: Record<string, string> = {
     pending: chalk.gray('⏳ Pending'),
     assigned: chalk.yellow('🔄 Assigned'),
     in_progress: chalk.blue('▶️  In Progress'),

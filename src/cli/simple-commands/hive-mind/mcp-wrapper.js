@@ -68,6 +68,50 @@ export class MCPToolWrapper {
     this.toolStats = new Map();
     this.parallelQueue = [];
     this.executing = false;
+    
+    // Initialize real memory storage
+    this.initializeMemoryStorage();
+  }
+  
+  /**
+   * Initialize real memory storage using SQLite
+   */
+  async initializeMemoryStorage() {
+    try {
+      const Database = (await import('better-sqlite3')).default;
+      const path = await import('path');
+      const fs = await import('fs');
+      
+      // Create .hive-mind directory if it doesn't exist
+      const hiveMindDir = path.join(process.cwd(), '.hive-mind');
+      if (!fs.existsSync(hiveMindDir)) {
+        fs.mkdirSync(hiveMindDir, { recursive: true });
+      }
+      
+      // Initialize SQLite database
+      const dbPath = path.join(hiveMindDir, 'memory.db');
+      this.memoryDb = new Database(dbPath);
+      
+      // Create memories table
+      this.memoryDb.exec(`
+        CREATE TABLE IF NOT EXISTS memories (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          namespace TEXT NOT NULL,
+          key TEXT NOT NULL,
+          value TEXT NOT NULL,
+          type TEXT DEFAULT 'knowledge',
+          timestamp INTEGER NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(namespace, key)
+        )
+      `);
+      
+      console.log('Real memory storage initialized with SQLite');
+    } catch (error) {
+      console.warn('Failed to initialize SQLite storage, falling back to in-memory:', error.message);
+      this.memoryDb = null;
+      this.memoryStore = new Map(); // Fallback to in-memory storage
+    }
   }
   
   /**

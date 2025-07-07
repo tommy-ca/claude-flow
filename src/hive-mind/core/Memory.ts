@@ -7,15 +7,15 @@
 
 import { EventEmitter } from 'events';
 import { performance } from 'perf_hooks';
-import { DatabaseManager } from './DatabaseManager';
-import { MCPToolWrapper } from '../integration/MCPToolWrapper';
+import { DatabaseManager } from './DatabaseManager.js';
+import { MCPToolWrapper } from '../integration/MCPToolWrapper.js';
 import {
   MemoryEntry,
   MemoryNamespace,
   MemoryStats,
   MemorySearchOptions,
   MemoryPattern
-} from '../types';
+} from '../types.js';
 
 /**
  * High-performance LRU Cache with memory management

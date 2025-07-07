@@ -7,8 +7,8 @@
 
 import { EventEmitter } from 'events';
 import { v4 as uuidv4 } from 'uuid';
-import { DatabaseManager } from './DatabaseManager';
-import { MCPToolWrapper } from '../integration/MCPToolWrapper';
+import { DatabaseManager } from './DatabaseManager.js';
+import { MCPToolWrapper } from '../integration/MCPToolWrapper.js';
 import {
   AgentType,
   AgentStatus,
@@ -17,7 +17,7 @@ import {
   Message,
   AgentConfig,
   ExecutionResult
-} from '../types';
+} from '../types.js';
 
 export class Agent extends EventEmitter {
   public readonly id: string;
