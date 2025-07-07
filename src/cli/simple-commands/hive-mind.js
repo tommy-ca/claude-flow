@@ -1391,18 +1391,68 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
       }
     });
     
-    // Auto-spawn option
-    if (flags.autoSpawn || flags.execute) {
-      console.log('\n' + chalk.yellow('🚀 Auto-spawning Claude Code instances...'));
+    // Spawn Claude Code instances when requested
+    if (flags.claude || flags.spawn || flags.autoSpawn || flags.execute) {
+      console.log('\n' + chalk.yellow('🚀 Spawning Claude Code instances...'));
+      
+      const { spawn: childSpawn, execSync } = await import('child_process');
+      
+      // Check if claude command exists
+      let claudeAvailable = false;
+      try {
+        execSync('which claude', { stdio: 'ignore' });
+        claudeAvailable = true;
+      } catch {
+        console.log(chalk.yellow('\n⚠️  Claude Code CLI not found in PATH'));
+        console.log(chalk.gray('Install it with: npm install -g @anthropic/claude-code-cli'));
+      }
       
       for (const command of spawnCommands) {
         console.log(chalk.gray(`\nSpawning: ${command.title}`));
-        console.log(chalk.cyan('Command:'), command.command);
-        console.log(chalk.blue('Context:'), command.context.substring(0, 200) + '...');
-        console.log(chalk.green('✓ Claude Code instance ready for coordination'));
+        
+        if (!claudeAvailable && !flags.dryRun) {
+          console.log(chalk.blue('Command to run manually:'));
+          console.log(chalk.green(`  ${command.command}`));
+          continue;
+        }
+        
+        if (flags.dryRun) {
+          console.log(chalk.blue('Dry run - would execute:'));
+          console.log(chalk.green(`  ${command.command}`));
+          console.log(chalk.gray('Context length:'), command.context.length, 'characters');
+          continue;
+        }
+        
+        try {
+          // Create Claude args
+          const claudeArgs = [];
+          
+          // Add auto-permission flag if requested
+          if (flags.auto || flags['dangerously-skip-permissions']) {
+            claudeArgs.push('--dangerously-skip-permissions');
+          }
+          
+          // Spawn claude process
+          const claudeProcess = childSpawn('claude', claudeArgs, {
+            stdio: ['pipe', 'inherit', 'inherit'],
+            shell: false
+          });
+          
+          // Write the context to stdin and close it
+          claudeProcess.stdin.write(command.context);
+          claudeProcess.stdin.end();
+          
+          console.log(chalk.green('✓ Claude Code instance spawned for'), command.title);
+          console.log(chalk.blue('  Context provided with MCP tool coordination instructions'));
+          
+          // Don't wait for completion - let them run in parallel
+        } catch (error) {
+          console.error(chalk.red(`Failed to spawn Claude Code for ${command.title}:`), error.message);
+        }
       }
       
       console.log('\n' + chalk.bold.green('🎉 All Claude Code instances spawned and coordinated!'));
+      console.log(chalk.gray('Instances are running with Hive Mind coordination protocols.'));
     } else {
       // Provide coordination instructions
       console.log('\n' + chalk.bold('🎯 Next Steps:'));

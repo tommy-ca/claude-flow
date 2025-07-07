@@ -71,8 +71,10 @@ class CLI {
   constructor(private name: string, private description: string) {}
 
   command(cmd: Command): this {
-    this.commands.set(cmd.name, cmd);
-    if (cmd.aliases) {
+    // Handle both our Command interface and Commander.js Command objects
+    const cmdName = typeof cmd.name === 'function' ? cmd.name() : cmd.name;
+    this.commands.set(cmdName, cmd);
+    if (cmd.aliases && typeof cmd.aliases[Symbol.iterator] === 'function') {
       for (const alias of cmd.aliases) {
         this.commands.set(alias, cmd);
       }
@@ -253,7 +255,8 @@ Created by rUv - Built with ❤️ for the Claude community
   private formatCommands(): string {
     const commands = Array.from(new Set(this.commands.values()));
     return commands
-      .map(cmd => `  ${cmd.name.padEnd(20)} ${cmd.description}`)
+      .filter(cmd => cmd && cmd.name) // Filter out invalid commands
+      .map(cmd => `  ${String(cmd.name).padEnd(20)} ${cmd.description || ''}`)
       .join("\n");
   }
 

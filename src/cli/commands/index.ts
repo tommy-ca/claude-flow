@@ -1519,9 +1519,16 @@ Now, please proceed with the task: ${task}`;
       {
         name: "strategy",
         short: "s",
-        description: "Orchestration strategy (auto, research, development, analysis)",
+        description: "Orchestration strategy (auto, research, development, analysis, testing, optimization, maintenance)",
         type: "string",
         default: "auto",
+      },
+      {
+        name: "mode",
+        short: "m",
+        description: "Coordination mode (centralized, distributed, hierarchical, mesh, hybrid)",
+        type: "string",
+        default: "centralized",
       },
       {
         name: "max-agents",
@@ -1598,6 +1605,16 @@ Now, please proceed with the task: ${task}`;
       {
         name: "ui",
         description: "Use blessed terminal UI (avoids TTY issues)",
+        type: "boolean",
+      },
+      {
+        name: "claude",
+        description: "Launch Claude Code with swarm coordination prompt",
+        type: "boolean",
+      },
+      {
+        name: "executor",
+        description: "Use built-in executor instead of Claude Code",
         type: "boolean",
       },
     ],

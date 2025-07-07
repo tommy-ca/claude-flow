@@ -9,6 +9,11 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs/promises';
 import { EventEmitter } from 'events';
+import { fileURLToPath } from 'url';
+
+// ES module compatibility - define __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class DatabaseManager extends EventEmitter {
   private static instance: DatabaseManager;

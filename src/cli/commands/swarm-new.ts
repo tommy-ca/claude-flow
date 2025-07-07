@@ -11,6 +11,7 @@ import { generateId } from '../../utils/helpers.js';
 import { success, error, warning, info } from "../cli-core.js";
 import type { CommandContext } from "../cli-core.js";
 import type { SwarmStrategy, SwarmMode, AgentType } from '../../swarm/types.js';
+import { spawn, execSync } from 'child_process';
 
 export async function swarmAction(ctx: CommandContext) {
   // First check if help is requested
@@ -39,6 +40,12 @@ export async function swarmAction(ctx: CommandContext) {
   // If UI mode is requested, launch the UI
   if (options.ui) {
     await launchSwarmUI(objective, options);
+    return;
+  }
+  
+  // If claude flag is set (or not executor flag), launch Claude Code with swarm prompt
+  if (options.claude || !options.executor) {
+    await launchClaudeCodeWithSwarm(objective, options);
     return;
   }
   
@@ -440,7 +447,11 @@ function parseSwarmOptions(flags: any) {
     
     // UI and debugging
     ui: flags.ui || false,
-    dryRun: flags.dryRun || flags['dry-run'] || flags.d || false
+    dryRun: flags.dryRun || flags['dry-run'] || flags.d || false,
+    
+    // Claude Code options
+    claude: flags.claude || false,
+    executor: flags.executor || false
   };
 }
 
