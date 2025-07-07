@@ -38,6 +38,19 @@ export interface DecompositionResult {
   recommendedStrategy: string;
   complexity: number;
   batchGroups: TaskBatch[];
+  // Additional properties for caching and memory
+  timestamp: Date;
+  ttl: number;
+  accessCount: number;
+  lastAccessed: Date;
+  data: any;
+  // Resource requirements
+  resourceRequirements?: {
+    memory?: number;
+    cpu?: number;
+    network?: string;
+    storage?: string;
+  };
 }
 
 export interface TaskBatch {

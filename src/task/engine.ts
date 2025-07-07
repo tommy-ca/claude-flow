@@ -6,6 +6,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 
 import { EventEmitter } from 'events';
 import type { Task, TaskStatus, AgentProfile, Resource } from '../utils/types.js';
+import type { TaskMetadata } from './types.js';
 import { generateId } from '../utils/helpers.js';
 
 export interface TaskDependency {
@@ -35,7 +36,7 @@ export interface TaskSchedule {
   timezone?: string;
 }
 
-export interface WorkflowTask extends Omit<Task, 'dependencies'> {
+export interface WorkflowTask extends Omit<Task, 'dependencies' | 'metadata'> {
   dependencies: TaskDependency[];
   resourceRequirements: ResourceRequirement[];
   schedule?: TaskSchedule;
@@ -52,6 +53,7 @@ export interface WorkflowTask extends Omit<Task, 'dependencies'> {
   checkpoints: TaskCheckpoint[];
   rollbackStrategy?: 'previous-checkpoint' | 'initial-state' | 'custom';
   customRollbackHandler?: string;
+  metadata: TaskMetadata;
 }
 
 export interface TaskCheckpoint {
@@ -338,7 +340,11 @@ export class TaskEngine extends EventEmitter {
 
     // Update task status
     task.status = 'cancelled';
-    task.metadata = { ...task.metadata, cancellationReason: reason, cancelledAt: new Date() };
+    task.metadata = { 
+      ...task.metadata, 
+      cancellationReason: reason, 
+      cancelledAt: new Date() 
+    };
 
     // Update memory
     if (this.memoryManager) {
@@ -675,14 +681,19 @@ export class TaskEngine extends EventEmitter {
     if (!task) return;
 
     // Implement retry logic based on retryPolicy
-    if (task.retryPolicy && (task.metadata?.retryCount || 0) < task.retryPolicy.maxAttempts) {
-      task.metadata = { ...task.metadata, retryCount: (task.metadata?.retryCount || 0) + 1 };
+    if (task.retryPolicy && (task.metadata.retryCount || 0) < task.retryPolicy.maxAttempts) {
+      const currentRetryCount = task.metadata.retryCount || 0;
+      task.metadata = { 
+        ...task.metadata, 
+        retryCount: currentRetryCount + 1,
+        lastRetryAt: new Date()
+      };
       task.status = 'pending';
       
       // Schedule retry with backoff
       setTimeout(() => {
         this.scheduleTask(task);
-      }, task.retryPolicy!.backoffMs * Math.pow(task.retryPolicy!.backoffMultiplier, task.metadata.retryCount - 1));
+      }, task.retryPolicy!.backoffMs * Math.pow(task.retryPolicy!.backoffMultiplier, currentRetryCount));
     }
   }
 

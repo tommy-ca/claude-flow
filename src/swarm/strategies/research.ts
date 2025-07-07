@@ -130,12 +130,7 @@ export class ResearchStrategy extends BaseStrategy {
     });
   }
 
-  async decomposeObjective(objective: SwarmObjective): Promise<{
-    tasks: TaskDefinition[];
-    dependencies: Map<string, string[]>;
-    estimatedDuration: number;
-    resourceRequirements: any;
-  }> {
+  async decomposeObjective(objective: SwarmObjective): Promise<DecompositionResult> {
     this.logger.info('Decomposing research objective', {
       objectiveId: objective.id,
       description: objective.description
@@ -301,6 +296,14 @@ Ensure the report is well-structured and actionable.`,
       tasks,
       dependencies,
       estimatedDuration: totalDuration,
+      recommendedStrategy: 'research',
+      complexity: this.estimateComplexity(objective.description),
+      batchGroups: this.createTaskBatches(tasks, dependencies),
+      timestamp: new Date(),
+      ttl: 3600000, // 1 hour
+      accessCount: 0,
+      lastAccessed: new Date(),
+      data: { objectiveId: objective.id, description: objective.description },
       resourceRequirements: {
         memory: SWARM_CONSTANTS.DEFAULT_MEMORY_LIMIT * 1.5,
         cpu: SWARM_CONSTANTS.DEFAULT_CPU_LIMIT * 1.2,
@@ -796,6 +799,38 @@ Ensure the report is well-structured and actionable.`,
       (this.metrics.averageResponseTime + duration) / 2;
   }
 
+  private createTaskBatches(tasks: TaskDefinition[], dependencies: Map<string, string[]>): any[] {
+    const batches: any[] = [];
+    const processed = new Set<string>();
+    let batchIndex = 0;
+
+    while (processed.size < tasks.length) {
+      const batchTasks = tasks.filter(task => 
+        !processed.has(task.id.id) && 
+        task.constraints.dependencies.every(dep => processed.has(dep.id))
+      );
+
+      if (batchTasks.length === 0) break; // Prevent infinite loop
+
+      const batch = {
+        id: `research-batch-${batchIndex++}`,
+        tasks: batchTasks,
+        canRunInParallel: batchTasks.length > 1,
+        estimatedDuration: Math.max(...batchTasks.map(t => t.constraints.timeoutAfter || 0)),
+        requiredResources: {
+          agents: batchTasks.length,
+          memory: batchTasks.length * 512, // MB
+          cpu: batchTasks.length * 0.5 // CPU cores
+        }
+      };
+
+      batches.push(batch);
+      batchTasks.forEach(task => processed.add(task.id.id));
+    }
+
+    return batches;
+  }
+
   // Public API for metrics
   getMetrics() {
     return {
@@ -834,5 +869,109 @@ Ensure the report is well-structured and actionable.`,
     }
 
     return refinedObjective;
+  }
+
+  // Implementation of abstract methods from BaseStrategy
+  async selectAgentForTask(task: TaskDefinition, availableAgents: any[]): Promise<string | null> {
+    if (availableAgents.length === 0) return null;
+
+    // Research-specific agent selection logic
+    let bestAgent = null;
+    let bestScore = 0;
+
+    for (const agent of availableAgents) {
+      let score = 0;
+
+      // Check for research capabilities
+      if (agent.capabilities?.research) score += 0.4;
+      if (agent.capabilities?.webSearch) score += 0.3;
+      if (agent.capabilities?.analysis) score += 0.2;
+      
+      // Check for specific research task types
+      if (task.type === 'research' && agent.type === 'researcher') score += 0.3;
+      if (task.type === 'analysis' && agent.type === 'analyst') score += 0.3;
+      if (task.type === 'web-search' && agent.capabilities?.webSearch) score += 0.4;
+
+      // Consider current workload
+      score *= (1 - (agent.workload || 0));
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestAgent = agent;
+      }
+    }
+
+    return bestAgent?.id?.id || null;
+  }
+
+  async optimizeTaskSchedule(tasks: TaskDefinition[], agents: any[]): Promise<any[]> {
+    const allocations: any[] = [];
+
+    // Group tasks by type for optimal allocation
+    const researchTasks = tasks.filter(t => t.type === 'research');
+    const analysisTasks = tasks.filter(t => t.type === 'analysis');
+    const webSearchTasks = tasks.filter(t => t.type === 'web-search');
+    const otherTasks = tasks.filter(t => !['research', 'analysis', 'web-search'].includes(t.type as string));
+
+    for (const agent of agents) {
+      const allocation = {
+        agentId: agent.id?.id || agent.id,
+        tasks: [] as string[],
+        estimatedWorkload: 0,
+        capabilities: this.getAgentCapabilitiesList(agent)
+      };
+
+      // Allocate tasks based on agent capabilities
+      if (agent.type === 'researcher' && researchTasks.length > 0) {
+        const task = researchTasks.shift();
+        if (task) {
+          allocation.tasks.push(task.id.id);
+          allocation.estimatedWorkload += 0.3;
+        }
+      }
+
+      if (agent.type === 'analyst' && analysisTasks.length > 0) {
+        const task = analysisTasks.shift();
+        if (task) {
+          allocation.tasks.push(task.id.id);
+          allocation.estimatedWorkload += 0.3;
+        }
+      }
+
+      if (agent.capabilities?.webSearch && webSearchTasks.length > 0) {
+        const task = webSearchTasks.shift();
+        if (task) {
+          allocation.tasks.push(task.id.id);
+          allocation.estimatedWorkload += 0.2;
+        }
+      }
+
+      // Allocate remaining tasks
+      if (allocation.tasks.length === 0 && otherTasks.length > 0) {
+        const task = otherTasks.shift();
+        if (task) {
+          allocation.tasks.push(task.id.id);
+          allocation.estimatedWorkload += 0.2;
+        }
+      }
+
+      if (allocation.tasks.length > 0) {
+        allocations.push(allocation);
+      }
+    }
+
+    return allocations;
+  }
+
+  private getAgentCapabilitiesList(agent: any): string[] {
+    const caps: string[] = [];
+    if (agent.capabilities) {
+      if (agent.capabilities.research) caps.push('research');
+      if (agent.capabilities.webSearch) caps.push('web-search');
+      if (agent.capabilities.analysis) caps.push('analysis');
+      if (agent.capabilities.codeGeneration) caps.push('code-generation');
+      if (agent.capabilities.documentation) caps.push('documentation');
+    }
+    return caps;
   }
 }
