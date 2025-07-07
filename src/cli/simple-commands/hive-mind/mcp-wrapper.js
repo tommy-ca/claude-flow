@@ -365,7 +365,7 @@ export class MCPToolWrapper {
         status: 'initialized'
       },
       agent_spawn: {
-        agentId: `agent-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        agentId: `agent-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         type: params.type,
         status: 'active'
       },

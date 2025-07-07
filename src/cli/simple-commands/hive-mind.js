@@ -364,17 +364,25 @@ async function spawnSwarm(args, flags) {
   const spinner = ora('Spawning Hive Mind swarm...').start();
   
   try {
-    // Initialize hive mind core
-    const hiveMind = new HiveMindCore({
-      objective,
-      name: flags.name || `hive-${Date.now()}`,
-      queenType: flags.queenType || 'strategic',
-      maxWorkers: flags.maxWorkers || 8,
-      consensusAlgorithm: flags.consensus || 'majority',
-      autoScale: flags.autoScale !== false,
-      encryption: flags.encryption || false
-    });
+    // Initialize hive mind core with error handling
+    let hiveMind;
+    try {
+      spinner.text = 'Initializing Hive Mind Core...';
+      hiveMind = new HiveMindCore({
+        objective,
+        name: flags.name || `hive-${Date.now()}`,
+        queenType: flags.queenType || 'strategic',
+        maxWorkers: flags.maxWorkers || 8,
+        consensusAlgorithm: flags.consensus || 'majority',
+        autoScale: flags.autoScale !== false,
+        encryption: flags.encryption || false
+      });
+    } catch (error) {
+      console.error('HiveMindCore initialization failed:', error);
+      throw new Error(`Failed to initialize HiveMindCore: ${error.message}`);
+    }
     
+    spinner.text = 'Setting up database connection...';
     // Initialize database connection
     const dbDir = path.join(cwd(), '.hive-mind');
     const dbPath = path.join(dbDir, 'hive.db');
@@ -387,11 +395,14 @@ async function spawnSwarm(args, flags) {
     // Check if database file exists and try to create a clean one if needed
     let db;
     try {
+      spinner.text = 'Creating database connection...';
       db = new Database(dbPath);
       // Test the database with a simple query
       db.prepare('SELECT 1').get();
+      spinner.text = 'Database connection established';
     } catch (error) {
       console.warn('Database issue detected, recreating...', error.message);
+      spinner.text = 'Recreating database...';
       // Remove corrupted database
       if (existsSync(dbPath)) {
         try {
@@ -406,7 +417,9 @@ async function spawnSwarm(args, flags) {
     }
     
     // Initialize database schema if not exists
-    db.exec(`
+    spinner.text = 'Creating database schema...';
+    try {
+      db.exec(`
       CREATE TABLE IF NOT EXISTS swarms (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -440,15 +453,26 @@ async function spawnSwarm(args, flags) {
         FOREIGN KEY (agent_id) REFERENCES agents(id)
       );
     `);
+      spinner.text = 'Database schema created successfully';
+    } catch (error) {
+      console.error('Database schema creation failed:', error);
+      throw new Error(`Failed to create database schema: ${error.message}`);
+    }
     
     // Create swarm record with safe ID generation
+    spinner.text = 'Creating swarm record...';
     const timestamp = Date.now();
     const randomPart = Math.random().toString(36).substring(2, 11); // Use substring instead of substr
     const swarmId = `swarm-${timestamp}-${randomPart}`;
-    db.prepare(`
-      INSERT INTO swarms (id, name, objective, queen_type)
-      VALUES (?, ?, ?, ?)
-    `).run(swarmId, hiveMind.config.name, objective, hiveMind.config.queenType);
+    try {
+      db.prepare(`
+        INSERT INTO swarms (id, name, objective, queen_type)
+        VALUES (?, ?, ?, ?)
+      `).run(swarmId, hiveMind.config.name, objective, hiveMind.config.queenType);
+    } catch (error) {
+      console.error('Failed to create swarm record:', error);
+      throw new Error(`Failed to create swarm record: ${error.message}`);
+    }
     
     spinner.text = 'Initializing Queen coordinator...';
     
@@ -565,6 +589,19 @@ async function spawnSwarm(args, flags) {
   } catch (error) {
     spinner.fail('Failed to spawn Hive Mind swarm');
     console.error(chalk.red('Error:'), error.message);
+    
+    // If error contains "sha3", provide specific guidance
+    if (error.message.includes('sha3') || error.message.includes('SHA3')) {
+      console.error('\n🔍 SHA3 Function Error Detected');
+      console.error('This appears to be a SQLite extension or better-sqlite3 configuration issue.');
+      console.error('\nPossible solutions:');
+      console.error('1. Try removing the corrupted database: rm -rf .hive-mind/');
+      console.error('2. Reinstall better-sqlite3: npm reinstall better-sqlite3');
+      console.error('3. Check if any SQLite extensions are conflicting');
+      console.error('\n🚨 Detailed error:');
+      console.error(error.stack || error.message);
+    }
+    
     exit(1);
   }
 }
