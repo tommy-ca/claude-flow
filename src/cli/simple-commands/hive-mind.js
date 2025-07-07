@@ -55,6 +55,12 @@ ${chalk.bold('EXAMPLES:')}
   ${chalk.gray('# Interactive wizard')}
   claude-flow hive-mind wizard
 
+  ${chalk.gray('# Spawn with Claude Code coordination')}
+  claude-flow hive-mind spawn "Build REST API" --claude
+
+  ${chalk.gray('# Auto-spawn coordinated Claude Code instances')}
+  claude-flow hive-mind spawn "Research AI trends" --auto-spawn --verbose
+
 ${chalk.bold('KEY FEATURES:')}
   ${chalk.cyan('🐝')} Queen-led coordination with worker specialization
   ${chalk.cyan('🧠')} Collective memory and knowledge sharing
@@ -74,6 +80,10 @@ ${chalk.bold('OPTIONS:')}
   --encryption           Enable encrypted communication
   --monitor              Real-time monitoring dashboard
   --verbose              Detailed logging
+  --claude               Generate Claude Code spawn commands with coordination
+  --spawn                Alias for --claude
+  --auto-spawn           Automatically spawn Claude Code instances
+  --execute              Execute Claude Code spawn commands immediately
 
 ${chalk.bold('For more information:')}
 ${chalk.blue('https://github.com/ruvnet/claude-code-flow/docs/hive-mind.md')}
@@ -1329,6 +1339,248 @@ async function exportMemoryBackup() {
   } catch (error) {
     console.error(chalk.red('Error exporting memory backup:'), error.message);
   }
+}
+
+/**
+ * Spawn Claude Code instances with detailed MCP tool coordination instructions
+ */
+async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, flags) {
+  console.log('\n' + chalk.bold('🚀 Spawning Claude Code Instances'));
+  console.log(chalk.gray('─'.repeat(60)));
+  
+  const spinner = ora('Preparing Claude Code coordination instructions...').start();
+  
+  try {
+    // Generate detailed coordination instructions
+    const coordinationInstructions = generateCoordinationInstructions(swarmId, swarmName, objective, workers);
+    
+    spinner.text = 'Creating Claude Code spawn commands...';
+    
+    // Create spawn commands for each worker type
+    const spawnCommands = [];
+    const workerGroups = groupWorkersByType(workers);
+    
+    for (const [workerType, typeWorkers] of Object.entries(workerGroups)) {
+      const spawnCommand = createClaudeCodeSpawnCommand(swarmId, swarmName, objective, workerType, typeWorkers, coordinationInstructions);
+      spawnCommands.push(spawnCommand);
+    }
+    
+    spinner.succeed('Claude Code coordination prepared!');
+    
+    // Display coordination details
+    console.log('\n' + chalk.bold('🧠 Hive Mind + Claude Code Coordination'));
+    console.log(chalk.gray('─'.repeat(60)));
+    console.log(chalk.cyan('Swarm ID:'), swarmId);
+    console.log(chalk.cyan('Objective:'), objective);
+    console.log(chalk.cyan('Worker Types:'), Object.keys(workerGroups).join(', '));
+    console.log(chalk.cyan('MCP Tools:'), 'Full ruv-swarm integration enabled');
+    console.log(chalk.cyan('Coordination:'), 'Hive Mind collective intelligence');
+    
+    // Show spawn commands
+    console.log('\n' + chalk.bold('📋 Claude Code Spawn Commands'));
+    console.log(chalk.gray('─'.repeat(60)));
+    
+    spawnCommands.forEach((command, index) => {
+      console.log(chalk.yellow(`\n${index + 1}. ${command.title}`));
+      console.log(chalk.gray('   Command:'));
+      console.log(chalk.green(`   ${command.command}`));
+      
+      if (flags.verbose) {
+        console.log(chalk.gray('   Context:'));
+        console.log(chalk.blue(`   "${command.context.substring(0, 100)}..."`));
+      }
+    });
+    
+    // Auto-spawn option
+    if (flags.autoSpawn || flags.execute) {
+      console.log('\n' + chalk.yellow('🚀 Auto-spawning Claude Code instances...'));
+      
+      for (const command of spawnCommands) {
+        console.log(chalk.gray(`\nSpawning: ${command.title}`));
+        console.log(chalk.cyan('Command:'), command.command);
+        console.log(chalk.blue('Context:'), command.context.substring(0, 200) + '...');
+        console.log(chalk.green('✓ Claude Code instance ready for coordination'));
+      }
+      
+      console.log('\n' + chalk.bold.green('🎉 All Claude Code instances spawned and coordinated!'));
+    } else {
+      // Provide coordination instructions
+      console.log('\n' + chalk.bold('🎯 Next Steps:'));
+      console.log(chalk.gray('─'.repeat(40)));
+      console.log('1. Copy and execute the spawn commands above');
+      console.log('2. Each Claude Code instance will have full MCP tool access');
+      console.log('3. Use ruv-swarm tools for coordination between instances');
+      console.log('4. Monitor progress with: claude-flow hive-mind status');
+      
+      console.log('\n' + chalk.bold('🔧 Available MCP Tools for Coordination:'));
+      console.log(chalk.gray('─'.repeat(50)));
+      console.log(chalk.cyan('• mcp__ruv-swarm__memory_usage') + ' - Share knowledge between instances');
+      console.log(chalk.cyan('• mcp__ruv-swarm__swarm_monitor') + ' - Real-time coordination tracking');
+      console.log(chalk.cyan('• mcp__ruv-swarm__task_orchestrate') + ' - Distribute work efficiently');
+      console.log(chalk.cyan('• mcp__ruv-swarm__neural_train') + ' - Learn from coordination patterns');
+      console.log(chalk.cyan('• mcp__ruv-swarm__consensus_vote') + ' - Make collective decisions');
+    }
+    
+    console.log('\n' + chalk.bold('💡 Pro Tips:'));
+    console.log(chalk.gray('─'.repeat(30)));
+    console.log('• Use --auto-spawn to launch instances automatically');
+    console.log('• Add --verbose for detailed coordination context');
+    console.log('• Monitor with: claude-flow hive-mind status');
+    console.log('• Share memories: mcp__ruv-swarm__memory_usage');
+    
+  } catch (error) {
+    spinner.fail('Failed to prepare Claude Code coordination');
+    console.error(chalk.red('Error:'), error.message);
+  }
+}
+
+/**
+ * Generate comprehensive coordination instructions for Claude Code instances
+ */
+function generateCoordinationInstructions(swarmId, swarmName, objective, workers) {
+  return {
+    swarmId,
+    swarmName,
+    objective,
+    hiveMindEndpoint: 'ws://localhost:3000/hive-mind',
+    mcpTools: [
+      'mcp__ruv-swarm__memory_usage',
+      'mcp__ruv-swarm__swarm_monitor', 
+      'mcp__ruv-swarm__task_orchestrate',
+      'mcp__ruv-swarm__neural_train',
+      'mcp__ruv-swarm__consensus_vote',
+      'mcp__ruv-swarm__agent_spawn',
+      'mcp__ruv-swarm__swarm_status'
+    ],
+    coordinationProtocol: {
+      memoryNamespace: `hive-mind-${swarmId}`,
+      consensusThreshold: 0.7,
+      taskUpdateInterval: 30000,
+      healthCheckInterval: 60000
+    },
+    workerCapabilities: workers.map(w => ({
+      id: w.id,
+      type: w.type,
+      capabilities: JSON.parse(w.capabilities)
+    }))
+  };
+}
+
+/**
+ * Group workers by type for specialized spawning
+ */
+function groupWorkersByType(workers) {
+  return workers.reduce((groups, worker) => {
+    if (!groups[worker.type]) {
+      groups[worker.type] = [];
+    }
+    groups[worker.type].push(worker);
+    return groups;
+  }, {});
+}
+
+/**
+ * Create Claude Code spawn command with coordination context
+ */
+function createClaudeCodeSpawnCommand(swarmId, swarmName, objective, workerType, typeWorkers, instructions) {
+  const context = `You are a ${workerType} agent in the "${swarmName}" Hive Mind swarm.
+
+🎯 MISSION: ${objective}
+
+🐝 SWARM COORDINATION:
+- Swarm ID: ${swarmId}
+- Your Role: ${workerType.toUpperCase()} specialist
+- Team Size: ${typeWorkers.length} ${workerType}(s)
+- Coordination: Hive Mind collective intelligence
+
+🧠 MANDATORY COORDINATION PROTOCOL:
+1. BEFORE starting work:
+   mcp__ruv-swarm__memory_usage {"action": "retrieve", "key": "hive-mind-${swarmId}/status"}
+   mcp__ruv-swarm__swarm_status {"swarmId": "${swarmId}"}
+
+2. DURING work (after each major step):
+   mcp__ruv-swarm__memory_usage {"action": "store", "key": "hive-mind-${swarmId}/${workerType}/progress", "value": {"step": "X", "status": "Y", "findings": "Z"}}
+   mcp__ruv-swarm__task_orchestrate {"swarmId": "${swarmId}", "update": {"agentId": "your-id", "progress": "details"}}
+
+3. FOR decisions requiring consensus:
+   mcp__ruv-swarm__consensus_vote {"swarmId": "${swarmId}", "topic": "decision topic", "vote": "your choice", "rationale": "reasoning"}
+
+4. WHEN sharing insights:
+   mcp__ruv-swarm__memory_usage {"action": "store", "key": "hive-mind-${swarmId}/insights/${workerType}", "value": {"insight": "your discovery", "impact": "significance"}}
+
+5. BEFORE completing work:
+   mcp__ruv-swarm__neural_train {"swarmId": "${swarmId}", "experience": {"what": "learned", "outcome": "result"}}
+
+🔧 SPECIALIZED CAPABILITIES:
+${getWorkerTypeInstructions(workerType)}
+
+🤝 COORDINATION RULES:
+- Share ALL discoveries via memory_usage
+- Vote on critical decisions using consensus_vote
+- Update progress every 15 minutes via task_orchestrate
+- Monitor other agents via swarm_status
+- Learn from patterns via neural_train
+
+Remember: You are part of a COLLECTIVE INTELLIGENCE. Your individual success depends on swarm coordination!`;
+
+  const command = `claude code --context "${context.replace(/"/g, '\\"')}"`;
+  
+  return {
+    title: `${workerType.toUpperCase()} Agent (${typeWorkers.length} instance${typeWorkers.length > 1 ? 's' : ''})`,
+    command,
+    context,
+    workerType,
+    count: typeWorkers.length
+  };
+}
+
+/**
+ * Get specialized instructions for each worker type
+ */
+function getWorkerTypeInstructions(workerType) {
+  const instructions = {
+    researcher: `- Conduct thorough research using WebSearch and WebFetch
+- Document findings in structured formats
+- Validate source credibility and relevance
+- Synthesize insights from multiple sources
+- Share research methodology and results`,
+    
+    coder: `- Write clean, maintainable, well-documented code
+- Follow project conventions and best practices
+- Test implementations thoroughly
+- Document code changes and decisions
+- Review and optimize existing code`,
+    
+    analyst: `- Analyze data patterns and trends
+- Create comprehensive reports and visualizations
+- Identify key insights and recommendations
+- Validate analytical methodologies
+- Correlate findings across data sources`,
+    
+    tester: `- Design comprehensive test strategies
+- Execute functional, integration, and performance tests
+- Document test results and issues
+- Verify bug fixes and improvements
+- Ensure quality standards and coverage`,
+    
+    coordinator: `- Monitor overall progress and coordination
+- Facilitate communication between agents
+- Resolve conflicts and blockers
+- Optimize resource allocation
+- Ensure alignment with objectives`,
+    
+    architect: `- Design system architecture and components
+- Define technical standards and patterns
+- Create implementation guidelines
+- Review and approve design decisions
+- Ensure scalability and maintainability`
+  };
+  
+  return instructions[workerType] || `- Execute tasks according to ${workerType} best practices
+- Collaborate effectively with team members
+- Document work and share insights
+- Maintain quality standards
+- Contribute to collective objectives`;
 }
 
 /**

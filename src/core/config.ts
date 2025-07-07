@@ -7,7 +7,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import { createHash, randomBytes, createCipher, createDecipher } from 'crypto';
+import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'crypto';
 import type { Config } from '../utils/types.js';
 import { deepMerge, safeParseJSON } from '../utils/helpers.js';
 import { ConfigError, ValidationError } from '../utils/errors.js';
@@ -1199,10 +1199,12 @@ export class ConfigManager {
     
     try {
       // Simplified encryption - in production use proper encryption
-      const cipher = createCipher('aes256', this.encryptionKey);
+      const iv = randomBytes(16);
+      const key = createHash('sha256').update(this.encryptionKey).digest();
+      const cipher = createCipheriv('aes-256-cbc', key, iv);
       let encrypted = cipher.update(JSON.stringify(value), 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      return `encrypted:${encrypted}`;
+      return `encrypted:${iv.toString('hex')}:${encrypted}`;
     } catch (error) {
       console.warn('Failed to encrypt value:', (error as Error).message);
       return value;
@@ -1218,8 +1220,12 @@ export class ConfigManager {
     }
     
     try {
-      const encrypted = encryptedValue.replace('encrypted:', '');
-      const decipher = createDecipher('aes256', this.encryptionKey);
+      const parts = encryptedValue.replace('encrypted:', '').split(':');
+      if (parts.length !== 2) return encryptedValue; // Handle old format
+      const iv = Buffer.from(parts[0], 'hex');
+      const encrypted = parts[1];
+      const key = createHash('sha256').update(this.encryptionKey).digest();
+      const decipher = createDecipheriv('aes-256-cbc', key, iv);
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
       return JSON.parse(decrypted);

@@ -64,9 +64,10 @@ For more information, visit: https://github.com/ruvnet/claude-code-flow
     
     if (fs.existsSync(cliPath)) {
       console.log('🚀 Running development CLI...');
-      const child = spawn(nodeBin, ['--loader', 'tsx', cliPath, ...args], {
+      const child = spawn(nodeBin, ['--import', 'tsx', cliPath, ...args], {
         stdio: 'inherit',
-        cwd: __dirname
+        cwd: __dirname,
+        env: { ...process.env, NODE_OPTIONS: '--experimental-specifier-resolution=node' }
       });
       
       child.on('exit', (code) => {
