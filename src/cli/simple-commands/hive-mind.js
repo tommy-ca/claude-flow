@@ -1001,8 +1001,6 @@ async function listMemories() {
     const mcpWrapper = await getMcpWrapper();
     const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
     
-    console.log('Debug - searchResult:', JSON.stringify(searchResult, null, 2));
-    
     // Handle different possible response structures
     let memories = [];
     if (searchResult && Array.isArray(searchResult.results)) {
@@ -1054,7 +1052,17 @@ async function searchMemories() {
     console.log(chalk.blue(`\n🔍 Searching for: "${searchTerm}"\n`));
     
     const mcpWrapper = await getMcpWrapper();
-    const memories = await mcpWrapper.searchMemory('hive-mind', searchTerm);
+    const searchResult = await mcpWrapper.searchMemory('hive-mind', searchTerm);
+    
+    // Handle different possible response structures
+    let memories = [];
+    if (searchResult && Array.isArray(searchResult.results)) {
+      memories = searchResult.results;
+    } else if (searchResult && Array.isArray(searchResult)) {
+      memories = searchResult;
+    } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
+      memories = searchResult.data;
+    }
     
     if (!memories || memories.length === 0) {
       console.log(chalk.yellow('No memories found matching your search.'));
@@ -1140,7 +1148,6 @@ async function showMemoryStats() {
     
     // Search for all memories with an empty pattern to get everything
     const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
-    console.log('Debug - searchResult:', JSON.stringify(searchResult, null, 2));
     
     // Handle different possible response structures
     let memories = [];

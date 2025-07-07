@@ -106,7 +106,7 @@ export class MCPToolWrapper {
         )
       `);
       
-      console.log('Real memory storage initialized with SQLite');
+      // Real memory storage initialized with SQLite
     } catch (error) {
       console.warn('Failed to initialize SQLite storage, falling back to in-memory:', error.message);
       this.memoryDb = null;
@@ -314,27 +314,31 @@ export class MCPToolWrapper {
    * Internal tool execution
    */
   async _executeToolInternal(toolName, params) {
-    return new Promise((resolve, reject) => {
-      const toolCategory = this._getToolCategory(toolName);
-      if (!toolCategory) {
-        reject(new Error(`Unknown MCP tool: ${toolName}`));
-        return;
+    const toolCategory = this._getToolCategory(toolName);
+    if (!toolCategory) {
+      throw new Error(`Unknown MCP tool: ${toolName}`);
+    }
+    
+    // Handle memory operations with real storage
+    if (toolName === 'memory_usage') {
+      if (params.action === 'store') {
+        return await this.storeMemory(params.namespace, params.key, params.value, params.type);
+      } else if (params.action === 'retrieve') {
+        return await this.retrieveMemory(params.namespace, params.key);
       }
-      
-      // Construct the full tool name
-      const fullToolName = `mcp__claude-flow__${toolName}`;
-      
-      // For demonstration, we'll simulate tool execution
-      // In production, this would call the actual MCP tool
-      console.log(`Executing MCP tool: ${fullToolName} with params:`, params);
-      
-      // Simulate async execution
-      setTimeout(() => {
-        // Mock response based on tool type
-        const mockResponse = this._getMockResponse(toolName, params);
-        resolve(mockResponse);
-      }, Math.random() * 1000);
-    });
+    } else if (toolName === 'memory_search') {
+      return await this.searchMemory(params.namespace, params.pattern);
+    }
+    
+    // For other tools, use mock responses
+    console.log(`Executing MCP tool: mcp__claude-flow__${toolName} with params:`, params);
+    
+    // Simulate async execution for non-memory tools
+    await new Promise(resolve => setTimeout(resolve, Math.random() * 500));
+    
+    // Mock response based on tool type
+    const mockResponse = this._getMockResponse(toolName, params);
+    return mockResponse;
   }
   
   /**
@@ -640,46 +644,196 @@ export class MCPToolWrapper {
   }
   
   /**
-   * Store data in collective memory
+   * Store data in collective memory (REAL IMPLEMENTATION)
    */
   async storeMemory(swarmId, key, value, type = 'knowledge') {
-    return await this.executeTool('memory_usage', {
-      action: 'store',
-      namespace: swarmId,
-      key,
-      value: JSON.stringify({ value, type, timestamp: Date.now() })
-    });
+    try {
+      if (!this.memoryDb) {
+        await this.initializeMemoryStorage();
+      }
+      
+      const timestamp = Date.now();
+      const valueStr = typeof value === 'string' ? value : JSON.stringify(value);
+      
+      if (this.memoryDb) {
+        // SQLite storage
+        const stmt = this.memoryDb.prepare(`
+          INSERT OR REPLACE INTO memories (namespace, key, value, type, timestamp)
+          VALUES (?, ?, ?, ?, ?)
+        `);
+        
+        const result = stmt.run(swarmId, key, valueStr, type, timestamp);
+        
+        return {
+          success: true,
+          action: 'store',
+          namespace: swarmId,
+          key,
+          type,
+          timestamp,
+          id: result.lastInsertRowid
+        };
+      } else {
+        // Fallback in-memory storage
+        const memoryKey = `${swarmId}:${key}`;
+        this.memoryStore.set(memoryKey, {
+          namespace: swarmId,
+          key,
+          value: valueStr,
+          type,
+          timestamp
+        });
+        
+        return {
+          success: true,
+          action: 'store',
+          namespace: swarmId,
+          key,
+          type,
+          timestamp
+        };
+      }
+    } catch (error) {
+      console.error('Error storing memory:', error);
+      throw error;
+    }
   }
   
   /**
-   * Retrieve data from collective memory
+   * Retrieve data from collective memory (REAL IMPLEMENTATION)
    */
   async retrieveMemory(swarmId, key) {
-    const result = await this.executeTool('memory_usage', {
-      action: 'retrieve',
-      namespace: swarmId,
-      key
-    });
-    
-    if (result.data) {
-      try {
-        return JSON.parse(result.data);
-      } catch {
-        return result.data;
+    try {
+      if (!this.memoryDb) {
+        await this.initializeMemoryStorage();
       }
+      
+      if (this.memoryDb) {
+        // SQLite retrieval
+        const stmt = this.memoryDb.prepare(`
+          SELECT * FROM memories WHERE namespace = ? AND key = ?
+        `);
+        
+        const row = stmt.get(swarmId, key);
+        if (row) {
+          try {
+            return {
+              ...row,
+              value: JSON.parse(row.value)
+            };
+          } catch {
+            return row;
+          }
+        }
+      } else {
+        // Fallback in-memory retrieval
+        const memoryKey = `${swarmId}:${key}`;
+        const memory = this.memoryStore.get(memoryKey);
+        if (memory) {
+          try {
+            return {
+              ...memory,
+              value: JSON.parse(memory.value)
+            };
+          } catch {
+            return memory;
+          }
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Error retrieving memory:', error);
+      throw error;
     }
-    return null;
   }
   
   /**
-   * Search collective memory
+   * Search collective memory (REAL IMPLEMENTATION)
    */
   async searchMemory(swarmId, pattern) {
-    return await this.executeTool('memory_search', {
-      namespace: swarmId,
-      pattern,
-      limit: 50
-    });
+    try {
+      if (!this.memoryDb) {
+        await this.initializeMemoryStorage();
+      }
+      
+      let results = [];
+      
+      if (this.memoryDb) {
+        // SQLite search
+        let query, params;
+        
+        if (pattern && pattern.trim()) {
+          // Search with pattern
+          query = `
+            SELECT * FROM memories 
+            WHERE namespace = ? AND (key LIKE ? OR value LIKE ? OR type LIKE ?)
+            ORDER BY timestamp DESC
+            LIMIT 50
+          `;
+          const searchPattern = `%${pattern}%`;
+          params = [swarmId, searchPattern, searchPattern, searchPattern];
+        } else {
+          // Get all memories for namespace
+          query = `
+            SELECT * FROM memories 
+            WHERE namespace = ?
+            ORDER BY timestamp DESC
+            LIMIT 50
+          `;
+          params = [swarmId];
+        }
+        
+        const stmt = this.memoryDb.prepare(query);
+        results = stmt.all(...params);
+        
+        // Parse JSON values where possible
+        results = results.map(row => {
+          try {
+            return {
+              ...row,
+              value: JSON.parse(row.value)
+            };
+          } catch {
+            return row;
+          }
+        });
+      } else {
+        // Fallback in-memory search
+        for (const [memKey, memory] of this.memoryStore) {
+          if (memory.namespace === swarmId) {
+            if (!pattern || 
+                memory.key.includes(pattern) || 
+                memory.value.includes(pattern) || 
+                memory.type.includes(pattern)) {
+              try {
+                results.push({
+                  ...memory,
+                  value: JSON.parse(memory.value)
+                });
+              } catch {
+                results.push(memory);
+              }
+            }
+          }
+        }
+        
+        // Sort by timestamp descending
+        results.sort((a, b) => b.timestamp - a.timestamp);
+        results = results.slice(0, 50);
+      }
+      
+      return {
+        success: true,
+        namespace: swarmId,
+        pattern: pattern || '',
+        total: results.length,
+        results: results
+      };
+    } catch (error) {
+      console.error('Error searching memory:', error);
+      throw error;
+    }
   }
   
   /**
