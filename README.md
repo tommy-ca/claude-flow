@@ -3,7 +3,7 @@
 <div align="center">
 
 [![🌟 Star on GitHub](https://img.shields.io/github/stars/ruvnet/claude-code-flow?style=for-the-badge&logo=github&color=gold)](https://github.com/ruvnet/claude-code-flow)
-[![📦 NPX Ready](https://img.shields.io/npm/v/claude-flow?style=for-the-badge&logo=npm&color=blue&label=v2.0.0)](https://www.npmjs.com/package/claude-flow)
+[![📦 NPX Ready](https://img.shields.io/npm/v/claude-flow?style=for-the-badge&logo=npm&color=blue&label=v2.0.0-alpha.3)](https://www.npmjs.com/package/claude-flow)
 [![⚡ Claude Code](https://img.shields.io/badge/Claude%20Code-MCP%20Ready-green?style=for-the-badge&logo=anthropic)](https://github.com/ruvnet/claude-code-flow)
 [![🐝 ruv-swarm](https://img.shields.io/badge/ruv--swarm-87%20Tools-purple?style=for-the-badge&logo=gitswarm)](https://github.com/ruvnet/ruv-FANN)
 [![🧠 Neural](https://img.shields.io/badge/WASM-Neural%20Networks-red?style=for-the-badge&logo=webassembly)](https://github.com/ruvnet/claude-code-flow)
@@ -46,11 +46,30 @@ Instead of promising "AI magic," Claude Flow delivers practical improvements:
 3. **Learning That Sticks**: Your system remembers successful patterns and applies them to new challenges
 4. **Production-Ready Today**: Built with enterprise needs in mind - security, monitoring, and reliability included
 
-> 🚀 **See it in action**: `npx claude-flow@2.0.0 init --claude --webui` - Experience intelligent coordination in your next project!
+> 🚀 **See it in action**: `npx claude-flow@alpha init` - Experience intelligent coordination with automatic MCP setup!
 
 ---
 
-## 🚀 **What's New in v2.0.0**
+## 🚀 **What's New in v2.0.0-alpha.3**
+
+### 🔌 **Automatic MCP Setup (NEW!)**
+- **Smart Detection** - Automatically detects Claude Code CLI installation
+- **Auto-Configuration** - Sets up both claude-flow and ruv-swarm MCP servers
+- **Zero Manual Setup** - No more complex MCP configuration steps
+- **Helpful Guidance** - Shows installation instructions if Claude Code not found
+- **Optional Override** - Use `--skip-mcp` flag to bypass automatic setup
+
+### ⚡ **One-Command Setup**
+```bash
+# Everything you need in one command
+npx claude-flow@alpha init
+
+# Automatically configures:
+# ✅ claude-flow MCP server (swarm orchestration)
+# ✅ ruv-swarm MCP server (enhanced coordination)  
+# ✅ Complete project structure with hooks
+# ✅ Claude Code integration ready
+```
 
 ### 🧠 **Neural Networks That Actually Work**
 - **512KB WASM Module** - Compiled neural networks that run locally with SIMD optimization
@@ -107,35 +126,39 @@ Write permissions for .claude/ directory
 
 ### 🔧 **Claude Code Integration Setup**
 ```bash
-# Step 1: Install Claude Flow v2.0.0
-npm install -g claude-flow@2.0.0
+# NEW: Automatic Setup (Recommended)
+npx claude-flow@alpha init
 
-# Step 2: Initialize with Claude Code integration
-npx claude-flow@2.0.0 init --claude --force
+# The above automatically:
+# ✅ Detects Claude Code CLI
+# ✅ Configures claude-flow MCP server  
+# ✅ Configures ruv-swarm MCP server
+# ✅ Sets up complete project structure
 
-# Step 3: Configure MCP server for Claude Code
-claude mcp add claude-flow npx claude-flow@2.0.0 mcp start --stdio
-
-# Step 4: Verify MCP integration
+# Verify MCP integration
 claude mcp list
-# Should show claude-flow server with 87 tools available
+# Should show:
+# claude-flow: claude-flow mcp start
+# ruv-swarm: npx ruv-swarm mcp start
 ```
 
 ### 🐝 **ruv-swarm Integration Setup**
 ```bash
-# Step 1: Add ruv-swarm MCP server to Claude Code
-claude mcp add ruv-swarm npx ruv-swarm mcp start
+# With alpha.3, ruv-swarm is configured automatically!
+npx claude-flow@alpha init
 
-# Step 2: Initialize swarm with Claude Code coordination
-npx claude-flow@2.0.0 coordination swarm-init --topology mesh --max-agents 8
+# Advanced swarm operations (development mode)
+npx claude-flow@alpha swarm init --topology mesh --max-agents 8
 
-# Step 3: Enable neural pattern learning
-npx claude-flow@2.0.0 neural train --pattern-type coordination --epochs 50
+# Basic swarm commands available in alpha
+npx claude-flow@alpha swarm --help
+npx claude-flow@alpha agent --help
+npx claude-flow@alpha status
 
-# Step 4: Start coordinated development (both methods work)
-npx claude-flow@2.0.0 start --ui     # Primary method
-npx claude-flow@2.0.0 start-ui       # Convenient alias
-# Navigate to http://localhost:3000 for full coordination interface
+# For full WebUI and neural training, use development mode:
+git clone https://github.com/ruvnet/claude-code-flow.git
+cd claude-code-flow && git checkout claude-flow-v2.0.0
+npx claude-flow start --ui  # Full interface at http://localhost:3000
 ```
 
 ---
@@ -226,55 +249,70 @@ npx claude-flow@2.0.0 env-check
 
 ## ⚡ **Quick Start - Revolutionary Setup**
 
-### 🚀 **Method 1: Complete Claude Code Integration (Recommended)**
+### 🚀 **Method 1: Automatic Setup (NEW - Recommended)**
 ```bash
-# Initialize with full Claude Code + ruv-swarm integration
-npx claude-flow@2.0.0 init --claude --webui
+# One command - everything auto-configured!
+npx claude-flow@alpha init
 
-# This creates:
-# ✓ .claude/ directory with complete MCP integration
-# ✓ CLAUDE.md with comprehensive ruv-swarm instructions
-# ✓ 87 MCP tools configured for Claude Code
-# ✓ Modern WebUI with real-time coordination
-# ✓ Neural pattern learning enabled
-# ✓ Cross-session memory persistence
+# This automatically:
+# ✓ Detects Claude Code CLI (if installed)
+# ✓ Configures claude-flow MCP server
+# ✓ Configures ruv-swarm MCP server  
+# ✓ Creates complete .claude/ directory structure
+# ✓ Sets up CLAUDE.md with comprehensive instructions
+# ✓ Enables hooks for automation
+# ✓ Creates local ./claude-flow wrapper
 
-# Start the revolutionary platform (both methods work)
-npx claude-flow@2.0.0 start --ui     # Primary method
-npx claude-flow@2.0.0 start-ui       # Convenient alias
-# Access at: http://localhost:3000
+# Verify MCP integration worked
+claude mcp list
 ```
 
-### 🧠 **Method 2: Neural Swarm Intelligence Setup**
+### 🛠️ **Method 2: Development Mode (Full Features)**
 ```bash
-# Deploy intelligent swarm with neural coordination
-npx claude-flow@2.0.0 coordination swarm-init --topology hierarchical --max-agents 8
+# For advanced features and WebUI
+git clone https://github.com/ruvnet/claude-code-flow.git
+cd claude-code-flow && git checkout claude-flow-v2.0.0
 
-# Spawn specialized coordination agents
-npx claude-flow@2.0.0 coordination agent-spawn --type coordinator --name "LeadArchitect"
-npx claude-flow@2.0.0 coordination agent-spawn --type coder --name "BackendDev"
-npx claude-flow@2.0.0 coordination agent-spawn --type analyst --name "DataAnalyst"
-
-# Orchestrate complex development tasks
-npx claude-flow@2.0.0 coordination task-orchestrate \
-  --task "Build complete REST API with authentication" \
-  --strategy parallel \
-  --share-results
+# Initialize and start full system
+npx claude-flow init
+npx claude-flow start --ui
+# Access WebUI at: http://localhost:3000
 ```
 
-### 🌐 **Method 3: WebUI + Real-Time Coordination**
+### 🧠 **Method 3: Testing Alpha Commands**
 ```bash
-# Start modern web interface with live coordination (both methods work)
-npx claude-flow@2.0.0 start --ui --port 3000    # Primary method
-npx claude-flow@2.0.0 start-ui --port 3000      # Convenient alias
+# After running npx claude-flow@alpha init
 
-# Features available in WebUI:
-# ✓ Real-time terminal emulator
-# ✓ 10 direct SPARC commands
-# ✓ Live agent status monitoring
-# ✓ Neural pattern visualization
-# ✓ Memory management interface
-# ✓ Cross-platform compatibility
+# Test basic commands
+npx claude-flow@alpha --version
+npx claude-flow@alpha --help
+
+# Test swarm functionality (basic in alpha)
+npx claude-flow@alpha swarm --help
+npx claude-flow@alpha agent --help
+npx claude-flow@alpha status
+
+# Use local wrapper (created by init)
+./claude-flow --version
+```
+
+### 🧪 **Alpha Testing Guide**
+After running the init command, check these key features:
+```bash
+# ✅ Files created correctly
+ls -la                    # Should see CLAUDE.md, claude-flow, .claude/
+ls -la .claude/commands/  # Should see multiple command categories
+
+# ✅ MCP servers configured (if Claude Code installed)
+claude mcp list
+# Should show: claude-flow and ruv-swarm servers
+
+# ✅ Help system works
+npx claude-flow@alpha --help
+npx claude-flow@alpha init --help
+
+# ✅ Local wrapper works
+./claude-flow --version
 ```
 
 ---
@@ -544,6 +582,38 @@ npm run benchmark:memory  # Memory system performance
 - **💾 65% Memory Efficiency**: Advanced compression with zero data loss
 - **🔒 Enterprise Security**: Non-root containers, vulnerability scanning, audit trails
 - **🌐 Cross-Platform Support**: Windows, macOS, Linux with Node.js 20+ optimization
+
+---
+
+## 🧪 **Alpha v2.0.0-alpha.3 Status**
+
+### ✅ **What Works in Alpha**
+- **Basic CLI functionality** - Core commands and help system
+- **Automatic MCP setup** - Detects and configures Claude Code integration
+- **Complete project initialization** - All files, directories, and configurations
+- **Cross-platform support** - Unix, Windows, PowerShell wrappers
+- **Help documentation** - Comprehensive command documentation
+- **Local wrapper** - `./claude-flow` executable for project-specific usage
+
+### 🚧 **Development Mode Features**
+For full functionality, use development mode:
+```bash
+git clone https://github.com/ruvnet/claude-code-flow.git
+cd claude-code-flow && git checkout claude-flow-v2.0.0
+npm install && npx claude-flow start --ui
+```
+
+Development mode includes:
+- **Full WebUI** - Browser-based interface at http://localhost:3000
+- **Neural processing** - WASM-based neural networks
+- **Advanced swarm operations** - Complete agent coordination
+- **Real-time monitoring** - Live performance metrics
+- **All 87 MCP tools** - Complete ruv-swarm integration
+
+### 📋 **Feedback & Issues**
+- **GitHub Issues**: https://github.com/ruvnet/claude-code-flow/issues/147
+- **NPM Package**: https://www.npmjs.com/package/claude-flow
+- **Testing**: Report any issues with `npx claude-flow@alpha init`
 
 ---
 

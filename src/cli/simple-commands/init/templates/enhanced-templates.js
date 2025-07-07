@@ -1078,8 +1078,8 @@ if [ -f "$SCRIPT_DIR/package.json" ] && [ -d "$SCRIPT_DIR/node_modules" ]; then
         exit 1
     fi
 else
-    # Production mode - use npx
-    exec npx claude-flow "$@"
+    # Production mode - use npx alpha
+    exec npx claude-flow@alpha "$@"
 fi`;
   } else if (type === 'windows') {
     return `@echo off
@@ -1097,8 +1097,8 @@ if exist "%~dp0package.json" (
         exit /b 1
     )
 ) else (
-    rem Production mode - use npx
-    npx claude-flow %*
+    rem Production mode - use npx alpha
+    npx claude-flow@alpha %*
 )`;
   } else if (type === 'powershell') {
     return `# Claude Flow wrapper script for PowerShell
@@ -1116,8 +1116,8 @@ if (Test-Path "$scriptPath\\package.json") {
         exit 1
     }
 } else {
-    # Production mode - use npx
-    & npx claude-flow $args
+    # Production mode - use npx alpha
+    & npx claude-flow@alpha $args
 }`;
   }
   return '';
