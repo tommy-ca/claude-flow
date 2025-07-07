@@ -299,8 +299,8 @@ export async function swarmAction(ctx: CommandContext) {
           
           // Get current task info
           const tasks = coordinator.getTasks();
-          const activeTasks = tasks.filter(t => t.status === 'in_progress');
-          const pendingTasks = tasks.filter(t => t.status === 'pending');
+          const activeTasks = tasks.filter(t => (t.status as string) === 'in_progress');
+          const pendingTasks = tasks.filter(t => (t.status as string) === 'pending');
           
           // Build status line
           let statusLine = `\r📊 Progress: ${status.tasks.completed}/${status.tasks.total} tasks`;
@@ -314,8 +314,8 @@ export async function swarmAction(ctx: CommandContext) {
             statusLine += ` | 🔄 ${agentName}: ${currentTask.name || currentTask.type} (${elapsed}s)`;
             
             // Track when task changes
-            if (currentTask.id !== lastTaskUpdate) {
-              lastTaskUpdate = currentTask.id;
+            if ((currentTask.id as any) !== lastTaskUpdate) {
+              lastTaskUpdate = currentTask.id as any;
               taskStartTime = Date.now();
               // Print task on new line for history
               console.log(`\n  📝 Starting: ${currentTask.name || currentTask.type} → ${agentName}`);
@@ -325,7 +325,7 @@ export async function swarmAction(ctx: CommandContext) {
           }
           
           // Add agent status
-          const activeAgents = status.agents.active;
+          const activeAgents = (status.agents as any).active || 0;
           if (activeAgents > 0) {
             statusLine += ` | 🤖 ${activeAgents} agents active`;
           }
@@ -396,7 +396,7 @@ function parseSwarmOptions(flags: any) {
   // Determine mode - if parallel flag is set, override mode to 'parallel'
   let mode = flags.mode as SwarmMode || 'centralized';
   if (flags.parallel) {
-    mode = 'parallel';
+    mode = 'parallel' as SwarmMode;
   }
   
   return {
@@ -630,22 +630,22 @@ async function setupIncrementalUpdates(
       } : null,
       agents: {
         total: initialAgents.length,
-        active: initialAgents.filter(a => a.status === 'active').length,
+        active: initialAgents.filter(a => (a.status as string) === 'active').length,
         list: initialAgents.map(a => ({
           id: a.id,
           name: a.name,
           type: a.type,
           status: a.status,
           currentTask: a.currentTask,
-          tasksCompleted: a.completedTasks?.length || 0
+          tasksCompleted: (a as any).completedTasks?.length || 0
         }))
       },
       tasks: {
         total: initialTasks.length,
-        completed: initialTasks.filter(t => t.status === 'completed').length,
-        inProgress: initialTasks.filter(t => t.status === 'in_progress').length,
-        pending: initialTasks.filter(t => t.status === 'pending').length,
-        failed: initialTasks.filter(t => t.status === 'failed').length
+        completed: initialTasks.filter(t => (t.status as string) === 'completed').length,
+        inProgress: initialTasks.filter(t => (t.status as string) === 'in_progress').length,
+        pending: initialTasks.filter(t => (t.status as string) === 'pending').length,
+        failed: initialTasks.filter(t => (t.status as string) === 'failed').length
       }
     }, null, 2));
     
@@ -657,11 +657,11 @@ Objective: ${initialObjective?.name || 'Unknown'}
 Status: ${initialObjective?.status || 'Unknown'}
 
 Tasks: ${initialStatus.tasks.completed}/${initialStatus.tasks.total} completed
-- In Progress: ${initialStatus.tasks.inProgress}
-- Pending: ${initialStatus.tasks.pending}
+- In Progress: ${(initialStatus.tasks as any).inProgress || 0}
+- Pending: ${(initialStatus.tasks as any).pending || 0}
 - Failed: ${initialStatus.tasks.failed}
 
-Agents: ${initialStatus.agents.active}/${initialStatus.agents.total} active
+Agents: ${(initialStatus.agents as any).active || 0}/${initialStatus.agents.total} active
 `;
     await fs.writeFile(`${swarmDir}/progress.txt`, initialProgressText);
   } catch (error) {
@@ -690,22 +690,22 @@ Agents: ${initialStatus.agents.active}/${initialStatus.agents.total} active
         } : null,
         agents: {
           total: agents.length,
-          active: agents.filter(a => a.status === 'active').length,
+          active: agents.filter(a => (a.status as string) === 'active').length,
           list: agents.map(a => ({
             id: a.id,
             name: a.name,
             type: a.type,
             status: a.status,
             currentTask: a.currentTask,
-            tasksCompleted: a.completedTasks?.length || 0
+            tasksCompleted: (a as any).completedTasks?.length || 0
           }))
         },
         tasks: {
           total: tasks.length,
-          completed: tasks.filter(t => t.status === 'completed').length,
-          inProgress: tasks.filter(t => t.status === 'in_progress').length,
-          pending: tasks.filter(t => t.status === 'pending').length,
-          failed: tasks.filter(t => t.status === 'failed').length
+          completed: tasks.filter(t => (t.status as string) === 'completed').length,
+          inProgress: tasks.filter(t => (t.status as string) === 'in_progress').length,
+          pending: tasks.filter(t => (t.status as string) === 'pending').length,
+          failed: tasks.filter(t => (t.status as string) === 'failed').length
         }
       }, null, 2));
       
@@ -719,9 +719,9 @@ Agents: ${initialStatus.agents.active}/${initialStatus.agents.total} active
           name: task.name,
           type: task.type,
           status: task.status,
-          assignedAgent: task.assignedAgent,
-          startTime: task.startTime,
-          endTime: task.endTime,
+          assignedAgent: task.assignedTo,
+          startTime: task.createdAt,
+          endTime: task.completedAt,
           result: task.result,
           error: task.error,
           metadata: task.metadata

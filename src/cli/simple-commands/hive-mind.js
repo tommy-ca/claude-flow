@@ -474,8 +474,17 @@ async function spawnSwarm(args, flags) {
       // TODO: Implement monitoring dashboard
     }
     
+    // Enhanced coordination instructions with MCP tools
     console.log('\n' + chalk.green('✓') + ' Swarm is ready for coordination');
     console.log(chalk.gray('Use "claude-flow hive-mind status" to view swarm activity'));
+    
+    // Offer to spawn Claude Code instances with coordination instructions
+    if (flags.claude || flags.spawn) {
+      await spawnClaudeCodeInstances(swarmId, hiveMind.config.name, objective, workers, flags);
+    } else {
+      console.log('\n' + chalk.blue('💡 Pro Tip:') + ' Add --claude to spawn coordinated Claude Code instances');
+      console.log(chalk.gray('   claude-flow hive-mind spawn "objective" --claude'));
+    }
     
   } catch (error) {
     spinner.fail('Failed to spawn Hive Mind swarm');

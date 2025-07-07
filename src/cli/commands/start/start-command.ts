@@ -6,7 +6,7 @@ import { promises as fs } from 'node:fs';
 
 import { Command } from '@cliffy/command';
 import chalk from 'chalk';
-import { Confirm } from '@cliffy/prompt';
+import inquirer from 'inquirer';
 import { ProcessManager } from './process-manager.js';
 import { ProcessUI } from './process-ui.js';
 import { SystemMonitor } from './system-monitor.js';
@@ -37,10 +37,12 @@ export const startCommand = new Command()
       // Check if already running
       if (!options.force && await isSystemRunning()) {
         console.log(chalk.yellow('⚠ Claude-Flow is already running'));
-        const shouldContinue = await Confirm.prompt({
+        const { shouldContinue } = await inquirer.prompt([{
+          type: 'confirm',
+          name: 'shouldContinue',
           message: 'Stop existing instance and restart?',
           default: false
-        });
+        }]);
         
         if (!shouldContinue) {
           console.log(chalk.gray('Use --force to override or "claude-flow stop" first'));
@@ -61,7 +63,7 @@ export const startCommand = new Command()
       console.log(chalk.blue('Initializing system components...'));
       const initPromise = processManager.initialize(options.config);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Initialization timeout')), options.timeout * 1000)
+        setTimeout(() => reject(new Error('Initialization timeout')), (options.timeout || 30) * 1000)
       );
       
       await Promise.race([initPromise, timeoutPromise]);
@@ -287,7 +289,7 @@ export const startCommand = new Command()
 
 async function isSystemRunning(): Promise<boolean> {
   try {
-    const pidData = await fs.readFile('.claude-flow.pid');
+    const pidData = await fs.readFile('.claude-flow.pid', 'utf-8');
     const data = JSON.parse(pidData);
     
     // Check if process is still running
@@ -304,7 +306,7 @@ async function isSystemRunning(): Promise<boolean> {
 
 async function stopExistingInstance(): Promise<void> {
   try {
-    const pidData = await fs.readFile('.claude-flow.pid');
+    const pidData = await fs.readFile('.claude-flow.pid', 'utf-8');
     const data = JSON.parse(pidData);
     
     console.log(chalk.yellow('Stopping existing instance...'));

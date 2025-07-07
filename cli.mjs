@@ -5,9 +5,13 @@
  * Functional CLI that bypasses TypeScript compilation issues for alpha testing
  */
 
-const { spawn } = require('child_process');
-const path = require('path');
-const fs = require('fs');
+import { spawn } from 'child_process';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Check if we're in a development environment
 const isDev = fs.existsSync(path.join(__dirname, 'src'));

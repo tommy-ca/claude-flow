@@ -429,7 +429,7 @@ export class TaskEngine extends EventEmitter {
     }));
 
     const edges: any[] = [];
-    for (const task of this.tasks.values()) {
+    for (const task of Array.from(this.tasks.values())) {
       for (const dep of task.dependencies) {
         edges.push({
           from: dep.taskId,
@@ -629,7 +629,7 @@ export class TaskEngine extends EventEmitter {
   }
 
   private async releaseTaskResources(taskId: string): Promise<void> {
-    for (const resource of this.resources.values()) {
+    for (const resource of Array.from(this.resources.values())) {
       if (resource.lockedBy === taskId) {
         resource.locked = false;
         resource.lockedBy = undefined;

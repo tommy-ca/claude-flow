@@ -95,7 +95,7 @@ export class ProcessUI {
       case 'h':
       case 'help':
       case '?':
-        this.help();
+        this.showHelp();
         break;
         
       default:

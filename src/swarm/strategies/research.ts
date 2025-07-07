@@ -421,7 +421,7 @@ Ensure the report is well-structured and actionable.`,
     const cacheKey = this.generateCacheKey('web-search', task.description);
     const cached = this.getFromCache(cacheKey);
     if (cached) {
-      this.metrics.cacheHits++;
+      this.researchMetrics.cacheHits++;
       return cached;
     }
 
@@ -442,7 +442,7 @@ Ensure the report is well-structured and actionable.`,
     
     // Cache results
     this.setCache(cacheKey, rankedResults, 3600000); // 1 hour TTL
-    this.metrics.cacheMisses++;
+    this.researchMetrics.cacheMisses++;
 
     return {
       results: rankedResults,
@@ -786,7 +786,7 @@ Ensure the report is well-structured and actionable.`,
 
     const now = new Date();
     if (now.getTime() - entry.timestamp.getTime() > entry.ttl) {
-      this.cache.delete(key);
+      this.researchCache.delete(key);
       return null;
     }
 
@@ -806,19 +806,19 @@ Ensure the report is well-structured and actionable.`,
     });
 
     // Cleanup old entries if cache is too large
-    if (this.cache.size > 1000) {
+    if (this.researchCache.size > 1000) {
       this.cleanupCache();
     }
   }
 
   private cleanupCache(): void {
-    const entries = Array.from(this.cache.entries());
+    const entries = Array.from(this.researchCache.entries());
     entries.sort((a, b) => a[1].lastAccessed.getTime() - b[1].lastAccessed.getTime());
     
     // Remove oldest 20% of entries
     const toRemove = Math.floor(entries.length * 0.2);
     for (let i = 0; i < toRemove; i++) {
-      this.cache.delete(entries[i][0]);
+      this.researchCache.delete(entries[i][0]);
     }
   }
 
@@ -873,9 +873,9 @@ Ensure the report is well-structured and actionable.`,
   }
 
   private updateResearchMetrics(taskType: string, duration: number): void {
-    this.metrics.queriesExecuted++;
-    this.metrics.averageResponseTime = 
-      (this.metrics.averageResponseTime + duration) / 2;
+    this.researchMetrics.queriesExecuted++;
+    this.researchMetrics.averageResponseTime = 
+      (this.researchMetrics.averageResponseTime + duration) / 2;
   }
 
   private createTaskBatches(tasks: TaskDefinition[], dependencies: Map<string, string[]>): any[] {
@@ -911,15 +911,25 @@ Ensure the report is well-structured and actionable.`,
   }
 
   // Public API for metrics
-  getMetrics() {
+  override getMetrics() {
+    const credibilityScoresRecord: Record<string, number> = {};
+    this.researchMetrics.credibilityScores.forEach((score, index) => {
+      credibilityScoresRecord[`result_${index}`] = score;
+    });
+
     return {
       ...this.metrics,
-      cacheHitRate: this.metrics.cacheHits / (this.metrics.cacheHits + this.metrics.cacheMisses),
-      averageCredibilityScore: this.metrics.credibilityScores.length > 0 
-        ? this.metrics.credibilityScores.reduce((a, b) => a + b, 0) / this.metrics.credibilityScores.length 
+      queriesExecuted: this.researchMetrics.queriesExecuted,
+      averageResponseTime: this.researchMetrics.averageResponseTime,
+      cacheHits: this.researchMetrics.cacheHits,
+      cacheMisses: this.researchMetrics.cacheMisses,
+      credibilityScores: credibilityScoresRecord,
+      cacheHitRate: this.researchMetrics.cacheHits / (this.researchMetrics.cacheHits + this.researchMetrics.cacheMisses || 1),
+      averageCredibilityScore: this.researchMetrics.credibilityScores.length > 0 
+        ? this.researchMetrics.credibilityScores.reduce((a, b) => a + b, 0) / this.researchMetrics.credibilityScores.length 
         : 0,
       connectionPoolUtilization: this.connectionPool.active / this.connectionPool.max,
-      cacheSize: this.cache.size
+      cacheSize: this.researchCache.size
     };
   }
 
@@ -969,7 +979,7 @@ Ensure the report is well-structured and actionable.`,
       // Check for specific research task types
       if (task.type === 'research' && agent.type === 'researcher') score += 0.3;
       if (task.type === 'analysis' && agent.type === 'analyst') score += 0.3;
-      if (task.type === 'web-search' && agent.capabilities?.webSearch) score += 0.4;
+      if (task.type === 'research' && agent.capabilities?.webSearch) score += 0.4;
 
       // Consider current workload
       score *= (1 - (agent.workload || 0));
@@ -989,8 +999,7 @@ Ensure the report is well-structured and actionable.`,
     // Group tasks by type for optimal allocation
     const researchTasks = tasks.filter(t => t.type === 'research');
     const analysisTasks = tasks.filter(t => t.type === 'analysis');
-    const webSearchTasks = tasks.filter(t => t.type === 'web-search');
-    const otherTasks = tasks.filter(t => !['research', 'analysis', 'web-search'].includes(t.type as string));
+    const otherTasks = tasks.filter(t => !['research', 'analysis'].includes(t.type as string));
 
     for (const agent of agents) {
       const allocation = {
@@ -1017,13 +1026,7 @@ Ensure the report is well-structured and actionable.`,
         }
       }
 
-      if (agent.capabilities?.webSearch && webSearchTasks.length > 0) {
-        const task = webSearchTasks.shift();
-        if (task) {
-          allocation.tasks.push(task.id.id);
-          allocation.estimatedWorkload += 0.2;
-        }
-      }
+      // Web search tasks are handled as research tasks
 
       // Allocate remaining tasks
       if (allocation.tasks.length === 0 && otherTasks.length > 0) {

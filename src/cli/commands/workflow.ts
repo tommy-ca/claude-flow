@@ -213,7 +213,7 @@ async function listWorkflows(options: any): Promise<void> {
     console.log(chalk.cyan.bold(`Workflows (${workflows.length})`));
     console.log('─'.repeat(60));
 
-    const table = new Table({
+    const table = new Table.default({
       head: ['ID', 'Name', 'Status', 'Progress', 'Started', 'Duration']
     });
 
@@ -671,7 +671,7 @@ function displayWorkflowStatus(execution: WorkflowExecution): void {
   console.log(chalk.cyan.bold('Tasks'));
   console.log('─'.repeat(50));
   
-  const table = new Table({
+  const table = new Table.default({
     head: ['Task', 'Status', 'Duration', 'Agent']
   });
 
