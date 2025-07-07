@@ -376,8 +376,51 @@ async function spawnSwarm(args, flags) {
     });
     
     // Initialize database connection
-    const dbPath = path.join(cwd(), '.hive-mind', 'hive.db');
+    const dbDir = path.join(cwd(), '.hive-mind');
+    const dbPath = path.join(dbDir, 'hive.db');
+    
+    // Ensure .hive-mind directory exists
+    if (!existsSync(dbDir)) {
+      mkdirSync(dbDir, { recursive: true });
+    }
+    
     const db = new Database(dbPath);
+    
+    // Initialize database schema if not exists
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS swarms (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        objective TEXT,
+        queen_type TEXT,
+        status TEXT DEFAULT 'active',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+      
+      CREATE TABLE IF NOT EXISTS agents (
+        id TEXT PRIMARY KEY,
+        swarm_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        type TEXT NOT NULL,
+        role TEXT NOT NULL,
+        status TEXT DEFAULT 'idle',
+        capabilities TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (swarm_id) REFERENCES swarms(id)
+      );
+      
+      CREATE TABLE IF NOT EXISTS tasks (
+        id TEXT PRIMARY KEY,
+        swarm_id TEXT NOT NULL,
+        agent_id TEXT,
+        description TEXT,
+        status TEXT DEFAULT 'pending',
+        result TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (swarm_id) REFERENCES swarms(id),
+        FOREIGN KEY (agent_id) REFERENCES agents(id)
+      );
+    `);
     
     // Create swarm record
     const swarmId = `swarm-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
