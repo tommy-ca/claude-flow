@@ -18,6 +18,7 @@ import { analysisAction } from './simple-commands/analysis.js';
 import { automationAction } from './simple-commands/automation.js';
 import { coordinationAction } from './simple-commands/coordination.js';
 import { hooksAction } from './simple-commands/hooks.js';
+import { hookSafetyCommand } from './simple-commands/hook-safety.js';
 import { hiveMindCommand } from './simple-commands/hive-mind.js';
 import { showUnifiedMetrics, fixTaskAttribution } from './simple-commands/swarm-metrics-integration.js';
 // Note: TypeScript imports commented out for Node.js compatibility
@@ -398,6 +399,38 @@ Hooks commands:
   • session-end: Execute at session termination (cleanup & export)
   
 Enables automated preparation & cleanup, performance tracking, and coordination synchronization.`
+  });
+
+  commandRegistry.set('hook-safety', {
+    handler: hookSafetyCommand,
+    description: '🚨 Critical hook safety system - Prevent infinite loops & financial damage',
+    usage: 'hook-safety <command> [options]',
+    examples: [
+      'hook-safety validate                           # Check for dangerous hook configurations',
+      'hook-safety validate --config ~/.claude/settings.json',
+      'hook-safety status                             # View safety status and context',
+      'hook-safety reset                              # Reset circuit breakers',
+      'hook-safety safe-mode                          # Enable safe mode (skip all hooks)'
+    ],
+    details: `
+🚨 CRITICAL: Stop hooks calling 'claude' commands create INFINITE LOOPS that can:
+  • Bypass API rate limits
+  • Cost thousands of dollars per day  
+  • Make your system unresponsive
+
+Hook Safety commands:
+  • validate: Check Claude Code settings for dangerous patterns
+  • status: Show current safety status and execution context
+  • reset: Reset circuit breakers and execution counters  
+  • safe-mode: Enable/disable safe mode (skips all hooks)
+
+SAFE ALTERNATIVES:
+  • Use PostToolUse hooks instead of Stop hooks
+  • Implement flag-based update patterns
+  • Use 'claude --skip-hooks' for manual updates
+  • Create conditional execution scripts
+
+For more information: https://github.com/ruvnet/claude-flow/issues/166`
   });
 
   commandRegistry.set('hive', {
