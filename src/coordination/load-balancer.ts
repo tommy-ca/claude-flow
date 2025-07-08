@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/error-handler.js';
+import { getErrorMessage, hasAgentLoad, hasAgentTask, hasWorkStealingData } from '../utils/type-guards.js';
 /**
  * Advanced load balancing and work stealing implementation
  */
@@ -153,19 +153,27 @@ export class LoadBalancer extends EventEmitter {
 
   private setupEventHandlers(): void {
     this.eventBus.on('agent:load-update', (data) => {
-      this.updateAgentLoad(data.agentId, data.load);
+      if (hasAgentLoad(data)) {
+        this.updateAgentLoad(data.agentId, data.load);
+      }
     });
 
     this.eventBus.on('task:queued', (data) => {
-      this.updateTaskQueue(data.agentId, data.task, 'add');
+      if (hasAgentTask(data)) {
+        this.updateTaskQueue(data.agentId, data.task, 'add');
+      }
     });
 
     this.eventBus.on('task:started', (data) => {
-      this.updateTaskQueue(data.agentId, data.task, 'remove');
+      if (hasAgentTask(data)) {
+        this.updateTaskQueue(data.agentId, data.task, 'remove');
+      }
     });
 
     this.eventBus.on('workstealing:request', (data) => {
-      this.executeWorkStealing(data.sourceAgent, data.targetAgent, data.taskCount);
+      if (hasWorkStealingData(data)) {
+        this.executeWorkStealing(data.sourceAgent, data.targetAgent, data.taskCount);
+      }
     });
 
     this.eventBus.on('agent:performance-update', (data) => {

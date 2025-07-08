@@ -12,62 +12,63 @@ import { generateId } from '../../utils/helpers.js';
 import { formatDuration, formatStatusIndicator, formatProgressBar } from '../formatter.js';
 
 export const workflowCommand = new Command()
+  .name('workflow')
   .description('Execute and manage workflows')
   .action(() => {
-    console.log(workflowCommand.getHelp());
+    workflowCommand.outputHelp();
   })
-  .command('run', new Command()
+  .command('run')
     .description('Execute a workflow from file')
-    .argument('<workflow-file:string>')
+    .argument('<workflow-file>', 'Workflow file path')
     .option('-d, --dry-run', 'Validate workflow without executing')
-    .option('-v, --variables <vars:string>', 'Override variables (JSON format)')
+    .option('-v, --variables <vars>', 'Override variables (JSON format)')
     .option('-w, --watch', 'Watch workflow execution progress')
     .option('--parallel', 'Allow parallel execution where possible')
     .option('--fail-fast', 'Stop on first task failure')
-    .action(async (options: any, workflowFile: string) => {
+    .action(async (workflowFile: string, options: any) => {
       await runWorkflow(workflowFile, options);
-    }),
+    })
   )
-  .command('validate', new Command()
+  .command('validate')
     .description('Validate a workflow file')
-    .argument('<workflow-file:string>')
+    .argument('<workflow-file>', 'Workflow file path')
     .option('--strict', 'Use strict validation mode')
-    .action(async (options: any, workflowFile: string) => {
+    .action(async (workflowFile: string, options: any) => {
       await validateWorkflow(workflowFile, options);
-    }),
+    })
   )
-  .command('list', new Command()
+  .command('list')
     .description('List running workflows')
     .option('--all', 'Include completed workflows')
-    .option('--format <format:string>', 'Output format (table, json)', { default: 'table' })
+    .option('--format <format>', 'Output format (table, json)', 'table')
     .action(async (options: any) => {
       await listWorkflows(options);
-    }),
+    })
   )
-  .command('status', new Command()
+  .command('status')
     .description('Show workflow execution status')
-    .argument('<workflow-id:string>')
+    .argument('<workflow-id>', 'Workflow ID')
     .option('-w, --watch', 'Watch workflow progress')
-    .action(async (options: any, workflowId: string) => {
+    .action(async (workflowId: string, options: any) => {
       await showWorkflowStatus(workflowId, options);
-    }),
+    })
   )
-  .command('stop', new Command()
+  .command('stop')
     .description('Stop a running workflow')
-    .argument('<workflow-id:string>')
+    .argument('<workflow-id>', 'Workflow ID')
     .option('-f, --force', 'Force stop without cleanup')
-    .action(async (options: any, workflowId: string) => {
+    .action(async (workflowId: string, options: any) => {
       await stopWorkflow(workflowId, options);
-    }),
+    })
   )
-  .command('template', new Command()
+  .command('template')
     .description('Generate workflow templates')
-    .argument('<template-type:string>')
-    .option('-o, --output <file:string>', 'Output file path')
-    .option('--format <format:string>', 'Template format (json, yaml)', { default: 'json' })
-    .action(async (options: any, templateType: string) => {
+    .argument('<template-type>', 'Template type')
+    .option('-o, --output <file>', 'Output file path')
+    .option('--format <format>', 'Template format (json, yaml)', 'json')
+    .action(async (templateType: string, options: any) => {
       await generateTemplate(templateType, options);
-    }),
+    })
   );
 
 interface WorkflowDefinition {
@@ -239,7 +240,7 @@ async function listWorkflows(options: any): Promise<void> {
       ]);
     }
 
-    table.render();
+    console.log(table.toString());
   } catch (error) {
     console.error(chalk.red('Failed to list workflows:'), (error as Error).message);
   }
@@ -429,7 +430,7 @@ async function generateTemplate(templateType: string, options: any): Promise<voi
 
 async function loadWorkflow(workflowFile: string): Promise<WorkflowDefinition> {
   try {
-    const content = await fs.readFile(workflowFile);
+    const content = await fs.readFile(workflowFile, 'utf-8');
     
     if (workflowFile.endsWith('.yaml') || workflowFile.endsWith('.yml')) {
       // In production, use a proper YAML parser
@@ -438,7 +439,7 @@ async function loadWorkflow(workflowFile: string): Promise<WorkflowDefinition> {
     
     return JSON.parse(content) as WorkflowDefinition;
   } catch (error) {
-    throw new Error(`Failed to load workflow file: ${(error as Error).message}`);
+    throw new Error(`Failed to load workflow file: ${getErrorMessage(error)}`);
   }
 }
 
@@ -691,7 +692,7 @@ function displayWorkflowStatus(execution: WorkflowExecution): void {
     ]);
   }
   
-  table.render();
+  console.log(table.toString());
 }
 
 function displayWorkflowProgress(execution: WorkflowExecution): void {

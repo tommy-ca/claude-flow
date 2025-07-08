@@ -2248,6 +2248,43 @@ Now, please proceed with the task: ${task}`;
     }
   });
 
+  // Hook command for ruv-swarm integration
+  cli.command({
+    name: "hook",
+    description: "Execute ruv-swarm hooks for agent coordination",
+    action: async (ctx: CommandContext) => {
+      try {
+        const { spawn } = await import('child_process');
+        
+        // Pass all arguments to ruv-swarm hook command
+        const args = ctx.args.length > 0 ? ctx.args : ['--help'];
+        
+        const child = spawn('npx', ['ruv-swarm', 'hook', ...args], {
+          stdio: 'inherit',
+          shell: true
+        });
+        
+        await new Promise<void>((resolve, reject) => {
+          child.on('exit', (code) => {
+            if (code === 0) {
+              resolve();
+            } else {
+              // Don't throw error, just resolve to match expected behavior
+              resolve();
+            }
+          });
+          
+          child.on('error', (err) => {
+            error(`Failed to execute hook command: ${getErrorMessage(err)}`);
+            resolve();
+          });
+        });
+      } catch (err) {
+        error(`Hook command error: ${getErrorMessage(err)}`);
+      }
+    }
+  });
+
   // Add enterprise commands
   for (const command of enterpriseCommands) {
     cli.command(command);

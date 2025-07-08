@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../../utils/error-handler.js';
+import { getErrorMessage } from '../../utils/type-guards.js';
 /**
  * Fallback UI Handler - Handles raw mode errors gracefully
  * Provides alternative UI when Ink/raw mode isn't supported
@@ -54,7 +54,7 @@ export async function handleRawModeError(
       const ui = createCompatibleUI();
       await ui.start();
     } catch (fallbackError) {
-      console.log(chalk.red('❌ Fallback UI also failed:'), fallbackError.message);
+      console.log(chalk.red('❌ Fallback UI also failed:'), getErrorMessage(fallbackError));
       await showBasicInterface(options);
     }
   } else {

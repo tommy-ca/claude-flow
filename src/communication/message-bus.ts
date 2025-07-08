@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/error-handler.js';
+import { getErrorMessage, hasAgentId } from '../utils/type-guards.js';
 /**
  * Advanced messaging and communication layer for swarm coordination
  */
@@ -280,11 +280,15 @@ export class MessageBus extends EventEmitter {
 
   private setupEventHandlers(): void {
     this.eventBus.on('agent:connected', (data) => {
-      this.handleAgentConnected(data.agentId);
+      if (hasAgentId(data)) {
+        this.handleAgentConnected(data.agentId);
+      }
     });
 
     this.eventBus.on('agent:disconnected', (data) => {
-      this.handleAgentDisconnected(data.agentId);
+      if (hasAgentId(data)) {
+        this.handleAgentDisconnected(data.agentId);
+      }
     });
 
     this.deliveryManager.on('delivery:success', (data) => {

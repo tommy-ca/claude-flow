@@ -136,6 +136,7 @@
     "@types/inquirer": "^9.0.7",
     "@types/jest": "^29.5.8",
     "@types/node": "^20.10.5",
+    "@types/uuid": "^10.0.0",
     "@types/ws": "^8.5.10",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",

@@ -9,6 +9,7 @@
 import { EventEmitter } from 'events';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { getErrorMessage } from '../../utils/type-guards.js';
 
 const execAsync = promisify(exec);
 
@@ -71,7 +72,7 @@ export class MCPToolWrapper extends EventEmitter {
       return { success: true, data: result };
       
     } catch (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 

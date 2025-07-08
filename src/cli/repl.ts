@@ -507,7 +507,7 @@ function showHelp(commands: REPLCommand[]): void {
     ]);
   }
   
-  table.render();
+  console.log(table.toString());
   console.log();
   
   console.log(chalk.gray('Tips:'));
@@ -659,7 +659,7 @@ async function showAgentList(): Promise<void> {
     ]);
   }
   
-  table.render();
+  console.log(table.toString());
 }
 
 async function handleAgentSpawn(args: string[]): Promise<void> {
@@ -781,7 +781,7 @@ async function showTaskList(): Promise<void> {
     ]);
   }
   
-  table.render();
+  console.log(table.toString());
 }
 
 async function handleTaskCreate(args: string[]): Promise<void> {
@@ -916,7 +916,7 @@ async function showSessionList(): Promise<void> {
     ]);
   }
   
-  table.render();
+  console.log(table.toString());
 }
 
 async function handleSessionSave(args: string[]): Promise<void> {
@@ -1011,7 +1011,7 @@ async function showWorkflowList(): Promise<void> {
     ]);
   }
   
-  table.render();
+  console.log(table.toString());
 }
 
 async function handleWorkflowRun(filename: string): Promise<void> {

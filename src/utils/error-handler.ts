@@ -2,6 +2,8 @@
  * Utility for proper error handling in TypeScript
  */
 
+import { getErrorMessage as getErrorMsg, getErrorStack as getErrorStk, isError as isErr } from './type-guards.js';
+
 export class AppError extends Error {
   constructor(
     message: string,
@@ -14,29 +16,10 @@ export class AppError extends Error {
   }
 }
 
-export function isError(error: unknown): error is Error {
-  return error instanceof Error;
-}
-
-export function getErrorMessage(error: unknown): string {
-  if (isError(error)) {
-    return error.message;
-  }
-  if (typeof error === 'string') {
-    return error;
-  }
-  if (error && typeof error === 'object' && 'message' in error) {
-    return String(error.message);
-  }
-  return 'An unknown error occurred';
-}
-
-export function getErrorStack(error: unknown): string | undefined {
-  if (isError(error)) {
-    return error.stack;
-  }
-  return undefined;
-}
+// Re-export from type-guards for backward compatibility
+export const isError = isErr;
+export const getErrorMessage = getErrorMsg;
+export const getErrorStack = getErrorStk;
 
 export function handleError(error: unknown, context?: string): never {
   const message = getErrorMessage(error);
