@@ -132,6 +132,22 @@ class OptimizedLRUCache {
     }
   }
 
+  forEach(callback) {
+    this.cache.forEach((entry, key) => {
+      callback(entry, key);
+    });
+  }
+
+  delete(key) {
+    if (this.cache.has(key)) {
+      const entry = this.cache.get(key);
+      this.cache.delete(key);
+      this.currentMemory -= entry.size;
+      return true;
+    }
+    return false;
+  }
+
   getStats() {
     return {
       size: this.cache.size,
