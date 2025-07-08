@@ -42,7 +42,7 @@ if %ERRORLEVEL% EQU 0 (
 
 REM 4. Fallback to npx (will download if needed)
 cd /d "%PROJECT_DIR%"
-npx claude-flow@alpha %*
+npx claude-flow@latest %*
 `;
 
       // Write the Windows batch file
@@ -95,7 +95,7 @@ elif command -v claude-flow &> /dev/null; then
 # 4. Fallback to npx (will download if needed)
 else
   cd "\${PROJECT_DIR}"
-  exec npx claude-flow@alpha "$@"
+  exec npx claude-flow@latest "$@"
 fi
 `;
 
