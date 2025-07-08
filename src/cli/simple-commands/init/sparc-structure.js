@@ -4,12 +4,14 @@ import { createBasicRoomodesConfig } from './sparc/roomodes-config.js';
 import { createBasicSparcWorkflow } from './sparc/workflows.js';
 import { createRooReadme } from './sparc/roo-readme.js';
 import { createClaudeSlashCommands } from './claude-commands/slash-commands.js';
+import { Deno, cwd } from '../../node-compat.js';
+import process from 'process';
 
 // Helper function to create SPARC structure manually
 export async function createSparcStructureManually() {
   try {
     // Ensure we're in the working directory
-    const workingDir = Deno.env.get('PWD') || Deno.cwd();
+    const workingDir = process.env.PWD || cwd();
     
     // Create .roo directory structure in working directory (legacy support)
     const rooDirectories = [

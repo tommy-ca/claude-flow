@@ -1114,16 +1114,9 @@ function createWrapperScriptFallback(type) {
       } catch {}
     },
     
-    // 3. Global installation
+    // 3. NPX with latest alpha version (prioritized over global)
     async () => {
-      try {
-        return spawn('claude-flow', process.argv.slice(2), { stdio: 'inherit', shell: true });
-      } catch {}
-    },
-    
-    // 4. NPX fallback
-    async () => {
-      return spawn('npx', ['claude-flow@latest', ...process.argv.slice(2)], { stdio: 'inherit' });
+      return spawn('npx', ['claude-flow@2.0.0-alpha.25', ...process.argv.slice(2)], { stdio: 'inherit' });
     }
   ];
 

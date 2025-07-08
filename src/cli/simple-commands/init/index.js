@@ -495,16 +495,16 @@ export async function initCommand(subArgs, flags) {
       }
       
       // Check for Claude Code and set up MCP servers (always enabled by default)
-      if (!dryRun && isClaudeCodeInstalled()) {
+      if (!initDryRun && isClaudeCodeInstalled()) {
         console.log('\n🔍 Claude Code CLI detected!');
-        const skipMcp = args && args.includes && args.includes('--skip-mcp');
+        const skipMcp = subArgs && subArgs.includes && subArgs.includes('--skip-mcp');
         
         if (!skipMcp) {
-          await setupMcpServers(dryRun);
+          await setupMcpServers(initDryRun);
         } else {
           console.log('  ℹ️  Skipping MCP setup (--skip-mcp flag used)');
         }
-      } else if (!dryRun && !isClaudeCodeInstalled()) {
+      } else if (!initDryRun && !isClaudeCodeInstalled()) {
         console.log('\n⚠️  Claude Code CLI not detected!');
         console.log('  📥 Install with: npm install -g @anthropics/claude-code');
         console.log('  📋 Then add MCP servers manually with:');
@@ -663,7 +663,7 @@ async function enhancedInitCommand(subArgs, flags) {
     }
 
     // Perform initialization steps with checkpoints
-    await performInitializationWithCheckpoints(rollbackSystem, options, workingDir);
+    await performInitializationWithCheckpoints(rollbackSystem, options, workingDir, dryRun);
 
     // Phase 4: Post-initialization validation
     console.log('\n✅ Phase 4: Post-initialization validation...');
@@ -873,13 +873,13 @@ async function handleListBackups(subArgs, flags) {
 /**
  * Perform initialization with checkpoints
  */
-async function performInitializationWithCheckpoints(rollbackSystem, options, workingDir) {
+async function performInitializationWithCheckpoints(rollbackSystem, options, workingDir, dryRun = false) {
   const phases = [
-    { name: 'file-creation', action: () => createInitialFiles(options, workingDir) },
-    { name: 'directory-structure', action: () => createDirectoryStructure(workingDir) },
-    { name: 'memory-setup', action: () => setupMemorySystem(workingDir) },
-    { name: 'coordination-setup', action: () => setupCoordinationSystem(workingDir) },
-    { name: 'executable-creation', action: () => createLocalExecutable(workingDir) }
+    { name: 'file-creation', action: () => createInitialFiles(options, workingDir, dryRun) },
+    { name: 'directory-structure', action: () => createDirectoryStructure(workingDir, dryRun) },
+    { name: 'memory-setup', action: () => setupMemorySystem(workingDir, dryRun) },
+    { name: 'coordination-setup', action: () => setupCoordinationSystem(workingDir, dryRun) },
+    { name: 'executable-creation', action: () => createLocalExecutable(workingDir, dryRun) }
   ];
   
   if (options.sparc) {
@@ -909,39 +909,45 @@ async function performInitializationWithCheckpoints(rollbackSystem, options, wor
 }
 
 // Helper functions for atomic initialization
-async function createInitialFiles(options, workingDir) {
-  const claudeMd = options.sparc ? createSparcClaudeMd() : 
-                   options.minimal ? createMinimalClaudeMd() : createFullClaudeMd();
-  await Deno.writeTextFile(`${workingDir}/CLAUDE.md`, claudeMd);
+async function createInitialFiles(options, workingDir, dryRun = false) {
+  if (!dryRun) {
+    const claudeMd = options.sparc ? createSparcClaudeMd() : 
+                     options.minimal ? createMinimalClaudeMd() : createFullClaudeMd();
+    await Deno.writeTextFile(`${workingDir}/CLAUDE.md`, claudeMd);
 
-  const memoryBankMd = options.minimal ? createMinimalMemoryBankMd() : createFullMemoryBankMd();
-  await Deno.writeTextFile(`${workingDir}/memory-bank.md`, memoryBankMd);
+    const memoryBankMd = options.minimal ? createMinimalMemoryBankMd() : createFullMemoryBankMd();
+    await Deno.writeTextFile(`${workingDir}/memory-bank.md`, memoryBankMd);
 
-  const coordinationMd = options.minimal ? createMinimalCoordinationMd() : createFullCoordinationMd();
-  await Deno.writeTextFile(`${workingDir}/coordination.md`, coordinationMd);
+    const coordinationMd = options.minimal ? createMinimalCoordinationMd() : createFullCoordinationMd();
+    await Deno.writeTextFile(`${workingDir}/coordination.md`, coordinationMd);
+  }
 }
 
-async function createDirectoryStructure(workingDir) {
+async function createDirectoryStructure(workingDir, dryRun = false) {
   const directories = [
     'memory', 'memory/agents', 'memory/sessions',
     'coordination', 'coordination/memory_bank', 'coordination/subtasks', 'coordination/orchestration',
     '.claude', '.claude/commands', '.claude/logs'
   ];
   
-  for (const dir of directories) {
-    await Deno.mkdir(`${workingDir}/${dir}`, { recursive: true });
+  if (!dryRun) {
+    for (const dir of directories) {
+      await Deno.mkdir(`${workingDir}/${dir}`, { recursive: true });
+    }
   }
 }
 
-async function setupMemorySystem(workingDir) {
-  const initialData = { agents: [], tasks: [], lastUpdated: Date.now() };
-  await Deno.writeTextFile(`${workingDir}/memory/claude-flow-data.json`, JSON.stringify(initialData, null, 2));
-  
-  await Deno.writeTextFile(`${workingDir}/memory/agents/README.md`, createAgentsReadme());
-  await Deno.writeTextFile(`${workingDir}/memory/sessions/README.md`, createSessionsReadme());
+async function setupMemorySystem(workingDir, dryRun = false) {
+  if (!dryRun) {
+    const initialData = { agents: [], tasks: [], lastUpdated: Date.now() };
+    await Deno.writeTextFile(`${workingDir}/memory/claude-flow-data.json`, JSON.stringify(initialData, null, 2));
+    
+    await Deno.writeTextFile(`${workingDir}/memory/agents/README.md`, createAgentsReadme());
+    await Deno.writeTextFile(`${workingDir}/memory/sessions/README.md`, createSessionsReadme());
+  }
 }
 
-async function setupCoordinationSystem(workingDir) {
+async function setupCoordinationSystem(workingDir, dryRun = false) {
   // Coordination system is already set up by createDirectoryStructure
   // This is a placeholder for future coordination setup logic
 }
@@ -1128,7 +1134,7 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
     // Check for Claude Code and set up MCP servers (always enabled by default)
     if (!dryRun && isClaudeCodeInstalled()) {
       console.log('\n🔍 Claude Code CLI detected!');
-      const skipMcp = (options && options['skip-mcp']) || (args && args.includes && args.includes('--skip-mcp'));
+      const skipMcp = (options && options['skip-mcp']) || (subArgs && subArgs.includes && subArgs.includes('--skip-mcp'));
       
       if (!skipMcp) {
         await setupMcpServers(dryRun);
