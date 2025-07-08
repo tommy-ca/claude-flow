@@ -1008,6 +1008,24 @@ async function enhancedClaudeFlowInit(flags, subArgs = []) {
       console.log('[DRY RUN] Would create .claude/settings.json');
     }
     
+    // Create settings.local.json with default MCP permissions
+    const settingsLocal = {
+      "permissions": {
+        "allow": [
+          "mcp__ruv-swarm",
+          "mcp__claude-flow"
+        ],
+        "deny": []
+      }
+    };
+    
+    if (!dryRun) {
+      await Deno.writeTextFile(`${claudeDir}/settings.local.json`, JSON.stringify(settingsLocal, null, 2));
+      printSuccess('✓ Created .claude/settings.local.json with default MCP permissions');
+    } else {
+      console.log('[DRY RUN] Would create .claude/settings.local.json with default MCP permissions');
+    }
+    
     // Create command documentation
     for (const [category, commands] of Object.entries(COMMAND_STRUCTURE)) {
       const categoryDir = `${claudeDir}/commands/${category}`;

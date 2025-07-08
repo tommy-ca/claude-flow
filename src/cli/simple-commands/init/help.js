@@ -58,6 +58,8 @@ export function showInitHelp() {
   console.log('  claude-flow init --list-backups             # Show available backups');
   console.log();
   console.log('What gets created:');
+  console.log('  • .claude/settings.json - Global configuration with hooks and features');
+  console.log('  • .claude/settings.local.json - Pre-approved MCP permissions (no prompts!)');
   console.log('  • .claude/commands/ directory with 20+ Claude Code slash commands');
   console.log('  • CLAUDE.md with project instructions (v2.0.0 enhanced by default)');
   console.log('  • memory/ directory for persistent context storage');

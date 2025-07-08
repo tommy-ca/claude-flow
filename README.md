@@ -25,7 +25,7 @@
 ### 🎯 **Instant Alpha Testing**
 
 ```bash
-# 1. Initialize with enhanced MCP setup
+# 1. Initialize with enhanced MCP setup (auto-configures permissions!)
 npx --y claude-flow@alpha init --force
 
 # 2. Explore all revolutionary capabilities  
