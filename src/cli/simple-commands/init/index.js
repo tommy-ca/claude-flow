@@ -1058,10 +1058,18 @@ ${commands.map(cmd => `- [${cmd}](./${cmd}.md)`).join('\n')}
       }
     }
     
-    // Create wrapper scripts using bash wrapper for ES module compatibility
+    // Create wrapper scripts
     if (!dryRun) {
-      // Use createLocalExecutable which creates proper bash wrapper
-      await createLocalExecutable(workingDir);
+      // Unix wrapper - now uses universal ES module compatible wrapper
+      const unixWrapper = createWrapperScript('unix');
+      await Deno.writeTextFile(`${workingDir}/claude-flow`, unixWrapper);
+      await fs.chmod(`${workingDir}/claude-flow`, 0o755);
+      
+      // Windows wrapper
+      await Deno.writeTextFile(`${workingDir}/claude-flow.bat`, createWrapperScript('windows'));
+      
+      // PowerShell wrapper
+      await Deno.writeTextFile(`${workingDir}/claude-flow.ps1`, createWrapperScript('powershell'));
       
       printSuccess('✓ Created platform-specific wrapper scripts');
     } else {

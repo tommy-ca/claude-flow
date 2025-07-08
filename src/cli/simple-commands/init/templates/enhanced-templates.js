@@ -34,6 +34,14 @@ export function createEnhancedSettingsJson() {
 }
 
 export function createWrapperScript(type = 'unix') {
+  // For unix, use the universal wrapper that works in both CommonJS and ES modules
+  if (type === 'unix') {
+    const universalTemplate = loadTemplate('claude-flow-universal');
+    if (universalTemplate) {
+      return universalTemplate;
+    }
+  }
+  
   const filename = type === 'unix' ? 'claude-flow' : 
                    type === 'windows' ? 'claude-flow.bat' : 
                    'claude-flow.ps1';
@@ -1060,29 +1068,85 @@ echo "  - npx claude-flow issue triage"
 // Wrapper script fallbacks
 function createWrapperScriptFallback(type) {
   if (type === 'unix') {
-    return `#!/bin/bash
-# Claude Flow wrapper script for Unix-like systems
+    // Return the universal ES module compatible wrapper
+    return `#!/usr/bin/env node
 
-# Find the directory where this script is located
-SCRIPT_DIR="$( cd "$( dirname "\${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+/**
+ * Claude Flow CLI - Universal Wrapper
+ * Works in both CommonJS and ES Module projects
+ */
 
-# Check if we're in a local development environment
-if [ -f "$SCRIPT_DIR/package.json" ] && [ -d "$SCRIPT_DIR/node_modules" ]; then
-    # Local development mode
-    if [ -f "$SCRIPT_DIR/src/cli/simple-cli.js" ]; then
-        # Use the simple CLI
-        exec node "$SCRIPT_DIR/src/cli/simple-cli.js" "$@"
-    elif [ -f "$SCRIPT_DIR/dist/cli.js" ]; then
-        # Use compiled version
-        exec node "$SCRIPT_DIR/dist/cli.js" "$@"
-    else
-        echo "Error: Could not find Claude Flow CLI files"
-        exit 1
-    fi
-else
-    # Production mode - use npx alpha
-    exec npx claude-flow@alpha "$@"
-fi`;
+// Use dynamic import to work in both CommonJS and ES modules
+(async () => {
+  const { spawn } = await import('child_process');
+  const { resolve } = await import('path');
+  const { fileURLToPath } = await import('url');
+  
+  try {
+    // Try to use import.meta.url (ES modules)
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = resolve(__filename, '..');
+  } catch {
+    // Fallback for CommonJS
+  }
+
+  // Try multiple strategies to find claude-flow
+  const strategies = [
+    // 1. Local node_modules
+    async () => {
+      try {
+        const localPath = resolve(process.cwd(), 'node_modules/.bin/claude-flow');
+        const { existsSync } = await import('fs');
+        if (existsSync(localPath)) {
+          return spawn(localPath, process.argv.slice(2), { stdio: 'inherit' });
+        }
+      } catch {}
+    },
+    
+    // 2. Parent node_modules (monorepo)
+    async () => {
+      try {
+        const parentPath = resolve(process.cwd(), '../node_modules/.bin/claude-flow');
+        const { existsSync } = await import('fs');
+        if (existsSync(parentPath)) {
+          return spawn(parentPath, process.argv.slice(2), { stdio: 'inherit' });
+        }
+      } catch {}
+    },
+    
+    // 3. Global installation
+    async () => {
+      try {
+        return spawn('claude-flow', process.argv.slice(2), { stdio: 'inherit', shell: true });
+      } catch {}
+    },
+    
+    // 4. NPX fallback
+    async () => {
+      return spawn('npx', ['claude-flow@latest', ...process.argv.slice(2)], { stdio: 'inherit' });
+    }
+  ];
+
+  // Try each strategy
+  for (const strategy of strategies) {
+    try {
+      const child = await strategy();
+      if (child) {
+        child.on('exit', (code) => process.exit(code || 0));
+        child.on('error', (err) => {
+          if (err.code !== 'ENOENT') {
+            console.error('Error:', err);
+            process.exit(1);
+          }
+        });
+        return;
+      }
+    } catch {}
+  }
+  
+  console.error('Could not find claude-flow. Please install it with: npm install claude-flow');
+  process.exit(1);
+})();`;
   } else if (type === 'windows') {
     return `@echo off
 rem Claude Flow wrapper script for Windows
