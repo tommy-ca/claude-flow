@@ -14,11 +14,22 @@
 
 ---
 
-# 🚀 **Experience the Future of AI Development**
+## 🌟 **Overview**
 
-**Claude-Flow v2.0.0 Alpha** represents a revolutionary leap in AI-powered development orchestration. Built from the ground up with enterprise-grade architecture, advanced swarm intelligence, and seamless Claude Code integration.
+**Claude-Flow v2.0.0 Alpha** is an enterprise-grade AI orchestration platform that revolutionizes how developers build with AI. By combining **hive-mind swarm intelligence**, **neural pattern recognition**, and **87 advanced MCP tools**, Claude-Flow enables unprecedented AI-powered development workflows.
 
-> 🔥 **Revolutionary AI Coordination**: Hive-Mind intelligence with 87 MCP tools, neural pattern recognition, and distributed memory systems
+### 🎯 **Key Features**
+
+- **🐝 Hive-Mind Intelligence**: Queen-led AI coordination with specialized worker agents
+- **🧠 Neural Networks**: 27+ cognitive models with WASM SIMD acceleration
+- **🔧 87 MCP Tools**: Comprehensive toolkit for swarm orchestration, memory, and automation
+- **🔄 Dynamic Agent Architecture (DAA)**: Self-organizing agents with fault tolerance
+- **💾 Distributed Memory**: Cross-session persistence with namespace management
+- **🪝 Advanced Hooks System**: Automated workflows with pre/post operation hooks
+- **📊 GitHub Integration**: 6 specialized modes for repository management
+- **⚡ Performance**: 84.8% SWE-Bench solve rate, 2.8-4.4x speed improvement
+
+> 🔥 **Revolutionary AI Coordination**: Build faster, smarter, and more efficiently with AI-powered development orchestration
 
 ## ⚡ **Try v2.0.0 Alpha in 4 Commands**
 
@@ -40,6 +51,7 @@ npx claude-flow@alpha hive-mind spawn "build me something amazing" --claude
 
 ---
 
+<<<<<<< HEAD
 ## 🐝 **Revolutionary Hive-Mind Intelligence**
 
 ### **Queen-Led AI Coordination**
@@ -93,13 +105,188 @@ npx claude-flow@alpha batch process --items "test,build,deploy" --concurrent
 npx claude-flow@alpha pipeline create --config advanced-deployment.json
 ```
 
-### **🔗 Lifecycle Hooks**
+## 🪝 **Advanced Hooks System**
+
+### **Automated Workflow Enhancement**
+Claude-Flow v2.0.0 introduces a powerful hooks system that automates coordination and enhances every operation:
+
 ```bash
-# Automated preparation, tracking, and cleanup
-npx claude-flow@alpha hooks pre-task --description "Build feature" --auto-spawn-agents
-npx claude-flow@alpha hooks post-edit --file "src/api.js" --memory-key "swarm/edits/api"
-npx claude-flow@alpha hooks post-task --task-id "feature-123" --analyze-performance
-npx claude-flow@alpha hooks session-end --export-metrics --generate-summary
+# Hooks automatically trigger on operations
+npx claude-flow@alpha init --force  # Auto-configures MCP servers & hooks
+```
+
+### **Available Hooks**
+
+#### **Pre-Operation Hooks**
+- **`pre-task`**: Auto-assigns agents based on task complexity
+- **`pre-search`**: Caches searches for improved performance
+- **`pre-edit`**: Validates files and prepares resources
+- **`pre-command`**: Security validation before execution
+
+#### **Post-Operation Hooks**
+- **`post-edit`**: Auto-formats code using language-specific tools
+- **`post-task`**: Trains neural patterns from successful operations
+- **`post-command`**: Updates memory with operation context
+- **`notification`**: Real-time progress updates
+
+#### **Session Hooks**
+- **`session-start`**: Restores previous context automatically
+- **`session-end`**: Generates summaries and persists state
+- **`session-restore`**: Loads memory from previous sessions
+
+### **Hook Configuration**
+```json
+// .claude/settings.json (auto-configured)
+{
+  "hooks": {
+    "post-edit": "npx claude-flow@alpha hook post-edit --file {file} --format --memory",
+    "pre-task": "npx claude-flow@alpha hook pre-task --auto-spawn --optimize-topology",
+    "session-end": "npx claude-flow@alpha hook session-end --summary --backup"
+  }
+}
+```
+
+## 🧠 **Neural Network Capabilities**
+
+### **Cognitive Computing Engine**
+Powered by 27+ neural models optimized with WASM SIMD acceleration:
+
+```bash
+# Train coordination patterns
+npx claude-flow@alpha neural train --pattern coordination --data "workflow.json"
+
+# Real-time predictions
+npx claude-flow@alpha neural predict --model task-optimizer --input "current-state.json"
+
+# Analyze cognitive behavior
+npx claude-flow@alpha cognitive analyze --behavior "development-patterns"
+```
+
+### **Neural Features**
+- **Pattern Recognition**: Learns from successful operations
+- **Adaptive Learning**: Improves performance over time
+- **Transfer Learning**: Apply knowledge across domains
+- **Model Compression**: Efficient storage and execution
+- **Ensemble Models**: Combine multiple neural networks
+- **Explainable AI**: Understand decision-making process
+
+## 🔧 **DAA MCP Endpoints**
+
+### **Dynamic Agent Architecture**
+Complete programmatic control over agent lifecycle and coordination:
+
+```bash
+# Create specialized agents
+npx claude-flow@alpha daa agent-create --type "specialized-researcher" \
+  --capabilities "[\"deep-analysis\", \"pattern-recognition\"]" \
+  --resources "{\"memory\": 2048, \"compute\": \"high\"}"
+
+# Match capabilities to tasks
+npx claude-flow@alpha daa capability-match \
+  --task-requirements "[\"security-analysis\", \"performance-optimization\"]"
+
+# Manage agent lifecycle
+npx claude-flow@alpha daa lifecycle-manage --agentId "agent-123" --action "scale-up"
+```
+
+### **DAA Features**
+- **Resource Allocation**: Dynamic CPU/memory management
+- **Inter-Agent Communication**: Message passing and coordination
+- **Consensus Mechanisms**: Democratic decision making
+- **Fault Tolerance**: Self-healing with automatic recovery
+- **Performance Optimization**: Real-time bottleneck resolution
+
+### **MCP Tool Categories**
+
+#### **🐝 Swarm Orchestration** (15 tools)
+- `swarm_init`, `agent_spawn`, `task_orchestrate`
+- `swarm_monitor`, `topology_optimize`, `load_balance`
+- `coordination_sync`, `swarm_scale`, `swarm_destroy`
+
+#### **🧠 Neural & Cognitive** (12 tools)
+- `neural_train`, `neural_predict`, `pattern_recognize`
+- `cognitive_analyze`, `learning_adapt`, `neural_compress`
+- `ensemble_create`, `transfer_learn`, `neural_explain`
+
+#### **💾 Memory Management** (10 tools)
+- `memory_usage`, `memory_search`, `memory_persist`
+- `memory_namespace`, `memory_backup`, `memory_restore`
+- `memory_compress`, `memory_sync`, `memory_analytics`
+
+#### **📊 Performance & Monitoring** (10 tools)
+- `performance_report`, `bottleneck_analyze`, `token_usage`
+- `benchmark_run`, `metrics_collect`, `trend_analysis`
+- `health_check`, `diagnostic_run`, `usage_stats`
+
+#### **🔄 Workflow Automation** (10 tools)
+- `workflow_create`, `workflow_execute`, `workflow_export`
+- `automation_setup`, `pipeline_create`, `scheduler_manage`
+- `trigger_setup`, `batch_process`, `parallel_execute`
+
+#### **📦 GitHub Integration** (6 tools)
+- `github_repo_analyze`, `github_pr_manage`, `github_issue_track`
+- `github_release_coord`, `github_workflow_auto`, `github_code_review`
+
+#### **🤖 Dynamic Agents** (6 tools)
+- `daa_agent_create`, `daa_capability_match`, `daa_resource_alloc`
+- `daa_lifecycle_manage`, `daa_communication`, `daa_consensus`
+
+#### **🛡️ System & Security** (8 tools)
+- `security_scan`, `backup_create`, `restore_system`
+- `config_manage`, `features_detect`, `log_analysis`
+
+## 🐝 **Revolutionary Hive-Mind Intelligence**
+
+### **Queen-Led AI Coordination**
+Claude-Flow v2.0.0 introduces groundbreaking hive-mind architecture where a **Queen AI** coordinates specialized worker agents in perfect harmony.
+
+```bash
+# Deploy intelligent swarm coordination
+npx claude-flow@alpha swarm "Build a full-stack application" --strategy development --claude
+
+# Launch hive-mind with specific specializations
+npx claude-flow@alpha hive-mind spawn "Create microservices architecture" --agents 8 --claude
+```
+
+### **🤖 Intelligent Agent Types**
+- **👑 Queen Agent**: Master coordinator and decision maker
+- **🏗️ Architect Agents**: System design and technical architecture
+- **💻 Coder Agents**: Implementation and development
+- **🧪 Tester Agents**: Quality assurance and validation
+- **📊 Analyst Agents**: Data analysis and insights
+- **🔍 Researcher Agents**: Information gathering and analysis
+- **🛡️ Security Agents**: Security auditing and compliance
+- **🚀 DevOps Agents**: Deployment and infrastructure
+
+---
+
+## ⚡ **87 Advanced MCP Tools**
+
+### **🧠 Neural & Cognitive Tools**
+```bash
+# Neural pattern recognition and training
+npx claude-flow@alpha neural train --pattern coordination --epochs 50
+npx claude-flow@alpha neural predict --model cognitive-analysis
+npx claude-flow@alpha cognitive analyze --behavior "development workflow"
+```
+
+### **💾 Distributed Memory Systems**
+```bash
+# Cross-session memory management
+npx claude-flow@alpha memory store "project-context" "Full-stack app requirements"
+npx claude-flow@alpha memory query "authentication" --namespace sparc
+npx claude-flow@alpha memory stats
+npx claude-flow@alpha memory export backup.json --namespace default
+npx claude-flow@alpha memory import project-memory.json
+```
+
+### **🔄 Workflow Orchestration**
+```bash
+# Advanced workflow automation
+npx claude-flow@alpha workflow create --name "CI/CD Pipeline" --parallel
+npx claude-flow@alpha batch process --items "test,build,deploy" --concurrent
+npx claude-flow@alpha pipeline create --config advanced-deployment.json
+>>>>>>> origin/main
 ```
 
 ### **📊 GitHub Integration**
@@ -375,7 +562,7 @@ npx claude-flow@alpha workflow --help
 - 🔜 Multi-cloud deployment automation
 - 🔜 Real-time collaboration features
 
-### **🏆 Stable v2.0.0 (Q2 2024)**
+### **🏆 Stable v2.0.0 (Q2 2025)**
 - 🎯 Production-ready hive-mind orchestration
 - 🎯 Complete neural computing suite
 - 🎯 Enterprise-grade security and monitoring
