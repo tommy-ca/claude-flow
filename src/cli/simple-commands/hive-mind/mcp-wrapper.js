@@ -69,6 +69,9 @@ export class MCPToolWrapper {
     this.parallelQueue = [];
     this.executing = false;
     
+    /** @type {import('better-sqlite3').Database | null} */
+    this.memoryDb = null;
+    
     // Initialize real memory storage
     this.initializeMemoryStorage();
   }

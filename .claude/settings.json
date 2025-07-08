@@ -36,31 +36,31 @@
   "hooks": {
     "preEditHook": {
       "command": "npx",
-      "args": ["claude-flow", "hook", "pre-edit", "--file", "${file}", "--auto-assign-agents", "true", "--load-context", "true"],
+      "args": ["claude-flow", "hooks", "pre-edit", "--file", "${file}", "--auto-assign-agents", "true", "--load-context", "true"],
       "alwaysRun": false,
       "outputFormat": "json"
     },
     "postEditHook": {
       "command": "npx",
-      "args": ["claude-flow", "hook", "post-edit", "--file", "${file}", "--format", "true", "--update-memory", "true", "--train-neural", "true"],
+      "args": ["claude-flow", "hooks", "post-edit", "--file", "${file}", "--format", "true", "--update-memory", "true", "--train-neural", "true"],
       "alwaysRun": true,
       "outputFormat": "json"
     },
     "preCommandHook": {
       "command": "npx",
-      "args": ["claude-flow", "hook", "pre-command", "--command", "${command}", "--validate-safety", "true", "--prepare-resources", "true"],
+      "args": ["claude-flow", "hooks", "pre-command", "--command", "${command}", "--validate-safety", "true", "--prepare-resources", "true"],
       "alwaysRun": false,
       "outputFormat": "json"
     },
     "postCommandHook": {
       "command": "npx",
-      "args": ["claude-flow", "hook", "post-command", "--command", "${command}", "--track-metrics", "true", "--store-results", "true"],
+      "args": ["claude-flow", "hooks", "post-command", "--command", "${command}", "--track-metrics", "true", "--store-results", "true"],
       "alwaysRun": false,
       "outputFormat": "json"
     },
     "sessionEndHook": {
       "command": "npx",
-      "args": ["claude-flow", "hook", "session-end", "--generate-summary", "true", "--persist-state", "true", "--export-metrics", "true"],
+      "args": ["claude-flow", "hooks", "session-end", "--generate-summary", "true", "--persist-state", "true", "--export-metrics", "true"],
       "alwaysRun": true,
       "outputFormat": "json"
     }

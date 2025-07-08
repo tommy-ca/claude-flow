@@ -165,6 +165,9 @@ export class CollectiveMemory extends EventEmitter {
   constructor(config = {}) {
     super();
     
+    /** @type {import('better-sqlite3').Database | null} */
+    this.db = null;
+    
     this.config = {
       swarmId: config.swarmId,
       maxSize: config.maxSize || 100, // MB
@@ -192,7 +195,6 @@ export class CollectiveMemory extends EventEmitter {
       }
     };
     
-    this.db = null;
     this.gcTimer = null;
     
     // Optimized cache with LRU eviction

@@ -39,7 +39,6 @@ export const taskCommand = new Command()
       console.log(JSON.stringify(task, null, 2));
       console.log(chalk.yellow('\nTo submit this task, ensure Claude-Flow is running'));
     })
-  )
   .command('list')
     .description('List all tasks')
     .option('-s, --status <status:string>', 'Filter by status')
@@ -47,14 +46,12 @@ export const taskCommand = new Command()
     .action(async (options: any) => {
       console.log(chalk.yellow('Task listing requires a running Claude-Flow instance'));
     })
-  )
   .command('status')
     .description('Get task status')
     .argument('<task-id>', 'Task ID')
     .action(async (taskId: string, options: any) => {
       console.log(chalk.yellow(`Task status requires a running Claude-Flow instance`));
     })
-  )
   .command('cancel')
     .description('Cancel a task')
     .argument('<task-id>', 'Task ID')
@@ -62,7 +59,6 @@ export const taskCommand = new Command()
     .action(async (taskId: string, options: any) => {
       console.log(chalk.yellow(`Cancelling task ${taskId} requires a running Claude-Flow instance`));
     })
-  )
   .command('workflow')
     .description('Execute a workflow from file')
     .argument('<workflow-file>', 'Workflow file path')
@@ -78,5 +74,4 @@ export const taskCommand = new Command()
       } catch (error) {
         console.error(chalk.red('Failed to load workflow:'), getErrorMessage(error));
       }
-    })
-  );
+    });

@@ -93,6 +93,15 @@ npx claude-flow@alpha batch process --items "test,build,deploy" --concurrent
 npx claude-flow@alpha pipeline create --config advanced-deployment.json
 ```
 
+### **🔗 Lifecycle Hooks**
+```bash
+# Automated preparation, tracking, and cleanup
+npx claude-flow@alpha hooks pre-task --description "Build feature" --auto-spawn-agents
+npx claude-flow@alpha hooks post-edit --file "src/api.js" --memory-key "swarm/edits/api"
+npx claude-flow@alpha hooks post-task --task-id "feature-123" --analyze-performance
+npx claude-flow@alpha hooks session-end --export-metrics --generate-summary
+```
+
 ### **📊 GitHub Integration**
 ```bash
 # GitHub workflow orchestration and coordination

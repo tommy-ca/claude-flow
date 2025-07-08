@@ -28,7 +28,6 @@ export const workflowCommand = new Command()
     .action(async (workflowFile: string, options: any) => {
       await runWorkflow(workflowFile, options);
     })
-  )
   .command('validate')
     .description('Validate a workflow file')
     .argument('<workflow-file>', 'Workflow file path')
@@ -36,7 +35,6 @@ export const workflowCommand = new Command()
     .action(async (workflowFile: string, options: any) => {
       await validateWorkflow(workflowFile, options);
     })
-  )
   .command('list')
     .description('List running workflows')
     .option('--all', 'Include completed workflows')
@@ -44,7 +42,6 @@ export const workflowCommand = new Command()
     .action(async (options: any) => {
       await listWorkflows(options);
     })
-  )
   .command('status')
     .description('Show workflow execution status')
     .argument('<workflow-id>', 'Workflow ID')
@@ -52,7 +49,6 @@ export const workflowCommand = new Command()
     .action(async (workflowId: string, options: any) => {
       await showWorkflowStatus(workflowId, options);
     })
-  )
   .command('stop')
     .description('Stop a running workflow')
     .argument('<workflow-id>', 'Workflow ID')
@@ -60,7 +56,6 @@ export const workflowCommand = new Command()
     .action(async (workflowId: string, options: any) => {
       await stopWorkflow(workflowId, options);
     })
-  )
   .command('template')
     .description('Generate workflow templates')
     .argument('<template-type>', 'Template type')
@@ -68,8 +63,8 @@ export const workflowCommand = new Command()
     .option('--format <format>', 'Template format (json, yaml)', 'json')
     .action(async (templateType: string, options: any) => {
       await generateTemplate(templateType, options);
-    })
-  );
+    });
+
 
 interface WorkflowDefinition {
   name: string;

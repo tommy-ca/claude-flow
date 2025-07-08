@@ -156,10 +156,10 @@ Once configured, ruv-swarm MCP tools enhance Claude Code's coordination:
 
 **What Actually Happens:**
 1. The swarm sets up a coordination framework
-2. Each agent MUST use ruv-swarm hooks for coordination:
-   - `npx ruv-swarm hook pre-task` before starting
-   - `npx ruv-swarm hook post-edit` after each file operation
-   - `npx ruv-swarm hook notification` to share decisions
+2. Each agent MUST use claude-flow hooks for coordination:
+   - `npx claude-flow hookss pre-task` before starting
+   - `npx claude-flow hookss post-edit` after each file operation
+   - `npx claude-flow hookss post-task` to complete work
 3. Claude Code uses its native Read, WebSearch, and Task tools
 4. The swarm coordinates through shared memory and hooks
 5. Results are synthesized by Claude Code with full coordination history
@@ -185,8 +185,8 @@ Once configured, ruv-swarm MCP tools enhance Claude Code's coordination:
 **What Actually Happens:**
 1. The swarm creates a development coordination plan
 2. Each agent coordinates using mandatory hooks:
-   - Pre-task hooks for context loading
-   - Post-edit hooks for progress tracking
+   - `npx claude-flow hookss pre-task` for context loading
+   - `npx claude-flow hookss post-edit` for progress tracking
    - Memory storage for cross-agent coordination
 3. Claude Code uses Write, Edit, Bash tools for implementation
 4. Agents share progress through ruv-swarm memory
@@ -286,7 +286,7 @@ See `.claude/commands/` for detailed documentation on all features.
 1. **SPAWN ALL AGENTS IN ONE BATCH** - Use multiple tool calls in a SINGLE message
 2. **EXECUTE TASKS IN PARALLEL** - Never wait for one task before starting another
 3. **USE BATCHTOOL FOR EVERYTHING** - Multiple operations = Single message with multiple tools
-4. **ALL AGENTS MUST USE COORDINATION TOOLS** - Every spawned agent MUST use ruv-swarm hooks and memory
+4. **ALL AGENTS MUST USE COORDINATION TOOLS** - Every spawned agent MUST use claude-flow hooks and memory
 
 ## 📋 MANDATORY AGENT COORDINATION PROTOCOL
 
@@ -297,27 +297,23 @@ When you spawn an agent using the Task tool, that agent MUST:
 **1️⃣ BEFORE Starting Work:**
 ```bash
 # Check previous work and load context
-npx ruv-swarm hook pre-task --description "[agent task]" --auto-spawn-agents false
-npx ruv-swarm hook session-restore --session-id "swarm-[id]" --load-memory true
+npx claude-flow hookss pre-task --description "[agent task]" --auto-spawn-agents false
 ```
 
 **2️⃣ DURING Work (After EVERY Major Step):**
 ```bash
 # Store progress in memory after each file operation
-npx ruv-swarm hook post-edit --file "[filepath]" --memory-key "swarm/[agent]/[step]"
+npx claude-flow hookss post-edit --file "[filepath]" --memory-key "swarm/[agent]/[step]"
 
-# Store decisions and findings
-npx ruv-swarm hook notification --message "[what was done]" --telemetry true
-
-# Check coordination with other agents
-npx ruv-swarm hook pre-search --query "[what to check]" --cache-results true
+# Store decisions and findings in memory
+npx claude-flow memory store --key "swarm/[agent]/decisions" --value "[what was done]"
 ```
 
 **3️⃣ AFTER Completing Work:**
 ```bash
 # Save all results and learnings
-npx ruv-swarm hook post-task --task-id "[task]" --analyze-performance true
-npx ruv-swarm hook session-end --export-metrics true --generate-summary true
+npx claude-flow hookss post-task --task-id "[task]" --analyze-performance true
+npx claude-flow hookss session-end --export-metrics true --generate-summary true
 ```
 
 ### 🎯 AGENT PROMPT TEMPLATE
@@ -328,10 +324,10 @@ When spawning agents, ALWAYS include these coordination instructions:
 You are the [Agent Type] agent in a coordinated swarm.
 
 MANDATORY COORDINATION:
-1. START: Run `npx ruv-swarm hook pre-task --description "[your task]"`
-2. DURING: After EVERY file operation, run `npx ruv-swarm hook post-edit --file "[file]" --memory-key "agent/[step]"`
-3. MEMORY: Store ALL decisions using `npx ruv-swarm hook notification --message "[decision]"`
-4. END: Run `npx ruv-swarm hook post-task --task-id "[task]" --analyze-performance true`
+1. START: Run `npx claude-flow hookss pre-task --description "[your task]"`
+2. DURING: After EVERY file operation, run `npx claude-flow hookss post-edit --file "[file]" --memory-key "agent/[step]"`
+3. MEMORY: Store ALL decisions using `npx claude-flow memory store --key "agent/decisions" --value "[decision]"`
+4. END: Run `npx claude-flow hookss post-task --task-id "[task]" --analyze-performance true`
 
 Your specific task: [detailed task description]
 
