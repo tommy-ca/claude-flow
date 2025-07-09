@@ -46,7 +46,7 @@ jobs:
     
     - name: Clean install test
       run: |
-        rm -rf node_modules
+        node -e "const fs = require('fs'); try { fs.rmSync('node_modules', { recursive: true, force: true }); } catch(e) { console.log('node_modules not found, continuing...'); }"
         npm ci
       env:
         CI: true
