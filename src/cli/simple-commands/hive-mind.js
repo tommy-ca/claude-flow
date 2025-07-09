@@ -90,7 +90,7 @@ ${chalk.bold('OPTIONS:')}
   --no-auto-permissions  Disable automatic --dangerously-skip-permissions
 
 ${chalk.bold('For more information:')}
-${chalk.blue('https://github.com/ruvnet/claude-code-flow/docs/hive-mind.md')}
+${chalk.blue('https://github.com/ruvnet/claude-flow/tree/main/docs/hive-mind')}
 `);
 }
 
