@@ -380,7 +380,7 @@ export async function startREPL(options: any = {}): Promise<void> {
   while (true) {
     try {
       const prompt = createPrompt(context);
-      const input = await Input.prompt({
+      const input = await prompt.prompt({
         message: prompt,
         suggestions: (input: string) => completer.complete(input),
       });
@@ -670,7 +670,7 @@ async function handleAgentSpawn(args: string[]): Promise<void> {
   }
 
   const type = args[0];
-  const name = args[1] || await Input.prompt({
+  const name = args[1] || await prompt.prompt({
     message: 'Agent name:',
     default: `${type}-agent`,
   });
@@ -688,7 +688,7 @@ async function handleAgentSpawn(args: string[]): Promise<void> {
 }
 
 async function handleAgentTerminate(agentId: string): Promise<void> {
-  const confirmed = await Confirm.prompt({
+  const confirmed = await confirm.prompt({
     message: `Terminate agent ${agentId}?`,
     default: false,
   });
@@ -815,7 +815,7 @@ async function showTaskStatus(taskId: string): Promise<void> {
 }
 
 async function handleTaskCancel(taskId: string): Promise<void> {
-  const confirmed = await Confirm.prompt({
+  const confirmed = await confirm.prompt({
     message: `Cancel task ${taskId}?`,
     default: false,
   });
@@ -920,7 +920,7 @@ async function showSessionList(): Promise<void> {
 }
 
 async function handleSessionSave(args: string[]): Promise<void> {
-  const name = args.length > 0 ? args.join(' ') : await Input.prompt({
+  const name = args.length > 0 ? args.join(' ') : await prompt.prompt({
     message: 'Session name:',
     default: `session-${new Date().toISOString().split('T')[0]}`,
   });
@@ -935,7 +935,7 @@ async function handleSessionSave(args: string[]): Promise<void> {
 }
 
 async function handleSessionRestore(sessionId: string): Promise<void> {
-  const confirmed = await Confirm.prompt({
+  const confirmed = await confirm.prompt({
     message: `Restore session ${sessionId}?`,
     default: false,
   });

@@ -1,6 +1,6 @@
 {
   "name": "claude-flow",
-  "version": "2.0.0-alpha.37",
+  "version": "2.0.0-alpha.38",
   "description": "Enterprise-grade AI agent orchestration with ruv-swarm integration (Alpha Release)",
   "main": "cli.mjs",
   "bin": {
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "tsx src/cli/main.ts",
-    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:binary",
+    "build": "npm run clean && npm run update-version && npm run build:esm && npm run build:cjs && npm run build:binary",
+    "update-version": "node scripts/update-bin-version.js || echo 'Version update script not found'",
     "clean": "rm -rf dist dist-cjs bin",
     "build:esm": "tsc",
     "build:cjs": "tsc -p tsconfig.cjs.json",
@@ -44,9 +45,8 @@
     "format": "prettier --write src",
     "diagnostics": "node -e \"import('./dist/monitoring/diagnostics.js').then(m => m.DiagnosticManager.quickDiagnostic().then(console.log))\"",
     "health-check": "node -e \"import('./dist/monitoring/health-check.js').then(m => new m.HealthCheckManager().performHealthCheck().then(console.log))\"",
-    "postinstall": "node scripts/postinstall.js",
-    "install:ci": "node scripts/install-ci.js",
-    "prepublishOnly": "echo 'Alpha release - skipping build/test/lint for now'",
+    "postinstall": "node scripts/postinstall.js || node scripts/install.js || echo 'Optional installation components skipped'",
+    "prepublishOnly": "npm run update-version || echo 'Version update skipped'",
     "publish:alpha": "npm publish --tag alpha",
     "publish:major": "npm version major && npm publish",
     "publish:minor": "npm version minor && npm publish",

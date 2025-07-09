@@ -31,28 +31,24 @@
 
 > 🔥 **Revolutionary AI Coordination**: Build faster, smarter, and more efficiently with AI-powered development orchestration
 
-## 📚 **Table of Contents**
-
-- [⚡ Quick Start](#-try-v200-alpha-in-4-commands)
-- [🪝 Advanced Hooks System](#-advanced-hooks-system)
-- [🧠 Neural Features](#neural-features)
-- [🔧 DAA MCP Endpoints](#-daa-mcp-endpoints)
-- [🐝 Hive-Mind Intelligence](#-revolutionary-hive-mind-intelligence)
-- [🔧 Hive-Mind Optimization](#-hive-mind-database-optimization)
-- [⚡ 87 Advanced MCP Tools](#-87-advanced-mcp-tools)
-- [🎮 Advanced Usage Examples](#-advanced-usage-examples)
-- [🏗️ Architecture Overview](#️-alpha-architecture-overview)
-- [🛠️ Installation & Setup](#️-alpha-installation--setup)
-- [📖 Documentation](#-comprehensive-documentation)
-- [🤝 Contributing](#-contributing-to-alpha)
-- [📜 License](#-license)
-
 ## ⚡ **Try v2.0.0 Alpha in 4 Commands**
+
+### 📋 **Prerequisites**
+
+⚠️ **IMPORTANT**: Claude Code must be installed first:
+
+```bash
+# 1. Install Claude Code globally
+npm install -g @anthropic-ai/claude-code
+
+# 2. Activate Claude Code with permissions
+claude --dangerously-skip-permissions
+```
 
 ### 🎯 **Instant Alpha Testing**
 
 ```bash
-# 1. Initialize with enhanced MCP setup (auto-configures permissions!)
+# 1. Initialize Claude Flow with enhanced MCP setup (auto-configures permissions!)
 npx --y claude-flow@alpha init --force
 
 # 2. Explore all revolutionary capabilities  

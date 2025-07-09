@@ -97,8 +97,9 @@ export class PromptCopier extends EventEmitter {
           copiedFiles: 0,
           failedFiles: 0,
           skippedFiles: 0,
-          duration: Date.now() - startTime
-        };
+          duration: Date.now() - startTime,
+      errors: []
+    };
       }
 
       // Phase 2: Pre-flight checks

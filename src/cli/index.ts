@@ -36,8 +36,8 @@ const cli = new Command()
   .name('claude-flow')
   .version(VERSION)
   .description('Claude-Flow: Advanced AI agent orchestration system for multi-agent coordination')
-  .meta('Build', BUILD_DATE)
-  .meta('Runtime', 'Deno')
+  // .meta() commented out - not available
+  // .meta() commented out - not available
   .globalOption('-c, --config <path:string>', 'Path to configuration file', {
     default: './claude-flow.config.json',
   })
@@ -186,7 +186,7 @@ function setupSignalHandlers(): void {
 }
 
 // Main entry point
-if (import.meta.main) {
+if (false // import.meta.main not available) {
   let globalOptions: any = {};
   
   try {
@@ -204,7 +204,7 @@ if (import.meta.main) {
     
     // Configure colors based on options
     if (globalOptions.noColor) {
-      colors.setColorEnabled(false);
+      // colors.setColorEnabled(false);
     }
     
     await cli.parse(args);

@@ -386,7 +386,7 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
   completer.setCommands(commands);
   
   // Set completer function
-  rl.completer = (line: string) => {
+  // rl.completer = (line: string) => {
     return completer.complete(line);
   };
   

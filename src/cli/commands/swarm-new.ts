@@ -537,7 +537,7 @@ export async function swarmAction(ctx: CommandContext) {
         },
         exportEnabled: false,
         exportFormat: 'json',
-        exportPath: './metrics'
+        // exportPath: './metrics' // Commented out - not in type definition
       }
     });
     
@@ -554,7 +554,7 @@ export async function swarmAction(ctx: CommandContext) {
       cacheTTL: 300000, // 5 minutes
       executionMode: options.parallel ? 'parallel' : 'sequential',
       resourceLimits: {
-        maxMemoryMB: 512,
+        maxMemory: 512,
         maxCpuPercent: 80,
         maxDiskIOps: 100,
         maxNetworkBandwidthMbps: 100
