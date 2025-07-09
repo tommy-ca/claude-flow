@@ -3,6 +3,9 @@
  * Demonstrates basic Jest testing without TypeScript or Deno imports
  */
 
+// Import jest from globals for mocking
+const { jest } = globalThis;
+
 // Example calculator class to test
 class Calculator {
   add(a, b) {
