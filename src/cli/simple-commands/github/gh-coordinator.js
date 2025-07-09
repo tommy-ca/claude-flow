@@ -55,8 +55,10 @@ class GitHubCoordinator {
       execSync('npx ruv-swarm --version', { stdio: 'pipe' });
 
       // Initialize swarm for GitHub coordination
-      const swarmInit = execSync('npx ruv-swarm hook pre-task --description "GitHub workflow coordination"',
-        { encoding: 'utf8' });
+      const swarmInit = execSync(
+        'npx ruv-swarm hook pre-task --description "GitHub workflow coordination"',
+        { encoding: 'utf8' }
+      );
 
       if (swarmInit.includes('continue')) {
         printSuccess('🐝 Swarm integration initialized for GitHub coordination');
@@ -119,7 +121,9 @@ class GitHubCoordinator {
 
     // Store coordination plan in swarm memory
     const memoryKey = `github-coordination/${coordinationPlan.id}`;
-    execSync(`npx ruv-swarm hook notification --message "GitHub Coordination: ${coordinationPlan.type} started" --telemetry true`);
+    execSync(
+      `npx ruv-swarm hook notification --message "GitHub Coordination: ${coordinationPlan.type} started" --telemetry true`
+    );
 
     // Execute each step with swarm coordination
     for (const step of coordinationPlan.steps) {
@@ -132,11 +136,15 @@ class GitHubCoordinator {
       await this.executeCoordinationStep(coordinationPlan, step);
 
       // Post-step hook
-      execSync(`npx ruv-swarm hook post-edit --file "github-coordination" --memory-key "${memoryKey}/${step}"`);
+      execSync(
+        `npx ruv-swarm hook post-edit --file "github-coordination" --memory-key "${memoryKey}/${step}"`
+      );
     }
 
     // Final coordination notification
-    execSync(`npx ruv-swarm hook notification --message "GitHub Coordination: ${coordinationPlan.type} completed" --telemetry true`);
+    execSync(
+      `npx ruv-swarm hook notification --message "GitHub Coordination: ${coordinationPlan.type} completed" --telemetry true`
+    );
   }
 
   /**
@@ -158,26 +166,26 @@ class GitHubCoordinator {
     const { owner, repo } = this.currentRepo;
 
     switch (step) {
-    case 'analyze_repository_structure':
-      await this.analyzeRepositoryStructure(owner, repo);
-      break;
-    case 'create_workflow_files':
-      await this.createWorkflowFiles(owner, repo, coordinationPlan.pipeline);
-      break;
-    case 'setup_environment_secrets':
-      await this.setupEnvironmentSecrets(owner, repo);
-      break;
-    case 'configure_branch_protection':
-      await this.configureBranchProtection(owner, repo);
-      break;
-    case 'test_pipeline_execution':
-      await this.testPipelineExecution(owner, repo);
-      break;
-    case 'setup_notifications':
-      await this.setupNotifications(owner, repo);
-      break;
-    default:
-      printWarning(`Unknown coordination step: ${step}`);
+      case 'analyze_repository_structure':
+        await this.analyzeRepositoryStructure(owner, repo);
+        break;
+      case 'create_workflow_files':
+        await this.createWorkflowFiles(owner, repo, coordinationPlan.pipeline);
+        break;
+      case 'setup_environment_secrets':
+        await this.setupEnvironmentSecrets(owner, repo);
+        break;
+      case 'configure_branch_protection':
+        await this.configureBranchProtection(owner, repo);
+        break;
+      case 'test_pipeline_execution':
+        await this.testPipelineExecution(owner, repo);
+        break;
+      case 'setup_notifications':
+        await this.setupNotifications(owner, repo);
+        break;
+      default:
+        printWarning(`Unknown coordination step: ${step}`);
     }
   }
 
@@ -210,7 +218,9 @@ class GitHubCoordinator {
 
     // Check for package.json (Node.js projects)
     try {
-      const packageResponse = await this.api.request(`/repos/${owner}/${repo}/contents/package.json`);
+      const packageResponse = await this.api.request(
+        `/repos/${owner}/${repo}/contents/package.json`
+      );
       analysis.hasPackageJson = packageResponse.success;
     } catch (error) {
       // package.json doesn't exist

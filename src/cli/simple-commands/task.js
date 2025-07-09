@@ -5,32 +5,32 @@ export async function taskCommand(subArgs, flags) {
   const taskCmd = subArgs[0];
 
   switch (taskCmd) {
-  case 'create':
-    await createTask(subArgs, flags);
-    break;
+    case 'create':
+      await createTask(subArgs, flags);
+      break;
 
-  case 'list':
-    await listTasks(subArgs, flags);
-    break;
+    case 'list':
+      await listTasks(subArgs, flags);
+      break;
 
-  case 'status':
-    await showTaskStatus(subArgs, flags);
-    break;
+    case 'status':
+      await showTaskStatus(subArgs, flags);
+      break;
 
-  case 'cancel':
-    await cancelTask(subArgs, flags);
-    break;
+    case 'cancel':
+      await cancelTask(subArgs, flags);
+      break;
 
-  case 'workflow':
-    await executeWorkflow(subArgs, flags);
-    break;
+    case 'workflow':
+      await executeWorkflow(subArgs, flags);
+      break;
 
-  case 'coordination':
-    await manageCoordination(subArgs, flags);
-    break;
+    case 'coordination':
+      await manageCoordination(subArgs, flags);
+      break;
 
-  default:
-    showTaskHelp();
+    default:
+      showTaskHelp();
   }
 }
 
@@ -121,24 +121,24 @@ async function manageCoordination(subArgs, flags) {
   const coordCmd = subArgs[1];
 
   switch (coordCmd) {
-  case 'status':
-    printSuccess('Task coordination status:');
-    console.log('🎯 Coordination engine: Not running');
-    console.log('   Active coordinators: 0');
-    console.log('   Pending tasks: 0');
-    console.log('   Resource utilization: 0%');
-    break;
+    case 'status':
+      printSuccess('Task coordination status:');
+      console.log('🎯 Coordination engine: Not running');
+      console.log('   Active coordinators: 0');
+      console.log('   Pending tasks: 0');
+      console.log('   Resource utilization: 0%');
+      break;
 
-  case 'optimize':
-    printSuccess('Optimizing task coordination...');
-    console.log('⚡ Optimization would include:');
-    console.log('   - Task dependency analysis');
-    console.log('   - Resource allocation optimization');
-    console.log('   - Parallel execution planning');
-    break;
+    case 'optimize':
+      printSuccess('Optimizing task coordination...');
+      console.log('⚡ Optimization would include:');
+      console.log('   - Task dependency analysis');
+      console.log('   - Resource allocation optimization');
+      console.log('   - Parallel execution planning');
+      break;
 
-  default:
-    console.log('Coordination commands: status, optimize');
+    default:
+      console.log('Coordination commands: status, optimize');
   }
 }
 

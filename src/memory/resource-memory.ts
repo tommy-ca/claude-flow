@@ -68,11 +68,14 @@ export interface ResourcePrediction {
   timestamp: number;
   serverId: string;
   horizon: '1h' | '6h' | '24h' | '7d';
-  predictions: Record<string, {
-    value: number;
-    confidence: number;
-    trend: 'increasing' | 'decreasing' | 'stable';
-  }>;
+  predictions: Record<
+    string,
+    {
+      value: number;
+      confidence: number;
+      trend: 'increasing' | 'decreasing' | 'stable';
+    }
+  >;
   algorithm: string;
   accuracy?: number;
 }
@@ -150,16 +153,16 @@ export class ResourceMemoryManager extends EventEmitter {
    */
   async initialize(): Promise<void> {
     await this.memoryManager.initialize();
-    
+
     // Load cached data
     await this.loadCaches();
-    
+
     // Set up cleanup interval
     this.cleanupInterval = setInterval(
       () => this.cleanup(),
       24 * 60 * 60 * 1000 // Daily cleanup
     );
-    
+
     logger.info('Resource memory manager initialized');
   }
 
@@ -171,7 +174,7 @@ export class ResourceMemoryManager extends EventEmitter {
       timestamp: report.timestamp,
       serverId: report.serverId,
       metrics: this.convertReportToMetrics(report),
-      events: [],
+      events: []
     };
 
     // Store in memory
@@ -184,7 +187,9 @@ export class ResourceMemoryManager extends EventEmitter {
     // Emit event
     this.emit('metrics-stored', entry);
 
-    logger.debug(`Stored metrics for server ${report.serverId} at ${new Date(report.timestamp).toISOString()}`);
+    logger.debug(
+      `Stored metrics for server ${report.serverId} at ${new Date(report.timestamp).toISOString()}`
+    );
   }
 
   /**
@@ -193,19 +198,19 @@ export class ResourceMemoryManager extends EventEmitter {
   async storeEvent(event: ResourceEvent): Promise<void> {
     const key = `event:${event.id}`;
     await this.memoryManager.store(key, event);
-    
+
     // Update cache
     this.eventCache.set(event.id, event);
-    
+
     // Index by server and timestamp if enabled
     if (this.indexingEnabled && event.serverId) {
       const indexKey = `event_index:${event.serverId}:${event.timestamp}`;
       await this.memoryManager.store(indexKey, event.id);
     }
-    
+
     // Emit event
     this.emit('event-stored', event);
-    
+
     logger.debug(`Stored event ${event.id} for server ${event.serverId}`);
   }
 
@@ -215,13 +220,13 @@ export class ResourceMemoryManager extends EventEmitter {
   async storePrediction(prediction: ResourcePrediction): Promise<void> {
     const key = `prediction:${prediction.serverId}:${prediction.horizon}:${prediction.timestamp}`;
     await this.memoryManager.store(key, prediction);
-    
+
     // Update cache
     this.predictionCache.set(key, prediction);
-    
+
     // Emit event
     this.emit('prediction-stored', prediction);
-    
+
     logger.debug(`Stored prediction for server ${prediction.serverId} (${prediction.horizon})`);
   }
 
@@ -242,10 +247,10 @@ export class ResourceMemoryManager extends EventEmitter {
     } = query;
 
     let results: ResourceMemoryEntry[] = [];
-    
+
     // Determine servers to query
-    const targetServers = serverId ? [serverId] : (serverIds || await this.getAllServerIds());
-    
+    const targetServers = serverId ? [serverId] : serverIds || (await this.getAllServerIds());
+
     // Query each server
     for (const server of targetServers) {
       const serverResults = await this.queryServerMetrics(server, {
@@ -255,23 +260,23 @@ export class ResourceMemoryManager extends EventEmitter {
         limit,
         offset
       });
-      
+
       results.push(...serverResults);
     }
-    
+
     // Sort by timestamp
     results.sort((a, b) => a.timestamp - b.timestamp);
-    
+
     // Apply aggregation if requested
     if (aggregation !== 'none' && interval) {
       results = this.aggregateMetrics(results, aggregation, interval);
     }
-    
+
     // Apply limit
     if (limit > 0) {
       results = results.slice(0, limit);
     }
-    
+
     return results;
   }
 
@@ -291,88 +296,90 @@ export class ResourceMemoryManager extends EventEmitter {
     } = query;
 
     let results: ResourceEvent[] = [];
-    
+
     // Query from cache first
     const cachedEvents = Array.from(this.eventCache.values());
-    
+
     // Filter cached events
     results = cachedEvents.filter(event => {
       // Server filter
       if (serverId && event.serverId !== serverId) return false;
       if (serverIds && (!event.serverId || !serverIds.includes(event.serverId))) return false;
-      
+
       // Time filter
       if (startTime && event.timestamp < startTime) return false;
       if (endTime && event.timestamp > endTime) return false;
-      
+
       // Event type filter
       if (eventTypes && !eventTypes.includes(event.type)) return false;
-      
+
       // Severity filter
       if (minSeverity) {
         const severityOrder = { low: 0, medium: 1, high: 2, critical: 3 };
         if (severityOrder[event.severity] < severityOrder[minSeverity]) return false;
       }
-      
+
       return true;
     });
-    
+
     // Sort by timestamp (newest first)
     results.sort((a, b) => b.timestamp - a.timestamp);
-    
+
     // Apply pagination
     if (offset > 0) {
       results = results.slice(offset);
     }
-    
+
     if (limit > 0) {
       results = results.slice(0, limit);
     }
-    
+
     return results;
   }
 
   /**
    * Query resource predictions
    */
-  async queryPredictions(query: ResourceQuery & { 
-    horizon?: '1h' | '6h' | '24h' | '7d';
-    algorithm?: string;
-  }): Promise<ResourcePrediction[]> {
+  async queryPredictions(
+    query: ResourceQuery & {
+      horizon?: '1h' | '6h' | '24h' | '7d';
+      algorithm?: string;
+    }
+  ): Promise<ResourcePrediction[]> {
     const { serverId, serverIds, startTime, endTime, horizon, algorithm, limit = 100 } = query;
-    
+
     let results: ResourcePrediction[] = [];
-    
+
     // Query from cache
     const cachedPredictions = Array.from(this.predictionCache.values());
-    
+
     // Filter predictions
     results = cachedPredictions.filter(prediction => {
       // Server filter
       if (serverId && prediction.serverId !== serverId) return false;
       if (serverIds && !serverIds.includes(prediction.serverId)) return false;
-      
+
       // Time filter
       if (startTime && prediction.timestamp < startTime) return false;
       if (endTime && prediction.timestamp > endTime) return false;
-      
+
       // Horizon filter
       if (horizon && prediction.horizon !== horizon) return false;
-      
+
       // Algorithm filter
       if (algorithm && prediction.algorithm !== algorithm) return false;
-      
+
       return true;
     });
-    
+
     // Sort by timestamp (newest first)
     results.sort((a, b) => b.timestamp - a.timestamp);
-    
+
     // Apply limit
     if (limit > 0) {
       results = results.slice(0, limit);
     }
-    
+
     return results;
   }
 
@@ -391,7 +398,7 @@ export class ResourceMemoryManager extends EventEmitter {
       endTime,
       limit: 10000 // Large limit to get all data
     });
-    
+
     // Query events
     const events = await this.queryEvents({
       serverId,
@@ -399,16 +406,16 @@ export class ResourceMemoryManager extends EventEmitter {
       endTime,
       limit: 10000
     });
-    
+
     // Calculate summary
     const summary: ResourceSummary = {
       serverId,
       period: { start: startTime, end: endTime },
       metrics: this.calculateMetricsSummary(metrics),
       events: this.calculateEventsSummary(events),
-      trends: this.calculateTrends(metrics),
+      trends: this.calculateTrends(metrics)
     };
-    
+
     return summary;
   }
 
@@ -421,14 +428,14 @@ export class ResourceMemoryManager extends EventEmitter {
   ): Promise<Array<{ timestamp: number; status: string; metrics: any }>> {
     const endTime = Date.now();
     const startTime = endTime - duration;
-    
+
     const metrics = await this.queryMetrics({
       serverId,
       startTime,
       endTime,
       limit: 1000
     });
-    
+
     return metrics.map(entry => ({
       timestamp: entry.timestamp,
       status: this.determineHealthStatus(entry.metrics),
@@ -454,37 +461,37 @@ export class ResourceMemoryManager extends EventEmitter {
   }> {
     const endTime = Date.now();
     const startTime = endTime - duration;
-    
+
     const allServers = await this.getAllServerIds();
     const recentMetrics = await this.queryMetrics({
       startTime,
       endTime,
       limit: 5000
     });
-    
+
     const recentEvents = await this.queryEvents({
       startTime,
       endTime,
       eventTypes: ['alert'],
       limit: 1000
     });
-    
+
     // Calculate cluster metrics
     const healthyServers = new Set(
       recentMetrics
         .filter(m => this.determineHealthStatus(m.metrics) === 'healthy')
         .map(m => m.serverId)
     ).size;
-    
+
     const averageUtilization = this.calculateClusterUtilization(recentMetrics);
     const trends = this.calculateClusterTrends(recentMetrics);
-    
+
     return {
       totalServers: allServers.length,
       healthyServers,
       alerts: recentEvents.length,
       averageUtilization,
-      trends,
+      trends
     };
   }
 
@@ -502,7 +509,7 @@ export class ResourceMemoryManager extends EventEmitter {
   ): Promise<void> {
     const key = `annotation:${serverId}:${timestamp}:${Date.now()}`;
     await this.memoryManager.store(key, annotation);
-    
+
     logger.debug(`Added annotation for server ${serverId} at ${new Date(timestamp).toISOString()}`);
   }
 
@@ -524,35 +531,34 @@ export class ResourceMemoryManager extends EventEmitter {
    */
   private async cleanup(): Promise<void> {
     const cutoffTime = Date.now() - this.retentionPeriod;
-    
+
     logger.info(`Starting resource memory cleanup (cutoff: ${new Date(cutoffTime).toISOString()})`);
-    
+
     try {
       // Clean up metrics cache
       for (const [serverId, entries] of this.metricsCache.entries()) {
         const filtered = entries.filter(entry => entry.timestamp > cutoffTime);
         this.metricsCache.set(serverId, filtered);
       }
-      
+
       // Clean up event cache
       for (const [eventId, event] of this.eventCache.entries()) {
         if (event.timestamp < cutoffTime) {
           this.eventCache.delete(eventId);
         }
       }
-      
+
       // Clean up prediction cache
       for (const [key, prediction] of this.predictionCache.entries()) {
         if (prediction.timestamp < cutoffTime) {
           this.predictionCache.delete(key);
         }
       }
-      
+
       // Clean up storage
       await this.memoryManager.cleanup();
-      
+
       logger.info('Resource memory cleanup completed');
-      
     } catch (error) {
       logger.error('Resource memory cleanup failed:', error);
     }
@@ -569,7 +575,7 @@ export class ResourceMemoryManager extends EventEmitter {
       memory: report.resources.memory,
       gpu: report.resources.gpu,
       network: report.resources.network,
-      disk: report.resources.disk,
+      disk: report.resources.disk
     };
   }
 
@@ -580,10 +586,10 @@ export class ResourceMemoryManager extends EventEmitter {
     if (!this.metricsCache.has(serverId)) {
       this.metricsCache.set(serverId, []);
     }
-    
+
     const entries = this.metricsCache.get(serverId)!;
     entries.push(entry);
-    
+
     // Keep only recent entries in cache
     const maxCacheSize = 1000;
     if (entries.length > maxCacheSize) {
@@ -597,28 +603,28 @@ export class ResourceMemoryManager extends EventEmitter {
    */
   private async loadCaches(): Promise<void> {
     // Load recent metrics
-    const recentTime = Date.now() - (60 * 60 * 1000); // Last hour
+    const recentTime = Date.now() - 60 * 60 * 1000; // Last hour
     const serverIds = await this.getAllServerIds();
-    
+
     for (const serverId of serverIds) {
       const entries = await this.queryServerMetrics(serverId, {
         startTime: recentTime,
         limit: 100
       });
-      
+
       this.metricsCache.set(serverId, entries);
     }
-    
+
     // Load recent events
     const recentEvents = await this.queryEvents({
       startTime: recentTime,
       limit: 1000
     });
-    
+
     for (const event of recentEvents) {
       this.eventCache.set(event.id, event);
     }
-    
+
     logger.debug('Resource memory caches loaded');
   }
 
@@ -644,11 +650,11 @@ export class ResourceMemoryManager extends EventEmitter {
         return true;
       });
     }
-    
+
     // Query from storage
     const pattern = `metrics:${serverId}:*`;
     const keys = await this.memoryManager.scan(pattern);
-    
+
     const results: ResourceMemoryEntry[] = [];
     for (const key of keys) {
       const entry = await this.memoryManager.retrieve(key);
@@ -656,7 +662,7 @@ export class ResourceMemoryManager extends EventEmitter {
         results.push(entry as ResourceMemoryEntry);
       }
     }
-    
+
     return results;
   }
 
@@ -666,7 +672,7 @@ export class ResourceMemoryManager extends EventEmitter {
   private async getAllServerIds(): Promise<string[]> {
     const pattern = 'metrics:*';
     const keys = await this.memoryManager.scan(pattern);
-    
+
     const serverIds = new Set<string>();
     for (const key of keys) {
       const parts = key.split(':');
@@ -674,7 +680,7 @@ export class ResourceMemoryManager extends EventEmitter {
         serverIds.add(parts[1]);
       }
     }
-    
+
     return Array.from(serverIds);
   }
 
@@ -687,7 +693,7 @@ export class ResourceMemoryManager extends EventEmitter {
     interval: number
   ): ResourceMemoryEntry[] {
     const buckets = new Map<number, ResourceMemoryEntry[]>();
-    
+
     // Group entries by time interval
     for (const entry of entries) {
       const bucketTime = Math.floor(entry.timestamp / interval) * interval;
@@ -696,7 +702,7 @@ export class ResourceMemoryManager extends EventEmitter {
       }
       buckets.get(bucketTime)!.push(entry);
     }
-    
+
     // Aggregate each bucket
     const aggregated: ResourceMemoryEntry[] = [];
     for (const [bucketTime, bucketEntries] of buckets.entries()) {
@@ -704,7 +710,7 @@ export class ResourceMemoryManager extends EventEmitter {
       aggregatedEntry.timestamp = bucketTime;
       aggregated.push(aggregatedEntry);
     }
-    
+
     return aggregated;
   }
 
@@ -718,11 +724,11 @@ export class ResourceMemoryManager extends EventEmitter {
     if (entries.length === 0) {
       throw new Error('Cannot aggregate empty bucket');
     }
-    
+
     if (entries.length === 1) {
       return entries[0];
     }
-    
+
     // Create base entry
     const base = entries[0];
     const aggregated: ResourceMemoryEntry = {
@@ -737,25 +743,25 @@ export class ResourceMemoryManager extends EventEmitter {
       },
       events: []
     };
-    
+
     // Aggregate CPU
     const cpuValues = entries.map(e => e.metrics.cpu.usage);
     aggregated.metrics.cpu.usage = this.applyAggregation(cpuValues, aggregation);
-    
+
     // Aggregate Memory
     const memoryUsedValues = entries.map(e => e.metrics.memory.used);
     const memoryAvailableValues = entries.map(e => e.metrics.memory.available);
     aggregated.metrics.memory.used = this.applyAggregation(memoryUsedValues, aggregation);
     aggregated.metrics.memory.available = this.applyAggregation(memoryAvailableValues, aggregation);
-    
+
     // Aggregate Network
     const latencyValues = entries.map(e => e.metrics.network.latency);
     aggregated.metrics.network.latency = this.applyAggregation(latencyValues, aggregation);
-    
+
     // Combine events
     const allEvents = entries.flatMap(e => e.events);
     aggregated.events = Array.from(new Set(allEvents));
-    
+
     return aggregated;
   }
 
@@ -789,11 +795,11 @@ export class ResourceMemoryManager extends EventEmitter {
         uptime: 0
       };
     }
-    
+
     const cpuValues = metrics.map(m => m.metrics.cpu.usage);
     const memoryValues = metrics.map(m => (m.metrics.memory.used / m.metrics.memory.total) * 100);
     const latencyValues = metrics.map(m => m.metrics.network.latency);
-    
+
     return {
       cpu: {
         avg: this.applyAggregation(cpuValues, 'avg'),
@@ -819,12 +825,12 @@ export class ResourceMemoryManager extends EventEmitter {
   private calculateEventsSummary(events: ResourceEvent[]): ResourceSummary['events'] {
     const byType: Record<string, number> = {};
     const bySeverity: Record<string, number> = {};
-    
+
     for (const event of events) {
       byType[event.type] = (byType[event.type] || 0) + 1;
       bySeverity[event.severity] = (bySeverity[event.severity] || 0) + 1;
     }
-    
+
     return {
       total: events.length,
       byType,
@@ -835,25 +841,27 @@ export class ResourceMemoryManager extends EventEmitter {
   /**
    * Calculate trends
    */
-  private calculateTrends(metrics: ResourceMemoryEntry[]): Record<string, 'increasing' | 'decreasing' | 'stable'> {
+  private calculateTrends(
+    metrics: ResourceMemoryEntry[]
+  ): Record<string, 'increasing' | 'decreasing' | 'stable'> {
     if (metrics.length < 2) {
       return {};
     }
-    
+
     const trends: Record<string, 'increasing' | 'decreasing' | 'stable'> = {};
-    
+
     // Calculate CPU trend
     const cpuValues = metrics.map(m => m.metrics.cpu.usage);
     trends.cpu = this.calculateTrend(cpuValues);
-    
+
     // Calculate Memory trend
     const memoryValues = metrics.map(m => (m.metrics.memory.used / m.metrics.memory.total) * 100);
     trends.memory = this.calculateTrend(memoryValues);
-    
+
     // Calculate Network trend
     const latencyValues = metrics.map(m => m.metrics.network.latency);
     trends.network = this.calculateTrend(latencyValues);
-    
+
     return trends;
   }
 
@@ -862,11 +870,11 @@ export class ResourceMemoryManager extends EventEmitter {
    */
   private calculateTrend(values: number[]): 'increasing' | 'decreasing' | 'stable' {
     if (values.length < 2) return 'stable';
-    
+
     const first = values[0];
     const last = values[values.length - 1];
     const change = (last - first) / first;
-    
+
     if (change > 0.1) return 'increasing';
     if (change < -0.1) return 'decreasing';
     return 'stable';
@@ -879,10 +887,10 @@ export class ResourceMemoryManager extends EventEmitter {
     if (metrics.length === 0) {
       return {};
     }
-    
+
     const cpuValues = metrics.map(m => m.metrics.cpu.usage);
     const memoryValues = metrics.map(m => (m.metrics.memory.used / m.metrics.memory.total) * 100);
-    
+
     return {
       cpu: this.applyAggregation(cpuValues, 'avg'),
       memory: this.applyAggregation(memoryValues, 'avg')
@@ -892,13 +900,17 @@ export class ResourceMemoryManager extends EventEmitter {
   /**
    * Calculate cluster trends
    */
-  private calculateClusterTrends(metrics: ResourceMemoryEntry[]): Record<string, 'up' | 'down' | 'stable'> {
+  private calculateClusterTrends(
+    metrics: ResourceMemoryEntry[]
+  ): Record<string, 'up' | 'down' | 'stable'> {
     const trends = this.calculateTrends(metrics);
-    
+
     return {
       cpu: trends.cpu === 'increasing' ? 'up' : trends.cpu === 'decreasing' ? 'down' : 'stable',
-      memory: trends.memory === 'increasing' ? 'up' : trends.memory === 'decreasing' ? 'down' : 'stable',
-      network: trends.network === 'increasing' ? 'up' : trends.network === 'decreasing' ? 'down' : 'stable'
+      memory:
+        trends.memory === 'increasing' ? 'up' : trends.memory === 'decreasing' ? 'down' : 'stable',
+      network:
+        trends.network === 'increasing' ? 'up' : trends.network === 'decreasing' ? 'down' : 'stable'
     };
   }
 
@@ -908,7 +920,7 @@ export class ResourceMemoryManager extends EventEmitter {
   private determineHealthStatus(metrics: ResourceMetrics): string {
     const cpuUsage = metrics.cpu.usage;
     const memoryUsage = (metrics.memory.used / metrics.memory.total) * 100;
-    
+
     if (cpuUsage > 90 || memoryUsage > 95) return 'critical';
     if (cpuUsage > 80 || memoryUsage > 85) return 'degraded';
     return 'healthy';
@@ -921,9 +933,9 @@ export class ResourceMemoryManager extends EventEmitter {
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval);
     }
-    
+
     await this.memoryManager.shutdown();
-    
+
     logger.info('Resource memory manager shutdown');
   }
 }

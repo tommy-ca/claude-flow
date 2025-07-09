@@ -35,7 +35,7 @@ export class WorkStealingCoordinator {
   constructor(
     private config: WorkStealingConfig,
     private eventBus: IEventBus,
-    private logger: ILogger,
+    private logger: ILogger
   ) {}
 
   async initialize(): Promise<void> {
@@ -45,19 +45,16 @@ export class WorkStealingCoordinator {
     }
 
     this.logger.info('Initializing work stealing coordinator');
-    
+
     // Start periodic steal checks
-    this.stealInterval = setInterval(
-      () => this.checkAndSteal(),
-      this.config.stealInterval,
-    );
+    this.stealInterval = setInterval(() => this.checkAndSteal(), this.config.stealInterval);
   }
 
   async shutdown(): Promise<void> {
     if (this.stealInterval) {
       clearInterval(this.stealInterval);
     }
-    
+
     this.workloads.clear();
     this.taskDurations.clear();
   }
@@ -70,7 +67,7 @@ export class WorkStealingCoordinator {
       cpuUsage: 0,
       memoryUsage: 0,
       priority: 0,
-      capabilities: [],
+      capabilities: []
     };
 
     this.workloads.set(agentId, { ...existing, ...workload });
@@ -113,23 +110,20 @@ export class WorkStealingCoordinator {
     }
 
     // Calculate how many tasks to steal
-    const tasksToSteal = Math.min(
-      Math.floor(difference / 2),
-      this.config.maxStealBatch,
-    );
+    const tasksToSteal = Math.min(Math.floor(difference / 2), this.config.maxStealBatch);
 
     this.logger.info('Initiating work stealing', {
       from: maxLoaded.agentId,
       to: minLoaded.agentId,
       tasksToSteal,
-      difference,
+      difference
     });
 
     // Emit steal request event
     this.eventBus.emit('workstealing:request', {
       sourceAgent: maxLoaded.agentId,
       targetAgent: minLoaded.agentId,
-      taskCount: tasksToSteal,
+      taskCount: tasksToSteal
     });
   }
 
@@ -182,10 +176,10 @@ export class WorkStealingCoordinator {
 
     // Sort by score (descending) and return best
     candidates.sort((a, b) => b.score - a.score);
-    
+
     this.logger.debug('Agent selection scores', {
       taskId: task.id,
-      candidates: candidates.slice(0, 5), // Top 5
+      candidates: candidates.slice(0, 5) // Top 5
     });
 
     return candidates[0].agentId;
@@ -194,7 +188,7 @@ export class WorkStealingCoordinator {
   getWorkloadStats(): Record<string, unknown> {
     const stats: Record<string, unknown> = {
       totalAgents: this.workloads.size,
-      workloads: {},
+      workloads: {}
     };
 
     let totalTasks = 0;
@@ -210,7 +204,7 @@ export class WorkStealingCoordinator {
         taskCount: workload.taskCount,
         avgTaskDuration: workload.avgTaskDuration,
         cpuUsage: workload.cpuUsage,
-        memoryUsage: workload.memoryUsage,
+        memoryUsage: workload.memoryUsage
       };
     }
 

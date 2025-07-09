@@ -8,7 +8,7 @@ export const GitHubViewMCPIntegration = {
   // Tool mappings
   tools: {
     github_repo_analyze: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('🔍 Analyzing repository:', params.repo);
         return {
           code_quality: '85%',
@@ -20,7 +20,7 @@ export const GitHubViewMCPIntegration = {
     },
 
     github_pr_manage: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('🔄 Managing PR:', params);
         return {
           success: true,
@@ -31,7 +31,7 @@ export const GitHubViewMCPIntegration = {
     },
 
     github_issue_track: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('📋 Tracking issues:', params);
         return {
           open: 15,
@@ -42,7 +42,7 @@ export const GitHubViewMCPIntegration = {
     },
 
     github_release_coord: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('🚀 Coordinating release:', params);
         return {
           version: params.version,
@@ -53,7 +53,7 @@ export const GitHubViewMCPIntegration = {
     },
 
     github_workflow_auto: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('🤖 Automating workflow:', params);
         return {
           workflow: params.workflow_name,
@@ -64,7 +64,7 @@ export const GitHubViewMCPIntegration = {
     },
 
     github_code_review: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('🔍 Running code review:', params);
         return {
           score: '8.5/10',
@@ -80,7 +80,7 @@ export const GitHubViewMCPIntegration = {
     },
 
     github_sync_coord: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('🔄 Syncing repositories:', params);
         return {
           synced: params.repos.length,
@@ -90,7 +90,7 @@ export const GitHubViewMCPIntegration = {
     },
 
     github_metrics: {
-      handler: async (params) => {
+      handler: async params => {
         console.log('📊 Fetching metrics:', params);
         return {
           commits: { total: 1542, week: 87 },
@@ -138,7 +138,7 @@ export class GitHubMCPBridge {
 
   setupHandlers() {
     // Listen for tool execution requests from the view
-    this.eventBus.on('tool:execute', async (data) => {
+    this.eventBus.on('tool:execute', async data => {
       if (data.source === 'github-view' && data.tool.startsWith('github_')) {
         try {
           // In real implementation, this would call the actual MCP tool

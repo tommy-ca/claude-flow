@@ -1,6 +1,6 @@
 /**
  * Memory Monitor and Optimization System
- * 
+ *
  * Provides real-time monitoring, analysis, and optimization
  * recommendations for the Hive Mind memory subsystem.
  */
@@ -164,7 +164,6 @@ export class MemoryMonitor extends EventEmitter {
 
       const duration = performance.now() - startTime;
       this.emit('metrics:collected', { metrics, duration });
-
     } catch (error) {
       this.emit('error', error);
     }
@@ -175,7 +174,7 @@ export class MemoryMonitor extends EventEmitter {
    */
   private async establishBaseline(): Promise<void> {
     const samples = [];
-    
+
     for (let i = 0; i < 10; i++) {
       await this.collectMetrics();
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -419,8 +418,8 @@ export class MemoryMonitor extends EventEmitter {
     if (!pools) return 0;
 
     const efficiencies = Object.values(pools).map((pool: any) => pool.reuseRate || 0);
-    return efficiencies.length > 0 
-      ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length 
+    return efficiencies.length > 0
+      ? efficiencies.reduce((a, b) => a + b, 0) / efficiencies.length
       : 0;
   }
 
@@ -589,9 +588,9 @@ export class MemoryMonitor extends EventEmitter {
   private cleanupOldAlerts(): void {
     const cutoff = Date.now() - 86400000; // 24 hours
     const initialCount = this.alerts.length;
-    
+
     this.alerts = this.alerts.filter(alert => alert.timestamp.getTime() > cutoff);
-    
+
     const cleaned = initialCount - this.alerts.length;
     if (cleaned > 0) {
       this.emit('alerts:cleaned', { cleaned });

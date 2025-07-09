@@ -1,4 +1,12 @@
-import { printSuccess, printError, printWarning, callRuvSwarmMCP, spawnSwarmAgent, getSwarmStatus, checkRuvSwarmAvailable } from '../utils.js';
+import {
+  printSuccess,
+  printError,
+  printWarning,
+  callRuvSwarmMCP,
+  spawnSwarmAgent,
+  getSwarmStatus,
+  checkRuvSwarmAvailable
+} from '../utils.js';
 
 // Simple ID generator
 function generateId(prefix = 'id') {
@@ -16,18 +24,18 @@ export async function coordinationAction(subArgs, flags) {
 
   try {
     switch (subcommand) {
-    case 'swarm-init':
-      await swarmInitCommand(subArgs, flags);
-      break;
-    case 'agent-spawn':
-      await agentSpawnCommand(subArgs, flags);
-      break;
-    case 'task-orchestrate':
-      await taskOrchestrateCommand(subArgs, flags);
-      break;
-    default:
-      printError(`Unknown coordination command: ${subcommand}`);
-      showCoordinationHelp();
+      case 'swarm-init':
+        await swarmInitCommand(subArgs, flags);
+        break;
+      case 'agent-spawn':
+        await agentSpawnCommand(subArgs, flags);
+        break;
+      case 'task-orchestrate':
+        await taskOrchestrateCommand(subArgs, flags);
+        break;
+      default:
+        printError(`Unknown coordination command: ${subcommand}`);
+        showCoordinationHelp();
     }
   } catch (err) {
     printError(`Coordination command failed: ${err.message}`);
@@ -77,8 +85,12 @@ async function swarmInitCommand(subArgs, flags) {
       console.log(`  📈 Performance: ${swarmResult.expectedPerformance || 'Optimized'}`);
 
       console.log('\n📋 NEXT STEPS:');
-      console.log(`  1. Spawn agents: claude-flow coordination agent-spawn --type <type> --swarm-id ${swarmId}`);
-      console.log(`  2. Orchestrate tasks: claude-flow coordination task-orchestrate --task "<description>" --swarm-id ${swarmId}`);
+      console.log(
+        `  1. Spawn agents: claude-flow coordination agent-spawn --type <type> --swarm-id ${swarmId}`
+      );
+      console.log(
+        `  2. Orchestrate tasks: claude-flow coordination task-orchestrate --task "<description>" --swarm-id ${swarmId}`
+      );
       console.log(`  3. Monitor swarm: claude-flow monitoring swarm-monitor --swarm-id ${swarmId}`);
     } else {
       printError(`Swarm initialization failed: ${swarmResult.error || 'Unknown error'}`);
@@ -99,7 +111,9 @@ async function agentSpawnCommand(subArgs, flags) {
   console.log('🤖 Spawning coordinated agent...');
   console.log(`🏷️  Agent type: ${agentType}`);
   console.log(`📛 Agent name: ${agentName}`);
-  if (swarmId) {console.log(`🐝 Target swarm: ${swarmId}`);}
+  if (swarmId) {
+    console.log(`🐝 Target swarm: ${swarmId}`);
+  }
 
   // Validate agent type
   const validTypes = ['coordinator', 'coder', 'researcher', 'analyst', 'tester', 'general'];
@@ -151,7 +165,9 @@ async function taskOrchestrateCommand(subArgs, flags) {
   console.log('🎯 Orchestrating task coordination...');
   console.log(`📋 Task: ${task}`);
   console.log(`📊 Strategy: ${strategy}`);
-  if (swarmId) {console.log(`🐝 Swarm: ${swarmId}`);}
+  if (swarmId) {
+    console.log(`🐝 Swarm: ${swarmId}`);
+  }
 
   // Simulate task orchestration
   console.log('\n🔄 Analyzing task requirements...');

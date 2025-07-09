@@ -38,7 +38,9 @@ async function getHiveMindMetrics() {
   try {
     const db = new Database(dbPath);
 
-    const stats = db.prepare(`
+    const stats = db
+      .prepare(
+        `
       SELECT 
         (SELECT COUNT(*) FROM swarms) as total_swarms,
         (SELECT COUNT(*) FROM agents) as total_agents,
@@ -46,9 +48,13 @@ async function getHiveMindMetrics() {
         (SELECT COUNT(*) FROM tasks WHERE status = 'completed') as completed_tasks,
         (SELECT COUNT(*) FROM tasks WHERE status = 'in_progress') as in_progress_tasks,
         (SELECT COUNT(*) FROM tasks WHERE status = 'pending') as pending_tasks
-    `).get();
+    `
+      )
+      .get();
 
-    const swarmBreakdown = db.prepare(`
+    const swarmBreakdown = db
+      .prepare(
+        `
       SELECT 
         s.id,
         s.name,
@@ -60,7 +66,9 @@ async function getHiveMindMetrics() {
       FROM swarms s
       LEFT JOIN tasks t ON s.id = t.swarm_id
       GROUP BY s.id, s.name, s.objective
-    `).all();
+    `
+      )
+      .all();
 
     db.close();
 
@@ -70,7 +78,6 @@ async function getHiveMindMetrics() {
       overall: stats,
       swarms: swarmBreakdown
     };
-
   } catch (error) {
     return {
       available: false,
@@ -92,7 +99,9 @@ async function getRuvSwarmMetrics() {
   try {
     const db = new Database(dbPath);
 
-    const stats = db.prepare(`
+    const stats = db
+      .prepare(
+        `
       SELECT 
         (SELECT COUNT(*) FROM swarms) as total_swarms,
         (SELECT COUNT(*) FROM agents) as total_agents,
@@ -100,9 +109,13 @@ async function getRuvSwarmMetrics() {
         (SELECT COUNT(*) FROM tasks WHERE status = 'completed') as completed_tasks,
         (SELECT COUNT(*) FROM tasks WHERE status = 'in_progress') as in_progress_tasks,
         (SELECT COUNT(*) FROM tasks WHERE status = 'pending') as pending_tasks
-    `).get();
+    `
+      )
+      .get();
 
-    const swarmBreakdown = db.prepare(`
+    const swarmBreakdown = db
+      .prepare(
+        `
       SELECT 
         s.id,
         s.name,
@@ -115,7 +128,9 @@ async function getRuvSwarmMetrics() {
       FROM swarms s
       LEFT JOIN tasks t ON s.id = t.swarm_id
       GROUP BY s.id, s.name, s.topology, s.strategy
-    `).all();
+    `
+      )
+      .all();
 
     db.close();
 
@@ -125,7 +140,6 @@ async function getRuvSwarmMetrics() {
       overall: stats,
       swarms: swarmBreakdown
     };
-
   } catch (error) {
     return {
       available: false,
@@ -154,17 +168,38 @@ async function integrateMetrics(hiveMind, ruvSwarm) {
   // Create combined totals
   if (integration.systems.length > 0) {
     integration.combined = {
-      total_swarms: integration.systems.reduce((sum, sys) => sum + (sys.overall?.total_swarms || 0), 0),
-      total_agents: integration.systems.reduce((sum, sys) => sum + (sys.overall?.total_agents || 0), 0),
-      total_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.total_tasks || 0), 0),
-      completed_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.completed_tasks || 0), 0),
-      in_progress_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.in_progress_tasks || 0), 0),
-      pending_tasks: integration.systems.reduce((sum, sys) => sum + (sys.overall?.pending_tasks || 0), 0)
+      total_swarms: integration.systems.reduce(
+        (sum, sys) => sum + (sys.overall?.total_swarms || 0),
+        0
+      ),
+      total_agents: integration.systems.reduce(
+        (sum, sys) => sum + (sys.overall?.total_agents || 0),
+        0
+      ),
+      total_tasks: integration.systems.reduce(
+        (sum, sys) => sum + (sys.overall?.total_tasks || 0),
+        0
+      ),
+      completed_tasks: integration.systems.reduce(
+        (sum, sys) => sum + (sys.overall?.completed_tasks || 0),
+        0
+      ),
+      in_progress_tasks: integration.systems.reduce(
+        (sum, sys) => sum + (sys.overall?.in_progress_tasks || 0),
+        0
+      ),
+      pending_tasks: integration.systems.reduce(
+        (sum, sys) => sum + (sys.overall?.pending_tasks || 0),
+        0
+      )
     };
 
-    integration.combined.success_rate = integration.combined.total_tasks > 0
-      ? ((integration.combined.completed_tasks / integration.combined.total_tasks) * 100).toFixed(1)
-      : '0';
+    integration.combined.success_rate =
+      integration.combined.total_tasks > 0
+        ? ((integration.combined.completed_tasks / integration.combined.total_tasks) * 100).toFixed(
+            1
+          )
+        : '0';
   }
 
   return integration;
@@ -199,8 +234,12 @@ export async function showUnifiedMetrics() {
     console.log(chalk.gray('─'.repeat(40)));
 
     const stats = system.overall;
-    console.log(`  Swarms: ${stats.total_swarms}, Agents: ${stats.total_agents}, Tasks: ${stats.total_tasks}`);
-    console.log(`  Completed: ${stats.completed_tasks}, In Progress: ${stats.in_progress_tasks}, Pending: ${stats.pending_tasks}`);
+    console.log(
+      `  Swarms: ${stats.total_swarms}, Agents: ${stats.total_agents}, Tasks: ${stats.total_tasks}`
+    );
+    console.log(
+      `  Completed: ${stats.completed_tasks}, In Progress: ${stats.in_progress_tasks}, Pending: ${stats.pending_tasks}`
+    );
 
     if (system.swarms && system.swarms.length > 0) {
       console.log('\n  Per-Swarm Breakdown:');
@@ -224,8 +263,12 @@ export async function showUnifiedMetrics() {
 
   // Show system availability
   console.log(chalk.cyan('System Availability:'));
-  console.log(`  Hive-Mind: ${metrics.hiveMind.available ? chalk.green('✓ Available') : chalk.red('✗ ' + metrics.hiveMind.reason)}`);
-  console.log(`  ruv-swarm: ${metrics.ruvSwarm.available ? chalk.green('✓ Available') : chalk.red('✗ ' + metrics.ruvSwarm.reason)}`);
+  console.log(
+    `  Hive-Mind: ${metrics.hiveMind.available ? chalk.green('✓ Available') : chalk.red('✗ ' + metrics.hiveMind.reason)}`
+  );
+  console.log(
+    `  ruv-swarm: ${metrics.ruvSwarm.available ? chalk.green('✓ Available') : chalk.red('✗ ' + metrics.ruvSwarm.reason)}`
+  );
 
   return metrics;
 }
@@ -268,15 +311,12 @@ export async function fixTaskAttribution() {
     } else {
       console.log(chalk.green('✓ All swarms have task assignments'));
     }
-
   } else if (metrics.hiveMind.available) {
     console.log(chalk.yellow('⚠️  Only Hive-Mind system available'));
     fixes.push('SETUP_RUV_SWARM');
-
   } else if (metrics.ruvSwarm.available) {
     console.log(chalk.yellow('⚠️  Only ruv-swarm system available'));
     fixes.push('SETUP_HIVE_MIND');
-
   } else {
     console.log(chalk.red('✗ No swarm systems available'));
     fixes.push('SETUP_BOTH_SYSTEMS');
@@ -299,25 +339,25 @@ export async function fixTaskAttribution() {
  */
 async function applyFix(fixType, metrics) {
   switch (fixType) {
-  case 'CREATE_SAMPLE_TASKS':
-    console.log(chalk.blue('📝 Creating sample tasks for empty swarms...'));
-    await createSampleTasks(metrics);
-    break;
+    case 'CREATE_SAMPLE_TASKS':
+      console.log(chalk.blue('📝 Creating sample tasks for empty swarms...'));
+      await createSampleTasks(metrics);
+      break;
 
-  case 'SETUP_RUV_SWARM':
-    console.log(chalk.blue('🐝 Setting up ruv-swarm system...'));
-    console.log(chalk.gray('  Run: npx ruv-swarm init'));
-    break;
+    case 'SETUP_RUV_SWARM':
+      console.log(chalk.blue('🐝 Setting up ruv-swarm system...'));
+      console.log(chalk.gray('  Run: npx ruv-swarm init'));
+      break;
 
-  case 'SETUP_HIVE_MIND':
-    console.log(chalk.blue('🧠 Setting up hive-mind system...'));
-    console.log(chalk.gray('  Run: claude-flow hive-mind init'));
-    break;
+    case 'SETUP_HIVE_MIND':
+      console.log(chalk.blue('🧠 Setting up hive-mind system...'));
+      console.log(chalk.gray('  Run: claude-flow hive-mind init'));
+      break;
 
-  case 'SETUP_BOTH_SYSTEMS':
-    console.log(chalk.blue('🔧 Setting up both swarm systems...'));
-    console.log(chalk.gray('  Run: claude-flow hive-mind init && npx ruv-swarm init'));
-    break;
+    case 'SETUP_BOTH_SYSTEMS':
+      console.log(chalk.blue('🔧 Setting up both swarm systems...'));
+      console.log(chalk.gray('  Run: claude-flow hive-mind init && npx ruv-swarm init'));
+      break;
   }
 }
 

@@ -16,6 +16,7 @@ Configure metrics, logs, uptime checks, and alerts using batch operations for co
 ### Core Monitoring Operations
 
 1. **Concurrent Metrics Collection**:
+
    ```javascript
    const metrics = await batchtools.parallel([
      () => collectCPUMetrics(allServices),
@@ -27,6 +28,7 @@ Configure metrics, logs, uptime checks, and alerts using batch operations for co
    ```
 
 2. **Parallel Log Analysis**:
+
    ```javascript
    const logAnalysis = await batchtools.analyzeLogs({
      sources: ['app.log', 'error.log', 'access.log', 'security.log'],
@@ -42,6 +44,7 @@ Configure metrics, logs, uptime checks, and alerts using batch operations for co
    ```
 
 3. **Batch Uptime Monitoring**:
+
    ```javascript
    const endpoints = await getHealthCheckEndpoints();
    const uptimeResults = await batchtools.checkEndpoints(endpoints, {
@@ -66,6 +69,7 @@ Configure metrics, logs, uptime checks, and alerts using batch operations for co
 ### Advanced Monitoring Workflows
 
 **Real-time Performance Analysis**:
+
 ```javascript
 const performanceMonitoring = await batchtools.streamMetrics({
   services: getAllServices(),
@@ -77,6 +81,7 @@ const performanceMonitoring = await batchtools.streamMetrics({
 ```
 
 **Parallel Regression Detection**:
+
 ```javascript
 const regressionChecks = await batchtools.parallel([
   () => compareMetrics('current', 'baseline', 'response_time'),
@@ -88,6 +93,7 @@ const regressionChecks = await batchtools.parallel([
 ```
 
 **Batch User Experience Monitoring**:
+
 ```javascript
 const uxMetrics = await batchtools.batch([
   { type: 'synthetic', tests: syntheticTests, regions: allRegions },
@@ -100,19 +106,25 @@ const uxMetrics = await batchtools.batch([
 ### Comprehensive System Health Checks
 
 1. **Multi-Region Monitoring**:
+
    ```javascript
    const regions = ['us-east-1', 'eu-west-1', 'ap-south-1'];
-   const regionalHealth = await batchtools.map(regions, async (region) => {
-     return {
-       region,
-       services: await checkServicesInRegion(region),
-       latency: await measureCrossRegionLatency(region),
-       capacity: await checkRegionalCapacity(region)
-     };
-   }, { concurrency: regions.length });
+   const regionalHealth = await batchtools.map(
+     regions,
+     async region => {
+       return {
+         region,
+         services: await checkServicesInRegion(region),
+         latency: await measureCrossRegionLatency(region),
+         capacity: await checkRegionalCapacity(region)
+       };
+     },
+     { concurrency: regions.length }
+   );
    ```
 
 2. **Dependency Health Monitoring**:
+
    ```javascript
    const dependencies = await batchtools.monitorDependencies({
      external: ['payment-api', 'email-service', 'cdn'],
@@ -170,6 +182,7 @@ const reports = await batchtools.parallel([
 ### Task Delegation
 
 Use `new_task` with batch specifications to:
+
 - Escalate performance degradations for optimization
 - Trigger parallel hotfix deployments
 - Coordinate multi-team incident response
@@ -184,6 +197,7 @@ Use `new_task` with batch specifications to:
 5. **Automated Remediation**: Implement self-healing for common issues
 
 Return `attempt_completion` with:
+
 - Consolidated monitoring dashboard data
 - Parallel analysis results across all services
 - Performance comparison with baselines
@@ -192,6 +206,7 @@ Return `attempt_completion` with:
 - SLA/SLO compliance status
 
 ## Groups/Permissions
+
 - read
 - edit
 - browser
@@ -238,7 +253,7 @@ const continuousMonitoring = async () => {
       () => checkAllEndpoints(),
       () => validateAllSLAs()
     ]);
-    
+
     await processSnapshot(snapshot);
     await sleep(60000); // 1 minute interval
   }
@@ -252,7 +267,7 @@ const capacityPlanning = async () => {
     { collect: 'peak_patterns', period: '7d' },
     { collect: 'resource_limits', current: true }
   ]);
-  
+
   return await predictCapacityNeeds(data);
 };
 
@@ -265,7 +280,7 @@ const healthScore = async () => {
     () => calculateUserSatisfactionScore(),
     () => calculateSecurityScore()
   ]);
-  
+
   return aggregateHealthScore(dimensions);
 };
 ```

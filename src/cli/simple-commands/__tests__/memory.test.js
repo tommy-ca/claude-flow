@@ -106,9 +106,7 @@ describe('Memory Command', () => {
   describe('retrieve subcommand', () => {
     test('should retrieve memory by key', async () => {
       const mockMemory = {
-        entries: [
-          { key: 'test-key', value: 'test-value', timestamp: new Date().toISOString() }
-        ]
+        entries: [{ key: 'test-key', value: 'test-value', timestamp: new Date().toISOString() }]
       };
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockMemory);
@@ -133,9 +131,7 @@ describe('Memory Command', () => {
     test('should handle expired entries', async () => {
       const pastDate = new Date(Date.now() - 1000).toISOString();
       const mockMemory = {
-        entries: [
-          { key: 'expired', value: 'value', expiresAt: pastDate }
-        ]
+        entries: [{ key: 'expired', value: 'value', expiresAt: pastDate }]
       };
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValue(mockMemory);
@@ -194,7 +190,12 @@ describe('Memory Command', () => {
         entries: [
           { key: 'key1', value: 'v1', tags: ['important'], timestamp: new Date().toISOString() },
           { key: 'key2', value: 'v2', tags: ['temporary'], timestamp: new Date().toISOString() },
-          { key: 'key3', value: 'v3', tags: ['important', 'api'], timestamp: new Date().toISOString() }
+          {
+            key: 'key3',
+            value: 'v3',
+            tags: ['important', 'api'],
+            timestamp: new Date().toISOString()
+          }
         ]
       };
       fs.pathExists.mockResolvedValue(true);
@@ -214,9 +215,7 @@ describe('Memory Command', () => {
 
       await memoryCommand(['list'], {});
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('No memories stored')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No memories stored'));
     });
   });
 
@@ -238,9 +237,7 @@ describe('Memory Command', () => {
       expect(writeCall[1].entries).toHaveLength(1);
       expect(writeCall[1].entries[0].key).toBe('key2');
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Memory deleted: key1')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Memory deleted: key1'));
     });
 
     test('should handle non-existent key', async () => {
@@ -265,9 +262,7 @@ describe('Memory Command', () => {
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries).toEqual([]);
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('All memories cleared')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('All memories cleared'));
     });
 
     test('should warn without force flag', async () => {
@@ -293,11 +288,7 @@ describe('Memory Command', () => {
 
       await memoryCommand(['export', 'backup.json'], {});
 
-      expect(fs.writeJson).toHaveBeenCalledWith(
-        'backup.json',
-        mockMemory,
-        { spaces: 2 }
-      );
+      expect(fs.writeJson).toHaveBeenCalledWith('backup.json', mockMemory, { spaces: 2 });
 
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Memories exported to backup.json')
@@ -313,9 +304,11 @@ describe('Memory Command', () => {
           { key: 'imported2', value: 'value2' }
         ]
       };
-      fs.pathExists.mockResolvedValueOnce(true) // import file exists
+      fs.pathExists
+        .mockResolvedValueOnce(true) // import file exists
         .mockResolvedValueOnce(true); // memory file exists
-      fs.readJson.mockResolvedValueOnce(importData) // import data
+      fs.readJson
+        .mockResolvedValueOnce(importData) // import data
         .mockResolvedValueOnce({ entries: [] }); // existing memory
       fs.writeJson.mockResolvedValue(undefined);
 
@@ -334,8 +327,7 @@ describe('Memory Command', () => {
       const existingData = { entries: [{ key: 'existing', value: 'original' }] };
 
       fs.pathExists.mockResolvedValue(true);
-      fs.readJson.mockResolvedValueOnce(importData)
-        .mockResolvedValueOnce(existingData);
+      fs.readJson.mockResolvedValueOnce(importData).mockResolvedValueOnce(existingData);
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['import', 'import.json'], { merge: true });
@@ -386,9 +378,7 @@ describe('Memory Command', () => {
 
       await memoryCommand(['list'], {});
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error:')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error:'));
     });
 
     test('should handle invalid JSON in import', async () => {
@@ -397,9 +387,7 @@ describe('Memory Command', () => {
 
       await memoryCommand(['import', 'bad.json'], {});
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error:')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error:'));
     });
   });
 });

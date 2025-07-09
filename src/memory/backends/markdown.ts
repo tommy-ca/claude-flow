@@ -19,7 +19,7 @@ export class MarkdownBackend implements IMemoryBackend {
 
   constructor(
     private baseDir: string,
-    private logger: ILogger,
+    private logger: ILogger
   ) {
     this.indexPath = path.join(this.baseDir, 'index.json');
   }
@@ -115,28 +115,23 @@ export class MarkdownBackend implements IMemoryBackend {
     }
 
     if (query.tags && query.tags.length > 0) {
-      results = results.filter(e => 
-        query.tags!.some(tag => e.tags.includes(tag)),
-      );
+      results = results.filter(e => query.tags!.some(tag => e.tags.includes(tag)));
     }
 
     if (query.startTime) {
-      results = results.filter(e => 
-        e.timestamp.getTime() >= query.startTime!.getTime(),
-      );
+      results = results.filter(e => e.timestamp.getTime() >= query.startTime!.getTime());
     }
 
     if (query.endTime) {
-      results = results.filter(e => 
-        e.timestamp.getTime() <= query.endTime!.getTime(),
-      );
+      results = results.filter(e => e.timestamp.getTime() <= query.endTime!.getTime());
     }
 
     if (query.search) {
       const searchLower = query.search.toLowerCase();
-      results = results.filter(e => 
-        e.content.toLowerCase().includes(searchLower) ||
-        e.tags.some(tag => tag.toLowerCase().includes(searchLower)),
+      results = results.filter(
+        e =>
+          e.content.toLowerCase().includes(searchLower) ||
+          e.tags.some(tag => tag.toLowerCase().includes(searchLower))
       );
     }
 
@@ -155,9 +150,9 @@ export class MarkdownBackend implements IMemoryBackend {
     return Array.from(this.entries.values());
   }
 
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     try {
@@ -182,13 +177,13 @@ export class MarkdownBackend implements IMemoryBackend {
         healthy: true,
         metrics: {
           entryCount,
-          totalSizeBytes,
-        },
+          totalSizeBytes
+        }
       };
     } catch (error) {
       return {
         healthy: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -216,7 +211,7 @@ export class MarkdownBackend implements IMemoryBackend {
 
   private async saveIndex(): Promise<void> {
     const index: Record<string, MemoryEntry> = {};
-    
+
     for (const [id, entry] of this.entries) {
       index[id] = entry;
     }
@@ -242,7 +237,7 @@ export class MarkdownBackend implements IMemoryBackend {
   private getEntryFilePath(entry: MemoryEntry): string {
     const date = entry.timestamp.toISOString().split('T')[0];
     const time = entry.timestamp.toISOString().split('T')[1].replace(/:/g, '-').split('.')[0];
-    
+
     return path.join(this.baseDir, 'agents', entry.agentId, date, `${time}_${entry.id}.md`);
   }
 
@@ -255,7 +250,7 @@ export class MarkdownBackend implements IMemoryBackend {
       `**Type**: ${entry.type}`,
       `**Timestamp**: ${entry.timestamp.toISOString()}`,
       `**Version**: ${entry.version}`,
-      '',
+      ''
     ];
 
     if (entry.parentId) {

@@ -87,7 +87,6 @@ export class SparcSpecification extends SparcPhase {
 
       console.log('✅ Specification phase completed');
       return result;
-
     } catch (error) {
       console.error('❌ Specification phase failed:', error.message);
       throw error;
@@ -116,11 +115,23 @@ export class SparcSpecification extends SparcPhase {
   categorizeTask() {
     const taskLower = this.taskDescription.toLowerCase();
 
-    if (taskLower.includes('api') || taskLower.includes('endpoint') || taskLower.includes('service')) {
+    if (
+      taskLower.includes('api') ||
+      taskLower.includes('endpoint') ||
+      taskLower.includes('service')
+    ) {
       return 'api_development';
-    } else if (taskLower.includes('ui') || taskLower.includes('frontend') || taskLower.includes('interface')) {
+    } else if (
+      taskLower.includes('ui') ||
+      taskLower.includes('frontend') ||
+      taskLower.includes('interface')
+    ) {
       return 'frontend_development';
-    } else if (taskLower.includes('database') || taskLower.includes('data') || taskLower.includes('storage')) {
+    } else if (
+      taskLower.includes('database') ||
+      taskLower.includes('data') ||
+      taskLower.includes('storage')
+    ) {
       return 'data_management';
     } else if (taskLower.includes('test') || taskLower.includes('testing')) {
       return 'testing';
@@ -138,7 +149,14 @@ export class SparcSpecification extends SparcPhase {
    */
   assessComplexity() {
     const wordCount = this.taskDescription.split(' ').length;
-    const complexityKeywords = ['integrate', 'complex', 'multiple', 'advanced', 'enterprise', 'scalable'];
+    const complexityKeywords = [
+      'integrate',
+      'complex',
+      'multiple',
+      'advanced',
+      'enterprise',
+      'scalable'
+    ];
     const hasComplexityKeywords = complexityKeywords.some(keyword =>
       this.taskDescription.toLowerCase().includes(keyword)
     );
@@ -157,13 +175,13 @@ export class SparcSpecification extends SparcPhase {
    */
   identifyDomain() {
     const domains = {
-      'web': ['web', 'website', 'html', 'css', 'javascript'],
-      'mobile': ['mobile', 'app', 'android', 'ios'],
-      'data': ['data', 'analytics', 'ml', 'ai', 'machine learning'],
-      'security': ['security', 'auth', 'authentication', 'encryption'],
-      'devops': ['deploy', 'ci/cd', 'docker', 'kubernetes'],
-      'backend': ['api', 'server', 'database', 'backend'],
-      'frontend': ['ui', 'ux', 'frontend', 'interface']
+      web: ['web', 'website', 'html', 'css', 'javascript'],
+      mobile: ['mobile', 'app', 'android', 'ios'],
+      data: ['data', 'analytics', 'ml', 'ai', 'machine learning'],
+      security: ['security', 'auth', 'authentication', 'encryption'],
+      devops: ['deploy', 'ci/cd', 'docker', 'kubernetes'],
+      backend: ['api', 'server', 'database', 'backend'],
+      frontend: ['ui', 'ux', 'frontend', 'interface']
     };
 
     const taskLower = this.taskDescription.toLowerCase();
@@ -182,7 +200,22 @@ export class SparcSpecification extends SparcPhase {
    */
   extractKeywords() {
     const words = this.taskDescription.toLowerCase().split(/\s+/);
-    const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
+    const stopWords = [
+      'the',
+      'a',
+      'an',
+      'and',
+      'or',
+      'but',
+      'in',
+      'on',
+      'at',
+      'to',
+      'for',
+      'of',
+      'with',
+      'by'
+    ];
 
     return words
       .filter(word => word.length > 2 && !stopWords.includes(word))
@@ -194,7 +227,20 @@ export class SparcSpecification extends SparcPhase {
    * Extract action verbs
    */
   extractActionVerbs() {
-    const verbs = ['create', 'build', 'develop', 'implement', 'design', 'setup', 'configure', 'deploy', 'test', 'optimize', 'refactor', 'integrate'];
+    const verbs = [
+      'create',
+      'build',
+      'develop',
+      'implement',
+      'design',
+      'setup',
+      'configure',
+      'deploy',
+      'test',
+      'optimize',
+      'refactor',
+      'integrate'
+    ];
     const taskLower = this.taskDescription.toLowerCase();
 
     return verbs.filter(verb => taskLower.includes(verb));
@@ -209,7 +255,11 @@ export class SparcSpecification extends SparcPhase {
 
     // Look for capitalized words (potential entities)
     for (const word of words) {
-      if (word.length > 2 && word[0] === word[0].toUpperCase() && word.slice(1) === word.slice(1).toLowerCase()) {
+      if (
+        word.length > 2 &&
+        word[0] === word[0].toUpperCase() &&
+        word.slice(1) === word.slice(1).toLowerCase()
+      ) {
         entities.push(word);
       }
     }
@@ -225,54 +275,54 @@ export class SparcSpecification extends SparcPhase {
 
     // Functional requirements based on task type
     switch (analysis.type) {
-    case 'api_development':
-      requirements.push(
-        'System must provide REST API endpoints',
-        'API must handle authentication and authorization',
-        'API must return appropriate HTTP status codes',
-        'API must validate input data',
-        'API must handle errors gracefully'
-      );
-      break;
+      case 'api_development':
+        requirements.push(
+          'System must provide REST API endpoints',
+          'API must handle authentication and authorization',
+          'API must return appropriate HTTP status codes',
+          'API must validate input data',
+          'API must handle errors gracefully'
+        );
+        break;
 
-    case 'frontend_development':
-      requirements.push(
-        'Interface must be responsive and mobile-friendly',
-        'User interface must be intuitive and accessible',
-        'Application must handle user input validation',
-        'Interface must provide feedback for user actions',
-        'Application must be cross-browser compatible'
-      );
-      break;
+      case 'frontend_development':
+        requirements.push(
+          'Interface must be responsive and mobile-friendly',
+          'User interface must be intuitive and accessible',
+          'Application must handle user input validation',
+          'Interface must provide feedback for user actions',
+          'Application must be cross-browser compatible'
+        );
+        break;
 
-    case 'data_management':
-      requirements.push(
-        'System must ensure data integrity',
-        'Data must be properly normalized',
-        'System must handle concurrent access',
-        'Data must be backed up regularly',
-        'System must provide data recovery mechanisms'
-      );
-      break;
+      case 'data_management':
+        requirements.push(
+          'System must ensure data integrity',
+          'Data must be properly normalized',
+          'System must handle concurrent access',
+          'Data must be backed up regularly',
+          'System must provide data recovery mechanisms'
+        );
+        break;
 
-    case 'testing':
-      requirements.push(
-        'Test suite must achieve minimum 80% code coverage',
-        'Tests must be automated and repeatable',
-        'Tests must validate all critical paths',
-        'Test data must be properly managed',
-        'Tests must run efficiently'
-      );
-      break;
+      case 'testing':
+        requirements.push(
+          'Test suite must achieve minimum 80% code coverage',
+          'Tests must be automated and repeatable',
+          'Tests must validate all critical paths',
+          'Test data must be properly managed',
+          'Tests must run efficiently'
+        );
+        break;
 
-    default:
-      requirements.push(
-        'System must be reliable and performant',
-        'Code must be maintainable and well-documented',
-        'System must handle edge cases gracefully',
-        'Implementation must follow best practices',
-        'System must be secure and robust'
-      );
+      default:
+        requirements.push(
+          'System must be reliable and performant',
+          'Code must be maintainable and well-documented',
+          'System must handle edge cases gracefully',
+          'Implementation must follow best practices',
+          'System must be secure and robust'
+        );
     }
 
     // Add complexity-specific requirements
@@ -355,7 +405,13 @@ export class SparcSpecification extends SparcPhase {
    * Assess requirement priority
    */
   assessRequirementPriority(requirement) {
-    const highPriorityKeywords = ['must', 'critical', 'security', 'authentication', 'data integrity'];
+    const highPriorityKeywords = [
+      'must',
+      'critical',
+      'security',
+      'authentication',
+      'data integrity'
+    ];
     const mediumPriorityKeywords = ['should', 'performance', 'optimization', 'monitoring'];
 
     const reqLower = requirement.toLowerCase();
@@ -395,7 +451,9 @@ export class SparcSpecification extends SparcPhase {
    */
   generateStoryTitle(requirement) {
     const words = requirement.split(' ');
-    const actionWord = words.find(word => ['provide', 'handle', 'ensure', 'validate'].includes(word.toLowerCase()));
+    const actionWord = words.find(word =>
+      ['provide', 'handle', 'ensure', 'validate'].includes(word.toLowerCase())
+    );
     const objectWord = words.find(word => ['API', 'data', 'user', 'system'].includes(word));
 
     return `${actionWord || 'Implement'} ${objectWord || 'functionality'}`;
@@ -486,16 +544,16 @@ export class SparcSpecification extends SparcPhase {
     const analysis = await this.analyzeTaskDescription();
 
     switch (analysis.type) {
-    case 'api_development':
-      return 'Enables system integration and data exchange, improving operational efficiency';
-    case 'frontend_development':
-      return 'Improves user experience and engagement, potentially increasing user satisfaction';
-    case 'data_management':
-      return 'Ensures data integrity and availability, supporting business decisions';
-    case 'testing':
-      return 'Reduces bugs and improves software quality, minimizing support costs';
-    default:
-      return 'Addresses business requirements and improves system capabilities';
+      case 'api_development':
+        return 'Enables system integration and data exchange, improving operational efficiency';
+      case 'frontend_development':
+        return 'Improves user experience and engagement, potentially increasing user satisfaction';
+      case 'data_management':
+        return 'Ensures data integrity and availability, supporting business decisions';
+      case 'testing':
+        return 'Reduces bugs and improves software quality, minimizing support costs';
+      default:
+        return 'Addresses business requirements and improves system capabilities';
     }
   }
 
@@ -607,22 +665,30 @@ ${result.businessValue}
 ${result.requirements.map((req, index) => `${index + 1}. ${req}`).join('\n')}
 
 ## Acceptance Criteria
-${result.acceptanceCriteria.map((criteria, index) => `
+${result.acceptanceCriteria
+  .map(
+    (criteria, index) => `
 ### ${index + 1}. ${criteria.requirement}
 - **Given**: ${criteria.given}
 - **When**: ${criteria.when}
 - **Then**: ${criteria.then}
 - **Priority**: ${criteria.priority}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## User Stories
-${result.userStories.map((story, index) => `
+${result.userStories
+  .map(
+    (story, index) => `
 ### ${index + 1}. ${story.title}
 ${story.narrative}
 **Acceptance Criteria**: ${story.acceptanceCriteria.join(', ')}
 **Priority**: ${story.priority}
 **Estimation**: ${story.estimation} points
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Constraints
 ${result.constraints.map((constraint, index) => `${index + 1}. ${constraint}`).join('\n')}
@@ -643,12 +709,16 @@ ${result.scope.excluded.map((item, index) => `${index + 1}. ${item}`).join('\n')
 ${result.timeline.phases.map(phase => `- ${phase.name}: ${phase.duration}`).join('\n')}
 
 ## Risks
-${result.risks.map((risk, index) => `
+${result.risks
+  .map(
+    (risk, index) => `
 ### ${index + 1}. ${risk.risk}
 - **Probability**: ${risk.probability}
 - **Impact**: ${risk.impact}
 - **Mitigation**: ${risk.mitigation}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Dependencies
 ${result.dependencies.map((dep, index) => `${index + 1}. ${dep}`).join('\n')}

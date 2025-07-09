@@ -13,14 +13,18 @@ export const DANGEROUS_PATTERN_EXAMPLE = {
   name: 'DANGEROUS: Stop hook calling claude command',
   description: '❌ NEVER USE THIS - Creates infinite recursion loop',
   pattern: {
-    'hooks': {
-      'Stop': [{
-        'matcher': '',
-        'hooks': [{
-          'type': 'command',
-          'command': 'claude -c -p "Update all changes to history.md"'
-        }]
-      }]
+    hooks: {
+      Stop: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'claude -c -p "Update all changes to history.md"'
+            }
+          ]
+        }
+      ]
     }
   },
   problems: [
@@ -39,14 +43,19 @@ export const SAFE_FLAG_PATTERN = {
   name: 'Safe Pattern: Flag-based updates',
   description: '✅ Set flag when update needed, run manually',
   pattern: {
-    'hooks': {
-      'Stop': [{
-        'matcher': '',
-        'hooks': [{
-          'type': 'command',
-          'command': 'bash -c \'echo "History update needed at $(date)" > ~/.claude/needs_update && echo "📝 History update flagged. Run: claude -c -p \\"Update history.md\\""\''
-        }]
-      }]
+    hooks: {
+      Stop: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command:
+                'bash -c \'echo "History update needed at $(date)" > ~/.claude/needs_update && echo "📝 History update flagged. Run: claude -c -p \\"Update history.md\\""\''
+            }
+          ]
+        }
+      ]
     }
   },
   benefits: [
@@ -71,14 +80,18 @@ export const SAFE_POST_TOOL_PATTERN = {
   name: 'Safe Pattern: PostToolUse hooks',
   description: '✅ React to specific file operations instead of Stop events',
   pattern: {
-    'hooks': {
-      'PostToolUse': [{
-        'matcher': 'Write|Edit|MultiEdit',
-        'hooks': [{
-          'type': 'command',
-          'command': 'echo \'File modified: {file}\' >> ~/.claude/modifications.log'
-        }]
-      }]
+    hooks: {
+      PostToolUse: [
+        {
+          matcher: 'Write|Edit|MultiEdit',
+          hooks: [
+            {
+              type: 'command',
+              command: "echo 'File modified: {file}' >> ~/.claude/modifications.log"
+            }
+          ]
+        }
+      ]
     }
   },
   benefits: [
@@ -103,14 +116,19 @@ export const SAFE_CONDITIONAL_PATTERN = {
   name: 'Safe Pattern: Conditional execution with context check',
   description: '✅ Check if running in hook context before calling claude',
   pattern: {
-    'hooks': {
-      'Stop': [{
-        'matcher': '',
-        'hooks': [{
-          'type': 'command',
-          'command': 'bash -c \'if [ -z "$CLAUDE_HOOK_CONTEXT" ]; then claude -c -p "Update history.md" --skip-hooks; else echo "Skipping update - in hook context"; fi\''
-        }]
-      }]
+    hooks: {
+      Stop: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command:
+                'bash -c \'if [ -z "$CLAUDE_HOOK_CONTEXT" ]; then claude -c -p "Update history.md" --skip-hooks; else echo "Skipping update - in hook context"; fi\''
+            }
+          ]
+        }
+      ]
     }
   },
   benefits: [
@@ -135,14 +153,18 @@ export const SAFE_BATCH_PATTERN = {
   name: 'Safe Pattern: Batch processing with scheduled execution',
   description: '✅ Accumulate changes and process them separately',
   pattern: {
-    'hooks': {
-      'Stop': [{
-        'matcher': '',
-        'hooks': [{
-          'type': 'command',
-          'command': 'echo "$(date): Session ended" >> ~/.claude/session_log.txt'
-        }]
-      }]
+    hooks: {
+      Stop: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command: 'echo "$(date): Session ended" >> ~/.claude/session_log.txt'
+            }
+          ]
+        }
+      ]
     }
   },
   additionalSetup: {
@@ -189,14 +211,19 @@ export const SAFE_QUEUE_PATTERN = {
   name: 'Safe Pattern: Queue-based command processing',
   description: '✅ Queue commands for external processing',
   pattern: {
-    'hooks': {
-      'Stop': [{
-        'matcher': '',
-        'hooks': [{
-          'type': 'command',
-          'command': 'echo \'{"command": "update-history", "timestamp": "\'$(date -Iseconds)\'", "session": "\'$CLAUDE_SESSION_ID\'"}\' >> ~/.claude/command_queue.jsonl'
-        }]
-      }]
+    hooks: {
+      Stop: [
+        {
+          matcher: '',
+          hooks: [
+            {
+              type: 'command',
+              command:
+                'echo \'{"command": "update-history", "timestamp": "\'$(date -Iseconds)\'", "session": "\'$CLAUDE_SESSION_ID\'"}\' >> ~/.claude/command_queue.jsonl'
+            }
+          ]
+        }
+      ]
     }
   },
   processor: `#!/usr/bin/env python3
@@ -283,7 +310,8 @@ ${DANGEROUS_PATTERN_EXAMPLE.problems.map(p => `- ${p}`).join('\n')}
 
 ## ✅ SAFE PATTERNS
 
-${ALL_SAFE_PATTERNS.map(pattern => `
+${ALL_SAFE_PATTERNS.map(
+  pattern => `
 ### ${pattern.name}
 
 ${pattern.description}
@@ -296,33 +324,54 @@ ${JSON.stringify(pattern.pattern, null, 2)}
 **Benefits:**
 ${pattern.benefits.map(b => `- ${b}`).join('\n')}
 
-${pattern.usage ? `**Usage:**
-${pattern.usage.map((u, i) => `${i + 1}. ${u}`).join('\n')}` : ''}
+${
+  pattern.usage
+    ? `**Usage:**
+${pattern.usage.map((u, i) => `${i + 1}. ${u}`).join('\n')}`
+    : ''
+}
 
-${pattern.additionalSetup ? `**Additional Setup:**
-${pattern.additionalSetup.cronJob ? `
+${
+  pattern.additionalSetup
+    ? `**Additional Setup:**
+${
+  pattern.additionalSetup.cronJob
+    ? `
 **Cron Job:**
 \`\`\`bash
 ${pattern.additionalSetup.cronJob}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
-${pattern.additionalSetup.updateScript ? `
+${
+  pattern.additionalSetup.updateScript
+    ? `
 **Update Script:**
 \`\`\`bash
 ${pattern.additionalSetup.updateScript}
 \`\`\`
-` : ''}` : ''}
+`
+    : ''
+}`
+    : ''
+}
 
-${pattern.processor ? `
+${
+  pattern.processor
+    ? `
 **Queue Processor:**
 \`\`\`python
 ${pattern.processor}
 \`\`\`
-` : ''}
+`
+    : ''
+}
 
 ---
-`).join('')}
+`
+).join('')}
 
 ## 🚀 Quick Migration Guide
 

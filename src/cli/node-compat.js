@@ -16,7 +16,7 @@ export const args = process.argv.slice(2);
 export const cwd = () => process.cwd();
 
 // File system operations
-export const readDir = async (path) => {
+export const readDir = async path => {
   const entries = await readdir(path, { withFileTypes: true });
   return entries.map(entry => ({
     name: entry.name,
@@ -26,7 +26,7 @@ export const readDir = async (path) => {
   }));
 };
 
-export const statFile = async (path) => {
+export const statFile = async path => {
   const stats = await stat(path);
   return {
     isFile: stats.isFile(),
@@ -38,7 +38,7 @@ export const statFile = async (path) => {
   };
 };
 
-export const readTextFile = async (path) => {
+export const readTextFile = async path => {
   return await readFile(path, 'utf-8');
 };
 
@@ -46,7 +46,7 @@ export const writeTextFile = async (path, content) => {
   await writeFile(path, content, 'utf-8');
 };
 
-export const remove = async (path) => {
+export const remove = async path => {
   const stats = await stat(path);
   if (stats.isDirectory()) {
     await rmdir(path, { recursive: true });
@@ -103,17 +103,17 @@ export const getImportMetaUrl = () => {
   return import.meta.url;
 };
 
-export const getDirname = (importMetaUrl) => {
+export const getDirname = importMetaUrl => {
   const __filename = fileURLToPath(importMetaUrl);
   return dirname(__filename);
 };
 
-export const getFilename = (importMetaUrl) => {
+export const getFilename = importMetaUrl => {
   return fileURLToPath(importMetaUrl);
 };
 
 // Check if this is the main module (Node.js equivalent of import.meta.main)
-export const isMainModule = (importMetaUrl) => {
+export const isMainModule = importMetaUrl => {
   const __filename = fileURLToPath(importMetaUrl);
   return process.argv[1] === __filename;
 };
@@ -123,9 +123,14 @@ export { existsSync };
 
 // Build information (Node.js equivalent of Deno.build)
 export const build = {
-  os: process.platform === 'win32' ? 'windows' :
-    process.platform === 'darwin' ? 'darwin' :
-      process.platform === 'linux' ? 'linux' : process.platform,
+  os:
+    process.platform === 'win32'
+      ? 'windows'
+      : process.platform === 'darwin'
+        ? 'darwin'
+        : process.platform === 'linux'
+          ? 'linux'
+          : process.platform,
   arch: process.arch,
   target: `${process.arch}-${process.platform}`
 };

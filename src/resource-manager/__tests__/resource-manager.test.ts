@@ -8,7 +8,7 @@ import { ResourceMonitorConfig, ResourceManagerOptions } from '../types';
 
 describe('ResourceManager', () => {
   let resourceManager: ResourceManager;
-  
+
   const testConfig: ResourceMonitorConfig = {
     interval: 1000,
     enableCPU: true,
@@ -103,43 +103,49 @@ describe('ResourceManager', () => {
 
     it('should respect agent allocation limits', async () => {
       const promises: Promise<any>[] = [];
-      
+
       // Try to allocate more than the limit
       for (let i = 0; i < 10; i++) {
         promises.push(
-          resourceManager.allocate({
-            agentId: 'test-agent',
-            resourceType: 'cpu',
-            amount: 1,
-            priority: 'medium'
-          }).catch(err => err)
+          resourceManager
+            .allocate({
+              agentId: 'test-agent',
+              resourceType: 'cpu',
+              amount: 1,
+              priority: 'medium'
+            })
+            .catch(err => err)
         );
       }
 
       const results = await Promise.all(promises);
-      
+
       // Should have some successful allocations and some errors
       const successful = results.filter(r => r.id);
       const errors = results.filter(r => r instanceof Error);
-      
+
       expect(successful.length).toBeLessThanOrEqual(5);
       expect(errors.length).toBeGreaterThan(0);
     });
 
     it('should validate allocation requests', async () => {
-      await expect(resourceManager.allocate({
-        agentId: '',
-        resourceType: 'cpu',
-        amount: 10,
-        priority: 'medium'
-      })).rejects.toThrow('Agent ID is required');
+      await expect(
+        resourceManager.allocate({
+          agentId: '',
+          resourceType: 'cpu',
+          amount: 10,
+          priority: 'medium'
+        })
+      ).rejects.toThrow('Agent ID is required');
 
-      await expect(resourceManager.allocate({
-        agentId: 'test-agent',
-        resourceType: 'cpu',
-        amount: 0,
-        priority: 'medium'
-      })).rejects.toThrow('Amount must be greater than 0');
+      await expect(
+        resourceManager.allocate({
+          agentId: 'test-agent',
+          resourceType: 'cpu',
+          amount: 0,
+          priority: 'medium'
+        })
+      ).rejects.toThrow('Amount must be greater than 0');
     });
   });
 
@@ -158,15 +164,15 @@ describe('ResourceManager', () => {
 
     it('should get resource summary', () => {
       const summary = resourceManager.getResourceSummary();
-      
+
       expect(summary).toBeDefined();
       expect(summary.timestamp).toBeInstanceOf(Date);
       expect(summary.totalResources).toBeGreaterThan(0);
       expect(summary.resourcesByType).toBeDefined();
     });
 
-    it('should emit resource events', (done) => {
-      resourceManager.on('resource:event', (event) => {
+    it('should emit resource events', done => {
+      resourceManager.on('resource:event', event => {
         expect(event).toBeDefined();
         expect(event.id).toBeDefined();
         expect(event.type).toBeDefined();

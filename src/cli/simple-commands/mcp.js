@@ -5,32 +5,32 @@ export async function mcpCommand(subArgs, flags) {
   const mcpCmd = subArgs[0];
 
   switch (mcpCmd) {
-  case 'status':
-    await showMcpStatus(subArgs, flags);
-    break;
+    case 'status':
+      await showMcpStatus(subArgs, flags);
+      break;
 
-  case 'start':
-    await startMcpServer(subArgs, flags);
-    break;
+    case 'start':
+      await startMcpServer(subArgs, flags);
+      break;
 
-  case 'stop':
-    await stopMcpServer(subArgs, flags);
-    break;
+    case 'stop':
+      await stopMcpServer(subArgs, flags);
+      break;
 
-  case 'tools':
-    await listMcpTools(subArgs, flags);
-    break;
+    case 'tools':
+      await listMcpTools(subArgs, flags);
+      break;
 
-  case 'auth':
-    await manageMcpAuth(subArgs, flags);
-    break;
+    case 'auth':
+      await manageMcpAuth(subArgs, flags);
+      break;
 
-  case 'config':
-    await showMcpConfig(subArgs, flags);
-    break;
+    case 'config':
+      await showMcpConfig(subArgs, flags);
+      break;
 
-  default:
-    showMcpHelp();
+    default:
+      showMcpHelp();
   }
 }
 
@@ -81,7 +81,7 @@ async function startMcpServer(subArgs, flags) {
         }
       });
 
-      serverProcess.on('exit', (code) => {
+      serverProcess.on('exit', code => {
         if (code !== 0) {
           console.error(`MCP server exited with code ${code}`);
         }
@@ -89,7 +89,6 @@ async function startMcpServer(subArgs, flags) {
 
       // Keep the process alive
       await new Promise(() => {}); // Never resolves, keeps server running
-
     } catch (error) {
       console.error('Failed to start MCP server:', error.message);
 
@@ -245,10 +244,16 @@ async function listMcpTools(subArgs, flags) {
   if (verbose) {
     console.log('\n📋 DETAILED TOOL INFORMATION:');
     console.log('  🔥 HIGH-PRIORITY TOOLS:');
-    console.log('    swarm_init: Initialize coordination with 4 topologies (hierarchical, mesh, ring, star)');
-    console.log('    agent_spawn: 8 agent types (researcher, coder, analyst, architect, tester, coordinator, reviewer, optimizer)');
+    console.log(
+      '    swarm_init: Initialize coordination with 4 topologies (hierarchical, mesh, ring, star)'
+    );
+    console.log(
+      '    agent_spawn: 8 agent types (researcher, coder, analyst, architect, tester, coordinator, reviewer, optimizer)'
+    );
     console.log('    neural_train: Train 27 neural models with WASM SIMD acceleration');
-    console.log('    memory_usage: 5 operations (store, retrieve, list, delete, search) with TTL & namespacing');
+    console.log(
+      '    memory_usage: 5 operations (store, retrieve, list, delete, search) with TTL & namespacing'
+    );
     console.log('    performance_report: Real-time metrics with 24h/7d/30d timeframes');
 
     console.log('\n  ⚡ PERFORMANCE FEATURES:');
@@ -276,32 +281,32 @@ async function manageMcpAuth(subArgs, flags) {
   const authCmd = subArgs[1];
 
   switch (authCmd) {
-  case 'setup':
-    printSuccess('Setting up MCP authentication...');
-    console.log('🔐 Authentication configuration:');
-    console.log('   Type: API Key based');
-    console.log('   Scope: Claude-Flow tools');
-    console.log('   Security: TLS encrypted');
-    break;
+    case 'setup':
+      printSuccess('Setting up MCP authentication...');
+      console.log('🔐 Authentication configuration:');
+      console.log('   Type: API Key based');
+      console.log('   Scope: Claude-Flow tools');
+      console.log('   Security: TLS encrypted');
+      break;
 
-  case 'status':
-    printSuccess('MCP Authentication Status:');
-    console.log('🔐 Status: Not configured');
-    console.log('🔑 API Keys: 0 active');
-    console.log('🛡️  Security: Default settings');
-    break;
+    case 'status':
+      printSuccess('MCP Authentication Status:');
+      console.log('🔐 Status: Not configured');
+      console.log('🔑 API Keys: 0 active');
+      console.log('🛡️  Security: Default settings');
+      break;
 
-  case 'rotate':
-    printSuccess('Rotating MCP authentication keys...');
-    console.log('🔄 New API keys would be generated');
-    console.log('♻️  Old keys would be deprecated gracefully');
-    break;
+    case 'rotate':
+      printSuccess('Rotating MCP authentication keys...');
+      console.log('🔄 New API keys would be generated');
+      console.log('♻️  Old keys would be deprecated gracefully');
+      break;
 
-  default:
-    console.log('Auth commands: setup, status, rotate');
-    console.log('Examples:');
-    console.log('  claude-flow mcp auth setup');
-    console.log('  claude-flow mcp auth status');
+    default:
+      console.log('Auth commands: setup, status, rotate');
+      console.log('Examples:');
+      console.log('  claude-flow mcp auth setup');
+      console.log('  claude-flow mcp auth status');
   }
 }
 
@@ -377,7 +382,9 @@ function showMcpHelp() {
   console.log('  --enable-wasm                    Enable WASM SIMD optimization');
   console.log();
   console.log('TOOLS OPTIONS:');
-  console.log('  --category <cat>                 Filter by category (swarm, neural, memory, etc.)');
+  console.log(
+    '  --category <cat>                 Filter by category (swarm, neural, memory, etc.)'
+  );
   console.log('  --verbose, -v                    Show detailed tool information');
   console.log('  --examples                       Show usage examples');
   console.log();

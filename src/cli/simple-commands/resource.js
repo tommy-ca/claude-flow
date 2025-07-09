@@ -52,7 +52,6 @@ class ResourceCommands {
 
       // Display summary
       this.displaySummary(reports);
-
     } catch (error) {
       logger.error('Failed to get resource status:', error);
       process.exit(1);
@@ -88,7 +87,6 @@ class ResourceCommands {
         for (const report of reports) {
           this.displayMonitoringData(report, selectedMetrics);
         }
-
       } catch (error) {
         console.error(chalk.red('Error updating monitor:'), error.message);
       }
@@ -149,7 +147,6 @@ class ResourceCommands {
           console.log(chalk.gray('\nOptimization cancelled.'));
         }
       }
-
     } catch (error) {
       logger.error('Optimization failed:', error);
       process.exit(1);
@@ -186,7 +183,6 @@ class ResourceCommands {
 
       // Display statistics
       this.displayHistoryStats(history);
-
     } catch (error) {
       logger.error('Failed to get resource history:', error);
       process.exit(1);
@@ -197,12 +193,13 @@ class ResourceCommands {
    * Display server status
    */
   displayServerStatus(report, verbose = false) {
-    const statusColor = {
-      healthy: 'green',
-      degraded: 'yellow',
-      overloaded: 'red',
-      offline: 'gray'
-    }[report.status] || 'white';
+    const statusColor =
+      {
+        healthy: 'green',
+        degraded: 'yellow',
+        overloaded: 'red',
+        offline: 'gray'
+      }[report.status] || 'white';
 
     console.log(chalk.bold(`🖥️  Server: ${report.serverId}`));
     console.log(chalk[statusColor](`   Status: ${report.status.toUpperCase()}`));
@@ -308,8 +305,11 @@ class ResourceCommands {
     const empty = width - filled;
 
     let color = 'green';
-    if (percentage > 0.8) {color = 'red';}
-    else if (percentage > 0.6) {color = 'yellow';}
+    if (percentage > 0.8) {
+      color = 'red';
+    } else if (percentage > 0.6) {
+      color = 'yellow';
+    }
 
     const bar = chalk[color]('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
     return `[${bar}]`;
@@ -335,10 +335,26 @@ class ResourceCommands {
     });
 
     table.push(
-      ['Healthy', chalk.green(summary.healthy), formatPercentage(summary.healthy / summary.totalServers * 100)],
-      ['Degraded', chalk.yellow(summary.degraded), formatPercentage(summary.degraded / summary.totalServers * 100)],
-      ['Overloaded', chalk.red(summary.overloaded), formatPercentage(summary.overloaded / summary.totalServers * 100)],
-      ['Offline', chalk.gray(summary.offline), formatPercentage(summary.offline / summary.totalServers * 100)]
+      [
+        'Healthy',
+        chalk.green(summary.healthy),
+        formatPercentage((summary.healthy / summary.totalServers) * 100)
+      ],
+      [
+        'Degraded',
+        chalk.yellow(summary.degraded),
+        formatPercentage((summary.degraded / summary.totalServers) * 100)
+      ],
+      [
+        'Overloaded',
+        chalk.red(summary.overloaded),
+        formatPercentage((summary.overloaded / summary.totalServers) * 100)
+      ],
+      [
+        'Offline',
+        chalk.gray(summary.offline),
+        formatPercentage((summary.offline / summary.totalServers) * 100)
+      ]
     );
 
     console.log(table.toString());
@@ -346,9 +362,10 @@ class ResourceCommands {
     // Average utilization
     if (reports.length > 0) {
       const avgCPU = reports.reduce((sum, r) => sum + r.resources.cpu.usage, 0) / reports.length;
-      const avgMem = reports.reduce((sum, r) => {
-        return sum + (r.resources.memory.used / r.resources.memory.total * 100);
-      }, 0) / reports.length;
+      const avgMem =
+        reports.reduce((sum, r) => {
+          return sum + (r.resources.memory.used / r.resources.memory.total) * 100;
+        }, 0) / reports.length;
 
       console.log(chalk.bold('\n📈 Average Utilization'));
       console.log(`   CPU: ${formatPercentage(avgCPU)}`);
@@ -428,7 +445,9 @@ class ResourceCommands {
     console.log(table.toString());
 
     const successCount = results.filter(r => r.success).length;
-    console.log(chalk.bold(`\n📈 Summary: ${successCount}/${results.length} actions completed successfully`));
+    console.log(
+      chalk.bold(`\n📈 Summary: ${successCount}/${results.length} actions completed successfully`)
+    );
   }
 
   /**
@@ -445,7 +464,9 @@ class ResourceCommands {
     const metrics = {};
     history.forEach(entry => {
       Object.keys(entry.metrics).forEach(metric => {
-        if (!metrics[metric]) {metrics[metric] = [];}
+        if (!metrics[metric]) {
+          metrics[metric] = [];
+        }
         metrics[metric].push(entry.metrics[metric]);
       });
     });
@@ -459,14 +480,20 @@ class ResourceCommands {
       const range = max - min;
 
       // Create simple sparkline
-      const sparkline = values.map(v => {
-        const normalized = (v - min) / range;
-        const height = Math.round(normalized * maxHeight);
-        return '▁▂▃▄▅▆▇█'[Math.min(height, 7)];
-      }).join('');
+      const sparkline = values
+        .map(v => {
+          const normalized = (v - min) / range;
+          const height = Math.round(normalized * maxHeight);
+          return '▁▂▃▄▅▆▇█'[Math.min(height, 7)];
+        })
+        .join('');
 
       console.log(`  ${sparkline}`);
-      console.log(chalk.gray(`  Min: ${min.toFixed(2)} | Max: ${max.toFixed(2)} | Current: ${values[values.length - 1].toFixed(2)}\n`));
+      console.log(
+        chalk.gray(
+          `  Min: ${min.toFixed(2)} | Max: ${max.toFixed(2)} | Current: ${values[values.length - 1].toFixed(2)}\n`
+        )
+      );
     });
   }
 
@@ -497,7 +524,9 @@ class ResourceCommands {
     const metrics = {};
     history.forEach(entry => {
       Object.entries(entry.metrics).forEach(([metric, value]) => {
-        if (!metrics[metric]) {metrics[metric] = [];}
+        if (!metrics[metric]) {
+          metrics[metric] = [];
+        }
         metrics[metric].push(value);
       });
     });
@@ -536,27 +565,34 @@ module.exports = {
         { name: '--server <id>', description: 'Show status for specific server' },
         { name: '--verbose', description: 'Show detailed information' }
       ],
-      handler: (args) => resourceCommands.status(args)
+      handler: args => resourceCommands.status(args)
     },
 
     monitor: {
       description: 'Monitor resources in real-time',
       options: [
         { name: '--interval <ms>', description: 'Update interval in milliseconds (default: 5000)' },
-        { name: '--metrics <list>', description: 'Comma-separated metrics to display (default: cpu,memory,network)' },
+        {
+          name: '--metrics <list>',
+          description: 'Comma-separated metrics to display (default: cpu,memory,network)'
+        },
         { name: '--server <id>', description: 'Monitor specific server' }
       ],
-      handler: (args) => resourceCommands.monitor(args)
+      handler: args => resourceCommands.monitor(args)
     },
 
     optimize: {
       description: 'Optimize resource allocation',
       options: [
-        { name: '--strategy <type>', description: 'Optimization strategy: balanced, performance, efficiency (default: balanced)' },
+        {
+          name: '--strategy <type>',
+          description:
+            'Optimization strategy: balanced, performance, efficiency (default: balanced)'
+        },
         { name: '--dry-run', description: 'Show optimization plan without applying' },
         { name: '--verbose', description: 'Show detailed optimization steps' }
       ],
-      handler: (args) => resourceCommands.optimize(args)
+      handler: args => resourceCommands.optimize(args)
     },
 
     history: {
@@ -565,9 +601,12 @@ module.exports = {
         { name: '--duration <time>', description: 'History duration: 1h, 24h, 7d (default: 1h)' },
         { name: '--server <id>', description: 'Show history for specific server' },
         { name: '--metric <type>', description: 'Specific metric to display (default: all)' },
-        { name: '--format <type>', description: 'Output format: chart, table, json (default: chart)' }
+        {
+          name: '--format <type>',
+          description: 'Output format: chart, table, json (default: chart)'
+        }
       ],
-      handler: (args) => resourceCommands.history(args)
+      handler: args => resourceCommands.history(args)
     }
   }
 };

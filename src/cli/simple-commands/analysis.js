@@ -1,4 +1,10 @@
-import { printSuccess, printError, printWarning, callRuvSwarmMCP, checkRuvSwarmAvailable } from '../utils.js';
+import {
+  printSuccess,
+  printError,
+  printWarning,
+  callRuvSwarmMCP,
+  checkRuvSwarmAvailable
+} from '../utils.js';
 
 export async function analysisAction(subArgs, flags) {
   const subcommand = subArgs[0];
@@ -11,18 +17,18 @@ export async function analysisAction(subArgs, flags) {
 
   try {
     switch (subcommand) {
-    case 'bottleneck-detect':
-      await bottleneckDetectCommand(subArgs, flags);
-      break;
-    case 'performance-report':
-      await performanceReportCommand(subArgs, flags);
-      break;
-    case 'token-usage':
-      await tokenUsageCommand(subArgs, flags);
-      break;
-    default:
-      printError(`Unknown analysis command: ${subcommand}`);
-      showAnalysisHelp();
+      case 'bottleneck-detect':
+        await bottleneckDetectCommand(subArgs, flags);
+        break;
+      case 'performance-report':
+        await performanceReportCommand(subArgs, flags);
+        break;
+      case 'token-usage':
+        await tokenUsageCommand(subArgs, flags);
+        break;
+      default:
+        printError(`Unknown analysis command: ${subcommand}`);
+        showAnalysisHelp();
     }
   } catch (err) {
     printError(`Analysis command failed: ${err.message}`);
@@ -61,16 +67,26 @@ async function bottleneckDetectCommand(subArgs, flags) {
 
       console.log('\n📊 BOTTLENECK ANALYSIS RESULTS:');
       const bottlenecks = analysisResult.bottlenecks || [
-        { severity: 'critical', component: 'Memory usage in agent spawn process', metric: '85% utilization' },
+        {
+          severity: 'critical',
+          component: 'Memory usage in agent spawn process',
+          metric: '85% utilization'
+        },
         { severity: 'warning', component: 'Task queue processing', metric: '12s avg' },
         { severity: 'good', component: 'Neural training pipeline', metric: 'optimal' },
         { severity: 'good', component: 'Swarm coordination latency', metric: 'within limits' }
       ];
 
       bottlenecks.forEach(bottleneck => {
-        const icon = bottleneck.severity === 'critical' ? '🔴' :
-          bottleneck.severity === 'warning' ? '🟡' : '🟢';
-        console.log(`  ${icon} ${bottleneck.severity}: ${bottleneck.component} (${bottleneck.metric})`);
+        const icon =
+          bottleneck.severity === 'critical'
+            ? '🔴'
+            : bottleneck.severity === 'warning'
+              ? '🟡'
+              : '🟢';
+        console.log(
+          `  ${icon} ${bottleneck.severity}: ${bottleneck.component} (${bottleneck.metric})`
+        );
       });
 
       console.log('\n💡 RECOMMENDATIONS:');
@@ -89,7 +105,9 @@ async function bottleneckDetectCommand(subArgs, flags) {
       console.log(`  • Confidence score: ${analysisResult.confidenceScore || 'N/A'}`);
       console.log(`  • Issues detected: ${analysisResult.issuesDetected || 'N/A'}`);
 
-      console.log(`\n📄 Detailed report saved to: ${analysisResult.reportPath || './analysis-reports/bottleneck-' + Date.now() + '.json'}`);
+      console.log(
+        `\n📄 Detailed report saved to: ${analysisResult.reportPath || './analysis-reports/bottleneck-' + Date.now() + '.json'}`
+      );
     } else {
       printError(`Bottleneck analysis failed: ${analysisResult.error || 'Unknown error'}`);
     }

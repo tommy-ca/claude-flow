@@ -11,7 +11,7 @@ const CPUMetricsSchema = z.object({
   usage: z.number().min(0).max(100),
   cores: z.number().positive(),
   loadAverage: z.array(z.number()).length(3).optional(),
-  temperature: z.number().optional(),
+  temperature: z.number().optional()
 });
 
 const MemoryMetricsSchema = z.object({
@@ -20,7 +20,7 @@ const MemoryMetricsSchema = z.object({
   available: z.number().nonnegative(),
   cached: z.number().nonnegative().optional(),
   swapUsed: z.number().nonnegative().optional(),
-  swapTotal: z.number().nonnegative().optional(),
+  swapTotal: z.number().nonnegative().optional()
 });
 
 const GPUDeviceSchema = z.object({
@@ -28,11 +28,11 @@ const GPUDeviceSchema = z.object({
   name: z.string(),
   memory: z.object({
     used: z.number().nonnegative(),
-    total: z.number().positive(),
+    total: z.number().positive()
   }),
   utilization: z.number().min(0).max(100),
   temperature: z.number().optional(),
-  powerUsage: z.number().optional(),
+  powerUsage: z.number().optional()
 });
 
 const NetworkMetricsSchema = z.object({
@@ -41,7 +41,7 @@ const NetworkMetricsSchema = z.object({
   packetsIn: z.number().nonnegative().optional(),
   packetsOut: z.number().nonnegative().optional(),
   bytesIn: z.number().nonnegative().optional(),
-  bytesOut: z.number().nonnegative().optional(),
+  bytesOut: z.number().nonnegative().optional()
 });
 
 const DiskMetricsSchema = z.object({
@@ -50,7 +50,7 @@ const DiskMetricsSchema = z.object({
   available: z.number().nonnegative(),
   iops: z.number().nonnegative().optional(),
   readSpeed: z.number().nonnegative().optional(),
-  writeSpeed: z.number().nonnegative().optional(),
+  writeSpeed: z.number().nonnegative().optional()
 });
 
 // Main resource report schema
@@ -63,10 +63,10 @@ export const MCPResourceReportSchema = z.object({
     gpu: z.array(GPUDeviceSchema).optional(),
     network: NetworkMetricsSchema,
     disk: DiskMetricsSchema.optional(),
-    capabilities: z.array(z.string()),
+    capabilities: z.array(z.string())
   }),
   status: z.enum(['healthy', 'degraded', 'overloaded', 'offline']),
-  metadata: z.record(z.any()).optional(),
+  metadata: z.record(z.any()).optional()
 });
 
 export type MCPResourceReport = z.infer<typeof MCPResourceReportSchema>;
@@ -81,31 +81,39 @@ export const ResourceAllocationRequestSchema = z.object({
   requestId: z.string(),
   agentId: z.string(),
   requirements: z.object({
-    cpu: z.object({
-      cores: z.number().positive().optional(),
-      minUsage: z.number().min(0).max(100).optional(),
-    }).optional(),
+    cpu: z
+      .object({
+        cores: z.number().positive().optional(),
+        minUsage: z.number().min(0).max(100).optional()
+      })
+      .optional(),
     memory: z.object({
       minimum: z.number().positive(),
-      preferred: z.number().positive().optional(),
+      preferred: z.number().positive().optional()
     }),
-    gpu: z.object({
-      required: z.boolean(),
-      minMemory: z.number().positive().optional(),
-      count: z.number().positive().optional(),
-    }).optional(),
-    network: z.object({
-      minBandwidth: z.number().positive().optional(),
-      maxLatency: z.number().positive().optional(),
-    }).optional(),
+    gpu: z
+      .object({
+        required: z.boolean(),
+        minMemory: z.number().positive().optional(),
+        count: z.number().positive().optional()
+      })
+      .optional(),
+    network: z
+      .object({
+        minBandwidth: z.number().positive().optional(),
+        maxLatency: z.number().positive().optional()
+      })
+      .optional()
   }),
-  constraints: z.object({
-    preferredServers: z.array(z.string()).optional(),
-    excludedServers: z.array(z.string()).optional(),
-    maxCost: z.number().positive().optional(),
-  }).optional(),
+  constraints: z
+    .object({
+      preferredServers: z.array(z.string()).optional(),
+      excludedServers: z.array(z.string()).optional(),
+      maxCost: z.number().positive().optional()
+    })
+    .optional(),
   priority: z.enum(['low', 'normal', 'high', 'critical']).default('normal'),
-  duration: z.number().positive().optional(), // Expected duration in seconds
+  duration: z.number().positive().optional() // Expected duration in seconds
 });
 
 export type ResourceAllocationRequest = z.infer<typeof ResourceAllocationRequestSchema>;
@@ -115,21 +123,29 @@ export const ResourceAllocationResponseSchema = z.object({
   requestId: z.string(),
   allocated: z.boolean(),
   serverId: z.string().optional(),
-  allocation: z.object({
-    cpu: z.object({
-      cores: z.number(),
-      reserved: z.number(),
-    }).optional(),
-    memory: z.object({
-      allocated: z.number(),
-    }).optional(),
-    gpu: z.object({
-      devices: z.array(z.string()),
-      memory: z.number(),
-    }).optional(),
-  }).optional(),
+  allocation: z
+    .object({
+      cpu: z
+        .object({
+          cores: z.number(),
+          reserved: z.number()
+        })
+        .optional(),
+      memory: z
+        .object({
+          allocated: z.number()
+        })
+        .optional(),
+      gpu: z
+        .object({
+          devices: z.array(z.string()),
+          memory: z.number()
+        })
+        .optional()
+    })
+    .optional(),
   reason: z.string().optional(), // Reason if allocation failed
-  alternativeServers: z.array(z.string()).optional(),
+  alternativeServers: z.array(z.string()).optional()
 });
 
 export type ResourceAllocationResponse = z.infer<typeof ResourceAllocationResponseSchema>;
@@ -156,35 +172,35 @@ export class ResourceProtocolHandler {
     // Register resource-related tools
     this.server.setRequestHandler({
       method: 'resources/report',
-      handler: async (request) => {
+      handler: async request => {
         const report = MCPResourceReportSchema.parse(request.params);
         await this.handleResourceReport(report);
         return { success: true };
-      },
+      }
     });
 
     this.server.setRequestHandler({
       method: 'resources/query',
-      handler: async (request) => {
+      handler: async request => {
         const { serverId } = request.params as { serverId?: string };
         return await this.queryResources(serverId);
-      },
+      }
     });
 
     this.server.setRequestHandler({
       method: 'resources/allocate',
-      handler: async (request) => {
+      handler: async request => {
         const allocation = ResourceAllocationRequestSchema.parse(request.params);
         return await this.allocateResources(allocation);
-      },
+      }
     });
 
     this.server.setRequestHandler({
       method: 'resources/release',
-      handler: async (request) => {
+      handler: async request => {
         const { requestId } = request.params as { requestId: string };
         return await this.releaseResources(requestId);
-      },
+      }
     });
 
     // Start periodic resource reporting
@@ -200,7 +216,7 @@ export class ResourceProtocolHandler {
         const report = await this.collectResourceMetrics();
         await this.server.notification({
           method: 'resources/status',
-          params: report,
+          params: report
         });
       } catch (error) {
         console.error('Failed to report resources:', error);
@@ -224,7 +240,7 @@ export class ResourceProtocolHandler {
   private async collectResourceMetrics(): Promise<MCPResourceReport> {
     // This is a stub implementation - replace with actual system metrics collection
     const os = await import('os');
-    
+
     const cpus = os.cpus();
     const totalMemory = os.totalmem();
     const freeMemory = os.freemem();
@@ -239,7 +255,7 @@ export class ResourceProtocolHandler {
       }
       totalIdle += cpu.times.idle;
     });
-    const cpuUsage = 100 - ~~(100 * totalIdle / totalTick);
+    const cpuUsage = 100 - ~~((100 * totalIdle) / totalTick);
 
     return {
       serverId: this.server.name || 'mcp-server',
@@ -248,20 +264,20 @@ export class ResourceProtocolHandler {
         cpu: {
           usage: cpuUsage,
           cores: cpus.length,
-          loadAverage: loadAverage,
+          loadAverage: loadAverage
         },
         memory: {
           used: totalMemory - freeMemory,
           total: totalMemory,
-          available: freeMemory,
+          available: freeMemory
         },
         network: {
           latency: 0, // Placeholder - implement actual network testing
-          bandwidth: 1000000000, // 1 Gbps placeholder
+          bandwidth: 1000000000 // 1 Gbps placeholder
         },
-        capabilities: this.getServerCapabilities(),
+        capabilities: this.getServerCapabilities()
       },
-      status: this.determineServerStatus(cpuUsage, (totalMemory - freeMemory) / totalMemory * 100),
+      status: this.determineServerStatus(cpuUsage, ((totalMemory - freeMemory) / totalMemory) * 100)
     };
   }
 
@@ -269,19 +285,16 @@ export class ResourceProtocolHandler {
    * Get server capabilities
    */
   private getServerCapabilities(): string[] {
-    return [
-      'text-generation',
-      'code-execution',
-      'file-operations',
-      'web-search',
-      'data-analysis',
-    ];
+    return ['text-generation', 'code-execution', 'file-operations', 'web-search', 'data-analysis'];
   }
 
   /**
    * Determine server status based on metrics
    */
-  private determineServerStatus(cpuUsage: number, memoryUsage: number): MCPResourceReport['status'] {
+  private determineServerStatus(
+    cpuUsage: number,
+    memoryUsage: number
+  ): MCPResourceReport['status'] {
     if (cpuUsage > 90 || memoryUsage > 90) {
       return 'overloaded';
     } else if (cpuUsage > 70 || memoryUsage > 70) {
@@ -302,7 +315,9 @@ export class ResourceProtocolHandler {
   /**
    * Query resources for a specific server or all servers
    */
-  private async queryResources(serverId?: string): Promise<MCPResourceReport | MCPResourceReport[]> {
+  private async queryResources(
+    serverId?: string
+  ): Promise<MCPResourceReport | MCPResourceReport[]> {
     // Implementation depends on resource manager integration
     // For now, return current server's resources
     const currentReport = await this.collectResourceMetrics();
@@ -312,12 +327,14 @@ export class ResourceProtocolHandler {
   /**
    * Allocate resources for an agent
    */
-  private async allocateResources(request: ResourceAllocationRequest): Promise<ResourceAllocationResponse> {
+  private async allocateResources(
+    request: ResourceAllocationRequest
+  ): Promise<ResourceAllocationResponse> {
     // Simplified allocation logic - replace with actual resource manager integration
     const currentResources = await this.collectResourceMetrics();
-    
+
     // Check if we can satisfy the request
-    const canAllocate = 
+    const canAllocate =
       currentResources.status === 'healthy' &&
       currentResources.resources.memory.available >= request.requirements.memory.minimum;
 
@@ -328,16 +345,16 @@ export class ResourceProtocolHandler {
         serverId: currentResources.serverId,
         allocation: {
           memory: {
-            allocated: request.requirements.memory.minimum,
-          },
-        },
+            allocated: request.requirements.memory.minimum
+          }
+        }
       };
     } else {
       return {
         requestId: request.requestId,
         allocated: false,
         reason: 'Insufficient resources available',
-        alternativeServers: [], // Would be populated by resource manager
+        alternativeServers: [] // Would be populated by resource manager
       };
     }
   }
@@ -355,7 +372,10 @@ export class ResourceProtocolHandler {
 /**
  * Helper function to integrate resource protocol with existing MCP server
  */
-export function addResourceProtocol(server: Server, options?: { reportInterval?: number }): ResourceProtocolHandler {
+export function addResourceProtocol(
+  server: Server,
+  options?: { reportInterval?: number }
+): ResourceProtocolHandler {
   const handler = new ResourceProtocolHandler(server, options?.reportInterval);
   handler.initialize().catch(console.error);
   return handler;

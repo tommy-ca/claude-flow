@@ -26,7 +26,9 @@ class DAATools {
   }
 
   init() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     this.createDAAPanel();
     this.setupEventListeners();
@@ -74,7 +76,9 @@ class DAATools {
     const matches = [];
 
     for (const [agentId, agent] of this.agents) {
-      if (agent.status !== 'active') {continue;}
+      if (agent.status !== 'active') {
+        continue;
+      }
 
       const score = this.calculateCapabilityScore(agent.capabilities, requirements);
       if (score > 0) {
@@ -142,26 +146,26 @@ class DAATools {
     let result;
 
     switch (action) {
-    case 'start':
-      result = this.startAgent(agent, params);
-      break;
-    case 'pause':
-      result = this.pauseAgent(agent, params);
-      break;
-    case 'resume':
-      result = this.resumeAgent(agent, params);
-      break;
-    case 'stop':
-      result = this.stopAgent(agent, params);
-      break;
-    case 'restart':
-      result = this.restartAgent(agent, params);
-      break;
-    case 'destroy':
-      result = this.destroyAgent(agent, params);
-      break;
-    default:
-      return { success: false, error: 'Unknown action' };
+      case 'start':
+        result = this.startAgent(agent, params);
+        break;
+      case 'pause':
+        result = this.pauseAgent(agent, params);
+        break;
+      case 'resume':
+        result = this.resumeAgent(agent, params);
+        break;
+      case 'stop':
+        result = this.stopAgent(agent, params);
+        break;
+      case 'restart':
+        result = this.restartAgent(agent, params);
+        break;
+      case 'destroy':
+        result = this.destroyAgent(agent, params);
+        break;
+      default:
+        return { success: false, error: 'Unknown action' };
     }
 
     // Update lifecycle visualization
@@ -673,7 +677,8 @@ class DAATools {
     optimization.status = 'completed';
     optimization.completed = Date.now();
 
-    const totalGain = improvements.reduce((sum, imp) => sum + imp.improvement, 0) / improvements.length;
+    const totalGain =
+      improvements.reduce((sum, imp) => sum + imp.improvement, 0) / improvements.length;
 
     return { success: true, improvements: improvements, performanceGain: totalGain };
   }
@@ -681,7 +686,9 @@ class DAATools {
   // UI Update Methods
   updateAgentsList() {
     const agentsList = document.getElementById('daa-agents-list');
-    if (!agentsList) {return;}
+    if (!agentsList) {
+      return;
+    }
 
     agentsList.innerHTML = '';
 
@@ -730,7 +737,9 @@ class DAATools {
 
   updateResourceGraphs() {
     const canvas = document.getElementById('daa-resource-chart');
-    if (!canvas) {return;}
+    if (!canvas) {
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -755,24 +764,31 @@ class DAATools {
 
   updateLifecycleVisualization() {
     const visualization = document.getElementById('daa-lifecycle-visualization');
-    if (!visualization) {return;}
+    if (!visualization) {
+      return;
+    }
 
     const statusCounts = {};
     for (const [_, agent] of this.agents) {
       statusCounts[agent.status] = (statusCounts[agent.status] || 0) + 1;
     }
 
-    visualization.innerHTML = Object.entries(statusCounts).map(([status, count]) =>
-      `<div class="lifecycle-item">
+    visualization.innerHTML = Object.entries(statusCounts)
+      .map(
+        ([status, count]) =>
+          `<div class="lifecycle-item">
                 <span class="status-badge status-${status}">${status}</span>
                 <span class="status-count">${count}</span>
             </div>`
-    ).join('');
+      )
+      .join('');
   }
 
   updateCommunicationFlow() {
     const svg = document.getElementById('daa-comm-diagram');
-    if (!svg) {return;}
+    if (!svg) {
+      return;
+    }
 
     // Clear existing content
     svg.innerHTML = '';
@@ -812,22 +828,29 @@ class DAATools {
 
   updateConsensusInterface() {
     const consensusStatus = document.getElementById('daa-consensus-status');
-    if (!consensusStatus) {return;}
+    if (!consensusStatus) {
+      return;
+    }
 
-    consensusStatus.innerHTML = Array.from(this.consensus.values()).map(consensus =>
-      `<div class="consensus-item">
+    consensusStatus.innerHTML = Array.from(this.consensus.values())
+      .map(
+        consensus =>
+          `<div class="consensus-item">
                 <div class="consensus-proposal">${consensus.proposal}</div>
                 <div class="consensus-status">${consensus.status}</div>
                 <div class="consensus-progress">
                     <div class="progress-bar" style="width: ${consensus.status === 'completed' ? '100%' : '50%'}"></div>
                 </div>
             </div>`
-    ).join('');
+      )
+      .join('');
   }
 
   updateFaultDashboard() {
     const faultStatus = document.getElementById('daa-fault-status');
-    if (!faultStatus) {return;}
+    if (!faultStatus) {
+      return;
+    }
 
     faultStatus.innerHTML = `
             <div class="fault-item">
@@ -847,7 +870,9 @@ class DAATools {
 
   updateOptimizationDashboard() {
     const optimizationStatus = document.getElementById('daa-optimization-status');
-    if (!optimizationStatus) {return;}
+    if (!optimizationStatus) {
+      return;
+    }
 
     optimizationStatus.innerHTML = `
             <div class="optimization-item">
@@ -867,28 +892,28 @@ class DAATools {
 
   setupEventListeners() {
     // Tab switching
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       if (e.target.classList.contains('daa-tab')) {
         this.switchTab(e.target.dataset.tab);
       }
     });
 
     // Agent creation
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       if (e.target.id === 'daa-create-agent') {
         this.handleCreateAgent();
       }
     });
 
     // Resource allocation
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       if (e.target.id === 'daa-allocate-resource') {
         this.handleAllocateResource();
       }
     });
 
     // Consensus voting
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       if (e.target.id === 'daa-start-consensus') {
         this.handleStartConsensus();
       }
@@ -914,7 +939,10 @@ class DAATools {
 
   handleCreateAgent() {
     const type = document.getElementById('daa-agent-type').value;
-    const capabilities = document.getElementById('daa-agent-capabilities').value.split(',').map(s => s.trim());
+    const capabilities = document
+      .getElementById('daa-agent-capabilities')
+      .value.split(',')
+      .map(s => s.trim());
 
     const result = this.daa_agent_create({
       type: type,

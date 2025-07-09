@@ -82,10 +82,18 @@ export class ComponentLibrary {
     return {
       element: panel,
       content,
-      setTitle: (newTitle) => { title.textContent = newTitle; },
-      setDescription: (newDesc) => { subtitle.textContent = newDesc; },
-      clear: () => { content.innerHTML = ''; },
-      append: (element) => { content.appendChild(element); }
+      setTitle: newTitle => {
+        title.textContent = newTitle;
+      },
+      setDescription: newDesc => {
+        subtitle.textContent = newDesc;
+      },
+      clear: () => {
+        content.innerHTML = '';
+      },
+      append: element => {
+        content.appendChild(element);
+      }
     };
   }
 
@@ -115,8 +123,10 @@ export class ComponentLibrary {
     return {
       element: container,
       canvas,
-      updateData: (data) => this.updateChart(canvas, data, config),
-      setTitle: (newTitle) => { title.textContent = newTitle; },
+      updateData: data => this.updateChart(canvas, data, config),
+      setTitle: newTitle => {
+        title.textContent = newTitle;
+      },
       addLegendItem: (label, color) => this.addLegendItem(legend, label, color)
     };
   }
@@ -148,9 +158,14 @@ export class ComponentLibrary {
       element: overlay,
       input,
       results,
-      show: () => { overlay.style.display = 'flex'; input.focus(); },
-      hide: () => { overlay.style.display = 'none'; },
-      updateResults: (commands) => this.updateCommandResults(results, commands),
+      show: () => {
+        overlay.style.display = 'flex';
+        input.focus();
+      },
+      hide: () => {
+        overlay.style.display = 'none';
+      },
+      updateResults: commands => this.updateCommandResults(results, commands),
       onCommand: null // Set by user
     };
   }
@@ -184,11 +199,13 @@ export class ComponentLibrary {
 
     return {
       element: container,
-      setProgress: (percent) => {
+      setProgress: percent => {
         fill.style.width = `${percent}%`;
         text.textContent = `${Math.round(percent)}%`;
       },
-      setLabel: (newLabel) => { label.textContent = newLabel; }
+      setLabel: newLabel => {
+        label.textContent = newLabel;
+      }
     };
   }
 
@@ -202,10 +219,12 @@ export class ComponentLibrary {
 
     return {
       element: badge,
-      setStatus: (newStatus) => {
+      setStatus: newStatus => {
         badge.className = `claude-status-badge claude-status-${newStatus}`;
       },
-      setText: (newText) => { badge.textContent = newText; }
+      setText: newText => {
+        badge.textContent = newText;
+      }
     };
   }
 
@@ -228,9 +247,15 @@ export class ComponentLibrary {
 
     return {
       element: container,
-      setMessage: (newMessage) => { message.textContent = newMessage; },
-      show: () => { container.style.display = 'flex'; },
-      hide: () => { container.style.display = 'none'; }
+      setMessage: newMessage => {
+        message.textContent = newMessage;
+      },
+      show: () => {
+        container.style.display = 'flex';
+      },
+      hide: () => {
+        container.style.display = 'none';
+      }
     };
   }
 
@@ -261,8 +286,10 @@ export class ComponentLibrary {
 
     return {
       element: container,
-      setMessage: (newMessage) => { text.textContent = newMessage; },
-      setDetails: (newDetails) => {
+      setMessage: newMessage => {
+        text.textContent = newMessage;
+      },
+      setDetails: newDetails => {
         if (newDetails) {
           if (!container.querySelector('.claude-error-details')) {
             const detailsEl = document.createElement('div');
@@ -295,7 +322,9 @@ export class ComponentLibrary {
 
     return {
       element: container,
-      setMessage: (newMessage) => { text.textContent = newMessage; }
+      setMessage: newMessage => {
+        text.textContent = newMessage;
+      }
     };
   }
 
@@ -319,10 +348,18 @@ export class ComponentLibrary {
     return {
       element: panel,
       content,
-      setTitle: (title) => { header.textContent = title; },
-      setContent: (html) => { content.innerHTML = html; },
-      append: (element) => { content.appendChild(element); },
-      clear: () => { content.innerHTML = ''; }
+      setTitle: title => {
+        header.textContent = title;
+      },
+      setContent: html => {
+        content.innerHTML = html;
+      },
+      append: element => {
+        content.appendChild(element);
+      },
+      clear: () => {
+        content.innerHTML = '';
+      }
     };
   }
 
@@ -347,7 +384,7 @@ export class ComponentLibrary {
 
     return {
       element: button,
-      setText: (text) => {
+      setText: text => {
         button.textContent = text;
         if (config.icon) {
           const icon = document.createElement('span');
@@ -356,8 +393,10 @@ export class ComponentLibrary {
           button.insertBefore(icon, button.firstChild);
         }
       },
-      setDisabled: (disabled) => { button.disabled = disabled; },
-      setLoading: (loading) => {
+      setDisabled: disabled => {
+        button.disabled = disabled;
+      },
+      setLoading: loading => {
         if (loading) {
           button.classList.add('claude-button-loading');
           button.disabled = true;
@@ -403,7 +442,7 @@ export class ComponentLibrary {
 
     return {
       element: grid,
-      updateTools: (newTools) => {
+      updateTools: newTools => {
         grid.innerHTML = '';
         newTools.forEach(tool => {
           // Recreate cards with new tools
@@ -443,9 +482,15 @@ export class ComponentLibrary {
 
     return {
       element: card,
-      setValue: (newValue) => { value.textContent = newValue; },
-      setLabel: (newLabel) => { label.textContent = newLabel; },
-      setIcon: (newIcon) => { icon.textContent = newIcon; }
+      setValue: newValue => {
+        value.textContent = newValue;
+      },
+      setLabel: newLabel => {
+        label.textContent = newLabel;
+      },
+      setIcon: newIcon => {
+        icon.textContent = newIcon;
+      }
     };
   }
 
@@ -475,8 +520,12 @@ export class ComponentLibrary {
 
       tabButton.addEventListener('click', () => {
         // Remove active class from all tabs
-        tabList.querySelectorAll('.claude-tab-button').forEach(btn => btn.classList.remove('active'));
-        tabContent.querySelectorAll('.claude-tab-pane').forEach(pane => pane.classList.remove('active'));
+        tabList
+          .querySelectorAll('.claude-tab-button')
+          .forEach(btn => btn.classList.remove('active'));
+        tabContent
+          .querySelectorAll('.claude-tab-pane')
+          .forEach(pane => pane.classList.remove('active'));
 
         // Add active class to clicked tab
         tabButton.classList.add('active');
@@ -493,13 +542,13 @@ export class ComponentLibrary {
 
     return {
       element: container,
-      setActiveTab: (index) => {
+      setActiveTab: index => {
         if (index >= 0 && index < tabs.length) {
           tabList.children[index].click();
         }
       },
       getActiveTab: () => activeTab,
-      addTab: (tab) => {
+      addTab: tab => {
         // Implementation for adding new tabs dynamically
       }
     };
@@ -509,7 +558,9 @@ export class ComponentLibrary {
    * Add component styles to document
    */
   addComponentStyles() {
-    if (document.getElementById('claude-component-styles')) {return;}
+    if (document.getElementById('claude-component-styles')) {
+      return;
+    }
 
     const styles = document.createElement('style');
     styles.id = 'claude-component-styles';
@@ -934,8 +985,8 @@ export class ComponentLibrary {
     // Simple chart implementation
     // In a real implementation, you'd use Chart.js or similar
     const padding = 40;
-    const chartWidth = canvas.width - (padding * 2);
-    const chartHeight = canvas.height - (padding * 2);
+    const chartWidth = canvas.width - padding * 2;
+    const chartHeight = canvas.height - padding * 2;
 
     if (config.type === 'line') {
       this.drawLineChart(ctx, data, padding, chartWidth, chartHeight);
@@ -948,7 +999,9 @@ export class ComponentLibrary {
    * Draw line chart
    */
   drawLineChart(ctx, data, padding, width, height) {
-    if (!data || data.length === 0) {return;}
+    if (!data || data.length === 0) {
+      return;
+    }
 
     const maxValue = Math.max(...data.map(d => d.value));
     const stepX = width / (data.length - 1);
@@ -958,8 +1011,8 @@ export class ComponentLibrary {
     ctx.beginPath();
 
     data.forEach((point, index) => {
-      const x = padding + (index * stepX);
-      const y = padding + height - (point.value / maxValue * height);
+      const x = padding + index * stepX;
+      const y = padding + height - (point.value / maxValue) * height;
 
       if (index === 0) {
         ctx.moveTo(x, y);
@@ -975,16 +1028,18 @@ export class ComponentLibrary {
    * Draw bar chart
    */
   drawBarChart(ctx, data, padding, width, height) {
-    if (!data || data.length === 0) {return;}
+    if (!data || data.length === 0) {
+      return;
+    }
 
     const maxValue = Math.max(...data.map(d => d.value));
-    const barWidth = width / data.length * 0.8;
-    const barSpacing = width / data.length * 0.2;
+    const barWidth = (width / data.length) * 0.8;
+    const barSpacing = (width / data.length) * 0.2;
 
     ctx.fillStyle = '#00d4ff';
 
     data.forEach((point, index) => {
-      const x = padding + (index * (barWidth + barSpacing));
+      const x = padding + index * (barWidth + barSpacing);
       const barHeight = (point.value / maxValue) * height;
       const y = padding + height - barHeight;
 

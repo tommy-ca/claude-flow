@@ -12,7 +12,7 @@ const { execSync } = require('child_process');
 const commands = {
   install: () => execSync('node install-template.js', { stdio: 'inherit' }),
   validate: () => execSync('node validate-template.js', { stdio: 'inherit' }),
-  deploy: (targetPath) => {
+  deploy: targetPath => {
     if (!targetPath) {
       console.error('Usage: template-manager deploy <target-project-path>');
       process.exit(1);

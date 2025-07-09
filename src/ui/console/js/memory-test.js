@@ -115,7 +115,9 @@ export class MemoryTest {
     const testData = {
       size: this.memoryManager.formatSize(1024),
       ttl: this.memoryManager.formatTTL(Date.now() + 3600000),
-      truncate: this.memoryManager.truncateValue('This is a very long test string that should be truncated'),
+      truncate: this.memoryManager.truncateValue(
+        'This is a very long test string that should be truncated'
+      ),
       escape: this.memoryManager.escapeHtml('<script>alert("test")</script>')
     };
 
@@ -132,7 +134,8 @@ export class MemoryTest {
       throw new Error(`TTL formatting failed: ${testData.ttl}`);
     }
 
-    if (testData.truncate.length <= 103) { // 100 + '...'
+    if (testData.truncate.length <= 103) {
+      // 100 + '...'
       this.terminal.writeSuccess('✅ Value truncation works');
     } else {
       throw new Error('Value truncation failed');

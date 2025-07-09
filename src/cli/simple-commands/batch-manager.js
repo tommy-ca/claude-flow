@@ -7,19 +7,19 @@ export async function batchManagerCommand(subArgs, flags) {
   const command = subArgs[0];
 
   switch (command) {
-  case 'create-config':
-    return await createBatchConfig(subArgs.slice(1), flags);
-  case 'validate-config':
-    return await validateBatchConfig(subArgs.slice(1), flags);
-  case 'list-templates':
-    return listTemplates();
-  case 'list-environments':
-    return listEnvironments();
-  case 'estimate':
-    return await estimateBatchOperation(subArgs.slice(1), flags);
-  case 'help':
-  default:
-    return showBatchManagerHelp();
+    case 'create-config':
+      return await createBatchConfig(subArgs.slice(1), flags);
+    case 'validate-config':
+      return await validateBatchConfig(subArgs.slice(1), flags);
+    case 'list-templates':
+      return listTemplates();
+    case 'list-environments':
+      return listEnvironments();
+    case 'estimate':
+      return await estimateBatchOperation(subArgs.slice(1), flags);
+    case 'help':
+    default:
+      return showBatchManagerHelp();
   }
 }
 
@@ -59,39 +59,39 @@ async function createInteractiveConfig(outputFile) {
   // This would require a proper CLI prompt library in a real implementation
   // For now, we'll create a comprehensive template with comments
   const config = {
-    '_comment': 'Batch initialization configuration',
-    '_templates': Object.keys(PROJECT_TEMPLATES),
-    '_environments': Object.keys(ENVIRONMENT_CONFIGS),
+    _comment: 'Batch initialization configuration',
+    _templates: Object.keys(PROJECT_TEMPLATES),
+    _environments: Object.keys(ENVIRONMENT_CONFIGS),
 
-    'baseOptions': {
-      'sparc': true,
-      'parallel': true,
-      'maxConcurrency': 5,
-      'force': false,
-      'minimal': false,
-      'progressTracking': true
+    baseOptions: {
+      sparc: true,
+      parallel: true,
+      maxConcurrency: 5,
+      force: false,
+      minimal: false,
+      progressTracking: true
     },
 
-    'projects': {
-      '_simple_list': ['project1', 'project2', 'project3'],
-      '_or_use_projectConfigs_below': 'for individual customization'
+    projects: {
+      _simple_list: ['project1', 'project2', 'project3'],
+      _or_use_projectConfigs_below: 'for individual customization'
     },
 
-    'projectConfigs': {
+    projectConfigs: {
       'example-api': {
-        'template': 'web-api',
-        'environment': 'dev',
-        'customConfig': {
-          'database': 'postgresql',
-          'auth': 'jwt'
+        template: 'web-api',
+        environment: 'dev',
+        customConfig: {
+          database: 'postgresql',
+          auth: 'jwt'
         }
       },
       'example-frontend': {
-        'template': 'react-app',
-        'environment': 'dev',
-        'customConfig': {
-          'ui': 'material-ui',
-          'state': 'redux'
+        template: 'react-app',
+        environment: 'dev',
+        customConfig: {
+          ui: 'material-ui',
+          state: 'redux'
         }
       }
     }
@@ -134,7 +134,9 @@ async function validateBatchConfig(args, flags) {
     }
 
     if (config.projects && config.projectConfigs) {
-      warnings.push('Both "projects" and "projectConfigs" specified. "projectConfigs" will take precedence.');
+      warnings.push(
+        'Both "projects" and "projectConfigs" specified. "projectConfigs" will take precedence.'
+      );
     }
 
     // Validate base options
@@ -146,13 +148,17 @@ async function validateBatchConfig(args, flags) {
       }
 
       if (template && !PROJECT_TEMPLATES[template]) {
-        issues.push(`Unknown template: ${template}. Available: ${Object.keys(PROJECT_TEMPLATES).join(', ')}`);
+        issues.push(
+          `Unknown template: ${template}. Available: ${Object.keys(PROJECT_TEMPLATES).join(', ')}`
+        );
       }
 
       if (environments) {
         for (const env of environments) {
           if (!ENVIRONMENT_CONFIGS[env]) {
-            issues.push(`Unknown environment: ${env}. Available: ${Object.keys(ENVIRONMENT_CONFIGS).join(', ')}`);
+            issues.push(
+              `Unknown environment: ${env}. Available: ${Object.keys(ENVIRONMENT_CONFIGS).join(', ')}`
+            );
           }
         }
       }
@@ -182,8 +188,11 @@ async function validateBatchConfig(args, flags) {
 
       // Summary
       console.log('\n📊 Configuration Summary:');
-      const projectCount = config.projects ? config.projects.length :
-        config.projectConfigs ? Object.keys(config.projectConfigs).length : 0;
+      const projectCount = config.projects
+        ? config.projects.length
+        : config.projectConfigs
+          ? Object.keys(config.projectConfigs).length
+          : 0;
       console.log(`  Projects: ${projectCount}`);
 
       if (config.baseOptions) {
@@ -192,7 +201,6 @@ async function validateBatchConfig(args, flags) {
         console.log(`  SPARC: ${config.baseOptions.sparc ? 'Enabled' : 'Disabled'}`);
         console.log(`  Template: ${config.baseOptions.template || 'default'}`);
       }
-
     } else {
       printError('❌ Configuration has issues:');
       issues.forEach(issue => console.error(`  - ${issue}`));
@@ -202,7 +210,6 @@ async function validateBatchConfig(args, flags) {
         warnings.forEach(warning => console.log(`  - ${warning}`));
       }
     }
-
   } catch (error) {
     if (error instanceof Deno.errors.NotFound) {
       printError(`Configuration file not found: ${configFile}`);
@@ -223,7 +230,9 @@ function listTemplates() {
     console.log(`   Name: ${template.name}`);
     console.log(`   Description: ${template.description}`);
     console.log(`   Extra Directories: ${template.extraDirs ? template.extraDirs.length : 0}`);
-    console.log(`   Extra Files: ${template.extraFiles ? Object.keys(template.extraFiles).length : 0}`);
+    console.log(
+      `   Extra Files: ${template.extraFiles ? Object.keys(template.extraFiles).length : 0}`
+    );
     console.log();
   }
 }
@@ -273,7 +282,9 @@ async function estimateBatchOperation(args, flags) {
     const avgTimePerProject = 15; // seconds estimate
 
     const sequentialTime = totalEnvironments * avgTimePerProject;
-    const parallelTime = parallel ? Math.ceil(totalEnvironments / maxConcurrency) * avgTimePerProject : sequentialTime;
+    const parallelTime = parallel
+      ? Math.ceil(totalEnvironments / maxConcurrency) * avgTimePerProject
+      : sequentialTime;
 
     console.log(`📊 Project Count: ${projectCount}`);
     console.log(`🌍 Total Environments: ${totalEnvironments}`);
@@ -287,8 +298,7 @@ async function estimateBatchOperation(args, flags) {
     console.log();
     console.log('💾 Estimated Disk Usage:');
     console.log('   Per Project: ~50-200 MB');
-    console.log(`   Total: ~${Math.ceil(totalEnvironments * 125 / 1024)} GB`);
-
+    console.log(`   Total: ~${Math.ceil((totalEnvironments * 125) / 1024)} GB`);
   } catch (error) {
     printError(`Failed to estimate batch operation: ${error.message}`);
   }

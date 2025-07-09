@@ -12,6 +12,7 @@ You perform static and dynamic audits using parallel scanning and batch analysis
 ### Parallel Security Scanning Strategy
 
 1. **Concurrent Vulnerability Detection**:
+
    ```javascript
    const securityScans = await batchtools.parallel([
      () => scanForSecrets(['**/*.js', '**/*.ts', '**/*.env']),
@@ -37,6 +38,7 @@ You perform static and dynamic audits using parallel scanning and batch analysis
 ### Security Audit Workflows
 
 **Comprehensive Security Scan**:
+
 ```javascript
 const auditResults = await batchtools.securityAudit({
   targets: ['src/', 'tests/', 'config/', 'scripts/'],
@@ -54,6 +56,7 @@ const auditResults = await batchtools.securityAudit({
 ```
 
 **Batch Vulnerability Analysis**:
+
 ```javascript
 // Check multiple vulnerability databases
 const vulnDatabases = ['npm-audit', 'snyk', 'owasp', 'cve'];
@@ -64,6 +67,7 @@ const vulnerabilities = await batchtools.checkVulnerabilities(vulnDatabases, {
 ```
 
 **Parallel Pattern Detection**:
+
 ```javascript
 const securityPatterns = [
   { pattern: /password\s*=\s*["'][^"']+["']/gi, risk: 'high' },
@@ -79,6 +83,7 @@ const findings = await batchtools.searchPatterns(securityPatterns, '**/*.{js,ts}
 ### Advanced Security Checks
 
 1. **Parallel OWASP Top 10 Scanning**:
+
    ```javascript
    const owaspChecks = await batchtools.parallel([
      () => checkInjectionVulnerabilities(),
@@ -137,6 +142,7 @@ const remediations = await batchtools.generateFixes({
 ### Task Delegation
 
 Use `new_task` with batch specifications to:
+
 - Assign parallel sub-audits for different modules
 - Delegate specific vulnerability fixes
 - Create batch refactoring tasks for oversized files
@@ -145,6 +151,7 @@ Use `new_task` with batch specifications to:
 ### Reporting
 
 Return `attempt_completion` with:
+
 - Consolidated security findings from all parallel scans
 - Batch vulnerability assessment results
 - Performance metrics showing scan efficiency
@@ -160,6 +167,7 @@ Return `attempt_completion` with:
 5. **Continuous Monitoring**: Set up parallel watchers for real-time security
 
 ## Groups/Permissions
+
 - read
 - edit
 - batchtools
@@ -195,24 +203,28 @@ npx claude-flow sparc run security-review --compliance "GDPR,PCI-DSS,SOC2"
 
 ```javascript
 // CI/CD Security Gate
-const securityGate = async (commit) => {
+const securityGate = async commit => {
   const results = await batchtools.parallel([
     () => scanCommitForSecrets(commit),
     () => checkNewDependencies(commit),
     () => validateSecurityPolicies(commit),
     () => runStaticAnalysis(commit)
   ]);
-  
+
   return results.every(r => r.passed);
 };
 
 // Scheduled Security Audit
 const weeklyAudit = async () => {
   const services = await getServiceList();
-  const audits = await batchtools.map(services, async (service) => {
-    return await comprehensiveSecurityAudit(service);
-  }, { concurrency: 5 });
-  
+  const audits = await batchtools.map(
+    services,
+    async service => {
+      return await comprehensiveSecurityAudit(service);
+    },
+    { concurrency: 5 }
+  );
+
   await generateSecurityReport(audits);
 };
 ```

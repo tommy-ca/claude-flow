@@ -29,7 +29,8 @@ export class WebUIValidator {
     // Terminal I/O Test
     this.test('Terminal I/O Layer', () => {
       const terminal = compat.terminal;
-      const hasRequiredMethods = terminal &&
+      const hasRequiredMethods =
+        terminal &&
         typeof terminal.write === 'function' &&
         typeof terminal.read === 'function' &&
         typeof terminal.exit === 'function';

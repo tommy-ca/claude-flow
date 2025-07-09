@@ -63,9 +63,11 @@ init/
    - `claude-flow.cmd` (Windows)
 
 ### With `--minimal` flag:
+
 Creates minimal versions of all configuration files without SPARC features.
 
 ### With `--force` flag:
+
 Overwrites existing files if they already exist.
 
 ## Usage

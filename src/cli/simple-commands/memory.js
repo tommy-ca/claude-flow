@@ -23,36 +23,36 @@ export async function memoryCommand(subArgs, flags) {
   }
 
   switch (memorySubcommand) {
-  case 'store':
-    await storeMemory(subArgs, loadMemory, saveMemory);
-    break;
+    case 'store':
+      await storeMemory(subArgs, loadMemory, saveMemory);
+      break;
 
-  case 'query':
-    await queryMemory(subArgs, loadMemory);
-    break;
+    case 'query':
+      await queryMemory(subArgs, loadMemory);
+      break;
 
-  case 'stats':
-    await showMemoryStats(loadMemory);
-    break;
+    case 'stats':
+      await showMemoryStats(loadMemory);
+      break;
 
-  case 'export':
-    await exportMemory(subArgs, loadMemory);
-    break;
+    case 'export':
+      await exportMemory(subArgs, loadMemory);
+      break;
 
-  case 'import':
-    await importMemory(subArgs, saveMemory);
-    break;
+    case 'import':
+      await importMemory(subArgs, saveMemory);
+      break;
 
-  case 'clear':
-    await clearMemory(subArgs, saveMemory);
-    break;
+    case 'clear':
+      await clearMemory(subArgs, saveMemory);
+      break;
 
-  case 'list':
-    await listNamespaces(loadMemory);
-    break;
+    case 'list':
+      await listNamespaces(loadMemory);
+      break;
 
-  default:
-    showMemoryHelp();
+    default:
+      showMemoryHelp();
   }
 }
 
@@ -108,7 +108,9 @@ async function queryMemory(subArgs, loadMemory) {
     const results = [];
 
     for (const [ns, entries] of Object.entries(data)) {
-      if (namespace && ns !== namespace) {continue;}
+      if (namespace && ns !== namespace) {
+        continue;
+      }
 
       for (const entry of entries) {
         if (entry.key.includes(search) || entry.value.includes(search)) {
@@ -130,7 +132,9 @@ async function queryMemory(subArgs, loadMemory) {
     for (const entry of results.slice(0, 10)) {
       console.log(`\n📌 ${entry.key}`);
       console.log(`   Namespace: ${entry.namespace}`);
-      console.log(`   Value: ${entry.value.substring(0, 100)}${entry.value.length > 100 ? '...' : ''}`);
+      console.log(
+        `   Value: ${entry.value.substring(0, 100)}${entry.value.length > 100 ? '...' : ''}`
+      );
       console.log(`   Stored: ${new Date(entry.timestamp).toLocaleString()}`);
     }
 
@@ -156,7 +160,9 @@ async function showMemoryStats(loadMemory) {
     printSuccess('Memory Bank Statistics:');
     console.log(`   Total Entries: ${totalEntries}`);
     console.log(`   Namespaces: ${Object.keys(data).length}`);
-    console.log(`   Size: ${(new TextEncoder().encode(JSON.stringify(data)).length / 1024).toFixed(2)} KB`);
+    console.log(
+      `   Size: ${(new TextEncoder().encode(JSON.stringify(data)).length / 1024).toFixed(2)} KB`
+    );
 
     if (Object.keys(data).length > 0) {
       console.log('\n📁 Namespace Breakdown:');
@@ -188,7 +194,9 @@ async function exportMemory(subArgs, loadMemory) {
     for (const entries of Object.values(exportData)) {
       totalEntries += entries.length;
     }
-    console.log(`📦 Exported ${totalEntries} entries from ${Object.keys(exportData).length} namespace(s)`);
+    console.log(
+      `📦 Exported ${totalEntries} entries from ${Object.keys(exportData).length} namespace(s)`
+    );
   } catch (err) {
     printError(`Failed to export memory: ${err.message}`);
   }

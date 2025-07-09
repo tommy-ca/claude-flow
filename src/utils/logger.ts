@@ -28,10 +28,14 @@ class Logger {
 
   private formatMessage(level: string, message: string, ...args: any[]): string {
     const timestamp = new Date().toISOString();
-    const formattedArgs = args.length > 0 ? ' ' + args.map(arg => 
-      typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-    ).join(' ') : '';
-    
+    const formattedArgs =
+      args.length > 0
+        ? ' ' +
+          args
+            .map(arg => (typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)))
+            .join(' ')
+        : '';
+
     return `[${timestamp}] [${level}] [${this.prefix}] ${message}${formattedArgs}`;
   }
 

@@ -21,7 +21,10 @@ import { hooksAction } from './simple-commands/hooks.js';
 import { hookSafetyCommand } from './simple-commands/hook-safety.js';
 import { hiveMindCommand } from './simple-commands/hive-mind.js';
 import hiveMindOptimizeCommand from './simple-commands/hive-mind-optimize.js';
-import { showUnifiedMetrics, fixTaskAttribution } from './simple-commands/swarm-metrics-integration.js';
+import {
+  showUnifiedMetrics,
+  fixTaskAttribution
+} from './simple-commands/swarm-metrics-integration.js';
 // Note: TypeScript imports commented out for Node.js compatibility
 // import { ruvSwarmAction } from './commands/ruv-swarm.ts';
 // import { configIntegrationAction } from './commands/config-integration.ts';
@@ -148,23 +151,14 @@ First-time users should run: npx claude-flow@latest init --sparc`
     handler: statusCommand,
     description: 'Show system status and health',
     usage: 'status [--verbose] [--json]',
-    examples: [
-      'status',
-      'status --verbose',
-      'status --json'
-    ]
+    examples: ['status', 'status --verbose', 'status --json']
   });
 
   commandRegistry.set('mcp', {
     handler: mcpCommand,
     description: 'Manage MCP server and tools',
     usage: 'mcp <subcommand> [options]',
-    examples: [
-      'mcp status',
-      'mcp start --port 8080',
-      'mcp tools --verbose',
-      'mcp auth setup'
-    ]
+    examples: ['mcp status', 'mcp start --port 8080', 'mcp tools --verbose', 'mcp auth setup']
   });
 
   commandRegistry.set('monitor', {

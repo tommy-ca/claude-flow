@@ -74,12 +74,12 @@ export class MemoryIndexer {
       this.addEntry(entry);
     }
 
-    this.logger.info('Memory index built', { 
+    this.logger.info('Memory index built', {
       totalEntries: this.entries.size,
       agents: this.agentIndex.keys().length,
       sessions: this.sessionIndex.keys().length,
       types: this.typeIndex.keys().length,
-      tags: this.tagIndex.keys().length,
+      tags: this.tagIndex.keys().length
     });
   }
 
@@ -94,7 +94,7 @@ export class MemoryIndexer {
     this.agentIndex.add(entry.agentId, entry.id);
     this.sessionIndex.add(entry.sessionId, entry.id);
     this.typeIndex.add(entry.type, entry.id);
-    
+
     for (const tag of entry.tags) {
       this.tagIndex.add(tag, entry.id);
     }
@@ -126,7 +126,7 @@ export class MemoryIndexer {
     this.agentIndex.remove(entry.agentId, id);
     this.sessionIndex.remove(entry.sessionId, id);
     this.typeIndex.remove(entry.type, id);
-    
+
     for (const tag of entry.tags) {
       this.tagIndex.remove(tag, id);
     }
@@ -193,8 +193,8 @@ export class MemoryIndexer {
         agents: this.agentIndex.keys().length,
         sessions: this.sessionIndex.keys().length,
         types: this.typeIndex.keys().length,
-        tags: this.tagIndex.keys().length,
-      },
+        tags: this.tagIndex.keys().length
+      }
     };
   }
 
@@ -210,10 +210,7 @@ export class MemoryIndexer {
     this.timeIndex.clear();
   }
 
-  private intersectSets(
-    set1: Set<string> | undefined,
-    set2: Set<string>,
-  ): Set<string> {
+  private intersectSets(set1: Set<string> | undefined, set2: Set<string>): Set<string> {
     if (!set1) {
       return new Set(set2);
     }

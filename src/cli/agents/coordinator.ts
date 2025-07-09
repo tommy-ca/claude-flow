@@ -3,7 +3,12 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type {
+  AgentCapabilities,
+  AgentConfig,
+  AgentEnvironment,
+  TaskDefinition
+} from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
@@ -71,7 +76,7 @@ export class CoordinatorAgent extends BaseAgent {
       maxMemoryUsage: 512 * 1024 * 1024, // 512MB
       maxExecutionTime: 600000, // 10 minutes
       reliability: 0.95,
-      speed: 0.90,
+      speed: 0.9,
       quality: 0.88
     };
   }
@@ -86,20 +91,14 @@ export class CoordinatorAgent extends BaseAgent {
       timeoutThreshold: 600000,
       reportingInterval: 15000,
       heartbeatInterval: 8000,
-      permissions: [
-        'file-read',
-        'file-write',
-        'api-access',
-        'agent-management',
-        'task-management'
-      ],
+      permissions: ['file-read', 'file-write', 'api-access', 'agent-management', 'task-management'],
       trustedAgents: [],
       expertise: {
         'task-orchestration': 0.95,
-        'resource-management': 0.90,
+        'resource-management': 0.9,
         'progress-tracking': 0.92,
-        'communication': 0.88,
-        'planning': 0.85
+        communication: 0.88,
+        planning: 0.85
       },
       preferences: {
         communicationStyle: 'clear',
@@ -289,7 +288,7 @@ export class CoordinatorAgent extends BaseAgent {
         duration: '1 day'
       }
     ];
-    
+
     allocation.efficiency = 0.85;
 
     return allocation;
@@ -419,15 +418,16 @@ export class CoordinatorAgent extends BaseAgent {
     // Simulate report generation
     await this.delay(3000);
 
-    report.executive_summary = 'Project is 68% complete and on track for delivery. Team productivity is high with minor blockers identified.';
-    
+    report.executive_summary =
+      'Project is 68% complete and on track for delivery. Team productivity is high with minor blockers identified.';
+
     report.key_metrics = {
       completion: '68%',
       velocity: '12 points/sprint',
       quality: '4.2/5.0',
       budget: '72% utilized'
     };
-    
+
     report.achievements = [
       'Completed API development milestone',
       'Achieved 85% test coverage',
@@ -501,7 +501,7 @@ export const createCoordinatorAgent = (
       'task-orchestration': 0.98,
       'resource-allocation': 0.95,
       'progress-tracking': 0.92,
-      'team-coordination': 0.90,
+      'team-coordination': 0.9,
       'workflow-management': 0.94
     },
     preferences: {

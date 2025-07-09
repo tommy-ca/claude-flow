@@ -36,7 +36,9 @@ class ClaudeCodeConsole {
    * Initialize the console application
    */
   async init() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     try {
       // Show loading overlay
@@ -46,10 +48,7 @@ class ClaudeCodeConsole {
       this.getDOMElements();
 
       // Initialize terminal emulator
-      this.terminal = new TerminalEmulator(
-        this.elements.consoleOutput,
-        this.elements.consoleInput
-      );
+      this.terminal = new TerminalEmulator(this.elements.consoleOutput, this.elements.consoleInput);
 
       // Initialize command handler
       this.commandHandler = new CommandHandler(this.terminal, this.wsClient);
@@ -82,7 +81,6 @@ class ClaudeCodeConsole {
 
       this.isInitialized = true;
       console.log('Claude Code Console initialized successfully');
-
     } catch (error) {
       console.error('Failed to initialize console:', error);
       this.showError('Failed to initialize console: ' + error.message);
@@ -125,7 +123,7 @@ class ClaudeCodeConsole {
    */
   setupComponentInteractions() {
     // Terminal -> Command Handler
-    this.terminal.on('command', (command) => {
+    this.terminal.on('command', command => {
       this.commandHandler.processCommand(command);
     });
 
@@ -140,7 +138,7 @@ class ClaudeCodeConsole {
       this.terminal.setPrompt('claude-flow>');
     });
 
-    this.wsClient.on('disconnected', (info) => {
+    this.wsClient.on('disconnected', info => {
       this.updateConnectionStatus(false, false);
       this.terminal.writeWarning('Disconnected from server');
       this.terminal.setPrompt('offline>');
@@ -150,26 +148,28 @@ class ClaudeCodeConsole {
       }
     });
 
-    this.wsClient.on('reconnecting', (info) => {
+    this.wsClient.on('reconnecting', info => {
       this.updateConnectionStatus(false, true);
-      this.terminal.writeInfo(`Reconnecting... (${info.attempt}/${this.wsClient.maxReconnectAttempts})`);
+      this.terminal.writeInfo(
+        `Reconnecting... (${info.attempt}/${this.wsClient.maxReconnectAttempts})`
+      );
     });
 
-    this.wsClient.on('error', (error) => {
+    this.wsClient.on('error', error => {
       this.terminal.writeError(`WebSocket error: ${error.message || 'Unknown error'}`);
     });
 
-    this.wsClient.on('message_received', (message) => {
+    this.wsClient.on('message_received', message => {
       this.messageCount++;
       this.handleIncomingMessage(message);
     });
 
-    this.wsClient.on('notification', (notification) => {
+    this.wsClient.on('notification', notification => {
       this.handleNotification(notification);
     });
 
     // Settings -> Application
-    this.settings.on('connect_requested', async (config) => {
+    this.settings.on('connect_requested', async config => {
       await this.connect(config.url, config.token);
     });
 
@@ -177,7 +177,7 @@ class ClaudeCodeConsole {
       this.disconnect();
     });
 
-    this.settings.on('max_lines_changed', (maxLines) => {
+    this.settings.on('max_lines_changed', maxLines => {
       this.terminal.setMaxLines(maxLines);
     });
 
@@ -281,7 +281,6 @@ class ClaudeCodeConsole {
       if (token) {
         this.settings.set('authToken', token);
       }
-
     } catch (error) {
       this.updateConnectionStatus(false, false);
       this.terminal.writeError(`Connection failed: ${error.message}`);
@@ -304,15 +303,17 @@ class ClaudeCodeConsole {
 
     // Update status indicator
     if (this.elements.statusIndicator) {
-      this.elements.statusIndicator.className = 'status-indicator ' +
-        (connected ? 'connected' : connecting ? 'connecting' : '');
+      this.elements.statusIndicator.className =
+        'status-indicator ' + (connected ? 'connected' : connecting ? 'connecting' : '');
     }
 
     // Update status text
     if (this.elements.statusText) {
-      this.elements.statusText.textContent =
-        connected ? 'Connected' :
-          connecting ? 'Connecting...' : 'Disconnected';
+      this.elements.statusText.textContent = connected
+        ? 'Connected'
+        : connecting
+          ? 'Connecting...'
+          : 'Disconnected';
     }
 
     // Update settings panel
@@ -341,28 +342,28 @@ class ClaudeCodeConsole {
     const { method, params } = notification;
 
     switch (method) {
-    case 'agent/status':
-      this.handleAgentStatus(params);
-      break;
+      case 'agent/status':
+        this.handleAgentStatus(params);
+        break;
 
-    case 'swarm/update':
-      this.handleSwarmUpdate(params);
-      break;
+      case 'swarm/update':
+        this.handleSwarmUpdate(params);
+        break;
 
-    case 'memory/update':
-      this.handleMemoryUpdate(params);
-      break;
+      case 'memory/update':
+        this.handleMemoryUpdate(params);
+        break;
 
-    case 'log/message':
-      this.handleLogMessage(params);
-      break;
+      case 'log/message':
+        this.handleLogMessage(params);
+        break;
 
-    case 'connection/established':
-      this.handleConnectionEstablished(params);
-      break;
+      case 'connection/established':
+        this.handleConnectionEstablished(params);
+        break;
 
-    default:
-      console.log('Unhandled notification:', method, params);
+      default:
+        console.log('Unhandled notification:', method, params);
     }
   }
 
@@ -389,20 +390,20 @@ class ClaudeCodeConsole {
     const { method, params } = message;
 
     switch (method) {
-    case 'claude-flow/started':
-      this.terminal.writeSuccess(`Claude Flow started in ${params.mode} mode`);
-      break;
+      case 'claude-flow/started':
+        this.terminal.writeSuccess(`Claude Flow started in ${params.mode} mode`);
+        break;
 
-    case 'claude-flow/stopped':
-      this.terminal.writeInfo('Claude Flow stopped');
-      break;
+      case 'claude-flow/stopped':
+        this.terminal.writeInfo('Claude Flow stopped');
+        break;
 
-    case 'claude-flow/error':
-      this.terminal.writeError(`Claude Flow error: ${params.message}`);
-      break;
+      case 'claude-flow/error':
+        this.terminal.writeError(`Claude Flow error: ${params.message}`);
+        break;
 
-    default:
-      this.terminal.writeInfo(`Claude Flow: ${method} - ${JSON.stringify(params)}`);
+      default:
+        this.terminal.writeInfo(`Claude Flow: ${method} - ${JSON.stringify(params)}`);
     }
   }
 
@@ -442,8 +443,8 @@ class ClaudeCodeConsole {
    */
   handleLogMessage(params) {
     if (params.level && params.message) {
-      const type = params.level === 'error' ? 'error' :
-        params.level === 'warn' ? 'warning' : 'info';
+      const type =
+        params.level === 'error' ? 'error' : params.level === 'warn' ? 'warning' : 'info';
       this.terminal.write(`[${params.level.toUpperCase()}] ${params.message}`, type);
     }
   }
@@ -471,17 +472,17 @@ class ClaudeCodeConsole {
    */
   handleSettingChange(key, value) {
     switch (key) {
-    case 'theme':
-      document.documentElement.setAttribute('data-theme', value);
-      break;
+      case 'theme':
+        document.documentElement.setAttribute('data-theme', value);
+        break;
 
-    case 'fontSize':
-      document.documentElement.style.setProperty('--font-size-base', `${value}px`);
-      break;
+      case 'fontSize':
+        document.documentElement.style.setProperty('--font-size-base', `${value}px`);
+        break;
 
-    case 'lineHeight':
-      document.documentElement.style.setProperty('--line-height', value);
-      break;
+      case 'lineHeight':
+        document.documentElement.style.setProperty('--line-height', value);
+        break;
     }
   }
 
@@ -537,8 +538,7 @@ class ClaudeCodeConsole {
       const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
 
-      this.elements.uptime.textContent =
-        `Uptime: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      this.elements.uptime.textContent = `Uptime: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
   }
 
@@ -606,7 +606,7 @@ class ClaudeCodeConsole {
    */
   setupEventListeners() {
     // Handle unhandled promise rejections
-    window.addEventListener('unhandledrejection', (event) => {
+    window.addEventListener('unhandledrejection', event => {
       console.error('Unhandled promise rejection:', event.reason);
       if (this.terminal) {
         this.terminal.writeError(`Unhandled error: ${event.reason.message || event.reason}`);
@@ -614,7 +614,7 @@ class ClaudeCodeConsole {
     });
 
     // Handle errors
-    window.addEventListener('error', (event) => {
+    window.addEventListener('error', event => {
       console.error('Global error:', event.error);
       if (this.terminal) {
         this.terminal.writeError(`Application error: ${event.error.message || event.error}`);

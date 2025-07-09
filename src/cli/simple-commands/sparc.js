@@ -8,7 +8,13 @@ export async function sparcCommand(subArgs, flags) {
   const sparcCmd = subArgs[0];
 
   // Show help if requested or no args
-  if (flags.help || flags.h || sparcCmd === '--help' || sparcCmd === '-h' || (!sparcCmd && Object.keys(flags).length === 0)) {
+  if (
+    flags.help ||
+    flags.h ||
+    sparcCmd === '--help' ||
+    sparcCmd === '-h' ||
+    (!sparcCmd && Object.keys(flags).length === 0)
+  ) {
     showSparcHelp();
     return;
   }
@@ -48,24 +54,24 @@ export async function sparcCommand(subArgs, flags) {
   const actualCmd = mergedArgs[0];
 
   switch (actualCmd) {
-  case 'modes':
-    await listSparcModes(mergedArgs);
-    break;
+    case 'modes':
+      await listSparcModes(mergedArgs);
+      break;
 
-  case 'info':
-    await showModeInfo(mergedArgs);
-    break;
+    case 'info':
+      await showModeInfo(mergedArgs);
+      break;
 
-  case 'run':
-    await runSparcMode(mergedArgs, flags);
-    break;
+    case 'run':
+      await runSparcMode(mergedArgs, flags);
+      break;
 
-  case 'tdd':
-    await runTddWorkflow(mergedArgs);
-    break;
+    case 'tdd':
+      await runTddWorkflow(mergedArgs);
+      break;
 
-  default:
-    showSparcHelp();
+    default:
+      showSparcHelp();
   }
 }
 
@@ -162,7 +168,6 @@ async function showModeInfo(subArgs) {
     console.log();
     console.log('Source:');
     console.log(mode.source);
-
   } catch (err) {
     printError(`Failed to show mode info: ${err.message}`);
   }
@@ -170,7 +175,10 @@ async function showModeInfo(subArgs) {
 
 async function runSparcMode(subArgs, flags) {
   const runModeSlug = subArgs[1];
-  const taskDescription = subArgs.slice(2).filter(arg => !arg.startsWith('--')).join(' ');
+  const taskDescription = subArgs
+    .slice(2)
+    .filter(arg => !arg.startsWith('--'))
+    .join(' ');
 
   if (!runModeSlug || !taskDescription) {
     printError('Usage: sparc run <mode-slug> <task-description>');
@@ -201,8 +209,9 @@ async function runSparcMode(subArgs, flags) {
     }
 
     // Build enhanced SPARC prompt
-    const memoryNamespace = subArgs.includes('--namespace') ?
-      subArgs[subArgs.indexOf('--namespace') + 1] : mode.slug;
+    const memoryNamespace = subArgs.includes('--namespace')
+      ? subArgs[subArgs.indexOf('--namespace') + 1]
+      : mode.slug;
 
     const enhancedTask = createSparcPrompt(mode, taskDescription, memoryNamespace);
 
@@ -261,7 +270,6 @@ async function runSparcMode(subArgs, flags) {
 
     // Execute Claude with SPARC configuration
     await executeClaude(enhancedTask, toolsList, instanceId, memoryNamespace, subArgs);
-
   } catch (err) {
     printError(`Failed to run SPARC mode: ${err.message}`);
   }
@@ -371,8 +379,14 @@ async function executeClaude(enhancedTask, toolsList, instanceId, memoryNamespac
   if (isNonInteractive || subArgs.includes('--verbose') || subArgs.includes('-v')) {
     console.log('\n🔍 Debug: Executing claude with:');
     console.log('Command: claude');
-    console.log('Permissions:', enablePermissions ? '✅ Enabled (will prompt)' : '⚡ Skipped (--dangerously-skip-permissions)');
-    console.log('Tools:', enablePermissions ? `Specified: ${toolsList}` : 'ALL tools enabled (MCP, WebSearch, etc.)');
+    console.log(
+      'Permissions:',
+      enablePermissions ? '✅ Enabled (will prompt)' : '⚡ Skipped (--dangerously-skip-permissions)'
+    );
+    console.log(
+      'Tools:',
+      enablePermissions ? `Specified: ${toolsList}` : 'ALL tools enabled (MCP, WebSearch, etc.)'
+    );
     console.log('Mode:', isNonInteractive ? '🤖 Non-interactive' : '💬 Interactive');
     console.log('Args array length:', claudeArgs.length);
     console.log('First arg (prompt) length:', claudeArgs[0].length, 'characters');
@@ -476,7 +490,9 @@ function showSparcHelp() {
   console.log();
   console.log('  # Boomerang orchestration pattern');
   console.log('  batchtool orchestrate --boomerang \\');
-  console.log('    --research "npx claude-flow sparc run ask \'requirements\' --non-interactive" \\');
+  console.log(
+    '    --research "npx claude-flow sparc run ask \'requirements\' --non-interactive" \\'
+  );
   console.log('    --design "npx claude-flow sparc run architect \'system\' --non-interactive" \\');
   console.log('    --implement "npx claude-flow sparc run code \'features\' --non-interactive" \\');
   console.log('    --test "npx claude-flow sparc run tdd \'validation\' --non-interactive"');

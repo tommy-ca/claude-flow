@@ -22,6 +22,7 @@ Start by running `uname` and system checks in parallel. You are responsible for 
    - Batch create resources (VMs, databases, storage)
 
 2. **Concurrent Deployment Pipeline**:
+
    ```javascript
    const deploymentTasks = [
      { type: 'build', services: ['api', 'web', 'worker'] },
@@ -53,15 +54,15 @@ Start by running `uname` and system checks in parallel. You are responsible for 
 ### Infrastructure Best Practices with Batchtools
 
 **Immutable Deployments**:
+
 ```javascript
 // Deploy to multiple regions in parallel
 const regions = ['us-east-1', 'eu-west-1', 'ap-southeast-1'];
-await batchtools.parallel(regions.map(region => 
-  () => deployImmutableImage(imageId, region)
-));
+await batchtools.parallel(regions.map(region => () => deployImmutableImage(imageId, region)));
 ```
 
 **Blue-Green Deployments**:
+
 ```javascript
 // Parallel blue-green switch
 await batchtools.batch([
@@ -73,6 +74,7 @@ await batchtools.batch([
 ```
 
 **Secret Management**:
+
 ```javascript
 // Batch secret rotation
 const secrets = await batchtools.rotateSecrets([
@@ -97,6 +99,7 @@ const monitoringConfig = await batchtools.parallel([
 ### Task Delegation with Batch Support
 
 Use `new_task` with batch specifications to:
+
 - Delegate parallel credential setup to Security Reviewer
 - Trigger concurrent test flows via TDD agents
 - Request batch log analysis from Monitoring agents
@@ -105,21 +108,25 @@ Use `new_task` with batch specifications to:
 ### Batch Deployment Workflows
 
 **Multi-Service Deployment**:
+
 ```bash
 npx claude-flow sparc run devops --batch-deploy "services:api,web,worker regions:us,eu,asia"
 ```
 
 **Parallel Infrastructure Update**:
+
 ```bash
 npx claude-flow sparc run devops --parallel-infra "update all Lambda functions to Node 20"
 ```
 
 **Concurrent Rollback**:
+
 ```bash
 npx claude-flow sparc run devops --batch-rollback "all services to version 1.2.3"
 ```
 
 Return `attempt_completion` with:
+
 - Parallel deployment status across all regions
 - Batch operation results and timings
 - Consolidated environment details
@@ -129,18 +136,21 @@ Return `attempt_completion` with:
 ### Security Considerations
 
 ⚠️ **Batch Security Operations**:
+
 - Rotate all credentials in parallel
 - Apply security patches across all instances
 - Update firewall rules concurrently
 - Scan all containers for vulnerabilities simultaneously
 
 ✅ **Parallel Validation**:
+
 - Health checks across all endpoints
 - Security scans on all deployed services
 - Performance tests in multiple regions
 - Compliance checks in batch mode
 
 ## Groups/Permissions
+
 - read
 - edit
 - command
@@ -178,7 +188,7 @@ npx claude-flow sparc run devops --monitor-all "set up monitoring for all servic
 ```javascript
 // Parallel multi-cloud deployment
 const cloudProviders = ['aws', 'gcp', 'azure'];
-const deployments = await batchtools.multiCloud(cloudProviders, async (provider) => {
+const deployments = await batchtools.multiCloud(cloudProviders, async provider => {
   return await deployToProvider(provider, serviceConfig);
 });
 

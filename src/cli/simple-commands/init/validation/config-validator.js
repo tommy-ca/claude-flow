@@ -41,12 +41,10 @@ export class ConfigValidator {
           result.errors.push(...validationResult.errors);
         }
         result.warnings.push(...validationResult.warnings);
-
       } catch (jsonError) {
         result.success = false;
         result.errors.push(`Invalid JSON in .roomodes: ${jsonError.message}`);
       }
-
     } catch (error) {
       if (error instanceof Deno.errors.NotFound) {
         result.warnings.push('.roomodes file not found - SPARC features may not be available');
@@ -90,11 +88,7 @@ export class ConfigValidator {
       }
 
       // Check for important command patterns
-      const importantCommands = [
-        'npx claude-flow sparc',
-        'npm run build',
-        'npm run test'
-      ];
+      const importantCommands = ['npx claude-flow sparc', 'npm run build', 'npm run test'];
 
       for (const command of importantCommands) {
         if (!content.includes(command)) {
@@ -107,7 +101,6 @@ export class ConfigValidator {
         result.success = false;
         result.errors.push('CLAUDE.md appears to be too short or empty');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Could not read CLAUDE.md: ${error.message}`);
@@ -143,12 +136,10 @@ export class ConfigValidator {
           result.errors.push(...validationResult.errors);
         }
         result.warnings.push(...validationResult.warnings);
-
       } catch (jsonError) {
         result.success = false;
         result.errors.push(`Invalid JSON in memory data: ${jsonError.message}`);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Could not read memory data: ${error.message}`);
@@ -191,7 +182,6 @@ export class ConfigValidator {
       if (content.length < 50) {
         result.warnings.push('coordination.md appears to be very short');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Could not read coordination.md: ${error.message}`);
@@ -241,7 +231,6 @@ export class ConfigValidator {
       } else {
         result.warnings.push('Executable may not have proper shebang');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Could not validate executable: ${error.message}`);

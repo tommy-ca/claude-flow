@@ -54,14 +54,16 @@ async function runContinuousMonitoring(interval, format) {
     }
 
     console.log(`\n🔄 Next update in ${interval}ms...`);
-
   }, interval);
 
   // In a real implementation, you would handle Ctrl+C gracefully
-  setTimeout(() => {
-    clearInterval(monitorInterval);
-    console.log('\n👋 Monitoring stopped');
-  }, interval * (maxIterations + 1));
+  setTimeout(
+    () => {
+      clearInterval(monitorInterval);
+      console.log('\n👋 Monitoring stopped');
+    },
+    interval * (maxIterations + 1)
+  );
 }
 
 async function collectMetrics() {
@@ -111,7 +113,9 @@ function displayMetrics(metrics) {
 
   // Orchestrator metrics
   console.log('\n🎭 Orchestrator:');
-  console.log(`   Status: ${getStatusIcon(metrics.orchestrator.status)} ${metrics.orchestrator.status}`);
+  console.log(
+    `   Status: ${getStatusIcon(metrics.orchestrator.status)} ${metrics.orchestrator.status}`
+  );
   console.log(`   Active Agents: ${metrics.orchestrator.active_agents}`);
   console.log(`   Queued Tasks: ${metrics.orchestrator.queued_tasks}`);
   console.log(`   Completed: ${metrics.orchestrator.completed_tasks}`);
@@ -134,11 +138,16 @@ function displayMetrics(metrics) {
 
 function getStatusIcon(status) {
   switch (status) {
-  case 'running': return '🟢';
-  case 'stopped': return '🔴';
-  case 'starting': return '🟡';
-  case 'error': return '❌';
-  default: return '⚪';
+    case 'running':
+      return '🟢';
+    case 'stopped':
+      return '🔴';
+    case 'starting':
+      return '🟡';
+    case 'error':
+      return '❌';
+    default:
+      return '⚪';
   }
 }
 

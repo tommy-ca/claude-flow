@@ -3,7 +3,12 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type {
+  AgentCapabilities,
+  AgentConfig,
+  AgentEnvironment,
+  TaskDefinition
+} from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
@@ -67,14 +72,7 @@ export class TesterAgent extends BaseAgent {
       apiIntegration: true,
       fileSystem: true,
       terminalAccess: true,
-      languages: [
-        'typescript',
-        'javascript',
-        'python',
-        'java',
-        'csharp',
-        'go'
-      ],
+      languages: ['typescript', 'javascript', 'python', 'java', 'csharp', 'go'],
       frameworks: [
         'jest',
         'mocha',
@@ -111,7 +109,7 @@ export class TesterAgent extends BaseAgent {
       maxMemoryUsage: 1024 * 1024 * 1024, // 1GB
       maxExecutionTime: 1800000, // 30 minutes
       reliability: 0.95,
-      speed: 0.80,
+      speed: 0.8,
       quality: 0.95
     };
   }
@@ -136,11 +134,11 @@ export class TesterAgent extends BaseAgent {
       trustedAgents: [],
       expertise: {
         'unit-testing': 0.95,
-        'integration-testing': 0.90,
+        'integration-testing': 0.9,
         'e2e-testing': 0.88,
         'test-automation': 0.92,
         'performance-testing': 0.85,
-        'security-testing': 0.80
+        'security-testing': 0.8
       },
       preferences: {
         testFramework: 'jest',
@@ -239,7 +237,7 @@ export class TesterAgent extends BaseAgent {
         coverage: 88
       }
     ];
-    
+
     testing.coverage = {
       lines: 87,
       functions: 92,
@@ -458,7 +456,7 @@ export class TesterAgent extends BaseAgent {
         impact: 'Data breach potential'
       }
     ];
-    
+
     security.riskLevel = 'medium';
 
     return security;
@@ -599,7 +597,7 @@ export class TesterAgent extends BaseAgent {
       skipped: 5,
       flaky: 3
     };
-    
+
     analysis.insights = [
       'Test execution time increased by 15% this week',
       'Coverage decreased in auth module',
@@ -671,10 +669,10 @@ export const createTesterAgent = (
     expertise: {
       'unit-testing': 0.95,
       'integration-testing': 0.92,
-      'e2e-testing': 0.90,
+      'e2e-testing': 0.9,
       'performance-testing': 0.88,
       'security-testing': 0.85,
-      'api-testing': 0.90
+      'api-testing': 0.9
     },
     preferences: {
       testingApproach: 'comprehensive',
@@ -691,12 +689,7 @@ export const createTesterAgent = (
     logDirectory: './logs/tester',
     apiEndpoints: {},
     credentials: {},
-    availableTools: [
-      'test-runner',
-      'coverage-analyzer',
-      'browser-automation',
-      'api-tester'
-    ],
+    availableTools: ['test-runner', 'coverage-analyzer', 'browser-automation', 'api-tester'],
     toolConfigs: {
       testRunner: { framework: 'jest', coverage: true },
       browser: { headless: true, screenshots: true }

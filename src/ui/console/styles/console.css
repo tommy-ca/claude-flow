@@ -19,20 +19,20 @@
   --console-text: #c9d1d9;
   --console-prompt: #58a6ff;
   --console-cursor: #c9d1d9;
-  
+
   /* Typography */
   --font-mono: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
   --font-size-base: 14px;
   --font-size-small: 12px;
   --line-height: 1.4;
-  
+
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
-  
+
   /* Animation */
   --transition-fast: 150ms ease;
   --transition-medium: 250ms ease;
@@ -40,7 +40,7 @@
 }
 
 /* Light theme override */
-[data-theme="light"] {
+[data-theme='light'] {
   --bg-primary: #ffffff;
   --bg-secondary: #f6f8fa;
   --bg-tertiary: #eaeef2;
@@ -59,7 +59,7 @@
 }
 
 /* Classic terminal theme */
-[data-theme="classic"] {
+[data-theme='classic'] {
   --bg-primary: #000000;
   --bg-secondary: #1a1a1a;
   --bg-tertiary: #2d2d2d;
@@ -77,7 +77,7 @@
 }
 
 /* Matrix theme */
-[data-theme="matrix"] {
+[data-theme='matrix'] {
   --bg-primary: #000000;
   --bg-secondary: #001100;
   --bg-tertiary: #002200;
@@ -99,7 +99,8 @@
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -271,7 +272,7 @@ body {
   word-spacing: 0;
   text-align: left;
   font-variant-ligatures: none;
-  font-feature-settings: "liga" 0;
+  font-feature-settings: 'liga' 0;
   overflow-x: auto;
   display: block;
 }
@@ -468,7 +469,8 @@ body {
 
 /* Animations */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -483,10 +485,12 @@ body {
 }
 
 @keyframes blink {
-  0%, 50% {
+  0%,
+  50% {
     opacity: 1;
   }
-  51%, 100% {
+  51%,
+  100% {
     opacity: 0;
   }
 }

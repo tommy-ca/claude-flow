@@ -55,7 +55,7 @@ describe('CircularBuffer', () => {
 
     it('should return undefined for invalid indices', () => {
       buffer.push(1);
-      
+
       expect(buffer.get(-1)).toBeUndefined();
       expect(buffer.get(1)).toBeUndefined();
       expect(buffer.get(100)).toBeUndefined();
@@ -172,7 +172,7 @@ describe('CircularBuffer', () => {
   describe('factory function', () => {
     it('should create buffer using factory', () => {
       const buffer = createCircularBuffer<string>(3);
-      
+
       buffer.push('a');
       buffer.push('b');
       buffer.push('c');

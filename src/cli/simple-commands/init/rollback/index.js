@@ -50,7 +50,6 @@ export class RollbackSystem {
         result.errors.push(...backup.errors);
         printError('Failed to create backup');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Backup creation failed: ${error.message}`);
@@ -78,7 +77,6 @@ export class RollbackSystem {
       if (!checkpoint.success) {
         result.errors.push(...checkpoint.errors);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Checkpoint creation failed: ${error.message}`);
@@ -102,7 +100,7 @@ export class RollbackSystem {
       console.log('🔄 Performing full rollback...');
 
       // Find the appropriate backup
-      const targetBackup = backupId || await this.findLatestPreInitBackup();
+      const targetBackup = backupId || (await this.findLatestPreInitBackup());
       if (!targetBackup) {
         result.success = false;
         result.errors.push('No suitable backup found for rollback');
@@ -124,7 +122,6 @@ export class RollbackSystem {
       } else {
         printError('Full rollback failed');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Rollback failed: ${error.message}`);
@@ -149,7 +146,7 @@ export class RollbackSystem {
       console.log(`🔄 Performing partial rollback for phase: ${phase}`);
 
       // Find checkpoint
-      const checkpoint = checkpointId || await this.findLatestCheckpoint(phase);
+      const checkpoint = checkpointId || (await this.findLatestCheckpoint(phase));
       if (!checkpoint) {
         result.success = false;
         result.errors.push(`No checkpoint found for phase: ${phase}`);
@@ -171,7 +168,6 @@ export class RollbackSystem {
       } else {
         printError(`Partial rollback failed for phase: ${phase}`);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Partial rollback failed: ${error.message}`);
@@ -206,7 +202,6 @@ export class RollbackSystem {
       } else {
         printWarning(`Auto-recovery failed for: ${failureType}`);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Auto-recovery failed: ${error.message}`);
@@ -235,7 +230,6 @@ export class RollbackSystem {
       // Get checkpoints
       const checkpoints = await this.stateTracker.getCheckpoints();
       result.checkpoints = checkpoints;
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to list rollback points: ${error.message}`);
@@ -263,7 +257,6 @@ export class RollbackSystem {
       if (cleanupResult.success) {
         console.log(`🗑️  Cleaned up ${cleanupResult.cleaned.length} old backups`);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Cleanup failed: ${error.message}`);
@@ -305,7 +298,6 @@ export class RollbackSystem {
       if (!recoveryCheck.success) {
         result.warnings.push(...recoveryCheck.errors);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Rollback system validation failed: ${error.message}`);
@@ -362,10 +354,10 @@ export class AtomicOperation {
    * Begin atomic operation
    */
   async begin() {
-    const checkpoint = await this.rollbackSystem.createCheckpoint(
-      `atomic-${this.operationName}`,
-      { operation: this.operationName, started: Date.now() }
-    );
+    const checkpoint = await this.rollbackSystem.createCheckpoint(`atomic-${this.operationName}`, {
+      operation: this.operationName,
+      started: Date.now()
+    });
 
     this.checkpointId = checkpoint.checkpointId;
     return checkpoint.success;

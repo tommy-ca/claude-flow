@@ -1,4 +1,10 @@
-import { printSuccess, printError, printWarning, execRuvSwarmHook, checkRuvSwarmAvailable } from '../utils.js';
+import {
+  printSuccess,
+  printError,
+  printWarning,
+  execRuvSwarmHook,
+  checkRuvSwarmAvailable
+} from '../utils.js';
 
 // Simple ID generator
 function generateId(prefix = 'id') {
@@ -16,24 +22,24 @@ export async function hooksAction(subArgs, flags) {
 
   try {
     switch (subcommand) {
-    case 'pre-task':
-      await preTaskCommand(subArgs, flags);
-      break;
-    case 'post-task':
-      await postTaskCommand(subArgs, flags);
-      break;
-    case 'pre-edit':
-      await preEditCommand(subArgs, flags);
-      break;
-    case 'post-edit':
-      await postEditCommand(subArgs, flags);
-      break;
-    case 'session-end':
-      await sessionEndCommand(subArgs, flags);
-      break;
-    default:
-      printError(`Unknown hooks command: ${subcommand}`);
-      showHooksHelp();
+      case 'pre-task':
+        await preTaskCommand(subArgs, flags);
+        break;
+      case 'post-task':
+        await postTaskCommand(subArgs, flags);
+        break;
+      case 'pre-edit':
+        await preEditCommand(subArgs, flags);
+        break;
+      case 'post-edit':
+        await postEditCommand(subArgs, flags);
+        break;
+      case 'session-end':
+        await sessionEndCommand(subArgs, flags);
+        break;
+      default:
+        printError(`Unknown hooks command: ${subcommand}`);
+        showHooksHelp();
     }
   } catch (err) {
     printError(`Hooks command failed: ${err.message}`);
@@ -50,7 +56,9 @@ async function preTaskCommand(subArgs, flags) {
   console.log('🔄 Executing pre-task hook...');
   console.log(`📋 Task: ${description}`);
   console.log(`🆔 Task ID: ${taskId}`);
-  if (agentId) {console.log(`🤖 Agent: ${agentId}`);}
+  if (agentId) {
+    console.log(`🤖 Agent: ${agentId}`);
+  }
 
   // Check if ruv-swarm is available
   const isAvailable = await checkRuvSwarmAvailable();
@@ -201,7 +209,9 @@ async function postEditCommand(subArgs, flags) {
 
   console.log('📝 Executing post-edit hook...');
   console.log(`📄 File: ${file}`);
-  if (memoryKey) {console.log(`💾 Memory key: ${memoryKey}`);}
+  if (memoryKey) {
+    console.log(`💾 Memory key: ${memoryKey}`);
+  }
 
   // Simulate post-edit operations
   console.log('\n🔄 Post-edit operations:');
@@ -244,7 +254,9 @@ async function sessionEndCommand(subArgs, flags) {
   const generateSummary = options['generate-summary'] || false;
 
   console.log('🏁 Executing session-end hook...');
-  if (swarmId) {console.log(`🐝 Swarm: ${swarmId}`);}
+  if (swarmId) {
+    console.log(`🐝 Swarm: ${swarmId}`);
+  }
   console.log(`📊 Export metrics: ${exportMetrics ? 'Yes' : 'No'}`);
   console.log(`📋 Generate summary: ${generateSummary ? 'Yes' : 'No'}`);
 

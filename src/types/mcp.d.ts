@@ -33,14 +33,16 @@ declare module '@modelcontextprotocol/sdk/types.js' {
 }
 
 declare module '@modelcontextprotocol/sdk/server/index.js' {
-  import { Tool, CallToolRequest, CallToolResult, ListToolsResult } from '@modelcontextprotocol/sdk/types.js';
-  
+  import {
+    Tool,
+    CallToolRequest,
+    CallToolResult,
+    ListToolsResult
+  } from '@modelcontextprotocol/sdk/types.js';
+
   export class Server {
     constructor();
-    setRequestHandler<T>(
-      method: string,
-      handler: (request: T) => Promise<any>
-    ): void;
+    setRequestHandler<T>(method: string, handler: (request: T) => Promise<any>): void;
     connect(transport: any): Promise<void>;
     close(): Promise<void>;
   }
@@ -54,10 +56,7 @@ declare module '@modelcontextprotocol/sdk/server/stdio.js' {
 
 declare module '@modelcontextprotocol/sdk/client/index.js' {
   export class Client {
-    constructor(config: {
-      name: string;
-      version: string;
-    });
+    constructor(config: { name: string; version: string });
     connect(transport: any): Promise<void>;
     request(method: string, params?: any): Promise<any>;
     close(): Promise<void>;
@@ -66,10 +65,6 @@ declare module '@modelcontextprotocol/sdk/client/index.js' {
 
 declare module '@modelcontextprotocol/sdk/client/stdio.js' {
   export class StdioClientTransport {
-    constructor(config: {
-      command: string;
-      args?: string[];
-      env?: Record<string, string>;
-    });
+    constructor(config: { command: string; args?: string[]; env?: Record<string, string> });
   }
 }

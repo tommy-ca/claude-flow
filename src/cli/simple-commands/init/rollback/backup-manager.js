@@ -8,7 +8,9 @@ function ensureDirSync(dirPath) {
   try {
     fs.mkdirSync(dirPath, { recursive: true });
   } catch (error) {
-    if (error.code !== 'EEXIST') {throw error;}
+    if (error.code !== 'EEXIST') {
+      throw error;
+    }
   }
 }
 
@@ -79,10 +81,7 @@ export class BackupManager {
       }
 
       // Save manifest
-      await Deno.writeTextFile(
-        `${backupPath}/manifest.json`,
-        JSON.stringify(manifest, null, 2)
-      );
+      await Deno.writeTextFile(`${backupPath}/manifest.json`, JSON.stringify(manifest, null, 2));
 
       // Create backup metadata
       const metadata = {
@@ -92,14 +91,10 @@ export class BackupManager {
         dirCount: manifest.directories.length
       };
 
-      await Deno.writeTextFile(
-        `${backupPath}/metadata.json`,
-        JSON.stringify(metadata, null, 2)
-      );
+      await Deno.writeTextFile(`${backupPath}/metadata.json`, JSON.stringify(metadata, null, 2));
 
       console.log(`  ✓ Backup created: ${backupId}`);
       console.log(`  📁 Files backed up: ${result.files.length}`);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Backup creation failed: ${error.message}`);
@@ -158,7 +153,6 @@ export class BackupManager {
 
       console.log(`  ✓ Backup restored: ${backupId}`);
       console.log(`  📁 Items restored: ${result.restored.length}`);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Backup restoration failed: ${error.message}`);
@@ -252,7 +246,6 @@ export class BackupManager {
           }
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Cleanup failed: ${error.message}`);
@@ -290,7 +283,6 @@ export class BackupManager {
       if (!spaceCheck.adequate) {
         result.warnings.push('Low disk space for backups');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Backup system validation failed: ${error.message}`);
@@ -340,13 +332,7 @@ export class BackupManager {
 
   async getCriticalDirectories() {
     const dirs = [];
-    const potentialDirs = [
-      '.claude',
-      '.roo',
-      'memory/agents',
-      'memory/sessions',
-      'coordination'
-    ];
+    const potentialDirs = ['.claude', '.roo', 'memory/agents', 'memory/sessions', 'coordination'];
 
     for (const dir of potentialDirs) {
       try {
@@ -387,7 +373,6 @@ export class BackupManager {
         size: stat.size,
         modified: stat.mtime?.getTime() || 0
       };
-
     } catch (error) {
       result.success = false;
       result.error = error.message;
@@ -416,7 +401,6 @@ export class BackupManager {
         originalPath: relativePath,
         backupPath: destPath
       };
-
     } catch (error) {
       result.success = false;
       result.error = error.message;
@@ -454,7 +438,6 @@ export class BackupManager {
 
       // Copy file back
       await Deno.copyFile(sourcePath, destPath);
-
     } catch (error) {
       result.success = false;
       result.error = error.message;
@@ -484,7 +467,6 @@ export class BackupManager {
 
       // Copy directory contents back
       await this.copyDirectoryRecursive(sourcePath, destPath);
-
     } catch (error) {
       result.success = false;
       result.error = error.message;

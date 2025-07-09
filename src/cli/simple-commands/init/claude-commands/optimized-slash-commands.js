@@ -1,6 +1,9 @@
 // optimized-slash-commands.js - Create batchtools-optimized Claude Code slash commands
 
-import { createOptimizedSparcSlashCommand, createOptimizedMainSparcCommand } from './optimized-sparc-commands.js';
+import {
+  createOptimizedSparcSlashCommand,
+  createOptimizedMainSparcCommand
+} from './optimized-sparc-commands.js';
 import { createOptimizedClaudeFlowCommands } from './optimized-claude-flow-commands.js';
 
 // Create batchtools-optimized Claude Code slash commands for SPARC modes
@@ -20,7 +23,7 @@ export async function createOptimizedClaudeSlashCommands(workingDir, selectedMod
     console.log(`  📝 Creating optimized commands for ${modesToCreate.length} modes...`);
 
     // Create slash commands for each SPARC mode with batchtools optimization
-    const commandPromises = modesToCreate.map(async (mode) => {
+    const commandPromises = modesToCreate.map(async mode => {
       const commandPath = `${workingDir}/.claude/commands/sparc/${mode.slug}.md`;
       const commandContent = createOptimizedSparcSlashCommand(mode);
 
@@ -44,7 +47,6 @@ export async function createOptimizedClaudeSlashCommands(workingDir, selectedMod
 
     console.log(`  🎯 Total optimized commands created: ${modesToCreate.length + 5}`);
     console.log('  💡 All commands include parallel processing and performance optimizations');
-
   } catch (err) {
     console.log(`  ⚠️  Could not create optimized Claude Code slash commands: ${err.message}`);
   }

@@ -95,6 +95,7 @@ claude-flow init --list-backups
 **Purpose**: Ensure system is ready for initialization
 
 **Checks**:
+
 - File system permissions (read/write access)
 - Available disk space (minimum 100MB required)
 - Existing file conflicts (with --force handling)
@@ -108,6 +109,7 @@ claude-flow init --list-backups
 **Purpose**: Create restore point before any changes
 
 **Actions**:
+
 - Backup existing critical files
 - Backup directory structures
 - Create backup manifest with metadata
@@ -120,6 +122,7 @@ claude-flow init --list-backups
 **Purpose**: Perform initialization with checkpoint tracking
 
 **Process**:
+
 1. Begin atomic operation
 2. Create checkpoints before each phase
 3. Execute initialization steps
@@ -127,6 +130,7 @@ claude-flow init --list-backups
 5. Commit or rollback based on success
 
 **Phases**:
+
 - File creation (CLAUDE.md, memory-bank.md, coordination.md)
 - Directory structure creation
 - Memory system setup
@@ -140,6 +144,7 @@ claude-flow init --list-backups
 **Purpose**: Verify initialization completed successfully
 
 **Checks**:
+
 - File integrity (existence, size, readability)
 - Completeness (all required files and directories)
 - Structure validation (correct organization)
@@ -152,6 +157,7 @@ claude-flow init --list-backups
 **Purpose**: Validate configuration files and syntax
 
 **Checks**:
+
 - .roomodes JSON syntax and structure
 - CLAUDE.md content and sections
 - Memory configuration validity
@@ -164,6 +170,7 @@ claude-flow init --list-backups
 **Purpose**: Assess overall system health
 
 **Checks**:
+
 - SPARC mode availability
 - Template integrity
 - Configuration consistency
@@ -206,31 +213,37 @@ Automatic rollback during failed initialization:
 The system includes automated recovery for common failures:
 
 ### Permission Denied
+
 - Attempt to fix directory permissions
 - Verify write access restoration
 - Provide manual resolution steps
 
 ### Disk Space Issues
+
 - Clean temporary files
 - Remove old backups
 - Check available space after cleanup
 
 ### Missing Dependencies
+
 - Attempt dependency installation/configuration
 - Verify dependency availability
 - Provide installation guidance
 
 ### Corrupted Configuration
+
 - Regenerate configuration files
 - Restore from backup if available
 - Create minimal working configuration
 
 ### Partial Initialization
+
 - Identify completed vs missing components
 - Complete missing initialization steps
 - Verify final system state
 
 ### SPARC Failures
+
 - Recover .roomodes configuration
 - Restore .roo directory structure
 - Recreate SPARC commands
@@ -240,21 +253,25 @@ The system includes automated recovery for common failures:
 The system maintains detailed state information:
 
 ### Rollback Points
+
 - Backup ID and location
 - Timestamp and type
 - System state snapshot
 
 ### Checkpoints
+
 - Phase name and timestamp
 - Operation details
 - Status tracking
 
 ### File Operations
+
 - Operation type (create/modify/delete)
 - File paths and metadata
 - Reversible operation data
 
 ### Phase History
+
 - Initialization progress
 - Phase transitions
 - Timing information
@@ -262,16 +279,19 @@ The system maintains detailed state information:
 ## Error Handling
 
 ### Validation Failures
+
 - Clear error messages with context
 - Suggested resolution steps
 - Prevention of unsafe operations
 
 ### Initialization Failures
+
 - Automatic rollback triggers
 - Error categorization
 - Recovery procedure selection
 
 ### Rollback Failures
+
 - Emergency procedures
 - Manual recovery steps
 - System state analysis
@@ -305,6 +325,7 @@ const results = await runValidationTests('/path/to/project');
 ```
 
 Test categories:
+
 - Pre-initialization validation
 - Post-initialization validation
 - Configuration validation
@@ -343,6 +364,7 @@ Test categories:
 ### Common Issues
 
 1. **Permission Denied**
+
    ```bash
    # Fix permissions
    chmod -R 755 .
@@ -350,6 +372,7 @@ Test categories:
    ```
 
 2. **Disk Space Low**
+
    ```bash
    # Clean and retry
    claude-flow init --rollback --full
@@ -358,6 +381,7 @@ Test categories:
    ```
 
 3. **Validation Failures**
+
    ```bash
    # Check what's failing
    claude-flow init --validate
@@ -378,6 +402,7 @@ Test categories:
 If all automated recovery fails:
 
 1. **Manual Backup Restore**
+
    ```bash
    # Find backup
    ls .claude-flow-backups/
@@ -385,6 +410,7 @@ If all automated recovery fails:
    ```
 
 2. **Clean State Reset**
+
    ```bash
    # Remove all artifacts manually
    rm -rf .claude .roo CLAUDE.md memory-bank.md coordination.md

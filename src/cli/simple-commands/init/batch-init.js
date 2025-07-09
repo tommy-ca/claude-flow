@@ -15,18 +15,12 @@ import {
   createFullClaudeMd,
   createMinimalClaudeMd
 } from './templates/claude-md.js';
-import {
-  createFullMemoryBankMd,
-  createMinimalMemoryBankMd
-} from './templates/memory-bank-md.js';
+import { createFullMemoryBankMd, createMinimalMemoryBankMd } from './templates/memory-bank-md.js';
 import {
   createFullCoordinationMd,
   createMinimalCoordinationMd
 } from './templates/coordination-md.js';
-import {
-  createAgentsReadme,
-  createSessionsReadme
-} from './templates/readme-files.js';
+import { createAgentsReadme, createSessionsReadme } from './templates/readme-files.js';
 
 // Progress tracking for batch operations
 class BatchProgressTracker {
@@ -89,7 +83,8 @@ class BatchProgressTracker {
       completed: this.completed,
       failed: this.failed,
       elapsedTime: elapsed,
-      successRate: this.totalProjects > 0 ? (this.completed / this.totalProjects * 100).toFixed(1) : 0
+      successRate:
+        this.totalProjects > 0 ? ((this.completed / this.totalProjects) * 100).toFixed(1) : 0
     };
   }
 }
@@ -207,12 +202,12 @@ app.listen(PORT, () => {
       }
     }
   },
-  'microservice': {
+  microservice: {
     name: 'Microservice',
     description: 'Containerized microservice with Docker',
     extraDirs: ['src', 'config', 'tests', 'scripts'],
     extraFiles: {
-      'Dockerfile': `FROM node:18-alpine
+      Dockerfile: `FROM node:18-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
@@ -329,7 +324,9 @@ async function initializeProject(projectPath, options = {}) {
   try {
     // Get absolute project path
     const currentDir = cwd();
-    const absoluteProjectPath = projectPath.startsWith('/') ? projectPath : `${currentDir}/${projectPath}`;
+    const absoluteProjectPath = projectPath.startsWith('/')
+      ? projectPath
+      : `${currentDir}/${projectPath}`;
 
     // Create project directory
     await Deno.mkdir(absoluteProjectPath, { recursive: true });
@@ -362,16 +359,17 @@ async function initializeProject(projectPath, options = {}) {
     }
 
     // Create all directories in parallel
-    await Promise.all(directories.map(dir =>
-      Deno.mkdir(dir, { recursive: true }).catch(() => {})
-    ));
+    await Promise.all(directories.map(dir => Deno.mkdir(dir, { recursive: true }).catch(() => {})));
 
     // Create configuration files in parallel
     const fileCreationTasks = [];
 
     // CLAUDE.md
-    const claudeMd = sparc ? createSparcClaudeMd() :
-      minimal ? createMinimalClaudeMd() : createFullClaudeMd();
+    const claudeMd = sparc
+      ? createSparcClaudeMd()
+      : minimal
+        ? createMinimalClaudeMd()
+        : createFullClaudeMd();
     fileCreationTasks.push(Deno.writeTextFile('CLAUDE.md', claudeMd));
 
     // memory-bank.md
@@ -415,8 +413,8 @@ async function initializeProject(projectPath, options = {}) {
       const templateConfig = PROJECT_TEMPLATES[template];
       if (templateConfig.extraFiles) {
         for (const [filePath, content] of Object.entries(templateConfig.extraFiles)) {
-          let fileContent = typeof content === 'object' ?
-            JSON.stringify(content, null, 2) : content;
+          let fileContent =
+            typeof content === 'object' ? JSON.stringify(content, null, 2) : content;
 
           // Replace template variables
           fileContent = fileContent
@@ -493,7 +491,9 @@ export async function batchInitCommand(projects, options = {}) {
   perfMonitor.start();
   resourceMonitor.start();
 
-  printSuccess(`Starting batch initialization for ${projects.length} projects across ${environments.length} environments`);
+  printSuccess(
+    `Starting batch initialization for ${projects.length} projects across ${environments.length} environments`
+  );
   console.log(`Template: ${template || 'default'}`);
   console.log(`Parallelism: ${parallel ? `Yes (max ${maxConcurrency} concurrent)` : 'No'}`);
   console.log(`SPARC: ${sparc ? 'Enabled' : 'Disabled'}\n`);
@@ -503,12 +503,17 @@ export async function batchInitCommand(projects, options = {}) {
 
   for (const project of projects) {
     for (const env of environments) {
-      const projectPath = environments.length > 1 ?
-        `${project}-${env}` : project;
+      const projectPath = environments.length > 1 ? `${project}-${env}` : project;
 
       const initTask = async () => {
-        if (tracker) {tracker.startProject(projectPath);}
-        perfMonitor.recordOperation('project-init-start', { projectPath, template, environment: env });
+        if (tracker) {
+          tracker.startProject(projectPath);
+        }
+        perfMonitor.recordOperation('project-init-start', {
+          projectPath,
+          template,
+          environment: env
+        });
 
         const result = await resourceManager.withResource(async () => {
           return await initializeProject(projectPath, {
@@ -526,7 +531,9 @@ export async function batchInitCommand(projects, options = {}) {
           perfMonitor.recordError(result.error, { projectPath, template, environment: env });
         }
 
-        if (tracker) {tracker.completeProject(projectPath, result.success);}
+        if (tracker) {
+          tracker.completeProject(projectPath, result.success);
+        }
         results.push(result);
       };
 
@@ -601,13 +608,11 @@ export async function parseBatchConfig(configFile) {
 // Create batch initialization from config file
 export async function batchInitFromConfig(configFile, options = {}) {
   const config = await parseBatchConfig(configFile);
-  if (!config) {return;}
+  if (!config) {
+    return;
+  }
 
-  const {
-    projects = [],
-    baseOptions = {},
-    projectConfigs = {}
-  } = config;
+  const { projects = [], baseOptions = {}, projectConfigs = {} } = config;
 
   // Merge options with config
   const mergedOptions = { ...baseOptions, ...options };
@@ -641,13 +646,17 @@ export function validateBatchOptions(options) {
   }
 
   if (options.template && !PROJECT_TEMPLATES[options.template]) {
-    errors.push(`Unknown template: ${options.template}. Available: ${Object.keys(PROJECT_TEMPLATES).join(', ')}`);
+    errors.push(
+      `Unknown template: ${options.template}. Available: ${Object.keys(PROJECT_TEMPLATES).join(', ')}`
+    );
   }
 
   if (options.environments) {
     for (const env of options.environments) {
       if (!ENVIRONMENT_CONFIGS[env]) {
-        errors.push(`Unknown environment: ${env}. Available: ${Object.keys(ENVIRONMENT_CONFIGS).join(', ')}`);
+        errors.push(
+          `Unknown environment: ${env}. Available: ${Object.keys(ENVIRONMENT_CONFIGS).join(', ')}`
+        );
       }
     }
   }

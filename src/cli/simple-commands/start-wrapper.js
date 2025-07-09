@@ -144,7 +144,6 @@ export async function startCommand(subArgs, flags) {
         }
       });
       console.log(`Process ID: ${pid} (saved to .claude-flow.pid)`);
-
     } else {
       // Interactive mode
       printSuccess('Orchestration system started!');
@@ -195,7 +194,6 @@ export async function startCommand(subArgs, flags) {
         await new Promise(() => {});
       }
     }
-
   } catch (err) {
     printError(`Failed to start orchestration system: ${err.message}`);
     console.error('Stack trace:', err.stack);

@@ -150,7 +150,9 @@ function displayStatus(status, verbose) {
 
   // Overall status
   const overallStatus = status.orchestrator.running ? '🟢 Running' : '🟡 Not Running';
-  console.log(`${overallStatus} (orchestrator ${status.orchestrator.running ? 'active' : 'not started'})`);
+  console.log(
+    `${overallStatus} (orchestrator ${status.orchestrator.running ? 'active' : 'not started'})`
+  );
 
   // Core components
   console.log(`🤖 Agents: ${status.agents.active} active`);
@@ -208,7 +210,9 @@ function displayStatus(status, verbose) {
     // Resource usage
     if (status.resources) {
       console.log('\n📈 Resource Usage:');
-      console.log(`   Memory: ${status.resources.memory.usage} of ${status.resources.memory.total}`);
+      console.log(
+        `   Memory: ${status.resources.memory.usage} of ${status.resources.memory.total}`
+      );
       console.log(`   Available: ${status.resources.memory.available}`);
       console.log(`   CPU Cores: ${status.resources.cpu.cores}`);
       console.log(`   CPU Load: ${status.resources.cpu.load}`);
@@ -218,7 +222,9 @@ function displayStatus(status, verbose) {
 
       if (status.resources.platform) {
         console.log('\n💻 Platform:');
-        console.log(`   OS: ${status.resources.platform.type} ${status.resources.platform.release}`);
+        console.log(
+          `   OS: ${status.resources.platform.type} ${status.resources.platform.release}`
+        );
         console.log(`   Architecture: ${status.resources.platform.arch}`);
         console.log(`   System Uptime: ${status.resources.platform.uptime}`);
       }
@@ -254,16 +260,24 @@ function formatBytes(bytes) {
 }
 
 function formatUptime(milliseconds) {
-  if (milliseconds === 0) {return '0s';}
+  if (milliseconds === 0) {
+    return '0s';
+  }
 
   const seconds = Math.floor(milliseconds / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) {return `${days}d ${hours % 24}h ${minutes % 60}m`;}
-  if (hours > 0) {return `${hours}h ${minutes % 60}m ${seconds % 60}s`;}
-  if (minutes > 0) {return `${minutes}m ${seconds % 60}s`;}
+  if (days > 0) {
+    return `${days}d ${hours % 24}h ${minutes % 60}m`;
+  }
+  if (hours > 0) {
+    return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${seconds % 60}s`;
+  }
   return `${seconds}s`;
 }
 

@@ -19,21 +19,25 @@ npx claude-flow bottleneck detect [options]
 ## Examples
 
 ### Basic bottleneck detection
+
 ```bash
 npx claude-flow bottleneck detect
 ```
 
 ### Analyze specific swarm
+
 ```bash
 npx claude-flow bottleneck detect --swarm-id swarm-123
 ```
 
 ### Last 24 hours with export
+
 ```bash
 npx claude-flow bottleneck detect -t 24h -e bottlenecks.json
 ```
 
 ### Auto-fix detected issues
+
 ```bash
 npx claude-flow bottleneck detect --fix --threshold 15
 ```
@@ -41,24 +45,28 @@ npx claude-flow bottleneck detect --fix --threshold 15
 ## Metrics Analyzed
 
 ### Communication Bottlenecks
+
 - Message queue delays
 - Agent response times
 - Coordination overhead
 - Memory access patterns
 
 ### Processing Bottlenecks
+
 - Task completion times
 - Agent utilization rates
 - Parallel execution efficiency
 - Resource contention
 
 ### Memory Bottlenecks
+
 - Cache hit rates
 - Memory access patterns
 - Storage I/O performance
 - Neural pattern loading
 
 ### Network Bottlenecks
+
 - API call latency
 - MCP communication delays
 - External service timeouts
@@ -79,7 +87,7 @@ npx claude-flow bottleneck detect --fix --threshold 15
 🚨 Critical Bottlenecks
 1. Agent Communication (35% impact)
    └── coordinator → coder-1 messages delayed by 2.3s avg
-   
+
 2. Memory Access (28% impact)
    └── Neural pattern loading taking 1.8s per access
 
@@ -126,6 +134,7 @@ When using `--fix`, the following optimizations may be applied:
 ## Performance Impact
 
 Typical improvements after bottleneck resolution:
+
 - **Communication**: 30-50% faster message delivery
 - **Processing**: 20-40% reduced task completion time
 - **Memory**: 40-60% fewer cache misses
@@ -135,7 +144,7 @@ Typical improvements after bottleneck resolution:
 
 ```javascript
 // Check for bottlenecks in Claude Code
-mcp__claude-flow__bottleneck_detect { 
+mcp__claude-flow__bottleneck_detect {
   timeRange: "1h",
   threshold: 20,
   autoFix: false

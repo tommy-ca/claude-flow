@@ -18,7 +18,7 @@ export interface HiveMessage {
   inReplyTo?: string;
 }
 
-export type HiveMessageType = 
+export type HiveMessageType =
   | 'task_proposal'
   | 'vote_request'
   | 'vote_response'
@@ -42,7 +42,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
   private messageQueue: Map<string, HiveMessage[]> = new Map();
   private knowledgeBase: Map<string, any> = new Map();
   private consensusThreshold: number;
-  
+
   constructor(options: { consensusThreshold?: number } = {}) {
     super();
     this.consensusThreshold = options.consensusThreshold || 0.6;
@@ -55,13 +55,13 @@ export class HiveCommunicationProtocol extends EventEmitter {
   private initializeChannels() {
     // Broadcast channel for all agents
     this.createChannel('broadcast', 'broadcast', 'General announcements and updates');
-    
+
     // Consensus channel for voting
     this.createChannel('consensus', 'consensus', 'Voting and decision making');
-    
+
     // Coordination channel for task management
     this.createChannel('coordination', 'coordination', 'Task assignment and progress');
-    
+
     // Knowledge channel for sharing insights
     this.createChannel('knowledge', 'knowledge', 'Knowledge sharing and learning');
   }
@@ -69,11 +69,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
   /**
    * Create a new communication channel
    */
-  createChannel(
-    name: string, 
-    type: HiveChannel['type'], 
-    description: string
-  ): HiveChannel {
+  createChannel(name: string, type: HiveChannel['type'], description: string): HiveChannel {
     const channel: HiveChannel = {
       id: generateId('channel'),
       name,
@@ -81,10 +77,10 @@ export class HiveCommunicationProtocol extends EventEmitter {
       members: new Set(),
       messages: []
     };
-    
+
     this.channels.set(channel.id, channel);
     this.emit('channel:created', { channel, description });
-    
+
     return channel;
   }
 
@@ -94,7 +90,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
   joinChannel(channelId: string, agentId: string) {
     const channel = this.channels.get(channelId);
     if (!channel) throw new Error(`Channel ${channelId} not found`);
-    
+
     channel.members.add(agentId);
     this.emit('channel:joined', { channelId, agentId });
   }
@@ -108,17 +104,17 @@ export class HiveCommunicationProtocol extends EventEmitter {
       id: generateId('msg'),
       timestamp: Date.now()
     };
-    
+
     // Route message based on type
     this.routeMessage(fullMessage);
-    
+
     // Store in appropriate channel
     const channelType = this.getChannelTypeForMessage(fullMessage.type);
     const channel = Array.from(this.channels.values()).find(c => c.type === channelType);
     if (channel) {
       channel.messages.push(fullMessage);
     }
-    
+
     // Queue for recipient(s)
     if (fullMessage.to === 'broadcast') {
       // Queue for all agents
@@ -131,9 +127,9 @@ export class HiveCommunicationProtocol extends EventEmitter {
       // Queue for specific recipient
       this.queueMessage(fullMessage.to, fullMessage);
     }
-    
+
     this.emit('message:sent', fullMessage);
-    
+
     return fullMessage;
   }
 
@@ -201,14 +197,14 @@ export class HiveCommunicationProtocol extends EventEmitter {
    */
   private handleVoteRequest(message: HiveMessage) {
     const { proposal, deadline } = message.payload;
-    
+
     this.emit('vote:requested', {
       messageId: message.id,
       proposal,
       deadline,
       from: message.from
     });
-    
+
     // Set timeout for vote collection
     if (deadline) {
       setTimeout(() => {
@@ -220,12 +216,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
   /**
    * Submit a vote response
    */
-  submitVote(
-    requestId: string, 
-    agentId: string, 
-    vote: boolean, 
-    confidence: number = 1.0
-  ) {
+  submitVote(requestId: string, agentId: string, vote: boolean, confidence: number = 1.0) {
     const voteMessage = this.sendMessage({
       from: agentId,
       to: 'consensus',
@@ -238,14 +229,14 @@ export class HiveCommunicationProtocol extends EventEmitter {
       },
       priority: 'high'
     });
-    
+
     this.emit('vote:submitted', {
       requestId,
       agentId,
       vote,
       confidence
     });
-    
+
     return voteMessage;
   }
 
@@ -269,12 +260,11 @@ export class HiveCommunicationProtocol extends EventEmitter {
    */
   private collectVotes(requestId: string) {
     const votes = new Map<string, { vote: boolean; confidence: number }>();
-    
+
     // Collect all vote responses for this request
     for (const channel of this.channels.values()) {
       for (const message of channel.messages) {
-        if (message.type === 'vote_response' && 
-            message.payload.requestId === requestId) {
+        if (message.type === 'vote_response' && message.payload.requestId === requestId) {
           votes.set(message.from, {
             vote: message.payload.vote,
             confidence: message.payload.confidence
@@ -282,10 +272,10 @@ export class HiveCommunicationProtocol extends EventEmitter {
         }
       }
     }
-    
+
     // Calculate consensus
     const consensus = this.calculateConsensus(votes);
-    
+
     this.emit('consensus:reached', {
       requestId,
       consensus,
@@ -296,26 +286,27 @@ export class HiveCommunicationProtocol extends EventEmitter {
   /**
    * Calculate consensus from votes
    */
-  private calculateConsensus(
-    votes: Map<string, { vote: boolean; confidence: number }>
-  ): { approved: boolean; confidence: number } {
+  private calculateConsensus(votes: Map<string, { vote: boolean; confidence: number }>): {
+    approved: boolean;
+    confidence: number;
+  } {
     if (votes.size === 0) {
       return { approved: false, confidence: 0 };
     }
-    
+
     let totalWeight = 0;
     let approvalWeight = 0;
-    
+
     for (const [_, { vote, confidence }] of votes) {
       totalWeight += confidence;
       if (vote) {
         approvalWeight += confidence;
       }
     }
-    
+
     const approvalRate = approvalWeight / totalWeight;
     const approved = approvalRate >= this.consensusThreshold;
-    
+
     return { approved, confidence: approvalRate };
   }
 
@@ -324,7 +315,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
    */
   private handleKnowledgeShare(message: HiveMessage) {
     const { key, value, metadata } = message.payload;
-    
+
     // Store in knowledge base
     this.knowledgeBase.set(key, {
       value,
@@ -332,7 +323,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
       contributor: message.from,
       timestamp: message.timestamp
     });
-    
+
     this.emit('knowledge:shared', {
       key,
       contributor: message.from,
@@ -345,13 +336,13 @@ export class HiveCommunicationProtocol extends EventEmitter {
    */
   queryKnowledge(pattern: string): any[] {
     const results = [];
-    
+
     for (const [key, data] of this.knowledgeBase) {
       if (key.includes(pattern)) {
         results.push({ key, ...data });
       }
     }
-    
+
     return results;
   }
 
@@ -360,7 +351,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
    */
   private handleConsensusCheck(message: HiveMessage) {
     const { topic, options } = message.payload;
-    
+
     // Initiate voting round
     const voteRequest = this.sendMessage({
       from: 'consensus-system',
@@ -374,7 +365,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
       priority: 'urgent',
       requiresResponse: true
     });
-    
+
     this.emit('consensus:initiated', {
       topic,
       options,
@@ -387,7 +378,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
    */
   private handleQualityReport(message: HiveMessage) {
     const { taskId, metrics, issues } = message.payload;
-    
+
     // Store quality metrics
     this.knowledgeBase.set(`quality/${taskId}`, {
       metrics,
@@ -395,7 +386,7 @@ export class HiveCommunicationProtocol extends EventEmitter {
       reporter: message.from,
       timestamp: message.timestamp
     });
-    
+
     // Check if quality threshold breached
     if (metrics.score < 0.7) {
       this.emit('quality:alert', {
@@ -419,20 +410,20 @@ export class HiveCommunicationProtocol extends EventEmitter {
       knowledgeEntries: this.knowledgeBase.size,
       avgResponseTime: 0
     };
-    
+
     // Aggregate message statistics
     for (const channel of this.channels.values()) {
       stats.totalMessages += channel.messages.length;
-      
+
       for (const message of channel.messages) {
         const typeCount = stats.messagesByType.get(message.type) || 0;
         stats.messagesByType.set(message.type, typeCount + 1);
-        
+
         const priorityCount = stats.messagesByPriority.get(message.priority) || 0;
         stats.messagesByPriority.set(message.priority, priorityCount + 1);
       }
     }
-    
+
     return stats;
   }
 
@@ -454,15 +445,15 @@ export class HiveCommunicationProtocol extends EventEmitter {
         ...value
       }))
     };
-    
+
     // Collect all messages
     for (const channel of this.channels.values()) {
       log.messages.push(...channel.messages);
     }
-    
+
     // Sort by timestamp
     log.messages.sort((a, b) => a.timestamp - b.timestamp);
-    
+
     return log;
   }
 }

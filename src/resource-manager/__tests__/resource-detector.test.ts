@@ -123,7 +123,7 @@ describe('ResourceDetector', () => {
       const networks = await detector.detectNetworks();
 
       expect(networks).toBeInstanceOf(Array);
-      
+
       if (networks.length > 0) {
         const network = networks[0];
         expect(network.type).toBe('network');
@@ -153,7 +153,7 @@ describe('ResourceDetector', () => {
       const gpus = await detector.detectGPUs();
 
       expect(gpus).toBeInstanceOf(Array);
-      
+
       if (gpus.length > 0) {
         const gpu = gpus[0];
         expect(gpu.type).toBe('gpu');
@@ -180,7 +180,7 @@ describe('ResourceDetector', () => {
       // Should have at least CPU and memory
       const cpuResources = resources.filter(r => r.type === 'cpu');
       const memoryResources = resources.filter(r => r.type === 'memory');
-      
+
       expect(cpuResources).toHaveLength(1);
       expect(memoryResources).toHaveLength(1);
 
@@ -220,7 +220,7 @@ describe('ResourceDetector', () => {
     it('should determine correct resource status', async () => {
       await detector.initialize();
       const cpu = await detector.detectCPU();
-      
+
       // Status should be based on usage
       if (cpu.usage >= 95) {
         expect(cpu.status).toBe('exhausted');

@@ -17,12 +17,15 @@ export interface FallbackOptions {
  * Handles raw mode errors and provides fallback UI
  */
 export async function handleRawModeError(
-  error: Error, 
+  error: Error,
   options: FallbackOptions = {}
 ): Promise<void> {
-  const isRawModeError = (error instanceof Error ? error.message : String(error)).includes('Raw mode is not supported') || 
-                        (error instanceof Error ? error.message : String(error)).includes('stdin') ||
-                        (error instanceof Error ? error.message : String(error)).includes('Ink');
+  const isRawModeError =
+    (error instanceof Error ? error.message : String(error)).includes(
+      'Raw mode is not supported'
+    ) ||
+    (error instanceof Error ? error.message : String(error)).includes('stdin') ||
+    (error instanceof Error ? error.message : String(error)).includes('Ink');
 
   if (!isRawModeError) {
     throw error; // Re-throw if it's not a raw mode error
@@ -51,7 +54,7 @@ export async function handleRawModeError(
   if (options.enableUI) {
     console.log(chalk.green('✅ Launching compatible UI mode...'));
     console.log();
-    
+
     try {
       const ui = createCompatibleUI();
       await ui.start();
@@ -91,7 +94,7 @@ async function showBasicInterface(options: FallbackOptions): Promise<void> {
   }
 
   console.log(chalk.gray('Press Ctrl+C to exit'));
-  
+
   // Wait for user to exit
   await new Promise(() => {
     process.on('SIGINT', () => {
@@ -173,10 +176,10 @@ export function checkUISupport(): {
  */
 export function showUISupport(): void {
   const support = checkUISupport();
-  
+
   console.log(chalk.cyan.bold('🖥️  UI Support Information'));
   console.log(chalk.gray('─'.repeat(40)));
-  
+
   if (support.supported) {
     console.log(chalk.green('✅ Interactive UI supported'));
     console.log(chalk.gray('Your terminal supports all UI features'));
@@ -187,7 +190,7 @@ export function showUISupport(): void {
       console.log(chalk.blue(`Recommendation: ${support.recommendation}`));
     }
   }
-  
+
   console.log();
   console.log(chalk.white('Environment details:'));
   console.log(chalk.gray(`• Terminal: ${process.env.TERM || 'unknown'}`));

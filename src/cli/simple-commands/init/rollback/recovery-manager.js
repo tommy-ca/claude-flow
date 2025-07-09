@@ -22,48 +22,47 @@ export class RecoveryManager {
       let recoveryResult;
 
       switch (failureType) {
-      case 'permission-denied':
-        recoveryResult = await this.recoverFromPermissionDenied(context);
-        break;
+        case 'permission-denied':
+          recoveryResult = await this.recoverFromPermissionDenied(context);
+          break;
 
-      case 'disk-space':
-        recoveryResult = await this.recoverFromDiskSpace(context);
-        break;
+        case 'disk-space':
+          recoveryResult = await this.recoverFromDiskSpace(context);
+          break;
 
-      case 'missing-dependencies':
-        recoveryResult = await this.recoverFromMissingDependencies(context);
-        break;
+        case 'missing-dependencies':
+          recoveryResult = await this.recoverFromMissingDependencies(context);
+          break;
 
-      case 'corrupted-config':
-        recoveryResult = await this.recoverFromCorruptedConfig(context);
-        break;
+        case 'corrupted-config':
+          recoveryResult = await this.recoverFromCorruptedConfig(context);
+          break;
 
-      case 'partial-initialization':
-        recoveryResult = await this.recoverFromPartialInitialization(context);
-        break;
+        case 'partial-initialization':
+          recoveryResult = await this.recoverFromPartialInitialization(context);
+          break;
 
-      case 'sparc-failure':
-        recoveryResult = await this.recoverFromSparcFailure(context);
-        break;
+        case 'sparc-failure':
+          recoveryResult = await this.recoverFromSparcFailure(context);
+          break;
 
-      case 'executable-creation-failure':
-        recoveryResult = await this.recoverFromExecutableFailure(context);
-        break;
+        case 'executable-creation-failure':
+          recoveryResult = await this.recoverFromExecutableFailure(context);
+          break;
 
-      case 'memory-setup-failure':
-        recoveryResult = await this.recoverFromMemorySetupFailure(context);
-        break;
+        case 'memory-setup-failure':
+          recoveryResult = await this.recoverFromMemorySetupFailure(context);
+          break;
 
-      default:
-        recoveryResult = await this.performGenericRecovery(failureType, context);
-        break;
+        default:
+          recoveryResult = await this.performGenericRecovery(failureType, context);
+          break;
       }
 
       result.success = recoveryResult.success;
       result.errors.push(...recoveryResult.errors);
       result.warnings.push(...recoveryResult.warnings);
       result.actions.push(...recoveryResult.actions);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Recovery failed: ${error.message}`);
@@ -115,7 +114,6 @@ export class RecoveryManager {
         result.success = false;
         result.errors.push('Write permissions still denied');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Permission recovery failed: ${error.message}`);
@@ -146,13 +144,13 @@ export class RecoveryManager {
 
       // Check available space after cleanup
       const spaceCheck = await this.checkAvailableSpace();
-      if (spaceCheck.available > 100) { // MB
+      if (spaceCheck.available > 100) {
+        // MB
         result.actions.push(`Freed space: ${spaceCheck.available}MB available`);
       } else {
         result.success = false;
         result.errors.push('Insufficient disk space even after cleanup');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Disk space recovery failed: ${error.message}`);
@@ -190,7 +188,6 @@ export class RecoveryManager {
         result.success = false;
         result.errors.push('Some dependencies still unavailable after recovery');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Dependency recovery failed: ${error.message}`);
@@ -227,7 +224,6 @@ export class RecoveryManager {
       if (!validationResult.valid) {
         result.warnings.push('Some recovered configs may have issues');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Config recovery failed: ${error.message}`);
@@ -271,7 +267,6 @@ export class RecoveryManager {
         result.success = false;
         result.errors.push('Initialization still incomplete after recovery');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Partial initialization recovery failed: ${error.message}`);
@@ -315,7 +310,6 @@ export class RecoveryManager {
       } else {
         result.warnings.push('Could not recover SPARC commands');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`SPARC recovery failed: ${error.message}`);
@@ -368,7 +362,6 @@ export class RecoveryManager {
         result.success = false;
         result.errors.push('Could not recreate executable');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Executable recovery failed: ${error.message}`);
@@ -390,11 +383,7 @@ export class RecoveryManager {
 
     try {
       // Recreate memory directory structure
-      const memoryDirs = [
-        'memory',
-        'memory/agents',
-        'memory/sessions'
-      ];
+      const memoryDirs = ['memory', 'memory/agents', 'memory/sessions'];
 
       for (const dir of memoryDirs) {
         try {
@@ -422,8 +411,14 @@ export class RecoveryManager {
 
       // Recreate README files
       const readmeFiles = [
-        { path: 'memory/agents/README.md', content: '# Agent Memory\n\nThis directory stores agent-specific memory data.' },
-        { path: 'memory/sessions/README.md', content: '# Session Memory\n\nThis directory stores session-specific memory data.' }
+        {
+          path: 'memory/agents/README.md',
+          content: '# Agent Memory\n\nThis directory stores agent-specific memory data.'
+        },
+        {
+          path: 'memory/sessions/README.md',
+          content: '# Session Memory\n\nThis directory stores session-specific memory data.'
+        }
       ];
 
       for (const readme of readmeFiles) {
@@ -434,7 +429,6 @@ export class RecoveryManager {
           result.warnings.push(`Could not create ${readme.path}`);
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Memory setup recovery failed: ${error.message}`);
@@ -475,7 +469,6 @@ export class RecoveryManager {
 
       result.actions.push(`Performed generic recovery for: ${failureType}`);
       result.warnings.push('Generic recovery may not fully resolve the issue');
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Generic recovery failed: ${error.message}`);
@@ -496,11 +489,7 @@ export class RecoveryManager {
 
     try {
       // Test recovery procedures
-      const recoveryTests = [
-        'permission-denied',
-        'disk-space',
-        'corrupted-config'
-      ];
+      const recoveryTests = ['permission-denied', 'disk-space', 'corrupted-config'];
 
       for (const test of recoveryTests) {
         const testResult = await this.testRecoveryProcedure(test);
@@ -508,7 +497,6 @@ export class RecoveryManager {
           result.warnings.push(`Recovery test failed: ${test}`);
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Recovery system validation failed: ${error.message}`);
@@ -522,11 +510,7 @@ export class RecoveryManager {
   async cleanupTemporaryFiles() {
     const result = { actions: [] };
 
-    const tempPatterns = [
-      '*.tmp',
-      '*.temp',
-      '.claude-flow-*-test*'
-    ];
+    const tempPatterns = ['*.tmp', '*.temp', '.claude-flow-*-test*'];
 
     for (const pattern of tempPatterns) {
       try {
@@ -640,11 +624,7 @@ export class RecoveryManager {
   async identifyCompletedItems() {
     const items = [];
 
-    const checkFiles = [
-      'CLAUDE.md',
-      'memory-bank.md',
-      'coordination.md'
-    ];
+    const checkFiles = ['CLAUDE.md', 'memory-bank.md', 'coordination.md'];
 
     for (const file of checkFiles) {
       try {
@@ -661,12 +641,7 @@ export class RecoveryManager {
   async identifyMissingItems() {
     const missing = [];
 
-    const requiredFiles = [
-      'CLAUDE.md',
-      'memory-bank.md',
-      'coordination.md',
-      'claude-flow'
-    ];
+    const requiredFiles = ['CLAUDE.md', 'memory-bank.md', 'coordination.md', 'claude-flow'];
 
     for (const file of requiredFiles) {
       try {
@@ -732,12 +707,7 @@ export class RecoveryManager {
     };
 
     try {
-      const rooDirs = [
-        '.roo',
-        '.roo/templates',
-        '.roo/workflows',
-        '.roo/modes'
-      ];
+      const rooDirs = ['.roo', '.roo/templates', '.roo/workflows', '.roo/modes'];
 
       for (const dir of rooDirs) {
         await Deno.mkdir(`${this.workingDir}/${dir}`, { recursive: true });

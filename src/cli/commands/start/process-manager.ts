@@ -5,13 +5,7 @@ import { getErrorMessage } from '../../../utils/error-handler.js';
 
 import { EventEmitter } from './event-emitter.js';
 import chalk from 'chalk';
-import { 
-  ProcessInfo, 
-  ProcessType, 
-  ProcessStatus, 
-  ProcessMetrics,
-  SystemStats 
-} from './types.js';
+import { ProcessInfo, ProcessType, ProcessStatus, ProcessMetrics, SystemStats } from './types.js';
 import { Orchestrator } from '../../../core/orchestrator.js';
 import { TerminalManager } from '../../../terminal/manager.js';
 import { MemoryManager } from '../../../memory/manager.js';
@@ -111,20 +105,12 @@ export class ProcessManager extends EventEmitter {
           break;
 
         case ProcessType.MEMORY_MANAGER:
-          this.memoryManager = new MemoryManager(
-            this.config.memory,
-            eventBus,
-            logger
-          );
+          this.memoryManager = new MemoryManager(this.config.memory, eventBus, logger);
           await this.memoryManager.initialize();
           break;
 
         case ProcessType.TERMINAL_POOL:
-          this.terminalManager = new TerminalManager(
-            this.config.terminal,
-            eventBus,
-            logger
-          );
+          this.terminalManager = new TerminalManager(this.config.terminal, eventBus, logger);
           await this.terminalManager.initialize();
           break;
 
@@ -138,20 +124,20 @@ export class ProcessManager extends EventEmitter {
           break;
 
         case ProcessType.MCP_SERVER:
-          this.mcpServer = new MCPServer(
-            this.config.mcp,
-            eventBus,
-            logger
-          );
+          this.mcpServer = new MCPServer(this.config.mcp, eventBus, logger);
           await this.mcpServer.start();
           break;
 
         case ProcessType.ORCHESTRATOR:
-          if (!this.terminalManager || !this.memoryManager || 
-              !this.coordinationManager || !this.mcpServer) {
+          if (
+            !this.terminalManager ||
+            !this.memoryManager ||
+            !this.coordinationManager ||
+            !this.mcpServer
+          ) {
             throw new Error('Required components not initialized');
           }
-          
+
           this.orchestrator = new Orchestrator(
             this.config,
             this.terminalManager,
@@ -168,7 +154,6 @@ export class ProcessManager extends EventEmitter {
       process.startTime = Date.now();
       this.updateProcessStatus(processId, ProcessStatus.RUNNING);
       this.emit('processStarted', { processId, process });
-
     } catch (error) {
       this.updateProcessStatus(processId, ProcessStatus.ERROR);
       process.metrics = {
@@ -228,7 +213,6 @@ export class ProcessManager extends EventEmitter {
 
       this.updateProcessStatus(processId, ProcessStatus.STOPPED);
       this.emit('processStopped', { processId });
-
     } catch (error) {
       this.updateProcessStatus(processId, ProcessStatus.ERROR);
       this.emit('processError', { processId, error });

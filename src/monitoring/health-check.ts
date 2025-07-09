@@ -5,11 +5,11 @@
 import { EventBus } from '../core/event-bus.js';
 import { Logger } from '../core/logger.js';
 import { SystemIntegration } from '../integration/system-integration.js';
-import type { 
-  HealthCheckResult, 
-  ComponentStatus, 
-  SystemHealth, 
-  SystemMetrics 
+import type {
+  HealthCheckResult,
+  ComponentStatus,
+  SystemHealth,
+  SystemMetrics
 } from '../integration/types.js';
 import { getErrorMessage } from '../utils/error-handler.js';
 
@@ -38,15 +38,11 @@ export class HealthCheckManager {
   private isRunning = false;
   private lastMetrics: SystemMetrics | null = null;
 
-  constructor(
-    eventBus: EventBus,
-    logger: Logger,
-    config: HealthCheckConfig = {}
-  ) {
+  constructor(eventBus: EventBus, logger: Logger, config: HealthCheckConfig = {}) {
     this.eventBus = eventBus;
     this.logger = logger;
     this.systemIntegration = SystemIntegration.getInstance();
-    
+
     this.config = {
       interval: config.interval || 30000, // 30 seconds
       timeout: config.timeout || 5000, // 5 seconds
@@ -110,7 +106,7 @@ export class HealthCheckManager {
    */
   async performHealthCheck(): Promise<SystemHealth> {
     const startTime = Date.now();
-    
+
     try {
       this.logger.debug('Performing system health check');
 
@@ -119,7 +115,7 @@ export class HealthCheckManager {
 
       // Perform individual component checks
       const componentChecks = await this.checkAllComponents();
-      
+
       // Collect system metrics if enabled
       if (this.config.enableMetrics) {
         this.lastMetrics = await this.collectSystemMetrics();
@@ -145,11 +141,10 @@ export class HealthCheckManager {
       });
 
       return systemHealth;
-
     } catch (error) {
       const duration = Date.now() - startTime;
       this.logger.error('Health check failed:', getErrorMessage(error));
-      
+
       this.eventBus.emit('health:check:failed', {
         error: getErrorMessage(error),
         duration,
@@ -198,10 +193,10 @@ export class HealthCheckManager {
    */
   private async checkComponent(componentName: string): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    
+
     try {
       const component = this.systemIntegration.getComponent(componentName);
-      
+
       if (!component) {
         return {
           component: componentName,
@@ -215,7 +210,7 @@ export class HealthCheckManager {
       if (typeof component.healthCheck === 'function') {
         const result = await Promise.race([
           component.healthCheck(),
-          new Promise((_, reject) => 
+          new Promise((_, reject) =>
             setTimeout(() => reject(new Error('Health check timeout')), this.config.timeout)
           )
         ]);
@@ -231,7 +226,6 @@ export class HealthCheckManager {
         metrics: { responseTime: duration },
         timestamp: Date.now()
       };
-
     } catch (error) {
       return {
         component: componentName,
@@ -247,16 +241,16 @@ export class HealthCheckManager {
    */
   private async collectSystemMetrics(): Promise<SystemMetrics> {
     const startTime = Date.now();
-    
+
     try {
       // Get system resource usage
       const memoryUsage = process.memoryUsage();
       const cpuUsage = process.cpuUsage();
-      
+
       // Get component-specific metrics
       const agentManager = this.systemIntegration.getComponent('agentManager');
       const taskEngine = this.systemIntegration.getComponent('taskEngine');
-      
+
       let activeAgents = 0;
       let activeTasks = 0;
       let queuedTasks = 0;
@@ -287,7 +281,6 @@ export class HealthCheckManager {
         uptime: process.uptime() * 1000,
         timestamp: Date.now()
       };
-
     } catch (error) {
       this.logger.error('Failed to collect system metrics:', getErrorMessage(error));
       return {
@@ -331,8 +324,9 @@ export class HealthCheckManager {
    * Check for alerts and send notifications
    */
   private async checkForAlerts(health: SystemHealth): Promise<void> {
-    const unhealthyComponents = Object.values(health.components)
-      .filter(component => component.status === 'unhealthy');
+    const unhealthyComponents = Object.values(health.components).filter(
+      component => component.status === 'unhealthy'
+    );
 
     if (unhealthyComponents.length > 0) {
       const alert = {
@@ -426,9 +420,7 @@ export class HealthCheckManager {
     let errorCount = 0;
 
     for (const history of this.healthHistory.values()) {
-      errorCount += history.filter(check => 
-        check.timestamp > recentTime && !check.healthy
-      ).length;
+      errorCount += history.filter(check => check.timestamp > recentTime && !check.healthy).length;
     }
 
     return errorCount;
@@ -446,7 +438,7 @@ export class HealthCheckManager {
     });
 
     // Listen for system errors
-    this.eventBus.on('system:error', (error) => {
+    this.eventBus.on('system:error', error => {
       this.logger.error('System error detected:', error);
     });
   }

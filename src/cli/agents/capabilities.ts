@@ -86,9 +86,7 @@ export class AgentCapabilitySystem {
     }
 
     // Sort by score (highest first) and return top results
-    return matches
-      .sort((a, b) => b.score - a.score)
-      .slice(0, maxResults);
+    return matches.sort((a, b) => b.score - a.score).slice(0, maxResults);
   }
 
   /**
@@ -96,7 +94,7 @@ export class AgentCapabilitySystem {
    */
   getTaskRequirements(task: TaskDefinition): TaskRequirements {
     const baseRequirements = this.taskTypeRequirements.get(task.type);
-    
+
     if (!baseRequirements) {
       // Infer requirements from task parameters
       return this.inferTaskRequirements(task);
@@ -126,7 +124,7 @@ export class AgentCapabilitySystem {
     // Evaluate required capabilities
     for (const required of requirements.requiredCapabilities) {
       maxScore += 20; // Each required capability is worth 20 points
-      
+
       if (this.agentHasCapability(capabilities, required)) {
         score += 20;
         matchedCapabilities.push(required);
@@ -139,7 +137,7 @@ export class AgentCapabilitySystem {
     // Evaluate preferred capabilities
     for (const preferred of requirements.preferredCapabilities) {
       maxScore += 10; // Each preferred capability is worth 10 points
-      
+
       if (this.agentHasCapability(capabilities, preferred)) {
         score += 10;
         matchedCapabilities.push(preferred);
@@ -149,7 +147,7 @@ export class AgentCapabilitySystem {
     // Evaluate language compatibility
     if (requirements.languages) {
       maxScore += 15;
-      const languageMatch = requirements.languages.some(lang => 
+      const languageMatch = requirements.languages.some(lang =>
         capabilities.languages.includes(lang)
       );
       if (languageMatch) {
@@ -160,7 +158,7 @@ export class AgentCapabilitySystem {
     // Evaluate framework compatibility
     if (requirements.frameworks) {
       maxScore += 15;
-      const frameworkMatch = requirements.frameworks.some(framework => 
+      const frameworkMatch = requirements.frameworks.some(framework =>
         capabilities.frameworks.includes(framework)
       );
       if (frameworkMatch) {
@@ -171,7 +169,7 @@ export class AgentCapabilitySystem {
     // Evaluate domain expertise
     if (requirements.domains) {
       maxScore += 10;
-      const domainMatch = requirements.domains.some(domain => 
+      const domainMatch = requirements.domains.some(domain =>
         capabilities.domains.includes(domain)
       );
       if (domainMatch) {
@@ -195,7 +193,11 @@ export class AgentCapabilitySystem {
 
     // Calculate final score as percentage
     const finalScore = maxScore > 0 ? (score / maxScore) * 100 : 0;
-    const confidence = this.calculateConfidence(matchedCapabilities, missingCapabilities, requirements);
+    const confidence = this.calculateConfidence(
+      matchedCapabilities,
+      missingCapabilities,
+      requirements
+    );
     const reason = this.generateMatchReason(matchedCapabilities, missingCapabilities, finalScore);
 
     return {
@@ -247,23 +249,27 @@ export class AgentCapabilitySystem {
   /**
    * Check for semantic capability matches
    */
-  private checkSemanticCapabilityMatch(capabilities: AgentCapabilities, capability: string): boolean {
+  private checkSemanticCapabilityMatch(
+    capabilities: AgentCapabilities,
+    capability: string
+  ): boolean {
     const semanticMappings: Record<string, string[]> = {
       'web-development': ['react', 'vue', 'angular', 'javascript', 'typescript', 'html', 'css'],
       'backend-development': ['node', 'express', 'fastify', 'python', 'django', 'flask'],
-      'database': ['sql', 'postgresql', 'mysql', 'mongodb', 'redis'],
-      'cloud': ['aws', 'azure', 'gcp', 'docker', 'kubernetes'],
-      'testing': ['jest', 'mocha', 'cypress', 'playwright', 'selenium'],
+      database: ['sql', 'postgresql', 'mysql', 'mongodb', 'redis'],
+      cloud: ['aws', 'azure', 'gcp', 'docker', 'kubernetes'],
+      testing: ['jest', 'mocha', 'cypress', 'playwright', 'selenium'],
       'data-science': ['python', 'r', 'pandas', 'numpy', 'sklearn'],
-      'mobile': ['react-native', 'flutter', 'swift', 'kotlin', 'ionic']
+      mobile: ['react-native', 'flutter', 'swift', 'kotlin', 'ionic']
     };
 
     for (const [concept, related] of Object.entries(semanticMappings)) {
       if (capability.includes(concept)) {
-        return related.some(item => 
-          capabilities.languages.includes(item) ||
-          capabilities.frameworks.includes(item) ||
-          capabilities.tools.includes(item)
+        return related.some(
+          item =>
+            capabilities.languages.includes(item) ||
+            capabilities.frameworks.includes(item) ||
+            capabilities.tools.includes(item)
         );
       }
     }
@@ -298,20 +304,20 @@ export class AgentCapabilitySystem {
    */
   private calculateAgentComplexityLevel(capabilities: AgentCapabilities): number {
     let level = 1;
-    
+
     // Advanced capabilities increase complexity level
     if (capabilities.codeGeneration) level += 0.5;
     if (capabilities.analysis) level += 0.5;
     if (capabilities.terminalAccess) level += 0.5;
-    
+
     // Multiple languages/frameworks indicate higher complexity handling
     if (capabilities.languages.length > 3) level += 0.5;
     if (capabilities.frameworks.length > 3) level += 0.5;
     if (capabilities.domains.length > 5) level += 0.5;
-    
+
     // Reliability indicates ability to handle complex tasks
     level += capabilities.reliability;
-    
+
     return Math.min(4, Math.max(1, Math.round(level)));
   }
 
@@ -327,15 +333,15 @@ export class AgentCapabilitySystem {
     if (totalRequired === 0) return 0.8; // Default confidence
 
     const matchRate = matched.length / (matched.length + missing.length);
-    const criticalMissing = missing.filter(cap => 
+    const criticalMissing = missing.filter(cap =>
       requirements.requiredCapabilities.includes(cap)
     ).length;
 
     let confidence = matchRate;
-    
+
     // Reduce confidence for missing critical capabilities
     if (criticalMissing > 0) {
-      confidence *= (1 - (criticalMissing / totalRequired) * 0.5);
+      confidence *= 1 - (criticalMissing / totalRequired) * 0.5;
     }
 
     return Math.max(0, Math.min(1, confidence));
@@ -344,11 +350,7 @@ export class AgentCapabilitySystem {
   /**
    * Generate human-readable match reason
    */
-  private generateMatchReason(
-    matched: string[],
-    missing: string[],
-    score: number
-  ): string {
+  private generateMatchReason(matched: string[], missing: string[], score: number): string {
     if (score >= 90) {
       return `Excellent match with ${matched.length} matching capabilities`;
     } else if (score >= 75) {
@@ -376,17 +378,17 @@ export class AgentCapabilitySystem {
       requiredCapabilities.push('codeGeneration');
       domains.push('development');
     }
-    
+
     if (description.includes('test')) {
       requiredCapabilities.push('testing');
       domains.push('testing');
     }
-    
+
     if (description.includes('analyze') || description.includes('analysis')) {
       requiredCapabilities.push('analysis');
       domains.push('analysis');
     }
-    
+
     if (description.includes('research')) {
       requiredCapabilities.push('research');
       domains.push('research');
@@ -420,7 +422,7 @@ export class AgentCapabilitySystem {
    */
   private initializeCapabilityRegistry(): CapabilityRegistry {
     return {
-      'codeGeneration': {
+      codeGeneration: {
         description: 'Ability to generate code in various programming languages',
         category: 'technical',
         prerequisites: [],
@@ -428,7 +430,7 @@ export class AgentCapabilitySystem {
         complexity: 8,
         importance: 9
       },
-      'codeReview': {
+      codeReview: {
         description: 'Ability to review and analyze code for quality and security',
         category: 'technical',
         prerequisites: ['codeGeneration'],
@@ -436,7 +438,7 @@ export class AgentCapabilitySystem {
         complexity: 7,
         importance: 8
       },
-      'testing': {
+      testing: {
         description: 'Ability to create and execute various types of tests',
         category: 'technical',
         prerequisites: [],
@@ -444,7 +446,7 @@ export class AgentCapabilitySystem {
         complexity: 6,
         importance: 9
       },
-      'documentation': {
+      documentation: {
         description: 'Ability to create comprehensive documentation',
         category: 'technical',
         prerequisites: [],
@@ -452,7 +454,7 @@ export class AgentCapabilitySystem {
         complexity: 4,
         importance: 7
       },
-      'research': {
+      research: {
         description: 'Ability to gather and analyze information from various sources',
         category: 'domain',
         prerequisites: [],
@@ -460,7 +462,7 @@ export class AgentCapabilitySystem {
         complexity: 5,
         importance: 8
       },
-      'analysis': {
+      analysis: {
         description: 'Ability to analyze data, patterns, and systems',
         category: 'technical',
         prerequisites: [],
@@ -468,7 +470,7 @@ export class AgentCapabilitySystem {
         complexity: 7,
         importance: 8
       },
-      'webSearch': {
+      webSearch: {
         description: 'Ability to search and retrieve information from the web',
         category: 'system',
         prerequisites: [],
@@ -476,7 +478,7 @@ export class AgentCapabilitySystem {
         complexity: 3,
         importance: 6
       },
-      'apiIntegration': {
+      apiIntegration: {
         description: 'Ability to integrate with external APIs and services',
         category: 'technical',
         prerequisites: [],
@@ -484,7 +486,7 @@ export class AgentCapabilitySystem {
         complexity: 6,
         importance: 7
       },
-      'fileSystem': {
+      fileSystem: {
         description: 'Ability to read, write, and manipulate files',
         category: 'system',
         prerequisites: [],
@@ -492,7 +494,7 @@ export class AgentCapabilitySystem {
         complexity: 3,
         importance: 6
       },
-      'terminalAccess': {
+      terminalAccess: {
         description: 'Ability to execute commands in terminal/shell',
         category: 'system',
         prerequisites: [],
@@ -600,7 +602,7 @@ export class AgentCapabilitySystem {
           domains: ['research', 'analysis', 'information-gathering'],
           tools: ['web-search', 'document-analyzer', 'data-extractor']
         };
-      
+
       case 'coder':
         return {
           ...baseCapabilities,
@@ -614,7 +616,7 @@ export class AgentCapabilitySystem {
           domains: ['web-development', 'backend-development'],
           tools: ['git', 'editor', 'debugger', 'linter']
         };
-      
+
       case 'analyst':
         return {
           ...baseCapabilities,
@@ -626,7 +628,7 @@ export class AgentCapabilitySystem {
           domains: ['data-analysis', 'statistics', 'visualization'],
           tools: ['data-processor', 'chart-generator', 'statistical-analyzer']
         };
-      
+
       case 'architect':
         return {
           ...baseCapabilities,
@@ -637,7 +639,7 @@ export class AgentCapabilitySystem {
           domains: ['system-architecture', 'software-architecture', 'cloud-architecture'],
           tools: ['architecture-diagrams', 'system-modeler', 'design-patterns']
         };
-      
+
       case 'tester':
         return {
           ...baseCapabilities,
@@ -649,7 +651,7 @@ export class AgentCapabilitySystem {
           domains: ['testing', 'quality-assurance', 'automation'],
           tools: ['test-runner', 'coverage-analyzer', 'browser-automation']
         };
-      
+
       case 'coordinator':
         return {
           ...baseCapabilities,
@@ -659,7 +661,7 @@ export class AgentCapabilitySystem {
           domains: ['project-management', 'coordination', 'planning'],
           tools: ['task-manager', 'workflow-orchestrator', 'communication-hub']
         };
-      
+
       default:
         return baseCapabilities;
     }

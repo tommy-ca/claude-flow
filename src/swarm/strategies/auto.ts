@@ -1,20 +1,46 @@
-
 // Extended TaskType for auto strategy (extends base TaskType)
-export type ExtendedTaskType = 
-  | 'data-analysis' | 'performance-analysis' | 'statistical-analysis'
-  | 'visualization' | 'predictive-modeling' | 'anomaly-detection'
-  | 'trend-analysis' | 'business-intelligence' | 'quality-analysis'
-  | 'system-design' | 'architecture-review' | 'api-design'
-  | 'cloud-architecture' | 'microservices-design' | 'security-architecture'
-  | 'scalability-design' | 'database-architecture'
-  | 'code-generation' | 'code-review' | 'refactoring' | 'debugging'
-  | 'api-development' | 'database-design' | 'performance-optimization'
-  | 'task-orchestration' | 'progress-tracking' | 'resource-allocation'
-  | 'workflow-management' | 'team-coordination' | 'status-reporting'
-  | 'fact-check' | 'literature-review' | 'market-analysis'
-  | 'unit-testing' | 'integration-testing' | 'e2e-testing'
-  | 'performance-testing' | 'security-testing' | 'api-testing'
-  | 'test-automation' | 'test-analysis';
+export type ExtendedTaskType =
+  | 'data-analysis'
+  | 'performance-analysis'
+  | 'statistical-analysis'
+  | 'visualization'
+  | 'predictive-modeling'
+  | 'anomaly-detection'
+  | 'trend-analysis'
+  | 'business-intelligence'
+  | 'quality-analysis'
+  | 'system-design'
+  | 'architecture-review'
+  | 'api-design'
+  | 'cloud-architecture'
+  | 'microservices-design'
+  | 'security-architecture'
+  | 'scalability-design'
+  | 'database-architecture'
+  | 'code-generation'
+  | 'code-review'
+  | 'refactoring'
+  | 'debugging'
+  | 'api-development'
+  | 'database-design'
+  | 'performance-optimization'
+  | 'task-orchestration'
+  | 'progress-tracking'
+  | 'resource-allocation'
+  | 'workflow-management'
+  | 'team-coordination'
+  | 'status-reporting'
+  | 'fact-check'
+  | 'literature-review'
+  | 'market-analysis'
+  | 'unit-testing'
+  | 'integration-testing'
+  | 'e2e-testing'
+  | 'performance-testing'
+  | 'security-testing'
+  | 'api-testing'
+  | 'test-automation'
+  | 'test-analysis';
 
 import { getErrorMessage } from '../../utils/error-handler.js';
 /**
@@ -24,7 +50,15 @@ import { getErrorMessage } from '../../utils/error-handler.js';
 
 import { BaseStrategy } from './base.js';
 import type { DecompositionResult, TaskBatch, AgentAllocation, TaskPattern } from './base.js';
-import type { SwarmObjective, TaskDefinition, AgentState, TaskType, TaskPriority, TaskId, AgentType } from '../types.js';
+import type {
+  SwarmObjective,
+  TaskDefinition,
+  AgentState,
+  TaskType,
+  TaskPriority,
+  TaskId,
+  AgentType
+} from '../types.js';
 import { generateId } from '../../utils/helpers.js';
 
 interface MLHeuristics {
@@ -84,7 +118,12 @@ export class AutoStrategy extends BaseStrategy {
     ]);
 
     // Generate tasks based on detected patterns and strategy
-    const tasks = await this.generateTasksWithBatching(objective, detectedPatterns, taskTypes, complexity);
+    const tasks = await this.generateTasksWithBatching(
+      objective,
+      detectedPatterns,
+      taskTypes,
+      complexity
+    );
 
     // Analyze dependencies and create batches
     const dependencies = this.analyzeDependencies(tasks);
@@ -117,12 +156,15 @@ export class AutoStrategy extends BaseStrategy {
   /**
    * ML-inspired agent selection with performance history consideration
    */
-  override async selectAgentForTask(task: TaskDefinition, availableAgents: AgentState[]): Promise<string | null> {
+  override async selectAgentForTask(
+    task: TaskDefinition,
+    availableAgents: AgentState[]
+  ): Promise<string | null> {
     if (availableAgents.length === 0) return null;
 
     // Score agents using ML heuristics
     const scoredAgents = await Promise.all(
-      availableAgents.map(async (agent) => ({
+      availableAgents.map(async agent => ({
         agent,
         score: await this.calculateAgentScore(agent, task)
       }))
@@ -130,7 +172,7 @@ export class AutoStrategy extends BaseStrategy {
 
     // Sort by score and select best agent
     scoredAgents.sort((a, b) => b.score - a.score);
-    
+
     // Update performance history
     const selectedAgent = scoredAgents[0].agent;
     this.updateAgentPerformanceHistory(selectedAgent.id.id, scoredAgents[0].score);
@@ -141,9 +183,12 @@ export class AutoStrategy extends BaseStrategy {
   /**
    * Predictive task scheduling with dynamic agent allocation
    */
-  override async optimizeTaskSchedule(tasks: TaskDefinition[], agents: AgentState[]): Promise<AgentAllocation[]> {
+  override async optimizeTaskSchedule(
+    tasks: TaskDefinition[],
+    agents: AgentState[]
+  ): Promise<AgentAllocation[]> {
     const schedule = await this.createPredictiveSchedule(tasks, agents);
-    
+
     return this.allocateAgentsOptimally(tasks, agents, schedule);
   }
 
@@ -152,21 +197,21 @@ export class AutoStrategy extends BaseStrategy {
   private initializeMLHeuristics(): MLHeuristics {
     return {
       taskTypeWeights: {
-        'development': 1.0,
-        'testing': 0.8,
-        'analysis': 0.9,
-        'documentation': 0.6,
-        'optimization': 1.1,
-        'research': 0.7
+        development: 1.0,
+        testing: 0.8,
+        analysis: 0.9,
+        documentation: 0.6,
+        optimization: 1.1,
+        research: 0.7
       },
       agentPerformanceHistory: new Map(),
       complexityFactors: {
-        'integration': 1.5,
-        'system': 1.3,
-        'api': 1.2,
-        'database': 1.4,
-        'ui': 1.1,
-        'algorithm': 1.6
+        integration: 1.5,
+        system: 1.3,
+        api: 1.2,
+        database: 1.4,
+        ui: 1.1,
+        algorithm: 1.6
       },
       parallelismOpportunities: [
         'independent modules',
@@ -180,22 +225,20 @@ export class AutoStrategy extends BaseStrategy {
 
   private async detectPatternsAsync(description: string): Promise<TaskPattern[]> {
     const cacheKey = `patterns-${description.slice(0, 50)}`;
-    
+
     if (this.patternCache.has(cacheKey)) {
       return this.patternCache.get(cacheKey)!;
     }
 
     // Simulate async pattern detection with enhanced matching
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
-        const patterns = this.taskPatterns.filter(pattern => 
-          pattern.pattern.test(description)
-        );
-        
+        const patterns = this.taskPatterns.filter(pattern => pattern.pattern.test(description));
+
         // Add dynamic patterns based on content analysis
         const dynamicPatterns = this.generateDynamicPatterns(description);
         const allPatterns = [...patterns, ...dynamicPatterns];
-        
+
         this.patternCache.set(cacheKey, allPatterns);
         resolve(allPatterns);
       }, 10); // Simulate async processing
@@ -203,10 +246,10 @@ export class AutoStrategy extends BaseStrategy {
   }
 
   private async analyzeTaskTypesAsync(description: string): Promise<string[]> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         const types = [];
-        
+
         // Enhanced task type detection
         if (/create|build|implement|develop|code/i.test(description)) {
           types.push('development');
@@ -233,17 +276,17 @@ export class AutoStrategy extends BaseStrategy {
   }
 
   private async estimateComplexityAsync(description: string): Promise<number> {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       setTimeout(() => {
         let complexity = this.estimateComplexity(description);
-        
+
         // Apply ML heuristics for complexity adjustment
         for (const [factor, weight] of Object.entries(this.mlHeuristics.complexityFactors)) {
           if (description.toLowerCase().includes(factor)) {
             complexity *= weight;
           }
         }
-        
+
         resolve(Math.min(Math.round(complexity), 5));
       }, 5);
     });
@@ -251,7 +294,7 @@ export class AutoStrategy extends BaseStrategy {
 
   private generateDynamicPatterns(description: string): TaskPattern[] {
     const patterns: TaskPattern[] = [];
-    
+
     // Generate patterns based on specific keywords and context
     if (description.includes('API') || description.includes('endpoint')) {
       patterns.push({
@@ -263,7 +306,7 @@ export class AutoStrategy extends BaseStrategy {
         priority: 2
       });
     }
-    
+
     if (description.includes('database') || description.includes('data')) {
       patterns.push({
         pattern: /database|data|storage/i,
@@ -285,143 +328,173 @@ export class AutoStrategy extends BaseStrategy {
     complexity: number
   ): Promise<TaskDefinition[]> {
     const tasks: TaskDefinition[] = [];
-    
+
     // Determine strategy-specific task generation
     if (objective.strategy === 'development') {
-      tasks.push(...await this.generateDevelopmentTasks(objective, complexity));
+      tasks.push(...(await this.generateDevelopmentTasks(objective, complexity)));
     } else if (objective.strategy === 'analysis') {
-      tasks.push(...await this.generateAnalysisTasks(objective, complexity));
+      tasks.push(...(await this.generateAnalysisTasks(objective, complexity)));
     } else {
       // Auto strategy - intelligent task generation based on patterns
-      tasks.push(...await this.generateAutoTasks(objective, patterns, taskTypes, complexity));
+      tasks.push(...(await this.generateAutoTasks(objective, patterns, taskTypes, complexity)));
     }
 
     return tasks;
   }
 
-  private async generateDevelopmentTasks(objective: SwarmObjective, complexity: number): Promise<TaskDefinition[]> {
+  private async generateDevelopmentTasks(
+    objective: SwarmObjective,
+    complexity: number
+  ): Promise<TaskDefinition[]> {
     const tasks: TaskDefinition[] = [];
     const baseId = generateId('task');
 
     // Analysis and Planning Phase
-    tasks.push(this.createTaskDefinition({
-      id: `${baseId}-analysis`,
-      type: 'analysis' as TaskType,
-      name: 'Requirements Analysis and Planning',
-      description: `Analyze requirements and create implementation plan for: ${objective.description}`,
-      priority: 'high' as TaskPriority,
-      estimatedDuration: Math.max(5 * 60 * 1000, complexity * 3 * 60 * 1000),
-      capabilities: ['analysis', 'documentation', 'research']
-    }));
+    tasks.push(
+      this.createTaskDefinition({
+        id: `${baseId}-analysis`,
+        type: 'analysis' as TaskType,
+        name: 'Requirements Analysis and Planning',
+        description: `Analyze requirements and create implementation plan for: ${objective.description}`,
+        priority: 'high' as TaskPriority,
+        estimatedDuration: Math.max(5 * 60 * 1000, complexity * 3 * 60 * 1000),
+        capabilities: ['analysis', 'documentation', 'research']
+      })
+    );
 
     // Implementation Phase (can be parallelized)
-    const implementationTasks = this.createParallelImplementationTasks(objective, complexity, baseId);
+    const implementationTasks = this.createParallelImplementationTasks(
+      objective,
+      complexity,
+      baseId
+    );
     tasks.push(...implementationTasks);
 
     // Testing Phase
-    tasks.push(this.createTaskDefinition({
-      id: `${baseId}-testing`,
-      type: 'testing' as TaskType,
-      name: 'Comprehensive Testing',
-      description: `Create and execute tests for the implementation`,
-      priority: 'high' as TaskPriority,
-      estimatedDuration: Math.max(8 * 60 * 1000, complexity * 4 * 60 * 1000),
-      capabilities: ['testing', 'code-generation'],
-      dependencies: implementationTasks.map(t => t.id.id)
-    }));
+    tasks.push(
+      this.createTaskDefinition({
+        id: `${baseId}-testing`,
+        type: 'testing' as TaskType,
+        name: 'Comprehensive Testing',
+        description: `Create and execute tests for the implementation`,
+        priority: 'high' as TaskPriority,
+        estimatedDuration: Math.max(8 * 60 * 1000, complexity * 4 * 60 * 1000),
+        capabilities: ['testing', 'code-generation'],
+        dependencies: implementationTasks.map(t => t.id.id)
+      })
+    );
 
     // Documentation Phase
-    tasks.push(this.createTaskDefinition({
-      id: `${baseId}-documentation`,
-      type: 'documentation' as TaskType,
-      name: 'Documentation Creation',
-      description: `Create comprehensive documentation`,
-      priority: 'medium' as TaskPriority,
-      estimatedDuration: Math.max(5 * 60 * 1000, complexity * 2 * 60 * 1000),
-      capabilities: ['documentation'],
-      dependencies: implementationTasks.map(t => t.id.id)
-    }));
+    tasks.push(
+      this.createTaskDefinition({
+        id: `${baseId}-documentation`,
+        type: 'documentation' as TaskType,
+        name: 'Documentation Creation',
+        description: `Create comprehensive documentation`,
+        priority: 'medium' as TaskPriority,
+        estimatedDuration: Math.max(5 * 60 * 1000, complexity * 2 * 60 * 1000),
+        capabilities: ['documentation'],
+        dependencies: implementationTasks.map(t => t.id.id)
+      })
+    );
 
     return tasks;
   }
 
-  private createParallelImplementationTasks(objective: SwarmObjective, complexity: number, baseId: string): TaskDefinition[] {
+  private createParallelImplementationTasks(
+    objective: SwarmObjective,
+    complexity: number,
+    baseId: string
+  ): TaskDefinition[] {
     const tasks: TaskDefinition[] = [];
-    
+
     // Determine if we can split implementation into parallel tasks
     const canParallelize = this.canParallelizeImplementation(objective.description);
-    
+
     if (canParallelize && complexity >= 3) {
       // Create multiple parallel implementation tasks
       const components = this.identifyComponents(objective.description);
-      
+
       components.forEach((component, index) => {
-        tasks.push(this.createTaskDefinition({
-          id: `${baseId}-impl-${index}`,
-          type: 'coding' as TaskType,
-          name: `Implement ${component}`,
-          description: `Implement ${component} component for: ${objective.description}`,
-          priority: 'high' as TaskPriority,
-          estimatedDuration: Math.max(10 * 60 * 1000, complexity * 5 * 60 * 1000),
-          capabilities: ['code-generation', 'file-system'],
-          dependencies: [`${baseId}-analysis`]
-        }));
+        tasks.push(
+          this.createTaskDefinition({
+            id: `${baseId}-impl-${index}`,
+            type: 'coding' as TaskType,
+            name: `Implement ${component}`,
+            description: `Implement ${component} component for: ${objective.description}`,
+            priority: 'high' as TaskPriority,
+            estimatedDuration: Math.max(10 * 60 * 1000, complexity * 5 * 60 * 1000),
+            capabilities: ['code-generation', 'file-system'],
+            dependencies: [`${baseId}-analysis`]
+          })
+        );
       });
     } else {
       // Single implementation task
-      tasks.push(this.createTaskDefinition({
-        id: `${baseId}-implementation`,
-        type: 'coding' as TaskType,
-        name: 'Core Implementation',
-        description: `Implement the solution for: ${objective.description}`,
-        priority: 'high' as TaskPriority,
-        estimatedDuration: Math.max(15 * 60 * 1000, complexity * 8 * 60 * 1000),
-        capabilities: ['code-generation', 'file-system'],
-        dependencies: [`${baseId}-analysis`]
-      }));
+      tasks.push(
+        this.createTaskDefinition({
+          id: `${baseId}-implementation`,
+          type: 'coding' as TaskType,
+          name: 'Core Implementation',
+          description: `Implement the solution for: ${objective.description}`,
+          priority: 'high' as TaskPriority,
+          estimatedDuration: Math.max(15 * 60 * 1000, complexity * 8 * 60 * 1000),
+          capabilities: ['code-generation', 'file-system'],
+          dependencies: [`${baseId}-analysis`]
+        })
+      );
     }
 
     return tasks;
   }
 
-  private async generateAnalysisTasks(objective: SwarmObjective, complexity: number): Promise<TaskDefinition[]> {
+  private async generateAnalysisTasks(
+    objective: SwarmObjective,
+    complexity: number
+  ): Promise<TaskDefinition[]> {
     const tasks: TaskDefinition[] = [];
     const baseId = generateId('task');
 
     // Data Collection
-    tasks.push(this.createTaskDefinition({
-      id: `${baseId}-collection`,
-      type: 'research' as TaskType,
-      name: 'Data Collection and Research',
-      description: `Collect and research data for: ${objective.description}`,
-      priority: 'high' as TaskPriority,
-      estimatedDuration: Math.max(8 * 60 * 1000, complexity * 4 * 60 * 1000),
-      capabilities: ['research', 'analysis', 'web-search']
-    }));
+    tasks.push(
+      this.createTaskDefinition({
+        id: `${baseId}-collection`,
+        type: 'research' as TaskType,
+        name: 'Data Collection and Research',
+        description: `Collect and research data for: ${objective.description}`,
+        priority: 'high' as TaskPriority,
+        estimatedDuration: Math.max(8 * 60 * 1000, complexity * 4 * 60 * 1000),
+        capabilities: ['research', 'analysis', 'web-search']
+      })
+    );
 
     // Analysis
-    tasks.push(this.createTaskDefinition({
-      id: `${baseId}-analysis`,
-      type: 'analysis' as TaskType,
-      name: 'Data Analysis',
-      description: `Analyze collected data and generate insights`,
-      priority: 'high' as TaskPriority,
-      estimatedDuration: Math.max(10 * 60 * 1000, complexity * 5 * 60 * 1000),
-      capabilities: ['analysis', 'documentation'],
-      dependencies: [`${baseId}-collection`]
-    }));
+    tasks.push(
+      this.createTaskDefinition({
+        id: `${baseId}-analysis`,
+        type: 'analysis' as TaskType,
+        name: 'Data Analysis',
+        description: `Analyze collected data and generate insights`,
+        priority: 'high' as TaskPriority,
+        estimatedDuration: Math.max(10 * 60 * 1000, complexity * 5 * 60 * 1000),
+        capabilities: ['analysis', 'documentation'],
+        dependencies: [`${baseId}-collection`]
+      })
+    );
 
     // Reporting
-    tasks.push(this.createTaskDefinition({
-      id: `${baseId}-reporting`,
-      type: 'documentation' as TaskType,
-      name: 'Analysis Report',
-      description: `Create comprehensive analysis report`,
-      priority: 'medium' as TaskPriority,
-      estimatedDuration: Math.max(6 * 60 * 1000, complexity * 3 * 60 * 1000),
-      capabilities: ['documentation', 'analysis'],
-      dependencies: [`${baseId}-analysis`]
-    }));
+    tasks.push(
+      this.createTaskDefinition({
+        id: `${baseId}-reporting`,
+        type: 'documentation' as TaskType,
+        name: 'Analysis Report',
+        description: `Create comprehensive analysis report`,
+        priority: 'medium' as TaskPriority,
+        estimatedDuration: Math.max(6 * 60 * 1000, complexity * 3 * 60 * 1000),
+        capabilities: ['documentation', 'analysis'],
+        dependencies: [`${baseId}-analysis`]
+      })
+    );
 
     return tasks;
   }
@@ -439,15 +512,17 @@ export class AutoStrategy extends BaseStrategy {
     const optimalStructure = this.determineOptimalTaskStructure(patterns, taskTypes, complexity);
 
     if (optimalStructure.requiresAnalysis) {
-      tasks.push(this.createTaskDefinition({
-        id: `${baseId}-analysis`,
-        type: 'analysis' as TaskType,
-        name: 'Intelligent Analysis',
-        description: `Analyze and understand: ${objective.description}`,
-        priority: 'high' as TaskPriority,
-        estimatedDuration: optimalStructure.analysisDuration,
-        capabilities: ['analysis', 'research']
-      }));
+      tasks.push(
+        this.createTaskDefinition({
+          id: `${baseId}-analysis`,
+          type: 'analysis' as TaskType,
+          name: 'Intelligent Analysis',
+          description: `Analyze and understand: ${objective.description}`,
+          priority: 'high' as TaskPriority,
+          estimatedDuration: optimalStructure.analysisDuration,
+          capabilities: ['analysis', 'research']
+        })
+      );
     }
 
     if (optimalStructure.requiresImplementation) {
@@ -456,16 +531,18 @@ export class AutoStrategy extends BaseStrategy {
     }
 
     if (optimalStructure.requiresTesting) {
-      tasks.push(this.createTaskDefinition({
-        id: `${baseId}-testing`,
-        type: 'testing' as TaskType,
-        name: 'Intelligent Testing',
-        description: `Test and validate the solution`,
-        priority: 'high' as TaskPriority,
-        estimatedDuration: optimalStructure.testingDuration,
-        capabilities: ['testing', 'validation'],
-        dependencies: tasks.filter(t => t.type === 'coding').map(t => t.id.id)
-      }));
+      tasks.push(
+        this.createTaskDefinition({
+          id: `${baseId}-testing`,
+          type: 'testing' as TaskType,
+          name: 'Intelligent Testing',
+          description: `Test and validate the solution`,
+          priority: 'high' as TaskPriority,
+          estimatedDuration: optimalStructure.testingDuration,
+          capabilities: ['testing', 'validation'],
+          dependencies: tasks.filter(t => t.type === 'coding').map(t => t.id.id)
+        })
+      );
     }
 
     return tasks;
@@ -500,7 +577,12 @@ export class AutoStrategy extends BaseStrategy {
         permissions: ['read', 'write', 'execute']
       },
       constraints: {
-        dependencies: (params.dependencies || []).map(dep => ({ id: dep, swarmId: 'auto-strategy', sequence: 1, priority: 1 })),
+        dependencies: (params.dependencies || []).map(dep => ({
+          id: dep,
+          swarmId: 'auto-strategy',
+          sequence: 1,
+          priority: 1
+        })),
         dependents: [],
         conflicts: [],
         maxRetries: 3,
@@ -514,33 +596,35 @@ export class AutoStrategy extends BaseStrategy {
       createdAt: new Date(),
       updatedAt: new Date(),
       attempts: [],
-      statusHistory: [{
-        timestamp: new Date(),
-        from: 'created',
-        to: 'created',
-        reason: 'Task created by AutoStrategy',
-        triggeredBy: 'system'
-      }]
+      statusHistory: [
+        {
+          timestamp: new Date(),
+          from: 'created',
+          to: 'created',
+          reason: 'Task created by AutoStrategy',
+          triggeredBy: 'system'
+        }
+      ]
     };
   }
 
   private getRequiredTools(type: TaskType): string[] {
     const toolMap: Record<string, string[]> = {
-      'coding': ['file-system', 'terminal', 'editor'],
-      'testing': ['test-runner', 'file-system', 'terminal'],
-      'analysis': ['analyst', 'file-system', 'web-search'],
-      'documentation': ['editor', 'file-system'],
-      'research': ['web-search', 'analyst', 'file-system'],
-      'review': ['analyst', 'file-system'],
-      'deployment': ['terminal', 'file-system', 'deployment-tools'],
-      'monitoring': ['monitoring-tools', 'analyst'],
-      'coordination': ['communication-tools'],
-      'communication': ['communication-tools'],
-      'maintenance': ['file-system', 'terminal', 'monitoring-tools'],
-      'optimization': ['analyst', 'profiler', 'file-system'],
-      'validation': ['validator', 'test-runner'],
-      'integration': ['integration-tools', 'file-system', 'terminal'],
-      'custom': ['file-system']
+      coding: ['file-system', 'terminal', 'editor'],
+      testing: ['test-runner', 'file-system', 'terminal'],
+      analysis: ['analyst', 'file-system', 'web-search'],
+      documentation: ['editor', 'file-system'],
+      research: ['web-search', 'analyst', 'file-system'],
+      review: ['analyst', 'file-system'],
+      deployment: ['terminal', 'file-system', 'deployment-tools'],
+      monitoring: ['monitoring-tools', 'analyst'],
+      coordination: ['communication-tools'],
+      communication: ['communication-tools'],
+      maintenance: ['file-system', 'terminal', 'monitoring-tools'],
+      optimization: ['analyst', 'profiler', 'file-system'],
+      validation: ['validator', 'test-runner'],
+      integration: ['integration-tools', 'file-system', 'terminal'],
+      custom: ['file-system']
     };
 
     return toolMap[type] || ['file-system'];
@@ -557,18 +641,22 @@ export class AutoStrategy extends BaseStrategy {
   private identifyComponents(description: string): string[] {
     // Simple component identification - in a real implementation this would be more sophisticated
     const components = ['Core Logic', 'User Interface', 'Data Layer'];
-    
+
     if (description.toLowerCase().includes('api')) {
       components.push('API Layer');
     }
     if (description.toLowerCase().includes('database')) {
       components.push('Database Integration');
     }
-    
+
     return components.slice(0, 3); // Limit to 3 parallel components
   }
 
-  private determineOptimalTaskStructure(patterns: TaskPattern[], taskTypes: string[], complexity: number) {
+  private determineOptimalTaskStructure(
+    patterns: TaskPattern[],
+    taskTypes: string[],
+    complexity: number
+  ) {
     return {
       requiresAnalysis: complexity >= 2 || taskTypes.includes('analysis'),
       requiresImplementation: taskTypes.includes('development') || taskTypes.includes('coding'),
@@ -578,40 +666,53 @@ export class AutoStrategy extends BaseStrategy {
     };
   }
 
-  private createOptimalImplementationTasks(objective: SwarmObjective, structure: any, baseId: string): TaskDefinition[] {
-    return [this.createTaskDefinition({
-      id: `${baseId}-implementation`,
-      type: 'coding' as TaskType,
-      name: 'Optimal Implementation',
-      description: `Implement solution for: ${objective.description}`,
-      priority: 'high' as TaskPriority,
-      estimatedDuration: Math.max(15 * 60 * 1000, structure.complexity * 8 * 60 * 1000),
-      capabilities: ['code-generation', 'file-system'],
-      dependencies: structure.requiresAnalysis ? [`${baseId}-analysis`] : []
-    })];
+  private createOptimalImplementationTasks(
+    objective: SwarmObjective,
+    structure: any,
+    baseId: string
+  ): TaskDefinition[] {
+    return [
+      this.createTaskDefinition({
+        id: `${baseId}-implementation`,
+        type: 'coding' as TaskType,
+        name: 'Optimal Implementation',
+        description: `Implement solution for: ${objective.description}`,
+        priority: 'high' as TaskPriority,
+        estimatedDuration: Math.max(15 * 60 * 1000, structure.complexity * 8 * 60 * 1000),
+        capabilities: ['code-generation', 'file-system'],
+        dependencies: structure.requiresAnalysis ? [`${baseId}-analysis`] : []
+      })
+    ];
   }
 
   private analyzeDependencies(tasks: TaskDefinition[]): Map<string, string[]> {
     const dependencies = new Map<string, string[]>();
-    
+
     tasks.forEach(task => {
       if (task.constraints.dependencies.length > 0) {
-        dependencies.set(task.id.id, task.constraints.dependencies.map(dep => dep.id));
+        dependencies.set(
+          task.id.id,
+          task.constraints.dependencies.map(dep => dep.id)
+        );
       }
     });
-    
+
     return dependencies;
   }
 
-  private createTaskBatches(tasks: TaskDefinition[], dependencies: Map<string, string[]>): TaskBatch[] {
+  private createTaskBatches(
+    tasks: TaskDefinition[],
+    dependencies: Map<string, string[]>
+  ): TaskBatch[] {
     const batches: TaskBatch[] = [];
     const processed = new Set<string>();
     let batchIndex = 0;
 
     while (processed.size < tasks.length) {
-      const batchTasks = tasks.filter(task => 
-        !processed.has(task.id.id) && 
-        task.constraints.dependencies.every(dep => processed.has(dep.id))
+      const batchTasks = tasks.filter(
+        task =>
+          !processed.has(task.id.id) &&
+          task.constraints.dependencies.every(dep => processed.has(dep.id))
       );
 
       if (batchTasks.length === 0) break; // Prevent infinite loop
@@ -687,23 +788,35 @@ export class AutoStrategy extends BaseStrategy {
 
   private agentHasCapability(agent: AgentState, capability: string): boolean {
     const caps = agent.capabilities;
-    
+
     switch (capability) {
-      case 'code-generation': return caps.codeGeneration;
-      case 'code-review': return caps.codeReview;
-      case 'testing': return caps.testing;
-      case 'documentation': return caps.documentation;
-      case 'research': return caps.research;
-      case 'analysis': return caps.analysis;
-      case 'web-search': return caps.webSearch;
-      case 'api-integration': return caps.apiIntegration;
-      case 'file-system': return caps.fileSystem;
-      case 'terminal-access': return caps.terminalAccess;
-      default: 
-        return caps.domains.includes(capability) ||
-               caps.languages.includes(capability) ||
-               caps.frameworks.includes(capability) ||
-               caps.tools.includes(capability);
+      case 'code-generation':
+        return caps.codeGeneration;
+      case 'code-review':
+        return caps.codeReview;
+      case 'testing':
+        return caps.testing;
+      case 'documentation':
+        return caps.documentation;
+      case 'research':
+        return caps.research;
+      case 'analysis':
+        return caps.analysis;
+      case 'web-search':
+        return caps.webSearch;
+      case 'api-integration':
+        return caps.apiIntegration;
+      case 'file-system':
+        return caps.fileSystem;
+      case 'terminal-access':
+        return caps.terminalAccess;
+      default:
+        return (
+          caps.domains.includes(capability) ||
+          caps.languages.includes(capability) ||
+          caps.frameworks.includes(capability) ||
+          caps.tools.includes(capability)
+        );
     }
   }
 
@@ -718,7 +831,7 @@ export class AutoStrategy extends BaseStrategy {
   private applyMLHeuristics(agent: AgentState, task: TaskDefinition): number {
     const taskType = this.detectTaskType(task.description);
     const weight = this.mlHeuristics.taskTypeWeights[taskType] || 1.0;
-    
+
     // Apply agent type bonus
     let bonus = 0;
     if (agent.type === 'coder' && taskType === 'development') bonus = 0.2;
@@ -732,17 +845,20 @@ export class AutoStrategy extends BaseStrategy {
     if (!this.performanceHistory.has(agentId)) {
       this.performanceHistory.set(agentId, []);
     }
-    
+
     const history = this.performanceHistory.get(agentId)!;
     history.push(score);
-    
+
     // Keep only last 10 scores
     if (history.length > 10) {
       history.shift();
     }
   }
 
-  private async createPredictiveSchedule(tasks: TaskDefinition[], agents: AgentState[]): Promise<PredictiveSchedule> {
+  private async createPredictiveSchedule(
+    tasks: TaskDefinition[],
+    agents: AgentState[]
+  ): Promise<PredictiveSchedule> {
     // Simplified predictive scheduling implementation
     const timeline: ScheduleSlot[] = [];
     let currentTime = Date.now();
@@ -768,24 +884,22 @@ export class AutoStrategy extends BaseStrategy {
   }
 
   private allocateAgentsOptimally(
-    tasks: TaskDefinition[], 
-    agents: AgentState[], 
+    tasks: TaskDefinition[],
+    agents: AgentState[],
     schedule: PredictiveSchedule
   ): AgentAllocation[] {
     const allocations: AgentAllocation[] = [];
 
     agents.forEach(agent => {
-      const suitableTasks = tasks.filter(task => 
-        this.calculateCapabilityMatch(agent, task) > 0.5
-      );
+      const suitableTasks = tasks.filter(task => this.calculateCapabilityMatch(agent, task) > 0.5);
 
       if (suitableTasks.length > 0) {
         allocations.push({
           agentId: agent.id.id,
           tasks: suitableTasks.slice(0, 3).map(t => t.id.id), // Limit to 3 tasks per agent
           estimatedWorkload: suitableTasks.length * 0.3,
-          capabilities: Object.keys(agent.capabilities).filter(cap => 
-            (agent.capabilities as any)[cap] === true
+          capabilities: Object.keys(agent.capabilities).filter(
+            cap => (agent.capabilities as any)[cap] === true
           )
         });
       }

@@ -81,12 +81,12 @@ export class WebSocketClient {
           resolve();
         };
 
-        this.ws.onclose = (event) => {
+        this.ws.onclose = event => {
           clearTimeout(connectionTimer);
           this.handleDisconnection(event);
         };
 
-        this.ws.onerror = (error) => {
+        this.ws.onerror = error => {
           clearTimeout(connectionTimer);
           console.error('WebSocket error:', error);
           this.isConnecting = false;
@@ -97,10 +97,9 @@ export class WebSocketClient {
           }
         };
 
-        this.ws.onmessage = (event) => {
+        this.ws.onmessage = event => {
           this.handleMessage(event);
         };
-
       } catch (error) {
         this.isConnecting = false;
         reject(error);
@@ -223,7 +222,6 @@ export class WebSocketClient {
       }
 
       this.emit('message_received', message);
-
     } catch (error) {
       console.error('Failed to parse WebSocket message:', error);
       this.emit('parse_error', error);
@@ -258,7 +256,9 @@ export class WebSocketClient {
     this.reconnectAttempts++;
     const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
 
-    console.log(`Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
+    console.log(
+      `Attempting reconnection ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`
+    );
     this.emit('reconnecting', { attempt: this.reconnectAttempts, delay });
 
     setTimeout(async () => {

@@ -89,7 +89,7 @@ export class MockMemoryManager {
   async keys(pattern?: string): Promise<string[]> {
     const allKeys = Array.from(this.storage.keys());
     if (!pattern) return allKeys;
-    
+
     // Simple pattern matching
     const regex = new RegExp(pattern.replace(/\*/g, '.*'));
     return allKeys.filter(key => regex.test(key));
@@ -115,7 +115,10 @@ export class MockMemoryManager {
 export class MockAgentManager {
   private agents: Map<string, any> = new Map();
 
-  constructor(private eventBus: EventBus, private logger: Logger) {}
+  constructor(
+    private eventBus: EventBus,
+    private logger: Logger
+  ) {}
 
   async initialize(): Promise<void> {
     // Mock initialization
@@ -231,7 +234,10 @@ export class MockSwarmCoordinator {
   getMetrics(): Promise<any> {
     return Promise.resolve({
       activeSwarms: this.swarms.size,
-      totalAgents: Array.from(this.swarms.values()).reduce((sum, swarm) => sum + swarm.agents.length, 0)
+      totalAgents: Array.from(this.swarms.values()).reduce(
+        (sum, swarm) => sum + swarm.agents.length,
+        0
+      )
     });
   }
 }
@@ -270,7 +276,7 @@ export class MockTaskEngine {
 
   async getActiveTasks(swarmId?: string): Promise<any[]> {
     const allTasks = Array.from(this.tasks.values());
-    return swarmId 
+    return swarmId
       ? allTasks.filter(task => task.swarmId === swarmId && task.status === 'active')
       : allTasks.filter(task => task.status === 'active');
   }
@@ -296,7 +302,10 @@ export class MockTaskEngine {
 }
 
 export class MockRealTimeMonitor {
-  constructor(private eventBus: EventBus, private logger: Logger) {}
+  constructor(
+    private eventBus: EventBus,
+    private logger: Logger
+  ) {}
 
   async initialize(): Promise<void> {
     // Mock initialization
@@ -333,7 +342,10 @@ export class MockRealTimeMonitor {
 }
 
 export class MockMcpServer {
-  constructor(private eventBus: EventBus, private logger: Logger) {}
+  constructor(
+    private eventBus: EventBus,
+    private logger: Logger
+  ) {}
 
   async initialize(): Promise<void> {
     // Mock initialization

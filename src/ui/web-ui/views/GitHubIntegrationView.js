@@ -32,10 +32,12 @@ export default class GitHubIntegrationView {
    * Initialize the GitHub integration view
    */
   async initialize() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     // Get component library from event bus
-    this.eventBus.emit('component-library:get', (library) => {
+    this.eventBus.emit('component-library:get', library => {
       this.componentLibrary = library;
     });
 
@@ -766,22 +768,21 @@ export default class GitHubIntegrationView {
 
       // Handle specific tool actions
       switch (toolName) {
-      case 'github_repo_analyze':
-        await this.handleRepoAnalysis(params);
-        break;
-      case 'github_pr_manage':
-        await this.handlePRManagement(params);
-        break;
-      case 'github_issue_track':
-        await this.handleIssueTracking(params);
-        break;
-      case 'github_code_review':
-        await this.handleCodeReview(params);
-        break;
-      default:
-        console.log(`Tool ${toolName} executed`);
+        case 'github_repo_analyze':
+          await this.handleRepoAnalysis(params);
+          break;
+        case 'github_pr_manage':
+          await this.handlePRManagement(params);
+          break;
+        case 'github_issue_track':
+          await this.handleIssueTracking(params);
+          break;
+        case 'github_code_review':
+          await this.handleCodeReview(params);
+          break;
+        default:
+          console.log(`Tool ${toolName} executed`);
       }
-
     } catch (error) {
       console.error(`❌ Error executing ${toolName}:`, error);
     }
@@ -867,8 +868,11 @@ export default class GitHubIntegrationView {
    * Repository analysis functions
    */
   async analyzeRepository() {
-    const repo = document.getElementById('analyze-repo')?.value || prompt('Enter repository (owner/repo):');
-    if (!repo) {return;}
+    const repo =
+      document.getElementById('analyze-repo')?.value || prompt('Enter repository (owner/repo):');
+    if (!repo) {
+      return;
+    }
 
     this.quickAction('github_repo_analyze', { repo });
   }
@@ -890,7 +894,9 @@ export default class GitHubIntegrationView {
    */
   async createPullRequest() {
     const repo = prompt('Enter repository (owner/repo):');
-    if (!repo) {return;}
+    if (!repo) {
+      return;
+    }
 
     console.log('🔄 Creating pull request for:', repo);
     this.eventBus.emit('tool:execute', {
@@ -918,7 +924,9 @@ export default class GitHubIntegrationView {
    */
   async trackIssues() {
     const repo = prompt('Enter repository (owner/repo):');
-    if (!repo) {return;}
+    if (!repo) {
+      return;
+    }
 
     this.quickAction('github_issue_track', { repo, action: 'track' });
   }
@@ -940,14 +948,19 @@ export default class GitHubIntegrationView {
    */
   async checkMetrics() {
     const repo = prompt('Enter repository (owner/repo):');
-    if (!repo) {return;}
+    if (!repo) {
+      return;
+    }
 
     this.quickAction('github_metrics', { repo });
   }
 
   async fetchMetrics() {
-    const repo = document.getElementById('metrics-repo')?.value || prompt('Enter repository (owner/repo):');
-    if (!repo) {return;}
+    const repo =
+      document.getElementById('metrics-repo')?.value || prompt('Enter repository (owner/repo):');
+    if (!repo) {
+      return;
+    }
 
     this.quickAction('github_metrics', { repo });
   }
@@ -956,10 +969,13 @@ export default class GitHubIntegrationView {
    * Code review functions
    */
   async startCodeReview() {
-    const repo = document.getElementById('review-repo')?.value || prompt('Enter repository (owner/repo):');
+    const repo =
+      document.getElementById('review-repo')?.value || prompt('Enter repository (owner/repo):');
     const pr = document.getElementById('review-pr')?.value || prompt('Enter PR number:');
 
-    if (!repo || !pr) {return;}
+    if (!repo || !pr) {
+      return;
+    }
 
     this.quickAction('github_code_review', { repo, pr });
   }
@@ -982,7 +998,7 @@ export default class GitHubIntegrationView {
    */
   setupEventHandlers() {
     // Listen for tool results
-    this.eventBus.on('tool:executed', (data) => {
+    this.eventBus.on('tool:executed', data => {
       if (data.source === 'github-view') {
         this.handleToolResult(data);
       }
@@ -994,17 +1010,17 @@ export default class GitHubIntegrationView {
     });
 
     // Listen for repository updates
-    this.eventBus.on('github:repo:updated', (data) => {
+    this.eventBus.on('github:repo:updated', data => {
       this.updateRepositoryList(data);
     });
 
     // Listen for PR updates
-    this.eventBus.on('github:pr:updated', (data) => {
+    this.eventBus.on('github:pr:updated', data => {
       this.updatePRList(data);
     });
 
     // Listen for issue updates
-    this.eventBus.on('github:issue:updated', (data) => {
+    this.eventBus.on('github:issue:updated', data => {
       this.updateIssueList(data);
     });
 
@@ -1031,21 +1047,21 @@ export default class GitHubIntegrationView {
    */
   updateUIWithResult(toolName, result) {
     switch (toolName) {
-    case 'github_repo_analyze':
-      this.updateAnalysisResults(result);
-      break;
-    case 'github_pr_manage':
-      this.updatePRResults(result);
-      break;
-    case 'github_issue_track':
-      this.updateIssueResults(result);
-      break;
-    case 'github_code_review':
-      this.updateReviewResults(result);
-      break;
-    case 'github_metrics':
-      this.updateMetricsResults(result);
-      break;
+      case 'github_repo_analyze':
+        this.updateAnalysisResults(result);
+        break;
+      case 'github_pr_manage':
+        this.updatePRResults(result);
+        break;
+      case 'github_issue_track':
+        this.updateIssueResults(result);
+        break;
+      case 'github_code_review':
+        this.updateReviewResults(result);
+        break;
+      case 'github_metrics':
+        this.updateMetricsResults(result);
+        break;
     }
   }
 
@@ -1086,21 +1102,27 @@ export default class GitHubIntegrationView {
     const reposStatEl = document.getElementById('repos-stat');
     if (reposStatEl) {
       const valueEl = reposStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.repositories.size;}
+      if (valueEl) {
+        valueEl.textContent = this.repositories.size;
+      }
     }
 
     // Update PR count
     const prsStatEl = document.getElementById('prs-stat');
     if (prsStatEl) {
       const valueEl = prsStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.pullRequests.size;}
+      if (valueEl) {
+        valueEl.textContent = this.pullRequests.size;
+      }
     }
 
     // Update issue count
     const issuesStatEl = document.getElementById('issues-stat');
     if (issuesStatEl) {
       const valueEl = issuesStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.issues.size;}
+      if (valueEl) {
+        valueEl.textContent = this.issues.size;
+      }
     }
   }
 
@@ -1157,12 +1179,16 @@ export default class GitHubIntegrationView {
 
     const findingsEl = document.getElementById('review-findings');
     if (findingsEl && result.findings) {
-      findingsEl.innerHTML = result.findings.map(finding => `
+      findingsEl.innerHTML = result.findings
+        .map(
+          finding => `
         <div class="finding-item">
           <span class="finding-type">${finding.type}</span>
           <span class="finding-desc">${finding.description}</span>
         </div>
-      `).join('');
+      `
+        )
+        .join('');
     }
   }
 
@@ -1173,17 +1199,23 @@ export default class GitHubIntegrationView {
     // Update metric values
     if (result.commits) {
       const commitsEl = document.getElementById('total-commits');
-      if (commitsEl) {commitsEl.textContent = result.commits.total || 0;}
+      if (commitsEl) {
+        commitsEl.textContent = result.commits.total || 0;
+      }
     }
 
     if (result.pull_requests) {
       const mergedEl = document.getElementById('merged-prs');
-      if (mergedEl) {mergedEl.textContent = result.pull_requests.merged || 0;}
+      if (mergedEl) {
+        mergedEl.textContent = result.pull_requests.merged || 0;
+      }
     }
 
     if (result.issues) {
       const resolvedEl = document.getElementById('resolved-issues');
-      if (resolvedEl) {resolvedEl.textContent = result.issues.resolved || 0;}
+      if (resolvedEl) {
+        resolvedEl.textContent = result.issues.resolved || 0;
+      }
     }
   }
 

@@ -23,7 +23,9 @@ export class PerformanceMonitor {
   }
 
   start() {
-    if (!this.enabled) {return;}
+    if (!this.enabled) {
+      return;
+    }
 
     this.metrics.startTime = Date.now();
     this.startMemoryMonitoring();
@@ -34,7 +36,9 @@ export class PerformanceMonitor {
   }
 
   stop() {
-    if (!this.enabled) {return;}
+    if (!this.enabled) {
+      return;
+    }
 
     this.metrics.endTime = Date.now();
     this.stopMemoryMonitoring();
@@ -81,13 +85,18 @@ export class PerformanceMonitor {
 
   calculateAverages() {
     if (this.metrics.memoryReadings.length > 0) {
-      const totalMemory = this.metrics.memoryReadings.reduce((sum, reading) => sum + reading.memoryMB, 0);
+      const totalMemory = this.metrics.memoryReadings.reduce(
+        (sum, reading) => sum + reading.memoryMB,
+        0
+      );
       this.metrics.averageMemoryMB = totalMemory / this.metrics.memoryReadings.length;
     }
   }
 
   recordOperation(operationType, details = {}) {
-    if (!this.enabled) {return;}
+    if (!this.enabled) {
+      return;
+    }
 
     this.metrics.operationCount++;
 
@@ -97,7 +106,9 @@ export class PerformanceMonitor {
   }
 
   recordError(error, context = {}) {
-    if (!this.enabled) {return;}
+    if (!this.enabled) {
+      return;
+    }
 
     this.metrics.errors.push({
       timestamp: Date.now(),
@@ -111,7 +122,9 @@ export class PerformanceMonitor {
   }
 
   recordWarning(message, context = {}) {
-    if (!this.enabled) {return;}
+    if (!this.enabled) {
+      return;
+    }
 
     this.metrics.warnings.push({
       timestamp: Date.now(),
@@ -132,12 +145,14 @@ export class PerformanceMonitor {
       ...this.metrics,
       duration,
       operationsPerSecond: this.metrics.operationCount / (duration / 1000),
-      memoryEfficiency: this.metrics.peakMemoryMB < (this.maxMemoryMB * 0.8) ? 'good' : 'warning'
+      memoryEfficiency: this.metrics.peakMemoryMB < this.maxMemoryMB * 0.8 ? 'good' : 'warning'
     };
   }
 
   generateReport() {
-    if (!this.enabled) {return 'Performance monitoring disabled';}
+    if (!this.enabled) {
+      return 'Performance monitoring disabled';
+    }
 
     const metrics = this.getMetrics();
 
@@ -169,7 +184,9 @@ export class PerformanceMonitor {
 
   // Real-time monitoring display
   displayRealTimeStats() {
-    if (!this.enabled) {return;}
+    if (!this.enabled) {
+      return;
+    }
 
     const currentTime = Date.now();
     const elapsed = this.metrics.startTime ? (currentTime - this.metrics.startTime) / 1000 : 0;
@@ -180,7 +197,9 @@ export class PerformanceMonitor {
       currentMemory = `${(memUsage.rss / 1024 / 1024).toFixed(1)}MB`;
     }
 
-    console.log(`⏱️  ${elapsed.toFixed(1)}s | 💾 ${currentMemory} | 🔄 ${this.metrics.operationCount} ops`);
+    console.log(
+      `⏱️  ${elapsed.toFixed(1)}s | 💾 ${currentMemory} | 🔄 ${this.metrics.operationCount} ops`
+    );
   }
 }
 
@@ -201,7 +220,9 @@ export class ResourceThresholdMonitor {
   }
 
   start() {
-    if (this.isMonitoring) {return;}
+    if (this.isMonitoring) {
+      return;
+    }
 
     this.isMonitoring = true;
     this.monitorInterval = setInterval(() => {
@@ -210,7 +231,9 @@ export class ResourceThresholdMonitor {
   }
 
   stop() {
-    if (!this.isMonitoring) {return;}
+    if (!this.isMonitoring) {
+      return;
+    }
 
     this.isMonitoring = false;
     if (this.monitorInterval) {
@@ -244,7 +267,7 @@ export class ResourceThresholdMonitor {
         console.error(`❌ Memory usage critical: ${current.toFixed(1)}MB / ${max}MB`);
         console.error('Consider reducing batch size or max concurrency');
       },
-      onCPUWarning: (percent) => {
+      onCPUWarning: percent => {
         printInfo(`⚠️ CPU usage high: ${percent}%`);
       }
     };
@@ -287,10 +310,10 @@ export class BatchOptimizer {
 
     // Adjust for template complexity
     const templateMultipliers = {
-      'basic': 1,
+      basic: 1,
       'web-api': 1.2,
       'react-app': 1.5,
-      'microservice': 1.8,
+      microservice: 1.8,
       'cli-tool': 1.1
     };
     timeMultiplier *= templateMultipliers[template] || 1;
@@ -308,7 +331,9 @@ export class BatchOptimizer {
       sequential: totalSequentialTime,
       parallel: parallelTime,
       savings: totalSequentialTime - parallelTime,
-      savingsPercent: ((totalSequentialTime - parallelTime) / totalSequentialTime * 100).toFixed(1)
+      savingsPercent: (((totalSequentialTime - parallelTime) / totalSequentialTime) * 100).toFixed(
+        1
+      )
     };
   }
 

@@ -192,7 +192,9 @@ export class NeuralPanelTest {
         console.log(`    ✅ Response shown for ${toolName}`);
         // Close if needed
         const closeBtn = response.querySelector('.close, [data-action="close"]');
-        if (closeBtn) {closeBtn.click();}
+        if (closeBtn) {
+          closeBtn.click();
+        }
       }
     }
 
@@ -207,7 +209,9 @@ export class NeuralPanelTest {
       const modal = document.querySelector('.config-modal, .modal');
       if (modal) {
         const closeBtn = modal.querySelector('.close, [data-action="close"]');
-        if (closeBtn) {closeBtn.click();}
+        if (closeBtn) {
+          closeBtn.click();
+        }
       }
     }
 
@@ -306,50 +310,46 @@ export class NeuralPanelTest {
 
   // Helper methods
   findNeuralButton() {
-    return document.querySelector(
-      '[data-view="neural"], ' +
-      'button[aria-label*="Neural"], ' +
-      'button:contains("Neural"), ' +
-      '.neural-button, ' +
-      '.header-nav button:nth-of-type(5)'
-    ) || Array.from(document.querySelectorAll('button')).find(btn =>
-      btn.textContent.includes('Neural') || btn.textContent.includes('🧠')
+    return (
+      document.querySelector(
+        '[data-view="neural"], ' +
+          'button[aria-label*="Neural"], ' +
+          'button:contains("Neural"), ' +
+          '.neural-button, ' +
+          '.header-nav button:nth-of-type(5)'
+      ) ||
+      Array.from(document.querySelectorAll('button')).find(
+        btn => btn.textContent.includes('Neural') || btn.textContent.includes('🧠')
+      )
     );
   }
 
   findNeuralPanel() {
     return document.querySelector(
-      '.neural-panel, ' +
-      '.panel-neural, ' +
-      '[data-panel="neural"], ' +
-      '.view-panel.active'
+      '.neural-panel, ' + '.panel-neural, ' + '[data-panel="neural"], ' + '.view-panel.active'
     );
   }
 
   findTab(tabName) {
-    return document.querySelector(
-      `[data-tab="${tabName}"], ` +
-      `[role="tab"][aria-label*="${tabName}"], ` +
-      `.tab-${tabName}`
-    ) || Array.from(document.querySelectorAll('.tab, [role="tab"]')).find(tab =>
-      tab.textContent.toLowerCase().includes(tabName)
+    return (
+      document.querySelector(
+        `[data-tab="${tabName}"], ` + `[role="tab"][aria-label*="${tabName}"], ` + `.tab-${tabName}`
+      ) ||
+      Array.from(document.querySelectorAll('.tab, [role="tab"]')).find(tab =>
+        tab.textContent.toLowerCase().includes(tabName)
+      )
     );
   }
 
   findTabContent(tabName) {
     return document.querySelector(
-      `[data-tab-content="${tabName}"], ` +
-      `.tab-content-${tabName}, ` +
-      `.${tabName}-content`
+      `[data-tab-content="${tabName}"], ` + `.tab-content-${tabName}, ` + `.${tabName}-content`
     );
   }
 
   findToolCards() {
     return document.querySelectorAll(
-      '.tool-card, ' +
-      '.neural-tool-card, ' +
-      '[data-tool], ' +
-      '.tool-item'
+      '.tool-card, ' + '.neural-tool-card, ' + '[data-tool], ' + '.tool-item'
     );
   }
 
@@ -365,19 +365,22 @@ export class NeuralPanelTest {
       close: '[data-action="close"], .close-btn, button[aria-label*="Close"]'
     };
 
-    return document.querySelector(selectors[type]) ||
+    return (
+      document.querySelector(selectors[type]) ||
       Array.from(document.querySelectorAll('button')).find(btn =>
         btn.textContent.toLowerCase().includes(type)
-      );
+      )
+    );
   }
 
   checkLayout() {
     const panel = this.findNeuralPanel();
-    if (!panel) {return false;}
+    if (!panel) {
+      return false;
+    }
 
     const rect = panel.getBoundingClientRect();
-    return rect.width > 0 && rect.height > 0 &&
-           rect.top >= 0 && rect.left >= 0;
+    return rect.width > 0 && rect.height > 0 && rect.top >= 0 && rect.left >= 0;
   }
 
   captureState(description) {
@@ -447,7 +450,9 @@ export class NeuralPanelTest {
     }
 
     if (this.testResults.tools.total !== 15) {
-      recommendations.push(`Ensure all 15 tools are displayed (found ${this.testResults.tools.total})`);
+      recommendations.push(
+        `Ensure all 15 tools are displayed (found ${this.testResults.tools.total})`
+      );
     }
 
     if (!this.testResults.animations.transitions) {

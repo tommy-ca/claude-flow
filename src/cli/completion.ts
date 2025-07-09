@@ -8,8 +8,18 @@ import { promises as fs } from 'node:fs';
 
 export class CompletionGenerator {
   private commands = [
-    'start', 'agent', 'task', 'memory', 'config', 'status', 
-    'monitor', 'session', 'workflow', 'repl', 'version', 'completion'
+    'start',
+    'agent',
+    'task',
+    'memory',
+    'config',
+    'status',
+    'monitor',
+    'session',
+    'workflow',
+    'repl',
+    'version',
+    'completion'
   ];
 
   private subcommands = {
@@ -18,12 +28,12 @@ export class CompletionGenerator {
     memory: ['query', 'export', 'import', 'stats', 'cleanup'],
     config: ['show', 'get', 'set', 'init', 'validate'],
     session: ['list', 'save', 'restore', 'delete', 'export', 'import', 'info', 'clean'],
-    workflow: ['run', 'validate', 'list', 'status', 'stop', 'template'],
+    workflow: ['run', 'validate', 'list', 'status', 'stop', 'template']
   };
 
   async generate(shell: string, install: boolean = false): Promise<void> {
     const detectedShell = shell === 'detect' ? await this.detectShell() : shell;
-    
+
     switch (detectedShell) {
       case 'bash':
         await this.generateBashCompletion(install);
@@ -43,18 +53,18 @@ export class CompletionGenerator {
 
   private async detectShell(): Promise<string> {
     const shell = process.env['SHELL'] || '';
-    
+
     if (shell.includes('bash')) return 'bash';
     if (shell.includes('zsh')) return 'zsh';
     if (shell.includes('fish')) return 'fish';
-    
+
     console.log(chalk.yellow('Could not detect shell, defaulting to bash'));
     return 'bash';
   }
 
   private async generateBashCompletion(install: boolean): Promise<void> {
     const script = this.getBashCompletionScript();
-    
+
     if (install) {
       await this.installBashCompletion(script);
     } else {
@@ -64,7 +74,7 @@ export class CompletionGenerator {
 
   private async generateZshCompletion(install: boolean): Promise<void> {
     const script = this.getZshCompletionScript();
-    
+
     if (install) {
       await this.installZshCompletion(script);
     } else {
@@ -74,7 +84,7 @@ export class CompletionGenerator {
 
   private async generateFishCompletion(install: boolean): Promise<void> {
     const script = this.getFishCompletionScript();
-    
+
     if (install) {
       await this.installFishCompletion(script);
     } else {
@@ -484,7 +494,7 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
         const dir = path.substring(0, path.lastIndexOf('/'));
         await Deno.mkdir(dir, { recursive: true });
         await fs.writeFile(path, script);
-        
+
         console.log(chalk.green('✓ Bash completion installed'));
         console.log(`${chalk.white('Location:')} ${path}`);
         console.log(chalk.gray('Restart your shell or run: source ~/.bashrc'));
@@ -496,7 +506,9 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
     }
 
     console.error(chalk.red('Failed to install bash completion'));
-    console.log(chalk.gray('You can manually save the completion script to a bash completion directory'));
+    console.log(
+      chalk.gray('You can manually save the completion script to a bash completion directory')
+    );
   }
 
   private async installZshCompletion(script: string): Promise<void> {
@@ -511,7 +523,7 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
         const dir = path.substring(0, path.lastIndexOf('/'));
         await Deno.mkdir(dir, { recursive: true });
         await fs.writeFile(path, script);
-        
+
         console.log(chalk.green('✓ Zsh completion installed'));
         console.log(`${chalk.white('Location:')} ${path}`);
         console.log(chalk.gray('Restart your shell or run: autoload -U compinit && compinit'));
@@ -523,7 +535,9 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
     }
 
     console.error(chalk.red('Failed to install zsh completion'));
-    console.log(chalk.gray('You can manually save the completion script to your zsh completion directory'));
+    console.log(
+      chalk.gray('You can manually save the completion script to your zsh completion directory')
+    );
   }
 
   private async installFishCompletion(script: string): Promise<void> {
@@ -538,7 +552,7 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
         const dir = path.substring(0, path.lastIndexOf('/'));
         await Deno.mkdir(dir, { recursive: true });
         await fs.writeFile(path, script);
-        
+
         console.log(chalk.green('✓ Fish completion installed'));
         console.log(`${chalk.white('Location:')} ${path}`);
         console.log(chalk.gray('Completions will be available in new fish sessions'));
@@ -550,6 +564,8 @@ complete -f -c claude-flow -n '__fish_claude_flow_using_command completion' -a '
     }
 
     console.error(chalk.red('Failed to install fish completion'));
-    console.log(chalk.gray('You can manually save the completion script to your fish completion directory'));
+    console.log(
+      chalk.gray('You can manually save the completion script to your fish completion directory')
+    );
   }
 }

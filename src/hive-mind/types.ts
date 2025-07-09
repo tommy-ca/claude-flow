@@ -1,6 +1,6 @@
 /**
  * Hive Mind Type Definitions
- * 
+ *
  * Core types and interfaces for the Hive Mind system
  */
 
@@ -21,7 +21,7 @@ export interface HiveMindConfig {
 }
 
 // Agent types
-export type AgentType = 
+export type AgentType =
   | 'coordinator'
   | 'researcher'
   | 'coder'
@@ -36,7 +36,7 @@ export type AgentType =
 
 export type AgentStatus = 'idle' | 'busy' | 'active' | 'error' | 'offline';
 
-export type AgentCapability = 
+export type AgentCapability =
   | 'task_management'
   | 'resource_allocation'
   | 'consensus_building'
@@ -89,7 +89,13 @@ export interface AgentSpawnOptions {
 // Task types
 export type TaskPriority = 'low' | 'medium' | 'high' | 'critical';
 export type TaskStrategy = 'parallel' | 'sequential' | 'adaptive' | 'consensus';
-export type TaskStatus = 'pending' | 'assigned' | 'in_progress' | 'completed' | 'failed' | 'cancelled';
+export type TaskStatus =
+  | 'pending'
+  | 'assigned'
+  | 'in_progress'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
 
 export interface Task {
   id: string;
@@ -136,7 +142,7 @@ export interface TaskAssignment {
 }
 
 // Communication types
-export type MessageType = 
+export type MessageType =
   | 'direct'
   | 'broadcast'
   | 'consensus'
@@ -203,11 +209,14 @@ export interface MemoryNamespace {
 export interface MemoryStats {
   totalEntries: number;
   totalSize: number;
-  byNamespace: Record<string, {
-    entries: number;
-    size: number;
-    avgTTL: number;
-  }>;
+  byNamespace: Record<
+    string,
+    {
+      entries: number;
+      size: number;
+      avgTTL: number;
+    }
+  >;
   cacheHitRate: number;
   avgAccessTime: number;
   hotKeys: string[];
@@ -261,7 +270,10 @@ export interface VotingStrategy {
   name: string;
   description: string;
   threshold: number;
-  recommend: (proposal: ConsensusProposal, analysis: any) => {
+  recommend: (
+    proposal: ConsensusProposal,
+    analysis: any
+  ) => {
     vote: boolean;
     confidence: number;
     reasoning: string;

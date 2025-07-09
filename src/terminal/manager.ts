@@ -20,7 +20,11 @@ export interface ITerminalManager {
   spawnTerminal(profile: AgentProfile): Promise<string>;
   terminateTerminal(terminalId: string): Promise<void>;
   executeCommand(terminalId: string, command: string): Promise<string>;
-  getHealthStatus(): Promise<{ healthy: boolean; error?: string; metrics?: Record<string, number> }>;
+  getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
+    metrics?: Record<string, number>;
+  }>;
   performMaintenance(): Promise<void>;
 }
 
@@ -36,17 +40,17 @@ export class TerminalManager implements ITerminalManager {
   constructor(
     private config: TerminalConfig,
     private eventBus: IEventBus,
-    private logger: ILogger,
+    private logger: ILogger
   ) {
     // Select adapter based on configuration
     this.adapter = this.createAdapter();
-    
+
     // Create terminal pool
     this.pool = new TerminalPool(
       this.config.poolSize,
       this.config.recycleAfter,
       this.adapter,
-      this.logger,
+      this.logger
     );
   }
 
@@ -82,9 +86,7 @@ export class TerminalManager implements ITerminalManager {
     try {
       // Terminate all sessions
       const sessionIds = Array.from(this.sessions.keys());
-      await Promise.all(
-        sessionIds.map((id) => this.terminateTerminal(id)),
-      );
+      await Promise.all(sessionIds.map(id => this.terminateTerminal(id)));
 
       // Shutdown pool
       await this.pool.shutdown();
@@ -116,7 +118,7 @@ export class TerminalManager implements ITerminalManager {
         terminal,
         profile,
         this.config.commandTimeout,
-        this.logger,
+        this.logger
       );
 
       // Initialize session
@@ -125,9 +127,9 @@ export class TerminalManager implements ITerminalManager {
       // Store session
       this.sessions.set(session.id, session);
 
-      this.logger.info('Terminal spawned', { 
-        terminalId: session.id, 
-        agentId: profile.id,
+      this.logger.info('Terminal spawned', {
+        terminalId: session.id,
+        agentId: profile.id
       });
 
       return session.id;
@@ -171,23 +173,24 @@ export class TerminalManager implements ITerminalManager {
     return await session.executeCommand(command);
   }
 
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     try {
       const poolHealth = await this.pool.getHealthStatus();
       const activeSessions = this.sessions.size;
-      const healthySessions = Array.from(this.sessions.values())
-        .filter((session) => session.isHealthy()).length;
+      const healthySessions = Array.from(this.sessions.values()).filter(session =>
+        session.isHealthy()
+      ).length;
 
       const metrics = {
         activeSessions,
         healthySessions,
         poolSize: poolHealth.size,
         availableTerminals: poolHealth.available,
-        recycledTerminals: poolHealth.recycled,
+        recycledTerminals: poolHealth.recycled
       };
 
       const healthy = poolHealth.healthy && healthySessions === activeSessions;
@@ -195,19 +198,19 @@ export class TerminalManager implements ITerminalManager {
       if (healthy) {
         return {
           healthy,
-          metrics,
+          metrics
         };
       } else {
         return {
           healthy,
           metrics,
-          error: 'Some terminals are unhealthy',
+          error: 'Some terminals are unhealthy'
         };
       }
     } catch (error) {
       return {
         healthy: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -221,12 +224,13 @@ export class TerminalManager implements ITerminalManager {
 
     try {
       // Clean up dead sessions
-      const deadSessions = Array.from(this.sessions.entries())
-        .filter(([_, session]) => !session.isHealthy());
+      const deadSessions = Array.from(this.sessions.entries()).filter(
+        ([_, session]) => !session.isHealthy()
+      );
 
       for (const [terminalId, _] of deadSessions) {
         this.logger.warn('Cleaning up dead terminal session', { terminalId });
-        await this.terminateTerminal(terminalId).catch(error => 
+        await this.terminateTerminal(terminalId).catch(error =>
           this.logger.error('Failed to clean up terminal', { terminalId, error })
         );
       }
@@ -238,7 +242,7 @@ export class TerminalManager implements ITerminalManager {
       this.eventBus.emit('terminal:maintenance', {
         deadSessions: deadSessions.length,
         activeSessions: this.sessions.size,
-        poolStatus: await this.pool.getHealthStatus(),
+        poolStatus: await this.pool.getHealthStatus()
       });
 
       this.logger.debug('Terminal manager maintenance completed');
@@ -258,7 +262,7 @@ export class TerminalManager implements ITerminalManager {
       startTime: session.startTime,
       status: session.isHealthy() ? 'active' : 'error',
       lastActivity: session.lastActivity,
-      memoryBankId: '', // TODO: Link to memory bank
+      memoryBankId: '' // TODO: Link to memory bank
     }));
   }
 
@@ -303,8 +307,10 @@ export class TerminalManager implements ITerminalManager {
 
   private isVSCodeEnvironment(): boolean {
     // Check for VSCode-specific environment variables
-    return process.env.TERM_PROGRAM === 'vscode' ||
-           process.env.VSCODE_PID !== undefined ||
-           process.env.VSCODE_IPC_HOOK !== undefined;
+    return (
+      process.env.TERM_PROGRAM === 'vscode' ||
+      process.env.VSCODE_PID !== undefined ||
+      process.env.VSCODE_IPC_HOOK !== undefined
+    );
   }
 }

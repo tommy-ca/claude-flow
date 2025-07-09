@@ -26,11 +26,11 @@ const MESSAGE_TYPES = {
  * Communication protocols
  */
 const PROTOCOLS = {
-  direct: 'direct',        // Point-to-point
-  broadcast: 'broadcast',  // One-to-all
-  multicast: 'multicast',  // One-to-many
-  gossip: 'gossip',       // Epidemic spread
-  consensus: 'consensus'   // Byzantine agreement
+  direct: 'direct', // Point-to-point
+  broadcast: 'broadcast', // One-to-all
+  multicast: 'multicast', // One-to-many
+  gossip: 'gossip', // Epidemic spread
+  consensus: 'consensus' // Byzantine agreement
 };
 
 /**
@@ -52,9 +52,9 @@ export class SwarmCommunication extends EventEmitter {
     };
 
     this.state = {
-      agents: new Map(),        // Connected agents
-      channels: new Map(),      // Communication channels
-      messageBuffer: [],        // Message queue
+      agents: new Map(), // Connected agents
+      channels: new Map(), // Communication channels
+      messageBuffer: [], // Message queue
       messageHistory: new Map(), // Sent messages
       metrics: {
         sent: 0,
@@ -65,9 +65,7 @@ export class SwarmCommunication extends EventEmitter {
       }
     };
 
-    this.encryptionKey = this.config.encryption
-      ? crypto.randomBytes(32)
-      : null;
+    this.encryptionKey = this.config.encryption ? crypto.randomBytes(32) : null;
 
     this._initialize();
   }
@@ -105,11 +103,14 @@ export class SwarmCommunication extends EventEmitter {
     this.state.agents.set(agentId, agent);
 
     // Announce new agent to swarm
-    this.broadcast({
-      type: 'agent_joined',
-      agentId,
-      metadata
-    }, 'sync');
+    this.broadcast(
+      {
+        type: 'agent_joined',
+        agentId,
+        metadata
+      },
+      'sync'
+    );
 
     this.emit('agent:registered', agent);
     return agent;
@@ -120,7 +121,9 @@ export class SwarmCommunication extends EventEmitter {
    */
   unregisterAgent(agentId) {
     const agent = this.state.agents.get(agentId);
-    if (!agent) {return;}
+    if (!agent) {
+      return;
+    }
 
     // Close channel
     const channel = this.state.channels.get(agentId);
@@ -132,10 +135,13 @@ export class SwarmCommunication extends EventEmitter {
     this.state.agents.delete(agentId);
 
     // Announce agent departure
-    this.broadcast({
-      type: 'agent_left',
-      agentId
-    }, 'sync');
+    this.broadcast(
+      {
+        type: 'agent_left',
+        agentId
+      },
+      'sync'
+    );
 
     this.emit('agent:unregistered', { agentId });
   }
@@ -187,7 +193,7 @@ export class SwarmCommunication extends EventEmitter {
         resolve({ messageId, delivered: true });
       });
 
-      this.once(`nack:${messageId}`, (error) => {
+      this.once(`nack:${messageId}`, error => {
         clearTimeout(timeout);
         reject(error);
       });
@@ -292,8 +298,9 @@ export class SwarmCommunication extends EventEmitter {
 
     // If no validators specified, use all online agents
     if (validators.length === 0) {
-      validators = Array.from(this.state.agents.keys())
-        .filter(id => this.state.agents.get(id).status === 'online');
+      validators = Array.from(this.state.agents.keys()).filter(
+        id => this.state.agents.get(id).status === 'online'
+      );
     }
 
     const votes = new Map();
@@ -318,8 +325,8 @@ export class SwarmCommunication extends EventEmitter {
       this._addToBuffer(envelope);
 
       // Create promise for vote
-      const votePromise = new Promise((resolve) => {
-        this.once(`vote:${consensusId}:${agentId}`, (vote) => {
+      const votePromise = new Promise(resolve => {
+        this.once(`vote:${consensusId}:${agentId}`, vote => {
           votes.set(agentId, vote);
           resolve({ agentId, vote });
         });
@@ -343,7 +350,7 @@ export class SwarmCommunication extends EventEmitter {
     const voteCount = {};
     let totalVotes = 0;
 
-    votes.forEach((vote) => {
+    votes.forEach(vote => {
       if (vote !== null) {
         voteCount[vote] = (voteCount[vote] || 0) + 1;
         totalVotes++;
@@ -353,8 +360,7 @@ export class SwarmCommunication extends EventEmitter {
     // Check if consensus reached
     const sortedVotes = Object.entries(voteCount).sort((a, b) => b[1] - a[1]);
     const winner = sortedVotes[0];
-    const consensusReached = winner &&
-      (winner[1] / validators.length) >= this.config.consensusQuorum;
+    const consensusReached = winner && winner[1] / validators.length >= this.config.consensusQuorum;
 
     const result = {
       consensusId,
@@ -369,11 +375,14 @@ export class SwarmCommunication extends EventEmitter {
     };
 
     // Phase 3: Announce result
-    this.broadcast({
-      phase: 'result',
-      consensusId,
-      result
-    }, 'consensus');
+    this.broadcast(
+      {
+        phase: 'result',
+        consensusId,
+        result
+      },
+      'consensus'
+    );
 
     this.emit('consensus:completed', result);
 
@@ -405,28 +414,28 @@ export class SwarmCommunication extends EventEmitter {
 
     // Process based on protocol
     switch (envelope.protocol) {
-    case PROTOCOLS.direct:
-      this._handleDirectMessage(envelope);
-      break;
+      case PROTOCOLS.direct:
+        this._handleDirectMessage(envelope);
+        break;
 
-    case PROTOCOLS.broadcast:
-      this._handleBroadcastMessage(envelope);
-      break;
+      case PROTOCOLS.broadcast:
+        this._handleBroadcastMessage(envelope);
+        break;
 
-    case PROTOCOLS.multicast:
-      this._handleMulticastMessage(envelope);
-      break;
+      case PROTOCOLS.multicast:
+        this._handleMulticastMessage(envelope);
+        break;
 
-    case PROTOCOLS.gossip:
-      this._handleGossipMessage(envelope);
-      break;
+      case PROTOCOLS.gossip:
+        this._handleGossipMessage(envelope);
+        break;
 
-    case PROTOCOLS.consensus:
-      this._handleConsensusMessage(envelope);
-      break;
+      case PROTOCOLS.consensus:
+        this._handleConsensusMessage(envelope);
+        break;
 
-    default:
-      this.emit('error', { type: 'unknown_protocol', envelope });
+      default:
+        this.emit('error', { type: 'unknown_protocol', envelope });
     }
 
     // Emit general message event
@@ -482,8 +491,9 @@ export class SwarmCommunication extends EventEmitter {
 
     // Continue spreading if hop count is low
     if (gossipData.hops < 3) {
-      const agents = Array.from(this.state.agents.keys())
-        .filter(id => !gossipData.seen.includes(id));
+      const agents = Array.from(this.state.agents.keys()).filter(
+        id => !gossipData.seen.includes(id)
+      );
 
       const selected = this._selectRandomAgents(agents, this.config.gossipFanout);
 
@@ -507,20 +517,20 @@ export class SwarmCommunication extends EventEmitter {
     const { phase, consensusId } = envelope.message;
 
     switch (phase) {
-    case 'propose':
-      // Agent should vote on proposal
-      this.emit('consensus:proposal', envelope);
-      break;
+      case 'propose':
+        // Agent should vote on proposal
+        this.emit('consensus:proposal', envelope);
+        break;
 
-    case 'vote':
-      // Collect vote
-      this.emit(`vote:${consensusId}:${envelope.from}`, envelope.message.vote);
-      break;
+      case 'vote':
+        // Collect vote
+        this.emit(`vote:${consensusId}:${envelope.from}`, envelope.message.vote);
+        break;
 
-    case 'result':
-      // Consensus result announced
-      this.emit('consensus:result', envelope.message.result);
-      break;
+      case 'result':
+        // Consensus result announced
+        this.emit('consensus:result', envelope.message.result);
+        break;
     }
   }
 
@@ -549,7 +559,7 @@ export class SwarmCommunication extends EventEmitter {
     // For now, we simulate with event emitters
     const channel = new EventEmitter();
 
-    channel.send = (message) => {
+    channel.send = message => {
       this.emit(`channel:${agentId}`, message);
     };
 
@@ -586,7 +596,7 @@ export class SwarmCommunication extends EventEmitter {
       setTimeout(() => {
         if (envelope.to === '*') {
           // Broadcast to all agents
-          this.state.agents.forEach((agent) => {
+          this.state.agents.forEach(agent => {
             this.emit(`deliver:${agent.id}`, envelope);
           });
         } else {
@@ -600,7 +610,6 @@ export class SwarmCommunication extends EventEmitter {
           history.status = 'sent';
           history.sentAt = Date.now();
         }
-
       }, Math.random() * 100);
     });
   }
@@ -652,7 +661,9 @@ export class SwarmCommunication extends EventEmitter {
    * Encrypt message
    */
   _encrypt(data) {
-    if (!this.encryptionKey) {return data;}
+    if (!this.encryptionKey) {
+      return data;
+    }
 
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv('aes-256-cbc', this.encryptionKey, iv);
@@ -670,7 +681,9 @@ export class SwarmCommunication extends EventEmitter {
    * Decrypt message
    */
   _decrypt(encrypted) {
-    if (!this.encryptionKey) {return encrypted;}
+    if (!this.encryptionKey) {
+      return encrypted;
+    }
 
     const iv = Buffer.from(encrypted.iv, 'hex');
     const decipher = crypto.createDecipheriv('aes-256-cbc', this.encryptionKey, iv);
@@ -685,9 +698,10 @@ export class SwarmCommunication extends EventEmitter {
    * Get communication statistics
    */
   getStatistics() {
-    const avgLatency = this.state.metrics.latency.length > 0
-      ? this.state.metrics.latency.reduce((a, b) => a + b, 0) / this.state.metrics.latency.length
-      : 0;
+    const avgLatency =
+      this.state.metrics.latency.length > 0
+        ? this.state.metrics.latency.reduce((a, b) => a + b, 0) / this.state.metrics.latency.length
+        : 0;
 
     return {
       agents: {
@@ -704,9 +718,13 @@ export class SwarmCommunication extends EventEmitter {
       },
       performance: {
         avgLatency: avgLatency.toFixed(2),
-        successRate: this.state.metrics.sent > 0
-          ? ((this.state.metrics.sent - this.state.metrics.failed) / this.state.metrics.sent * 100).toFixed(2)
-          : 100
+        successRate:
+          this.state.metrics.sent > 0
+            ? (
+                ((this.state.metrics.sent - this.state.metrics.failed) / this.state.metrics.sent) *
+                100
+              ).toFixed(2)
+            : 100
       }
     };
   }
@@ -716,8 +734,12 @@ export class SwarmCommunication extends EventEmitter {
    */
   close() {
     // Clear timers
-    if (this.messageProcessor) {clearInterval(this.messageProcessor);}
-    if (this.heartbeatTimer) {clearInterval(this.heartbeatTimer);}
+    if (this.messageProcessor) {
+      clearInterval(this.messageProcessor);
+    }
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+    }
 
     // Close all channels
     this.state.channels.forEach(channel => channel.close());

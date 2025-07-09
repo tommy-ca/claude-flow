@@ -77,7 +77,7 @@ class CommandHistory {
 
 class CommandCompleter {
   private commands: Map<string, REPLCommand> = new Map();
-  
+
   setCommands(commands: REPLCommand[]): void {
     this.commands.clear();
     for (const cmd of commands) {
@@ -92,7 +92,7 @@ class CommandCompleter {
 
   complete(input: string): string[] {
     const parts = input.trim().split(/\s+/);
-    
+
     if (parts.length === 1) {
       // Complete command names
       const prefix = parts[0];
@@ -100,15 +100,15 @@ class CommandCompleter {
         .filter(name => name.startsWith(prefix))
         .sort();
     }
-    
+
     // Complete subcommands and arguments
     const commandName = parts[0];
     const command = this.commands.get(commandName);
-    
+
     if (command) {
       return this.completeForCommand(command, parts.slice(1));
     }
-    
+
     return [];
   }
 
@@ -117,43 +117,45 @@ class CommandCompleter {
     switch (command.name) {
       case 'agent':
         if (args.length === 1) {
-          return ['spawn', 'list', 'terminate', 'info'].filter(sub => 
-            sub.startsWith(args[0])
-          );
+          return ['spawn', 'list', 'terminate', 'info'].filter(sub => sub.startsWith(args[0]));
         }
         if (args[0] === 'spawn' && args.length === 2) {
-          return ['coordinator', 'researcher', 'implementer', 'analyst', 'custom']
-            .filter(type => type.startsWith(args[1]));
+          return ['coordinator', 'researcher', 'implementer', 'analyst', 'custom'].filter(type =>
+            type.startsWith(args[1])
+          );
         }
         break;
-      
+
       case 'task':
         if (args.length === 1) {
-          return ['create', 'list', 'status', 'cancel', 'workflow'].filter(sub => 
+          return ['create', 'list', 'status', 'cancel', 'workflow'].filter(sub =>
             sub.startsWith(args[0])
           );
         }
         if (args[0] === 'create' && args.length === 2) {
-          return ['research', 'implementation', 'analysis', 'coordination']
-            .filter(type => type.startsWith(args[1]));
+          return ['research', 'implementation', 'analysis', 'coordination'].filter(type =>
+            type.startsWith(args[1])
+          );
         }
         break;
-      
+
       case 'session':
         if (args.length === 1) {
-          return ['list', 'save', 'restore', 'delete', 'export', 'import']
-            .filter(sub => sub.startsWith(args[0]));
+          return ['list', 'save', 'restore', 'delete', 'export', 'import'].filter(sub =>
+            sub.startsWith(args[0])
+          );
         }
         break;
-      
+
       case 'workflow':
         if (args.length === 1) {
-          return ['run', 'validate', 'list', 'status', 'stop', 'template']
-            .filter(sub => sub.startsWith(args[0]));
+          return ['run', 'validate', 'list', 'status', 'stop', 'template'].filter(sub =>
+            sub.startsWith(args[0])
+          );
         }
         break;
     }
-    
+
     return [];
   }
 }
@@ -167,12 +169,12 @@ export async function startREPL(options: any = {}): Promise<void> {
     history: [],
     workingDirectory: process.cwd(),
     connectionStatus: 'disconnected',
-    lastActivity: new Date(),
+    lastActivity: new Date()
   };
 
   const history = new CommandHistory(options.historyFile);
   const completer = new CommandCompleter();
-  
+
   const commands: REPLCommand[] = [
     {
       name: 'help',
@@ -180,13 +182,13 @@ export async function startREPL(options: any = {}): Promise<void> {
       description: 'Show available commands or help for a specific command',
       usage: 'help [command]',
       examples: ['help', 'help agent', 'help task create'],
-      handler: async (args) => {
+      handler: async args => {
         if (args.length === 0) {
           showHelp(commands);
         } else {
           showCommandHelp(commands, args[0]);
         }
-      },
+      }
     },
     {
       name: 'status',
@@ -196,7 +198,7 @@ export async function startREPL(options: any = {}): Promise<void> {
       examples: ['status', 'status orchestrator'],
       handler: async (args, ctx) => {
         await showSystemStatus(ctx, args[0]);
-      },
+      }
     },
     {
       name: 'connect',
@@ -206,7 +208,7 @@ export async function startREPL(options: any = {}): Promise<void> {
       examples: ['connect', 'connect localhost:3000'],
       handler: async (args, ctx) => {
         await connectToOrchestrator(ctx, args[0]);
-      },
+      }
     },
     {
       name: 'agent',
@@ -220,7 +222,7 @@ export async function startREPL(options: any = {}): Promise<void> {
       ],
       handler: async (args, ctx) => {
         await handleAgentCommand(args, ctx);
-      },
+      }
     },
     {
       name: 'task',
@@ -234,20 +236,16 @@ export async function startREPL(options: any = {}): Promise<void> {
       ],
       handler: async (args, ctx) => {
         await handleTaskCommand(args, ctx);
-      },
+      }
     },
     {
       name: 'memory',
       description: 'Memory operations (query, stats, export)',
       usage: 'memory <subcommand> [options]',
-      examples: [
-        'memory stats',
-        'memory query --agent agent-001',
-        'memory export memory.json'
-      ],
+      examples: ['memory stats', 'memory query --agent agent-001', 'memory export memory.json'],
       handler: async (args, ctx) => {
         await handleMemoryCommand(args, ctx);
-      },
+      }
     },
     {
       name: 'session',
@@ -260,20 +258,16 @@ export async function startREPL(options: any = {}): Promise<void> {
       ],
       handler: async (args, ctx) => {
         await handleSessionCommand(args, ctx);
-      },
+      }
     },
     {
       name: 'workflow',
       description: 'Workflow operations (run, list, status)',
       usage: 'workflow <subcommand> [options]',
-      examples: [
-        'workflow list',
-        'workflow run workflow.json',
-        'workflow status workflow-001'
-      ],
+      examples: ['workflow list', 'workflow run workflow.json', 'workflow status workflow-001'],
       handler: async (args, ctx) => {
         await handleWorkflowCommand(args, ctx);
-      },
+      }
     },
     {
       name: 'monitor',
@@ -281,10 +275,10 @@ export async function startREPL(options: any = {}): Promise<void> {
       description: 'Start monitoring mode',
       usage: 'monitor [--interval seconds]',
       examples: ['monitor', 'monitor --interval 5'],
-      handler: async (args) => {
+      handler: async args => {
         console.log(chalk.cyan('Starting monitor mode...'));
         console.log(chalk.gray('(This would start the live dashboard)'));
-      },
+      }
     },
     {
       name: 'history',
@@ -292,24 +286,27 @@ export async function startREPL(options: any = {}): Promise<void> {
       description: 'Show command history',
       usage: 'history [--search query]',
       examples: ['history', 'history --search agent'],
-      handler: async (args) => {
-        const searchQuery = args.indexOf('--search') >= 0 ? args[args.indexOf('--search') + 1] : null;
+      handler: async args => {
+        const searchQuery =
+          args.indexOf('--search') >= 0 ? args[args.indexOf('--search') + 1] : null;
         const historyItems = searchQuery ? history.search(searchQuery) : history.get();
-        
-        console.log(chalk.cyan.bold(`Command History${searchQuery ? ` (search: ${searchQuery})` : ''}`));
+
+        console.log(
+          chalk.cyan.bold(`Command History${searchQuery ? ` (search: ${searchQuery})` : ''}`)
+        );
         console.log('─'.repeat(50));
-        
+
         if (historyItems.length === 0) {
           console.log(chalk.gray('No commands in history'));
           return;
         }
-        
+
         const recent = historyItems.slice(-20); // Show last 20
         recent.forEach((cmd, i) => {
           const lineNumber = historyItems.length - recent.length + i + 1;
           console.log(`${chalk.gray(lineNumber.toString().padStart(3))} ${cmd}`);
         });
-      },
+      }
     },
     {
       name: 'clear',
@@ -317,7 +314,7 @@ export async function startREPL(options: any = {}): Promise<void> {
       description: 'Clear the screen',
       handler: async () => {
         console.clear();
-      },
+      }
     },
     {
       name: 'cd',
@@ -329,32 +326,35 @@ export async function startREPL(options: any = {}): Promise<void> {
           console.log(ctx.workingDirectory);
           return;
         }
-        
+
         try {
           const newDir = args[0] === '~' ? process.env['HOME'] || '/' : args[0];
           process.chdir(newDir);
           ctx.workingDirectory = process.cwd();
           console.log(chalk.gray(`Changed to: ${ctx.workingDirectory}`));
         } catch (error) {
-          console.error(chalk.red('Error:'), error instanceof Error ? error.message : String(error));
+          console.error(
+            chalk.red('Error:'),
+            error instanceof Error ? error.message : String(error)
+          );
         }
-      },
+      }
     },
     {
       name: 'pwd',
       description: 'Print working directory',
       handler: async (_, ctx) => {
         console.log(ctx.workingDirectory);
-      },
+      }
     },
     {
       name: 'echo',
       description: 'Echo arguments',
       usage: 'echo <text>',
       examples: ['echo "Hello, world!"'],
-      handler: async (args) => {
+      handler: async args => {
         console.log(args.join(' '));
-      },
+      }
     },
     {
       name: 'exit',
@@ -363,13 +363,13 @@ export async function startREPL(options: any = {}): Promise<void> {
       handler: async () => {
         console.log(chalk.gray('Goodbye!'));
         process.exit(0);
-      },
-    },
+      }
+    }
   ];
 
   // Set up command completion
   completer.setCommands(commands);
-  
+
   // Show initial status
   if (!options.quiet) {
     await showSystemStatus(context);
@@ -382,7 +382,7 @@ export async function startREPL(options: any = {}): Promise<void> {
       const prompt = createPrompt(context);
       const input = await prompt.prompt({
         message: prompt,
-        suggestions: (input: string) => completer.complete(input),
+        suggestions: (input: string) => completer.complete(input)
       });
 
       if (!input.trim()) {
@@ -397,23 +397,25 @@ export async function startREPL(options: any = {}): Promise<void> {
       // Parse command
       const args = parseCommand(input);
       const [commandName, ...commandArgs] = args;
-      
+
       // Find and execute command
-      const command = commands.find(c => 
-        c.name === commandName || 
-        (c.aliases && c.aliases.includes(commandName))
+      const command = commands.find(
+        c => c.name === commandName || (c.aliases && c.aliases.includes(commandName))
       );
 
       if (command) {
         try {
           await command.handler(commandArgs, context);
         } catch (error) {
-          console.error(chalk.red('Command failed:'), error instanceof Error ? error.message : String(error));
+          console.error(
+            chalk.red('Command failed:'),
+            error instanceof Error ? error.message : String(error)
+          );
         }
       } else {
         console.log(chalk.red(`Unknown command: ${commandName}`));
         console.log(chalk.gray('Type "help" for available commands'));
-        
+
         // Suggest similar commands
         const suggestions = findSimilarCommands(commandName, commands);
         if (suggestions.length > 0) {
@@ -435,16 +437,20 @@ export async function startREPL(options: any = {}): Promise<void> {
 function createPrompt(context: REPLContext): string {
   const statusIcon = getConnectionStatusIcon(context.connectionStatus);
   const dir = context.workingDirectory.split('/').pop() || '/';
-  
+
   return `${statusIcon} ${chalk.cyan('claude-flow')}:${chalk.yellow(dir)}${chalk.white('>')} `;
 }
 
 function getConnectionStatusIcon(status: string): string {
   switch (status) {
-    case 'connected': return chalk.green('●');
-    case 'connecting': return chalk.yellow('◐');
-    case 'disconnected': return chalk.red('○');
-    default: return chalk.gray('?');
+    case 'connected':
+      return chalk.green('●');
+    case 'connecting':
+      return chalk.yellow('◐');
+    case 'disconnected':
+      return chalk.red('○');
+    default:
+      return chalk.gray('?');
   }
 }
 
@@ -454,10 +460,10 @@ function parseCommand(input: string): string[] {
   let current = '';
   let inQuotes = false;
   let quoteChar = '';
-  
+
   for (let i = 0; i < input.length; i++) {
     const char = input[i];
-    
+
     if (inQuotes) {
       if (char === quoteChar) {
         inQuotes = false;
@@ -479,11 +485,11 @@ function parseCommand(input: string): string[] {
       }
     }
   }
-  
+
   if (current.trim()) {
     args.push(current.trim());
   }
-  
+
   return args;
 }
 
@@ -491,13 +497,11 @@ function showHelp(commands: REPLCommand[]): void {
   console.log(chalk.cyan.bold('Claude-Flow Interactive REPL'));
   console.log('─'.repeat(50));
   console.log();
-  
+
   console.log(chalk.white.bold('Available Commands:'));
   console.log();
-  
-  const table = new Table()
-    .header(['Command', 'Aliases', 'Description'])
-    .border(false);
+
+  const table = new Table().header(['Command', 'Aliases', 'Description']).border(false);
 
   for (const cmd of commands) {
     table.push([
@@ -506,10 +510,10 @@ function showHelp(commands: REPLCommand[]): void {
       cmd.description
     ]);
   }
-  
+
   console.log(table.toString());
   console.log();
-  
+
   console.log(chalk.gray('Tips:'));
   console.log(chalk.gray('• Use TAB for command completion'));
   console.log(chalk.gray('• Use "help <command>" for detailed help'));
@@ -518,28 +522,27 @@ function showHelp(commands: REPLCommand[]): void {
 }
 
 function showCommandHelp(commands: REPLCommand[], commandName: string): void {
-  const command = commands.find(c => 
-    c.name === commandName || 
-    (c.aliases && c.aliases.includes(commandName))
+  const command = commands.find(
+    c => c.name === commandName || (c.aliases && c.aliases.includes(commandName))
   );
-  
+
   if (!command) {
     console.log(chalk.red(`Unknown command: ${commandName}`));
     return;
   }
-  
+
   console.log(chalk.cyan.bold(`Command: ${command.name}`));
   console.log('─'.repeat(30));
   console.log(`${chalk.white('Description:')} ${command.description}`);
-  
+
   if (command.aliases) {
     console.log(`${chalk.white('Aliases:')} ${command.aliases.join(', ')}`);
   }
-  
+
   if (command.usage) {
     console.log(`${chalk.white('Usage:')} ${command.usage}`);
   }
-  
+
   if (command.examples) {
     console.log();
     console.log(chalk.white.bold('Examples:'));
@@ -552,18 +555,20 @@ function showCommandHelp(commands: REPLCommand[], commandName: string): void {
 async function showSystemStatus(context: REPLContext, component?: string): Promise<void> {
   console.log(chalk.cyan.bold('System Status'));
   console.log('─'.repeat(30));
-  
-  const statusIcon = formatStatusIndicator(context.connectionStatus === 'connected' ? 'success' : 'error');
+
+  const statusIcon = formatStatusIndicator(
+    context.connectionStatus === 'connected' ? 'success' : 'error'
+  );
   console.log(`${statusIcon} Connection: ${context.connectionStatus}`);
   console.log(`${chalk.white('Working Directory:')} ${context.workingDirectory}`);
   console.log(`${chalk.white('Last Activity:')} ${context.lastActivity.toLocaleTimeString()}`);
-  
+
   if (context.currentSession) {
     console.log(`${chalk.white('Current Session:')} ${context.currentSession}`);
   }
-  
+
   console.log(`${chalk.white('Commands in History:')} ${context.history.length}`);
-  
+
   if (context.connectionStatus === 'disconnected') {
     console.log();
     console.log(chalk.yellow('⚠ Not connected to orchestrator'));
@@ -573,16 +578,16 @@ async function showSystemStatus(context: REPLContext, component?: string): Promi
 
 async function connectToOrchestrator(context: REPLContext, target?: string): Promise<void> {
   const host = target || 'localhost:3000';
-  
+
   console.log(chalk.yellow(`Connecting to ${host}...`));
   context.connectionStatus = 'connecting';
-  
+
   // Mock connection attempt
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   // Simulate connection result
   const success = Math.random() > 0.3; // 70% success rate
-  
+
   if (success) {
     context.connectionStatus = 'connected';
     console.log(chalk.green('✓ Connected successfully'));
@@ -604,7 +609,7 @@ async function handleAgentCommand(args: string[], context: REPLContext): Promise
     console.log(chalk.gray('Usage: agent <spawn|list|terminate|info> [options]'));
     return;
   }
-  
+
   const subcommand = args[0];
   switch (subcommand) {
     case 'list':
@@ -637,19 +642,17 @@ async function showAgentList(): Promise<void> {
   const agents = [
     { id: 'agent-001', name: 'Coordinator', type: 'coordinator', status: 'active', tasks: 2 },
     { id: 'agent-002', name: 'Researcher', type: 'researcher', status: 'active', tasks: 5 },
-    { id: 'agent-003', name: 'Implementer', type: 'implementer', status: 'idle', tasks: 0 },
+    { id: 'agent-003', name: 'Implementer', type: 'implementer', status: 'idle', tasks: 0 }
   ];
-  
+
   console.log(chalk.cyan.bold(`Active Agents (${agents.length})`));
   console.log('─'.repeat(50));
-  
-  const table = new Table()
-    .header(['ID', 'Name', 'Type', 'Status', 'Tasks'])
-    .border(true);
+
+  const table = new Table().header(['ID', 'Name', 'Type', 'Status', 'Tasks']).border(true);
 
   for (const agent of agents) {
     const statusIcon = formatStatusIndicator(agent.status);
-    
+
     table.push([
       chalk.gray(agent.id),
       chalk.white(agent.name),
@@ -658,7 +661,7 @@ async function showAgentList(): Promise<void> {
       agent.tasks.toString()
     ]);
   }
-  
+
   console.log(table.toString());
 }
 
@@ -670,16 +673,18 @@ async function handleAgentSpawn(args: string[]): Promise<void> {
   }
 
   const type = args[0];
-  const name = args[1] || await prompt.prompt({
-    message: 'Agent name:',
-    default: `${type}-agent`,
-  });
+  const name =
+    args[1] ||
+    (await prompt.prompt({
+      message: 'Agent name:',
+      default: `${type}-agent`
+    }));
 
   console.log(chalk.yellow('Spawning agent...'));
-  
+
   // Mock spawning
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   const agentId = generateId('agent');
   console.log(chalk.green('✓ Agent spawned successfully'));
   console.log(`${chalk.white('ID:')} ${agentId}`);
@@ -690,14 +695,14 @@ async function handleAgentSpawn(args: string[]): Promise<void> {
 async function handleAgentTerminate(agentId: string): Promise<void> {
   const confirmed = await confirm.prompt({
     message: `Terminate agent ${agentId}?`,
-    default: false,
+    default: false
   });
-  
+
   if (!confirmed) {
     console.log(chalk.gray('Termination cancelled'));
     return;
   }
-  
+
   console.log(chalk.yellow('Terminating agent...'));
   await new Promise(resolve => setTimeout(resolve, 500));
   console.log(chalk.green('✓ Agent terminated'));
@@ -726,7 +731,7 @@ async function handleTaskCommand(args: string[], context: REPLContext): Promise<
     console.log(chalk.gray('Usage: task <create|list|status|cancel> [options]'));
     return;
   }
-  
+
   const subcommand = args[0];
   switch (subcommand) {
     case 'list':
@@ -757,21 +762,37 @@ async function handleTaskCommand(args: string[], context: REPLContext): Promise<
 async function showTaskList(): Promise<void> {
   // Mock task data
   const tasks = [
-    { id: 'task-001', type: 'research', description: 'Research quantum computing', status: 'running', agent: 'agent-002' },
-    { id: 'task-002', type: 'analysis', description: 'Analyze research results', status: 'pending', agent: null },
-    { id: 'task-003', type: 'implementation', description: 'Implement solution', status: 'completed', agent: 'agent-003' },
+    {
+      id: 'task-001',
+      type: 'research',
+      description: 'Research quantum computing',
+      status: 'running',
+      agent: 'agent-002'
+    },
+    {
+      id: 'task-002',
+      type: 'analysis',
+      description: 'Analyze research results',
+      status: 'pending',
+      agent: null
+    },
+    {
+      id: 'task-003',
+      type: 'implementation',
+      description: 'Implement solution',
+      status: 'completed',
+      agent: 'agent-003'
+    }
   ];
-  
+
   console.log(chalk.cyan.bold(`Tasks (${tasks.length})`));
   console.log('─'.repeat(60));
-  
-  const table = new Table()
-    .header(['ID', 'Type', 'Description', 'Status', 'Agent'])
-    .border(true);
+
+  const table = new Table().header(['ID', 'Type', 'Description', 'Status', 'Agent']).border(true);
 
   for (const task of tasks) {
     const statusIcon = formatStatusIndicator(task.status);
-    
+
     table.push([
       chalk.gray(task.id),
       chalk.white(task.type),
@@ -780,7 +801,7 @@ async function showTaskList(): Promise<void> {
       task.agent ? chalk.cyan(task.agent) : '-'
     ]);
   }
-  
+
   console.log(table.toString());
 }
 
@@ -792,10 +813,10 @@ async function handleTaskCreate(args: string[]): Promise<void> {
 
   const type = args[0];
   const description = args.slice(1).join(' ');
-  
+
   console.log(chalk.yellow('Creating task...'));
   await new Promise(resolve => setTimeout(resolve, 500));
-  
+
   const taskId = generateId('task');
   console.log(chalk.green('✓ Task created successfully'));
   console.log(`${chalk.white('ID:')} ${taskId}`);
@@ -817,14 +838,14 @@ async function showTaskStatus(taskId: string): Promise<void> {
 async function handleTaskCancel(taskId: string): Promise<void> {
   const confirmed = await confirm.prompt({
     message: `Cancel task ${taskId}?`,
-    default: false,
+    default: false
   });
-  
+
   if (!confirmed) {
     console.log(chalk.gray('Cancellation cancelled'));
     return;
   }
-  
+
   console.log(chalk.yellow('Cancelling task...'));
   await new Promise(resolve => setTimeout(resolve, 500));
   console.log(chalk.green('✓ Task cancelled'));
@@ -840,7 +861,7 @@ async function handleMemoryCommand(args: string[], context: REPLContext): Promis
     console.log(chalk.gray('Usage: memory <query|stats|export> [options]'));
     return;
   }
-  
+
   const subcommand = args[0];
   switch (subcommand) {
     case 'stats':
@@ -871,7 +892,7 @@ async function handleSessionCommand(args: string[], context: REPLContext): Promi
     console.log(chalk.gray('Usage: session <list|save|restore> [options]'));
     return;
   }
-  
+
   const subcommand = args[0];
   switch (subcommand) {
     case 'list':
@@ -896,15 +917,13 @@ async function showSessionList(): Promise<void> {
   // Mock session data
   const sessions = [
     { id: 'session-001', name: 'Research Project', date: '2024-01-15', agents: 3, tasks: 8 },
-    { id: 'session-002', name: 'Development', date: '2024-01-14', agents: 2, tasks: 5 },
+    { id: 'session-002', name: 'Development', date: '2024-01-14', agents: 2, tasks: 5 }
   ];
-  
+
   console.log(chalk.cyan.bold(`Saved Sessions (${sessions.length})`));
   console.log('─'.repeat(50));
-  
-  const table = new Table()
-    .header(['ID', 'Name', 'Date', 'Agents', 'Tasks'])
-    .border(true);
+
+  const table = new Table().header(['ID', 'Name', 'Date', 'Agents', 'Tasks']).border(true);
 
   for (const session of sessions) {
     table.push([
@@ -915,19 +934,22 @@ async function showSessionList(): Promise<void> {
       session.tasks.toString()
     ]);
   }
-  
+
   console.log(table.toString());
 }
 
 async function handleSessionSave(args: string[]): Promise<void> {
-  const name = args.length > 0 ? args.join(' ') : await prompt.prompt({
-    message: 'Session name:',
-    default: `session-${new Date().toISOString().split('T')[0]}`,
-  });
-  
+  const name =
+    args.length > 0
+      ? args.join(' ')
+      : await prompt.prompt({
+          message: 'Session name:',
+          default: `session-${new Date().toISOString().split('T')[0]}`
+        });
+
   console.log(chalk.yellow('Saving session...'));
   await new Promise(resolve => setTimeout(resolve, 1000));
-  
+
   const sessionId = generateId('session');
   console.log(chalk.green('✓ Session saved successfully'));
   console.log(`${chalk.white('ID:')} ${sessionId}`);
@@ -937,14 +959,14 @@ async function handleSessionSave(args: string[]): Promise<void> {
 async function handleSessionRestore(sessionId: string): Promise<void> {
   const confirmed = await confirm.prompt({
     message: `Restore session ${sessionId}?`,
-    default: false,
+    default: false
   });
-  
+
   if (!confirmed) {
     console.log(chalk.gray('Restore cancelled'));
     return;
   }
-  
+
   console.log(chalk.yellow('Restoring session...'));
   await new Promise(resolve => setTimeout(resolve, 1500));
   console.log(chalk.green('✓ Session restored successfully'));
@@ -960,7 +982,7 @@ async function handleWorkflowCommand(args: string[], context: REPLContext): Prom
     console.log(chalk.gray('Usage: workflow <list|run|status> [options]'));
     return;
   }
-  
+
   const subcommand = args[0];
   switch (subcommand) {
     case 'list':
@@ -989,20 +1011,18 @@ async function showWorkflowList(): Promise<void> {
   // Mock workflow data
   const workflows = [
     { id: 'workflow-001', name: 'Research Pipeline', status: 'running', progress: 60 },
-    { id: 'workflow-002', name: 'Data Analysis', status: 'completed', progress: 100 },
+    { id: 'workflow-002', name: 'Data Analysis', status: 'completed', progress: 100 }
   ];
-  
+
   console.log(chalk.cyan.bold(`Workflows (${workflows.length})`));
   console.log('─'.repeat(50));
-  
-  const table = new Table()
-    .header(['ID', 'Name', 'Status', 'Progress'])
-    .border(true);
+
+  const table = new Table().header(['ID', 'Name', 'Status', 'Progress']).border(true);
 
   for (const workflow of workflows) {
     const statusIcon = formatStatusIndicator(workflow.status);
     const progressBar = formatProgressBar(workflow.progress, 100, 15);
-    
+
     table.push([
       chalk.gray(workflow.id),
       chalk.white(workflow.name),
@@ -1010,7 +1030,7 @@ async function showWorkflowList(): Promise<void> {
       `${progressBar} ${workflow.progress}%`
     ]);
   }
-  
+
   console.log(table.toString());
 }
 
@@ -1019,7 +1039,7 @@ async function handleWorkflowRun(filename: string): Promise<void> {
     await fs.stat(filename);
     console.log(chalk.yellow(`Running workflow: ${filename}`));
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const workflowId = generateId('workflow');
     console.log(chalk.green('✓ Workflow started successfully'));
     console.log(`${chalk.white('ID:')} ${workflowId}`);
@@ -1041,7 +1061,7 @@ async function showWorkflowStatus(workflowId: string): Promise<void> {
 
 function findSimilarCommands(input: string, commands: REPLCommand[]): string[] {
   const allNames = commands.flatMap(c => [c.name, ...(c.aliases || [])]);
-  
+
   return allNames
     .filter(name => {
       // Simple similarity check - could use Levenshtein distance

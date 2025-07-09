@@ -4,9 +4,9 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import { Command } from 'commander';
 import * as path from 'path';
 import { copyPrompts, copyPromptsEnhanced } from './prompt-copier-enhanced.js';
-import { 
-  PromptConfigManager, 
-  PromptPathResolver, 
+import {
+  PromptConfigManager,
+  PromptPathResolver,
   PromptValidator,
   createProgressBar,
   formatFileSize,
@@ -31,18 +31,22 @@ program
   .option('--no-verify', 'Disable file verification')
   .option('--no-parallel', 'Disable parallel processing')
   .option('--workers <number>', 'Number of worker threads', parseInt)
-  .option('--conflict <strategy>', 'Conflict resolution strategy', /^(skip|overwrite|backup|merge)$/)
+  .option(
+    '--conflict <strategy>',
+    'Conflict resolution strategy',
+    /^(skip|overwrite|backup|merge)$/
+  )
   .option('--include <patterns>', 'Include patterns (comma-separated)')
   .option('--exclude <patterns>', 'Exclude patterns (comma-separated)')
   .option('--dry-run', 'Show what would be copied without actually copying')
   .option('--enhanced', 'Use enhanced copier with worker threads')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const configManager = new PromptConfigManager();
       const config = await configManager.loadConfig();
-      
+
       let copyOptions;
-      
+
       if (options.profile) {
         const profileOptions = configManager.getProfile(options.profile);
         copyOptions = {
@@ -59,21 +63,25 @@ program
           parallel: options.parallel,
           maxWorkers: options.workers || config.defaultOptions.maxWorkers,
           conflictResolution: options.conflict || config.defaultOptions.conflictResolution,
-          includePatterns: options.include ? options.include.split(',') : config.defaultOptions.includePatterns,
-          excludePatterns: options.exclude ? options.exclude.split(',') : config.defaultOptions.excludePatterns,
+          includePatterns: options.include
+            ? options.include.split(',')
+            : config.defaultOptions.includePatterns,
+          excludePatterns: options.exclude
+            ? options.exclude.split(',')
+            : config.defaultOptions.excludePatterns,
           dryRun: options.dryRun
         };
       }
 
       // Create progress bar
       let progressBar: ReturnType<typeof createProgressBar> | null = null;
-      
-      copyOptions.progressCallback = (progress) => {
+
+      copyOptions.progressCallback = progress => {
         if (!progressBar) {
           progressBar = createProgressBar(progress.total);
         }
         progressBar.update(progress.completed);
-        
+
         if (progress.completed === progress.total) {
           progressBar.complete();
         }
@@ -105,7 +113,6 @@ program
           console.log(`❌ ${error.file}: ${error.error} (${error.phase})`);
         });
       }
-
     } catch (error) {
       console.error('Copy operation failed:', error);
       process.exit(1);
@@ -116,16 +123,16 @@ program
   .command('discover')
   .description('Discover prompt directories in the current project')
   .option('-b, --base <path>', 'Base path to search from', process.cwd())
-  .action(async (options) => {
+  .action(async options => {
     try {
       const resolver = new PromptPathResolver(options.base);
       const directories = await resolver.discoverPromptDirectories();
-      
+
       console.log('Discovered prompt directories:');
       directories.forEach(dir => {
         console.log(`  📁 ${dir}`);
       });
-      
+
       if (directories.length === 0) {
         console.log('  No prompt directories found');
       }
@@ -143,40 +150,41 @@ program
     try {
       const stats = await require('fs').promises.stat(filePath);
       const files: string[] = [];
-      
+
       if (stats.isFile()) {
         files.push(filePath);
       } else if (stats.isDirectory()) {
         // Scan directory for prompt files
         const scanDir = async (dir: string) => {
           const entries = await require('fs').promises.readdir(dir, { withFileTypes: true });
-          
+
           for (const entry of entries) {
             const fullPath = path.join(dir, entry.name);
-            
-            if (entry.isFile() && (
-              entry.name.endsWith('.md') || 
-              entry.name.endsWith('.txt') || 
-              entry.name.endsWith('.prompt')
-            )) {
+
+            if (
+              entry.isFile() &&
+              (entry.name.endsWith('.md') ||
+                entry.name.endsWith('.txt') ||
+                entry.name.endsWith('.prompt'))
+            ) {
               files.push(fullPath);
             } else if (entry.isDirectory() && options.recursive) {
               await scanDir(fullPath);
             }
           }
         };
-        
+
         await scanDir(filePath);
       }
-      
+
       console.log(`Validating ${files.length} files...`);
-      
+
       let validFiles = 0;
       let invalidFiles = 0;
-      
+
       for (const file of files) {
         const result = await PromptValidator.validatePromptFile(file);
-        
+
         if (result.valid) {
           validFiles++;
           console.log(`✅ ${file}`);
@@ -187,14 +195,13 @@ program
             console.log(`   - ${issue}`);
           });
         }
-        
+
         if (result.metadata && Object.keys(result.metadata).length > 0) {
           console.log(`   Metadata: ${JSON.stringify(result.metadata)}`);
         }
       }
-      
+
       console.log(`\nValidation complete: ${validFiles} valid, ${invalidFiles} invalid`);
-      
     } catch (error) {
       console.error('Validation failed:', error);
       process.exit(1);
@@ -207,10 +214,10 @@ program
   .option('--init', 'Initialize default configuration')
   .option('--show', 'Show current configuration')
   .option('--profiles', 'List available profiles')
-  .action(async (options) => {
+  .action(async options => {
     try {
       const configManager = new PromptConfigManager();
-      
+
       if (options.init) {
         await configManager.saveConfig();
         console.log('✅ Configuration initialized');
@@ -220,7 +227,7 @@ program
       } else if (options.profiles) {
         const config = await configManager.loadConfig();
         const profiles = configManager.listProfiles();
-        
+
         console.log('Available profiles:');
         profiles.forEach(profile => {
           console.log(`  📋 ${profile}`);
@@ -241,14 +248,14 @@ program
 program
   .command('rollback <manifest>')
   .description('Rollback from backup')
-  .action(async (manifestPath) => {
+  .action(async manifestPath => {
     try {
       const { PromptCopier } = await import('./prompt-copier.js');
       const copier = new PromptCopier({
         source: '',
         destination: ''
       });
-      
+
       await copier.restoreFromBackup(manifestPath);
       console.log('✅ Rollback completed');
     } catch (error) {
@@ -264,7 +271,7 @@ program
   .option('-d, --destination <path>', 'Destination directory')
   .option('--bidirectional', 'Enable bidirectional sync')
   .option('--delete', 'Delete files not present in source')
-  .action(async (options) => {
+  .action(async options => {
     try {
       // This would implement incremental sync functionality
       console.log('Sync functionality not yet implemented');
@@ -276,12 +283,12 @@ program
   });
 
 // Handle uncaught errors
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.error('Uncaught exception:', error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason) => {
+process.on('unhandledRejection', reason => {
   console.error('Unhandled rejection:', reason);
   process.exit(1);
 });

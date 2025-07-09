@@ -11,34 +11,34 @@ import { logger } from '../../utils/logger';
 export interface PressureThresholds {
   // CPU pressure thresholds
   cpu: {
-    normal: number;      // 0-70%
-    warning: number;     // 70-85%
-    critical: number;    // 85-95%
-    emergency: number;   // 95%+
+    normal: number; // 0-70%
+    warning: number; // 70-85%
+    critical: number; // 85-95%
+    emergency: number; // 95%+
   };
-  
+
   // Memory pressure thresholds
   memory: {
-    normal: number;      // 0-70%
-    warning: number;     // 70-85%
-    critical: number;    // 85-95%
-    emergency: number;   // 95%+
+    normal: number; // 0-70%
+    warning: number; // 70-85%
+    critical: number; // 85-95%
+    emergency: number; // 95%+
   };
-  
+
   // Disk pressure thresholds
   disk: {
-    normal: number;      // 0-80%
-    warning: number;     // 80-90%
-    critical: number;    // 90-95%
-    emergency: number;   // 95%+
+    normal: number; // 0-80%
+    warning: number; // 80-90%
+    critical: number; // 90-95%
+    emergency: number; // 95%+
   };
-  
+
   // Network pressure thresholds (utilization %)
   network: {
-    normal: number;      // 0-60%
-    warning: number;     // 60-80%
-    critical: number;    // 80-90%
-    emergency: number;   // 90%+
+    normal: number; // 0-60%
+    warning: number; // 60-80%
+    critical: number; // 80-90%
+    emergency: number; // 90%+
   };
 }
 
@@ -49,7 +49,7 @@ export interface PressureLevel {
   trend: 'increasing' | 'decreasing' | 'stable';
   prediction?: {
     timeToThreshold: number; // milliseconds
-    confidence: number;      // 0-1
+    confidence: number; // 0-1
   };
 }
 
@@ -110,7 +110,7 @@ export class PressureDetector extends EventEmitter {
 
   constructor(thresholds?: Partial<PressureThresholds>) {
     super();
-    
+
     this.thresholds = this.mergeThresholds(thresholds);
     this.history = new Map();
     this.alertHistory = new CircularBuffer(100);
@@ -160,7 +160,7 @@ export class PressureDetector extends EventEmitter {
    */
   updateMetrics(metrics: IResourceMetrics): void {
     this.currentMetrics = metrics;
-    
+
     // Store in history
     this.history.get(ResourceType.CPU)?.add(metrics.cpu.usage);
     this.history.get(ResourceType.Memory)?.add(metrics.memory.usage);
@@ -181,9 +181,18 @@ export class PressureDetector extends EventEmitter {
       overall: await this.calculateOverallPressure(),
       resources: {
         cpu: await this.calculateResourcePressure(ResourceType.CPU, this.currentMetrics.cpu.usage),
-        memory: await this.calculateResourcePressure(ResourceType.Memory, this.currentMetrics.memory.usage),
-        disk: await this.calculateResourcePressure(ResourceType.Disk, this.currentMetrics.disk.usage),
-        network: await this.calculateResourcePressure(ResourceType.Network, this.currentMetrics.network.usage)
+        memory: await this.calculateResourcePressure(
+          ResourceType.Memory,
+          this.currentMetrics.memory.usage
+        ),
+        disk: await this.calculateResourcePressure(
+          ResourceType.Disk,
+          this.currentMetrics.disk.usage
+        ),
+        network: await this.calculateResourcePressure(
+          ResourceType.Network,
+          this.currentMetrics.network.usage
+        )
       },
       predictions: await this.generatePredictions(),
       mitigationActions: await this.generateMitigationActions()
@@ -205,9 +214,11 @@ export class PressureDetector extends EventEmitter {
    */
   isUnderPressure(): boolean {
     if (!this.lastAnalysis) return false;
-    
-    return this.lastAnalysis.overall.level !== 'normal' ||
-           Object.values(this.lastAnalysis.resources).some(r => r.level !== 'normal');
+
+    return (
+      this.lastAnalysis.overall.level !== 'normal' ||
+      Object.values(this.lastAnalysis.resources).some(r => r.level !== 'normal')
+    );
   }
 
   /**
@@ -241,13 +252,12 @@ export class PressureDetector extends EventEmitter {
 
     try {
       const analysis = await this.analyzePressure();
-      
+
       // Check for alerts
       await this.checkForAlerts(analysis);
-      
+
       // Emit analysis event
       this.emit('pressure-analysis', analysis);
-      
     } catch (error) {
       logger.error('Pressure check failed:', error);
     }
@@ -277,10 +287,11 @@ export class PressureDetector extends EventEmitter {
   private async generateAlert(type: ResourceType, pressure: PressureLevel): Promise<void> {
     const alertKey = `${type}-${pressure.level}`;
     const now = Date.now();
-    
+
     // Check cooldown (prevent spam)
     const lastAlert = this.alertCooldown.get(alertKey);
-    if (lastAlert && now - lastAlert < 30000) { // 30 second cooldown
+    if (lastAlert && now - lastAlert < 30000) {
+      // 30 second cooldown
       return;
     }
 
@@ -326,7 +337,7 @@ export class PressureDetector extends EventEmitter {
 
     // Find highest pressure level
     const levelPriority = { normal: 0, warning: 1, critical: 2, emergency: 3 };
-    const highestPressure = pressures.reduce((highest, current) => 
+    const highestPressure = pressures.reduce((highest, current) =>
       levelPriority[current.level] > levelPriority[highest.level] ? current : highest
     );
 
@@ -341,9 +352,12 @@ export class PressureDetector extends EventEmitter {
   /**
    * Calculate resource pressure level
    */
-  private async calculateResourcePressure(type: ResourceType, value: number): Promise<PressureLevel> {
+  private async calculateResourcePressure(
+    type: ResourceType,
+    value: number
+  ): Promise<PressureLevel> {
     const thresholds = this.getResourceThresholds(type);
-    
+
     let level: PressureLevel['level'];
     let threshold: number;
 
@@ -407,7 +421,7 @@ export class PressureDetector extends EventEmitter {
     const weightedSum = values.reduce((sum, val, index) => sum + (index + 1), 0);
     const avg = values.reduce((sum, val) => sum + val, 0) / values.length;
 
-    const trend = (sum / weightedSum) - avg;
+    const trend = sum / weightedSum - avg;
 
     if (trend > 2) return 'increasing';
     if (trend < -2) return 'decreasing';
@@ -441,15 +455,15 @@ export class PressureDetector extends EventEmitter {
     const sumXX = x.reduce((sum, val) => sum + val * val, 0);
 
     const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    
+
     if (slope <= 0) return undefined;
 
     const thresholds = this.getResourceThresholds(type);
-    const timeToWarning = (thresholds.warning - currentValue) / slope * timeInterval;
-    const timeToEmergency = (thresholds.emergency - currentValue) / slope * timeInterval;
+    const timeToWarning = ((thresholds.warning - currentValue) / slope) * timeInterval;
+    const timeToEmergency = ((thresholds.emergency - currentValue) / slope) * timeInterval;
 
     const targetTime = timeToWarning > 0 ? timeToWarning : timeToEmergency;
-    const confidence = Math.min(0.9, Math.max(0.1, 1 - (Math.abs(slope) / 10)));
+    const confidence = Math.min(0.9, Math.max(0.1, 1 - Math.abs(slope) / 10));
 
     return {
       timeToThreshold: targetTime,
@@ -464,7 +478,7 @@ export class PressureDetector extends EventEmitter {
     if (!this.currentMetrics) return {};
 
     const predictions: PressureAnalysis['predictions'] = {};
-    
+
     // Find next likely alert
     const resources = [
       { type: ResourceType.CPU, value: this.currentMetrics.cpu.usage },
@@ -479,15 +493,15 @@ export class PressureDetector extends EventEmitter {
     for (const { type, value } of resources) {
       const trend = this.calculateResourceTrend(type);
       const prediction = await this.predictResourceExhaustion(type, value, trend);
-      
+
       if (prediction && prediction.timeToThreshold < shortestTime) {
         shortestTime = prediction.timeToThreshold;
         const thresholds = this.getResourceThresholds(type);
-        
+
         let level: PressureLevel['level'] = 'warning';
         if (value >= thresholds.critical) level = 'emergency';
         else if (value >= thresholds.warning) level = 'critical';
-        
+
         nextAlert = {
           type,
           level,
@@ -556,8 +570,12 @@ export class PressureDetector extends EventEmitter {
    */
   private generateAlertMessage(type: ResourceType, pressure: PressureLevel): string {
     const percentage = Math.round(pressure.value);
-    const trend = pressure.trend === 'increasing' ? ' and increasing' : 
-                  pressure.trend === 'decreasing' ? ' but decreasing' : '';
+    const trend =
+      pressure.trend === 'increasing'
+        ? ' and increasing'
+        : pressure.trend === 'decreasing'
+          ? ' but decreasing'
+          : '';
 
     return `${type} pressure is ${pressure.level} (${percentage}%${trend})`;
   }
@@ -574,13 +592,13 @@ export class PressureDetector extends EventEmitter {
         recommendations.push('Consider emergency scaling');
         recommendations.push('Enable aggressive resource cleanup');
         break;
-      
+
       case 'critical':
         recommendations.push(`Scale up ${type} resources`);
         recommendations.push('Review resource allocation policies');
         recommendations.push('Consider load balancing improvements');
         break;
-      
+
       case 'warning':
         recommendations.push(`Monitor ${type} usage closely`);
         recommendations.push('Review resource optimization opportunities');
@@ -621,10 +639,14 @@ export class PressureDetector extends EventEmitter {
    */
   private mapLevelToSeverity(level: PressureLevel['level']): PressureAlert['severity'] {
     switch (level) {
-      case 'emergency': return 'critical';
-      case 'critical': return 'high';
-      case 'warning': return 'medium';
-      default: return 'low';
+      case 'emergency':
+        return 'critical';
+      case 'critical':
+        return 'high';
+      case 'warning':
+        return 'medium';
+      default:
+        return 'low';
     }
   }
 
@@ -633,11 +655,16 @@ export class PressureDetector extends EventEmitter {
    */
   private getResourceThresholds(type: ResourceType): PressureThresholds[keyof PressureThresholds] {
     switch (type) {
-      case ResourceType.CPU: return this.thresholds.cpu;
-      case ResourceType.Memory: return this.thresholds.memory;
-      case ResourceType.Disk: return this.thresholds.disk;
-      case ResourceType.Network: return this.thresholds.network;
-      default: return this.thresholds.cpu;
+      case ResourceType.CPU:
+        return this.thresholds.cpu;
+      case ResourceType.Memory:
+        return this.thresholds.memory;
+      case ResourceType.Disk:
+        return this.thresholds.disk;
+      case ResourceType.Network:
+        return this.thresholds.network;
+      default:
+        return this.thresholds.cpu;
     }
   }
 

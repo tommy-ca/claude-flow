@@ -91,10 +91,22 @@ describe('Command Registry', () => {
       registerCoreCommands();
 
       const expectedCommands = [
-        'init', 'start', 'memory', 'sparc', 'agent',
-        'task', 'config', 'status', 'mcp', 'monitor',
-        'swarm', 'batch-manager', 'github', 'docker',
-        'ruv-swarm', 'config-integration'
+        'init',
+        'start',
+        'memory',
+        'sparc',
+        'agent',
+        'task',
+        'config',
+        'status',
+        'mcp',
+        'monitor',
+        'swarm',
+        'batch-manager',
+        'github',
+        'docker',
+        'ruv-swarm',
+        'config-integration'
       ];
 
       expectedCommands.forEach(cmd => {
@@ -146,16 +158,14 @@ describe('Command Registry', () => {
     });
 
     test('should throw error for unknown command', async () => {
-      await expect(executeCommand('unknown', [], {}))
-        .rejects.toThrow('Unknown command: unknown');
+      await expect(executeCommand('unknown', [], {})).rejects.toThrow('Unknown command: unknown');
     });
 
     test('should handle command execution errors', async () => {
       const { swarmCommand } = await import('../simple-commands/swarm.js');
       swarmCommand.mockRejectedValue(new Error('Command failed'));
 
-      await expect(executeCommand('swarm', ['test'], {}))
-        .rejects.toThrow('Command failed');
+      await expect(executeCommand('swarm', ['test'], {})).rejects.toThrow('Command failed');
     });
   });
 

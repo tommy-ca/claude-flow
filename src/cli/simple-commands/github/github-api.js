@@ -65,9 +65,7 @@ class GitHubAPIClient {
 
   updateRateLimitInfo(headers) {
     this.rateLimitRemaining = parseInt(headers['x-ratelimit-remaining'] || '0');
-    this.rateLimitResetTime = new Date(
-      (parseInt(headers['x-ratelimit-reset']) || 0) * 1000
-    );
+    this.rateLimitResetTime = new Date((parseInt(headers['x-ratelimit-reset']) || 0) * 1000);
   }
 
   /**
@@ -78,8 +76,8 @@ class GitHubAPIClient {
 
     const url = endpoint.startsWith('http') ? endpoint : `${GITHUB_API_BASE}${endpoint}`;
     const headers = {
-      'Authorization': `token ${this.token}`,
-      'Accept': 'application/vnd.github.v3+json',
+      Authorization: `token ${this.token}`,
+      Accept: 'application/vnd.github.v3+json',
       'User-Agent': 'Claude-Flow-GitHub-Integration',
       ...options.headers
     };
@@ -275,10 +273,13 @@ class GitHubAPIClient {
   }
 
   async triggerWorkflow(owner, repo, workflowId, ref = 'main', inputs = {}) {
-    return await this.request(`/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`, {
-      method: 'POST',
-      body: { ref, inputs }
-    });
+    return await this.request(
+      `/repos/${owner}/${repo}/actions/workflows/${workflowId}/dispatches`,
+      {
+        method: 'POST',
+        body: { ref, inputs }
+      }
+    );
   }
 
   async listWorkflowRuns(owner, repo, options = {}) {
@@ -360,19 +361,19 @@ class GitHubAPIClient {
     const eventData = JSON.parse(payload);
 
     switch (event) {
-    case 'push':
-      return this.handlePushEvent(eventData);
-    case 'pull_request':
-      return this.handlePullRequestEvent(eventData);
-    case 'issues':
-      return this.handleIssuesEvent(eventData);
-    case 'release':
-      return this.handleReleaseEvent(eventData);
-    case 'workflow_run':
-      return this.handleWorkflowRunEvent(eventData);
-    default:
-      printInfo(`Unhandled event type: ${event}`);
-      return { handled: false, event };
+      case 'push':
+        return this.handlePushEvent(eventData);
+      case 'pull_request':
+        return this.handlePullRequestEvent(eventData);
+      case 'issues':
+        return this.handleIssuesEvent(eventData);
+      case 'release':
+        return this.handleReleaseEvent(eventData);
+      case 'workflow_run':
+        return this.handleWorkflowRunEvent(eventData);
+      default:
+        printInfo(`Unhandled event type: ${event}`);
+        return { handled: false, event };
     }
   }
 
@@ -387,10 +388,7 @@ class GitHubAPIClient {
     hmac.update(payload);
     const expectedSignature = `sha256=${hmac.digest('hex')}`;
 
-    return crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
-    );
+    return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
   }
 
   /**

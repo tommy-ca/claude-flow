@@ -6,7 +6,9 @@
  * Format bytes to human readable string
  */
 function formatBytes(bytes, decimals = 2) {
-  if (bytes === 0) {return '0 Bytes';}
+  if (bytes === 0) {
+    return '0 Bytes';
+  }
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
@@ -28,10 +30,18 @@ function formatPercentage(value, decimals = 1) {
  * Format duration in milliseconds to human readable string
  */
 function formatDuration(ms) {
-  if (ms < 1000) {return `${ms}ms`;}
-  if (ms < 60000) {return `${(ms / 1000).toFixed(1)}s`;}
-  if (ms < 3600000) {return `${(ms / 60000).toFixed(1)}m`;}
-  if (ms < 86400000) {return `${(ms / 3600000).toFixed(1)}h`;}
+  if (ms < 1000) {
+    return `${ms}ms`;
+  }
+  if (ms < 60000) {
+    return `${(ms / 1000).toFixed(1)}s`;
+  }
+  if (ms < 3600000) {
+    return `${(ms / 60000).toFixed(1)}m`;
+  }
+  if (ms < 86400000) {
+    return `${(ms / 3600000).toFixed(1)}h`;
+  }
   return `${(ms / 86400000).toFixed(1)}d`;
 }
 
@@ -53,7 +63,9 @@ function formatNumber(num) {
  * Truncate string to specified length with ellipsis
  */
 function truncate(str, length = 50) {
-  if (str.length <= length) {return str;}
+  if (str.length <= length) {
+    return str;
+  }
   return str.substring(0, length - 3) + '...';
 }
 
@@ -103,30 +115,34 @@ function createProgressBar(current, total, width = 40) {
  * Format table data with alignment
  */
 function formatTable(data, headers, alignment = {}) {
-  if (!data || data.length === 0) {return '';}
+  if (!data || data.length === 0) {
+    return '';
+  }
 
   const rows = [headers, ...data];
   const colWidths = headers.map((_, colIndex) => {
     return Math.max(...rows.map(row => String(row[colIndex] || '').length));
   });
 
-  const formatRow = (row) => {
-    return row.map((cell, index) => {
-      const cellStr = String(cell || '');
-      const width = colWidths[index];
-      const align = alignment[index] || 'left';
+  const formatRow = row => {
+    return row
+      .map((cell, index) => {
+        const cellStr = String(cell || '');
+        const width = colWidths[index];
+        const align = alignment[index] || 'left';
 
-      if (align === 'right') {
-        return cellStr.padStart(width);
-      } else if (align === 'center') {
-        const padding = width - cellStr.length;
-        const left = Math.floor(padding / 2);
-        const right = padding - left;
-        return ' '.repeat(left) + cellStr + ' '.repeat(right);
-      } else {
-        return cellStr.padEnd(width);
-      }
-    }).join(' | ');
+        if (align === 'right') {
+          return cellStr.padStart(width);
+        } else if (align === 'center') {
+          const padding = width - cellStr.length;
+          const left = Math.floor(padding / 2);
+          const right = padding - left;
+          return ' '.repeat(left) + cellStr + ' '.repeat(right);
+        } else {
+          return cellStr.padEnd(width);
+        }
+      })
+      .join(' | ');
   };
 
   const lines = [];
@@ -174,7 +190,7 @@ function formatStatus(status) {
  */
 function formatMetricWithTrend(current, previous, unit = '') {
   const trend = current > previous ? '↗' : current < previous ? '↘' : '→';
-  const change = previous !== 0 ? ((current - previous) / previous * 100).toFixed(1) : '0';
+  const change = previous !== 0 ? (((current - previous) / previous) * 100).toFixed(1) : '0';
 
   return `${current}${unit} ${trend} ${change}%`;
 }

@@ -1,6 +1,6 @@
 /**
  * Resource Manager - Main Export
- * 
+ *
  * Intelligent resource management and agent deployment system for claude-flow
  */
 
@@ -46,25 +46,25 @@ export const CONSTANTS = {
   DEFAULT_PRESSURE_DETECTION_INTERVAL: 10000,
   DEFAULT_HISTORY_SAMPLES: 100,
   DEFAULT_PREDICTION_HORIZON: 300000, // 5 minutes
-  
+
   // Resource thresholds
   DEFAULT_CPU_THRESHOLD: 80,
   DEFAULT_MEMORY_THRESHOLD: 85,
   DEFAULT_DISK_THRESHOLD: 90,
   DEFAULT_NETWORK_THRESHOLD: 75,
-  
+
   // Allocation settings
   DEFAULT_OVER_PROVISIONING_FACTOR: 1.2,
   DEFAULT_MIN_CPU_CORES: 0.1,
   DEFAULT_MIN_MEMORY: 128 * 1024 * 1024, // 128MB
   DEFAULT_MIN_DISK: 1024 * 1024 * 1024, // 1GB
   DEFAULT_MIN_NETWORK: 10 * 1024 * 1024, // 10Mbps
-  
+
   // Timing
   DEFAULT_IDLE_TIMEOUT: 300000, // 5 minutes
   DEFAULT_GRACE_PERIOD: 60000, // 1 minute
   DEFAULT_COOLDOWN_PERIOD: 120000, // 2 minutes
-  
+
   // Limits
   MAX_AGENTS: 1000,
   MAX_ALLOCATIONS: 10000,
@@ -82,7 +82,7 @@ export function quickStart(options?: {
   maxAgents?: number;
 }) {
   const factory = new ResourceManagerFactory();
-  
+
   return factory.createResourceManager(
     // Monitor config
     {

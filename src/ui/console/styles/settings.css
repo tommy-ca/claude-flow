@@ -121,9 +121,9 @@
 }
 
 /* Form controls */
-.setting-item input[type="text"],
-.setting-item input[type="password"],
-.setting-item input[type="number"],
+.setting-item input[type='text'],
+.setting-item input[type='password'],
+.setting-item input[type='number'],
 .setting-item select {
   width: 100%;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -136,17 +136,17 @@
   transition: all var(--transition-fast);
 }
 
-.setting-item input[type="text"]:focus,
-.setting-item input[type="password"]:focus,
-.setting-item input[type="number"]:focus,
+.setting-item input[type='text']:focus,
+.setting-item input[type='password']:focus,
+.setting-item input[type='number']:focus,
 .setting-item select:focus {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(31, 111, 235, 0.2);
 }
 
-.setting-item input[type="text"]::placeholder,
-.setting-item input[type="password"]::placeholder {
+.setting-item input[type='text']::placeholder,
+.setting-item input[type='password']::placeholder {
   color: var(--text-secondary);
   opacity: 0.7;
 }
@@ -162,7 +162,7 @@
   padding-right: 40px;
 }
 
-[data-theme="dark"] .setting-item select {
+[data-theme='dark'] .setting-item select {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23c9d1d9' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
 }
 
@@ -176,7 +176,7 @@
   margin-bottom: 0 !important;
 }
 
-.setting-item input[type="checkbox"] {
+.setting-item input[type='checkbox'] {
   width: 18px;
   height: 18px;
   margin: 0;
@@ -362,7 +362,7 @@
   gap: var(--spacing-sm);
 }
 
-.color-row input[type="text"] {
+.color-row input[type='text'] {
   flex: 1;
 }
 

@@ -9,7 +9,7 @@ import { SystemEvents } from '../utils/types.js';
 
 export interface CoordinationMetrics {
   timestamp: Date;
-  
+
   // Task metrics
   taskMetrics: {
     totalTasks: number;
@@ -22,7 +22,7 @@ export interface CoordinationMetrics {
     tasksByPriority: Record<string, number>;
     tasksByType: Record<string, number>;
   };
-  
+
   // Agent metrics
   agentMetrics: {
     totalAgents: number;
@@ -33,7 +33,7 @@ export interface CoordinationMetrics {
     avgTasksPerAgent: number;
     agentsByType: Record<string, number>;
   };
-  
+
   // Resource metrics
   resourceMetrics: {
     totalResources: number;
@@ -44,7 +44,7 @@ export interface CoordinationMetrics {
     lockContention: number; // waiting requests
     deadlockCount: number;
   };
-  
+
   // Coordination metrics
   coordinationMetrics: {
     messagesSent: number;
@@ -55,7 +55,7 @@ export interface CoordinationMetrics {
     workStealingEvents: number;
     circuitBreakerTrips: number;
   };
-  
+
   // Performance metrics
   performanceMetrics: {
     coordinationLatency: number; // avg ms
@@ -82,7 +82,7 @@ export class CoordinationMetricsCollector {
   private messageStartTimes = new Map<string, Date>();
   private lockStartTimes = new Map<string, Date>();
   private collectionInterval?: number;
-  
+
   // Counters
   private counters = {
     totalTasks: 0,
@@ -96,9 +96,9 @@ export class CoordinationMetricsCollector {
     workStealingEvents: 0,
     circuitBreakerTrips: 0,
     deadlockCount: 0,
-    errors: 0,
+    errors: 0
   };
-  
+
   // Gauges
   private gauges = {
     activeTasks: 0,
@@ -107,22 +107,22 @@ export class CoordinationMetricsCollector {
     busyAgents: 0,
     lockedResources: 0,
     freeResources: 0,
-    lockContention: 0,
+    lockContention: 0
   };
-  
+
   // Histograms (for calculating averages)
   private histograms = {
     taskDurations: [] as number[],
     messageDurations: [] as number[],
     lockDurations: [] as number[],
     coordinationLatencies: [] as number[],
-    schedulingLatencies: [] as number[],
+    schedulingLatencies: [] as number[]
   };
 
   constructor(
     private logger: ILogger,
     private eventBus: IEventBus,
-    private collectionIntervalMs = 30000, // 30 seconds
+    private collectionIntervalMs = 30000 // 30 seconds
   ) {
     this.setupEventHandlers();
   }
@@ -132,7 +132,7 @@ export class CoordinationMetricsCollector {
    */
   start(): void {
     this.logger.info('Starting coordination metrics collection');
-    
+
     this.collectionInterval = setInterval(() => {
       this.collectMetrics();
     }, this.collectionIntervalMs);
@@ -146,7 +146,7 @@ export class CoordinationMetricsCollector {
       clearInterval(this.collectionInterval);
       delete this.collectionInterval;
     }
-    
+
     this.logger.info('Stopped coordination metrics collection');
   }
 
@@ -157,15 +157,15 @@ export class CoordinationMetricsCollector {
     const sample: MetricsSample = {
       timestamp: new Date(),
       metric,
-      value,
+      value
     };
-    
+
     if (tags !== undefined) {
       sample.tags = tags;
     }
-    
+
     this.samples.push(sample);
-    
+
     // Keep only last 10000 samples to prevent memory bloat
     if (this.samples.length > 10000) {
       this.samples = this.samples.slice(-5000);
@@ -178,15 +178,15 @@ export class CoordinationMetricsCollector {
   getCurrentMetrics(): CoordinationMetrics {
     const now = new Date();
     const minuteAgo = new Date(now.getTime() - 60000);
-    
+
     // Calculate throughput (items per minute)
     const recentSamples = this.samples.filter(s => s.timestamp >= minuteAgo);
     const taskCompletions = recentSamples.filter(s => s.metric === 'task.completed').length;
     const errorCount = recentSamples.filter(s => s.metric === 'error').length;
-    
+
     return {
       timestamp: now,
-      
+
       taskMetrics: {
         totalTasks: this.counters.totalTasks,
         activeTasks: this.gauges.activeTasks,
@@ -196,9 +196,9 @@ export class CoordinationMetricsCollector {
         avgTaskDuration: this.average(this.histograms.taskDurations),
         taskThroughput: taskCompletions,
         tasksByPriority: this.getTasksByPriority(),
-        tasksByType: this.getTasksByType(),
+        tasksByType: this.getTasksByType()
       },
-      
+
       agentMetrics: {
         totalAgents: this.gauges.activeAgents + this.gauges.idleAgents,
         activeAgents: this.gauges.activeAgents,
@@ -206,9 +206,9 @@ export class CoordinationMetricsCollector {
         busyAgents: this.gauges.busyAgents,
         agentUtilization: this.calculateAgentUtilization(),
         avgTasksPerAgent: this.calculateAvgTasksPerAgent(),
-        agentsByType: this.getAgentsByType(),
+        agentsByType: this.getAgentsByType()
       },
-      
+
       resourceMetrics: {
         totalResources: this.gauges.lockedResources + this.gauges.freeResources,
         lockedResources: this.gauges.lockedResources,
@@ -216,9 +216,9 @@ export class CoordinationMetricsCollector {
         resourceUtilization: this.calculateResourceUtilization(),
         avgLockDuration: this.average(this.histograms.lockDurations),
         lockContention: this.gauges.lockContention,
-        deadlockCount: this.counters.deadlockCount,
+        deadlockCount: this.counters.deadlockCount
       },
-      
+
       coordinationMetrics: {
         messagesSent: this.counters.messagesSent,
         messagesReceived: this.counters.messagesReceived,
@@ -226,16 +226,16 @@ export class CoordinationMetricsCollector {
         conflictsDetected: this.counters.conflictsDetected,
         conflictsResolved: this.counters.conflictsResolved,
         workStealingEvents: this.counters.workStealingEvents,
-        circuitBreakerTrips: this.counters.circuitBreakerTrips,
+        circuitBreakerTrips: this.counters.circuitBreakerTrips
       },
-      
+
       performanceMetrics: {
         coordinationLatency: this.average(this.histograms.coordinationLatencies),
         schedulingLatency: this.average(this.histograms.schedulingLatencies),
         memoryUsage: this.getMemoryUsage(),
         cpuUsage: this.getCpuUsage(),
-        errorRate: errorCount,
-      },
+        errorRate: errorCount
+      }
     };
   }
 
@@ -244,35 +244,33 @@ export class CoordinationMetricsCollector {
    */
   getMetricHistory(metric: string, since?: Date): MetricsSample[] {
     const cutoff = since || new Date(Date.now() - 3600000); // 1 hour ago
-    
-    return this.samples.filter(s => 
-      s.metric === metric && s.timestamp >= cutoff
-    );
+
+    return this.samples.filter(s => s.metric === metric && s.timestamp >= cutoff);
   }
 
   /**
    * Get top metrics by value
    */
   getTopMetrics(limit = 10): Array<{ metric: string; value: number; timestamp: Date }> {
-    const recent = this.samples.filter(s => 
-      s.timestamp >= new Date(Date.now() - 300000) // 5 minutes
+    const recent = this.samples.filter(
+      s => s.timestamp >= new Date(Date.now() - 300000) // 5 minutes
     );
-    
+
     const byMetric = new Map<string, number>();
     const timestamps = new Map<string, Date>();
-    
+
     for (const sample of recent) {
       byMetric.set(sample.metric, (byMetric.get(sample.metric) || 0) + sample.value);
       timestamps.set(sample.metric, sample.timestamp);
     }
-    
+
     return Array.from(byMetric.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, limit)
       .map(([metric, value]) => ({
         metric,
         value,
-        timestamp: timestamps.get(metric)!,
+        timestamp: timestamps.get(metric)!
       }));
   }
 
@@ -295,14 +293,14 @@ export class CoordinationMetricsCollector {
     this.eventBus.on(SystemEvents.TASK_COMPLETED, (data: any) => {
       this.counters.completedTasks++;
       this.gauges.activeTasks = Math.max(0, this.gauges.activeTasks - 1);
-      
+
       const startTime = this.taskStartTimes.get(data.taskId);
       if (startTime) {
         const duration = new Date().getTime() - startTime.getTime();
         this.histograms.taskDurations.push(duration);
         this.taskStartTimes.delete(data.taskId);
       }
-      
+
       this.recordMetric('task.completed', 1);
     });
 
@@ -354,14 +352,14 @@ export class CoordinationMetricsCollector {
     this.eventBus.on(SystemEvents.RESOURCE_RELEASED, (data: any) => {
       this.gauges.freeResources++;
       this.gauges.lockedResources = Math.max(0, this.gauges.lockedResources - 1);
-      
+
       const startTime = this.lockStartTimes.get(data.resourceId);
       if (startTime) {
         const duration = new Date().getTime() - startTime.getTime();
         this.histograms.lockDurations.push(duration);
         this.lockStartTimes.delete(data.resourceId);
       }
-      
+
       this.recordMetric('resource.released', 1);
     });
 
@@ -380,14 +378,14 @@ export class CoordinationMetricsCollector {
 
     this.eventBus.on(SystemEvents.MESSAGE_RECEIVED, (data: any) => {
       this.counters.messagesReceived++;
-      
+
       const startTime = this.messageStartTimes.get(data.message.id);
       if (startTime) {
         const duration = new Date().getTime() - startTime.getTime();
         this.histograms.messageDurations.push(duration);
         this.messageStartTimes.delete(data.message.id);
       }
-      
+
       this.recordMetric('message.received', 1);
     });
 
@@ -428,16 +426,16 @@ export class CoordinationMetricsCollector {
    */
   private collectMetrics(): void {
     const metrics = this.getCurrentMetrics();
-    
+
     // Emit metrics event
     this.eventBus.emit('metrics:coordination', metrics);
-    
+
     // Log summary
     this.logger.debug('Coordination metrics collected', {
       activeTasks: metrics.taskMetrics.activeTasks,
       activeAgents: metrics.agentMetrics.activeAgents,
       lockedResources: metrics.resourceMetrics.lockedResources,
-      taskThroughput: metrics.taskMetrics.taskThroughput,
+      taskThroughput: metrics.taskMetrics.taskThroughput
     });
   }
 
@@ -455,13 +453,13 @@ export class CoordinationMetricsCollector {
   private getTasksByPriority(): Record<string, number> {
     const priorities = ['low', 'medium', 'high', 'critical'];
     const result: Record<string, number> = {};
-    
+
     for (const priority of priorities) {
-      result[priority] = this.samples.filter(s => 
-        s.metric === 'task.created' && s.tags?.priority === priority
+      result[priority] = this.samples.filter(
+        s => s.metric === 'task.created' && s.tags?.priority === priority
       ).length;
     }
-    
+
     return result;
   }
 
@@ -470,20 +468,20 @@ export class CoordinationMetricsCollector {
    */
   private getTasksByType(): Record<string, number> {
     const types = new Set<string>();
-    
+
     for (const sample of this.samples) {
       if (sample.metric === 'task.created' && sample.tags?.type) {
         types.add(sample.tags.type);
       }
     }
-    
+
     const result: Record<string, number> = {};
     for (const type of types) {
-      result[type] = this.samples.filter(s => 
-        s.metric === 'task.created' && s.tags?.type === type
+      result[type] = this.samples.filter(
+        s => s.metric === 'task.created' && s.tags?.type === type
       ).length;
     }
-    
+
     return result;
   }
 
@@ -492,20 +490,20 @@ export class CoordinationMetricsCollector {
    */
   private getAgentsByType(): Record<string, number> {
     const types = new Set<string>();
-    
+
     for (const sample of this.samples) {
       if (sample.metric === 'agent.spawned' && sample.tags?.type) {
         types.add(sample.tags.type);
       }
     }
-    
+
     const result: Record<string, number> = {};
     for (const type of types) {
-      result[type] = this.samples.filter(s => 
-        s.metric === 'agent.spawned' && s.tags?.type === type
+      result[type] = this.samples.filter(
+        s => s.metric === 'agent.spawned' && s.tags?.type === type
       ).length;
     }
-    
+
     return result;
   }
 
@@ -565,22 +563,22 @@ export class CoordinationMetricsCollector {
     this.taskStartTimes.clear();
     this.messageStartTimes.clear();
     this.lockStartTimes.clear();
-    
+
     // Reset counters
     for (const key in this.counters) {
       (this.counters as any)[key] = 0;
     }
-    
+
     // Reset gauges
     for (const key in this.gauges) {
       (this.gauges as any)[key] = 0;
     }
-    
+
     // Clear histograms
     for (const key in this.histograms) {
       (this.histograms as any)[key] = [];
     }
-    
+
     this.logger.info('Coordination metrics cleared');
   }
 }

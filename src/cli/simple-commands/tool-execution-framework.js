@@ -23,7 +23,7 @@ export class ToolExecutionFramework {
    */
   initializeFormatters() {
     // Swarm tools formatters
-    this.resultFormatters.set('swarm_init', (result) => ({
+    this.resultFormatters.set('swarm_init', result => ({
       title: 'Swarm Initialized',
       summary: `${result.topology} topology with ${result.maxAgents} max agents`,
       details: [
@@ -34,7 +34,7 @@ export class ToolExecutionFramework {
       status: result.success ? 'success' : 'error'
     }));
 
-    this.resultFormatters.set('neural_train', (result) => ({
+    this.resultFormatters.set('neural_train', result => ({
       title: 'Neural Training Complete',
       summary: `${result.pattern_type} model trained with ${result.accuracy.toFixed(2)} accuracy`,
       details: [
@@ -51,7 +51,7 @@ export class ToolExecutionFramework {
       }
     }));
 
-    this.resultFormatters.set('performance_report', (result) => ({
+    this.resultFormatters.set('performance_report', result => ({
       title: 'Performance Report',
       summary: `${result.timeframe} analysis - ${result.metrics.success_rate.toFixed(1)}% success rate`,
       details: [
@@ -67,7 +67,7 @@ export class ToolExecutionFramework {
       }
     }));
 
-    this.resultFormatters.set('memory_usage', (result) => ({
+    this.resultFormatters.set('memory_usage', result => ({
       title: 'Memory Operation',
       summary: `${result.action} operation on key "${result.key}"`,
       details: [
@@ -79,11 +79,11 @@ export class ToolExecutionFramework {
     }));
 
     // Default formatter for unknown tools
-    this.resultFormatters.set('default', (result) => ({
+    this.resultFormatters.set('default', result => ({
       title: `Tool: ${result.tool || 'Unknown'}`,
       summary: result.message || 'Tool executed successfully',
-      details: Object.entries(result).map(([key, value]) =>
-        `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`
+      details: Object.entries(result).map(
+        ([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : value}`
       ),
       status: result.success ? 'success' : 'error'
     }));
@@ -119,7 +119,6 @@ export class ToolExecutionFramework {
       }
 
       return execution;
-
     } catch (error) {
       this.ui.addLog('error', `Failed to execute ${toolName}: ${error.message}`);
       throw error;
@@ -160,7 +159,6 @@ export class ToolExecutionFramework {
       this.processQueue();
 
       return execution;
-
     } catch (error) {
       execution.status = 'failed';
       execution.endTime = Date.now();
@@ -216,7 +214,6 @@ export class ToolExecutionFramework {
             });
           }
         });
-
       } else {
         // Execute sequentially
         for (let i = 0; i < toolExecutions.length; i++) {
@@ -235,7 +232,6 @@ export class ToolExecutionFramework {
                 currentTool: toolName
               });
             }
-
           } catch (error) {
             results.push({
               success: false,
@@ -252,7 +248,10 @@ export class ToolExecutionFramework {
       }
 
       const successful = results.filter(r => r.success).length;
-      this.ui.addLog('success', `Batch ${batchId} completed: ${successful}/${results.length} successful`);
+      this.ui.addLog(
+        'success',
+        `Batch ${batchId} completed: ${successful}/${results.length} successful`
+      );
 
       return {
         batchId,
@@ -263,7 +262,6 @@ export class ToolExecutionFramework {
           failed: results.length - successful
         }
       };
-
     } catch (error) {
       this.ui.addLog('error', `Batch ${batchId} failed: ${error.message}`);
       throw error;
@@ -325,7 +323,6 @@ export class ToolExecutionFramework {
           failedSteps: results.filter(r => r.status === 'failed').length
         }
       };
-
     } catch (error) {
       this.ui.addLog('error', `Workflow ${workflowId} failed: ${error.message}`);
       throw error;
@@ -419,7 +416,7 @@ export class ToolExecutionFramework {
    */
   getPredefinedWorkflows() {
     return {
-      'neural_training_pipeline': {
+      neural_training_pipeline: {
         name: 'Neural Training Pipeline',
         description: 'Complete neural network training with evaluation',
         steps: [
@@ -453,7 +450,7 @@ export class ToolExecutionFramework {
         ]
       },
 
-      'swarm_deployment': {
+      swarm_deployment: {
         name: 'Swarm Deployment',
         description: 'Initialize and deploy a complete swarm',
         steps: [
@@ -494,7 +491,7 @@ export class ToolExecutionFramework {
         ]
       },
 
-      'performance_analysis': {
+      performance_analysis: {
         name: 'Performance Analysis',
         description: 'Comprehensive system performance analysis',
         steps: [

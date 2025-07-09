@@ -62,7 +62,9 @@ export class MemoryToolsPanel extends EventEmitter {
    * Initialize the memory tools panel
    */
   async init() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     try {
       await this.createPanelUI();
@@ -72,7 +74,6 @@ export class MemoryToolsPanel extends EventEmitter {
 
       this.isInitialized = true;
       this.emit('initialized');
-
     } catch (error) {
       console.error('Failed to initialize memory tools panel:', error);
       this.emit('error', error);
@@ -255,8 +256,9 @@ export class MemoryToolsPanel extends EventEmitter {
    * Populate tools grid for a category
    */
   populateToolsGrid(grid, categoryId) {
-    const toolsInCategory = Object.entries(this.memoryTools)
-      .filter(([, tool]) => tool.category === categoryId);
+    const toolsInCategory = Object.entries(this.memoryTools).filter(
+      ([, tool]) => tool.category === categoryId
+    );
 
     toolsInCategory.forEach(([toolId, tool]) => {
       const toolCard = document.createElement('div');
@@ -507,7 +509,7 @@ export class MemoryToolsPanel extends EventEmitter {
     });
 
     // Tool execution
-    this.elements.panel.addEventListener('click', (e) => {
+    this.elements.panel.addEventListener('click', e => {
       if (e.target.classList.contains('tool-action-btn')) {
         const action = e.target.dataset.action;
         const toolName = e.target.dataset.tool;
@@ -567,19 +569,19 @@ export class MemoryToolsPanel extends EventEmitter {
    */
   setupWebSocketHandlers() {
     if (this.wsClient) {
-      this.wsClient.on('memory_backup_progress', (data) => {
+      this.wsClient.on('memory_backup_progress', data => {
         this.updateBackupProgress(data);
       });
 
-      this.wsClient.on('memory_operation_complete', (data) => {
+      this.wsClient.on('memory_operation_complete', data => {
         this.handleOperationComplete(data);
       });
 
-      this.wsClient.on('memory_metrics_update', (data) => {
+      this.wsClient.on('memory_metrics_update', data => {
         this.updateMemoryMetrics(data);
       });
 
-      this.wsClient.on('cache_stats_update', (data) => {
+      this.wsClient.on('cache_stats_update', data => {
         this.updateCacheStats(data);
       });
     }
@@ -601,7 +603,6 @@ export class MemoryToolsPanel extends EventEmitter {
 
       // Load cache statistics
       await this.loadCacheStats();
-
     } catch (error) {
       console.error('Failed to load initial memory data:', error);
     }
@@ -632,7 +633,6 @@ export class MemoryToolsPanel extends EventEmitter {
       await this.sendCoordinationNotification(`${tool.name} completed successfully`);
 
       this.emit('tool_executed', { toolId });
-
     } catch (error) {
       this.updateStatus('Tool execution failed', 'error');
       this.emit('tool_error', { toolId, error });
@@ -658,7 +658,9 @@ export class MemoryToolsPanel extends EventEmitter {
    */
   showToolConfiguration(toolId) {
     const tool = this.memoryTools[toolId];
-    if (!tool) {return;}
+    if (!tool) {
+      return;
+    }
 
     // Create configuration modal
     const modal = document.createElement('div');
@@ -807,106 +809,106 @@ export class MemoryToolsPanel extends EventEmitter {
     const timestamp = new Date().toISOString();
 
     switch (toolId) {
-    case 'memory_backup':
-      return {
-        success: true,
-        backupId: `backup-${Date.now()}`,
-        size: '45.2 MB',
-        timestamp,
-        location: '/backups/memory-backup.gz'
-      };
+      case 'memory_backup':
+        return {
+          success: true,
+          backupId: `backup-${Date.now()}`,
+          size: '45.2 MB',
+          timestamp,
+          location: '/backups/memory-backup.gz'
+        };
 
-    case 'memory_restore':
-      return {
-        success: true,
-        restored: true,
-        timestamp,
-        itemsRestored: 1247
-      };
+      case 'memory_restore':
+        return {
+          success: true,
+          restored: true,
+          timestamp,
+          itemsRestored: 1247
+        };
 
-    case 'memory_compress':
-      return {
-        success: true,
-        originalSize: '89.4 MB',
-        compressedSize: '23.1 MB',
-        compressionRatio: 0.26,
-        algorithm: 'gzip'
-      };
+      case 'memory_compress':
+        return {
+          success: true,
+          originalSize: '89.4 MB',
+          compressedSize: '23.1 MB',
+          compressionRatio: 0.26,
+          algorithm: 'gzip'
+        };
 
-    case 'memory_sync':
-      return {
-        success: true,
-        synced: true,
-        timestamp,
-        itemsSynced: 342,
-        conflicts: 0
-      };
+      case 'memory_sync':
+        return {
+          success: true,
+          synced: true,
+          timestamp,
+          itemsSynced: 342,
+          conflicts: 0
+        };
 
-    case 'cache_manage':
-      return {
-        success: true,
-        action: 'optimized',
-        entriesProcessed: 1523,
-        spaceSaved: '12.7 MB',
-        hitRateImprovement: 0.08
-      };
+      case 'cache_manage':
+        return {
+          success: true,
+          action: 'optimized',
+          entriesProcessed: 1523,
+          spaceSaved: '12.7 MB',
+          hitRateImprovement: 0.08
+        };
 
-    case 'state_snapshot':
-      return {
-        success: true,
-        snapshotId: `snapshot-${Date.now()}`,
-        timestamp,
-        size: '8.9 MB',
-        components: 15
-      };
+      case 'state_snapshot':
+        return {
+          success: true,
+          snapshotId: `snapshot-${Date.now()}`,
+          timestamp,
+          size: '8.9 MB',
+          components: 15
+        };
 
-    case 'context_restore':
-      return {
-        success: true,
-        contextRestored: true,
-        timestamp,
-        itemsRestored: 89,
-        contextSize: '2.3 MB'
-      };
+      case 'context_restore':
+        return {
+          success: true,
+          contextRestored: true,
+          timestamp,
+          itemsRestored: 89,
+          contextSize: '2.3 MB'
+        };
 
-    case 'memory_analytics':
-      return {
-        success: true,
-        analytics: {
-          totalMemory: 128.5,
-          activeMemory: 89.2,
-          efficiency: 0.87,
-          hitRate: 0.94,
-          operations: 15420,
-          insights: [
-            'Memory usage is optimal',
-            'Cache hit rate is excellent',
-            'No memory leaks detected'
+      case 'memory_analytics':
+        return {
+          success: true,
+          analytics: {
+            totalMemory: 128.5,
+            activeMemory: 89.2,
+            efficiency: 0.87,
+            hitRate: 0.94,
+            operations: 15420,
+            insights: [
+              'Memory usage is optimal',
+              'Cache hit rate is excellent',
+              'No memory leaks detected'
+            ]
+          }
+        };
+
+      case 'memory_persist':
+        return {
+          success: true,
+          persisted: true,
+          timestamp,
+          sessionId: `session-${Date.now()}`,
+          size: '15.7 MB'
+        };
+
+      case 'memory_namespace':
+        return {
+          success: true,
+          namespaces: [
+            { id: 'default', size: '12.3 MB', items: 245 },
+            { id: 'cache', size: '8.7 MB', items: 156 },
+            { id: 'session', size: '3.2 MB', items: 78 }
           ]
-        }
-      };
+        };
 
-    case 'memory_persist':
-      return {
-        success: true,
-        persisted: true,
-        timestamp,
-        sessionId: `session-${Date.now()}`,
-        size: '15.7 MB'
-      };
-
-    case 'memory_namespace':
-      return {
-        success: true,
-        namespaces: [
-          { id: 'default', size: '12.3 MB', items: 245 },
-          { id: 'cache', size: '8.7 MB', items: 156 },
-          { id: 'session', size: '3.2 MB', items: 78 }
-        ]
-      };
-
-    default:
-      return { success: true, data: {}, mock: true };
+      default:
+        return { success: true, data: {}, mock: true };
     }
   }
 
@@ -933,7 +935,9 @@ export class MemoryToolsPanel extends EventEmitter {
    */
   handleToolResult(toolId, result) {
     const tool = this.memoryTools[toolId];
-    if (!tool) {return;}
+    if (!tool) {
+      return;
+    }
 
     if (result && result.success) {
       this.updateStatus(`${tool.name} completed successfully`, 'success');
@@ -968,7 +972,9 @@ export class MemoryToolsPanel extends EventEmitter {
    */
   addToTimeline(operation) {
     const timeline = document.getElementById('operationsTimeline');
-    if (!timeline) {return;}
+    if (!timeline) {
+      return;
+    }
 
     if (timeline.querySelector('.timeline-placeholder')) {
       timeline.innerHTML = '';
@@ -997,10 +1003,18 @@ export class MemoryToolsPanel extends EventEmitter {
    * Format operation result for display
    */
   formatOperationResult(result) {
-    if (result.size) {return `Size: ${result.size}`;}
-    if (result.compressionRatio) {return `Compression: ${(result.compressionRatio * 100).toFixed(1)}%`;}
-    if (result.itemsSynced) {return `Synced: ${result.itemsSynced} items`;}
-    if (result.spaceSaved) {return `Space saved: ${result.spaceSaved}`;}
+    if (result.size) {
+      return `Size: ${result.size}`;
+    }
+    if (result.compressionRatio) {
+      return `Compression: ${(result.compressionRatio * 100).toFixed(1)}%`;
+    }
+    if (result.itemsSynced) {
+      return `Synced: ${result.itemsSynced} items`;
+    }
+    if (result.spaceSaved) {
+      return `Space saved: ${result.spaceSaved}`;
+    }
     return 'Operation completed';
   }
 
@@ -1090,12 +1104,16 @@ export class MemoryToolsPanel extends EventEmitter {
     if (insightsContainer && metrics.insights) {
       insightsContainer.innerHTML = `
         <div class="insights-list">
-          ${metrics.insights.map(insight => `
+          ${metrics.insights
+            .map(
+              insight => `
             <div class="insight-item">
               <span class="insight-icon">💡</span>
               <span class="insight-text">${insight}</span>
             </div>
-          `).join('')}
+          `
+            )
+            .join('')}
         </div>
       `;
     }
@@ -1108,9 +1126,24 @@ export class MemoryToolsPanel extends EventEmitter {
     try {
       // Mock backup data
       const backups = [
-        { id: 'backup-1', name: 'Daily Backup', size: '45.2 MB', date: new Date(Date.now() - 86400000).toISOString() },
-        { id: 'backup-2', name: 'Weekly Backup', size: '98.7 MB', date: new Date(Date.now() - 604800000).toISOString() },
-        { id: 'backup-3', name: 'Manual Backup', size: '23.1 MB', date: new Date(Date.now() - 3600000).toISOString() }
+        {
+          id: 'backup-1',
+          name: 'Daily Backup',
+          size: '45.2 MB',
+          date: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          id: 'backup-2',
+          name: 'Weekly Backup',
+          size: '98.7 MB',
+          date: new Date(Date.now() - 604800000).toISOString()
+        },
+        {
+          id: 'backup-3',
+          name: 'Manual Backup',
+          size: '23.1 MB',
+          date: new Date(Date.now() - 3600000).toISOString()
+        }
       ];
 
       this.renderBackupList(backups);
@@ -1124,14 +1157,18 @@ export class MemoryToolsPanel extends EventEmitter {
    */
   renderBackupList(backups) {
     const backupList = document.getElementById('backupList');
-    if (!backupList) {return;}
+    if (!backupList) {
+      return;
+    }
 
     if (backups.length === 0) {
       backupList.innerHTML = '<div class="backups-placeholder">No backups available</div>';
       return;
     }
 
-    backupList.innerHTML = backups.map(backup => `
+    backupList.innerHTML = backups
+      .map(
+        backup => `
       <div class="backup-item">
         <div class="backup-info">
           <div class="backup-name">${backup.name}</div>
@@ -1152,11 +1189,13 @@ export class MemoryToolsPanel extends EventEmitter {
           </button>
         </div>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
 
     // Add event listeners for backup actions
     backupList.querySelectorAll('.backup-action-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         const action = e.currentTarget.dataset.action;
         const backupId = e.currentTarget.dataset.backup;
         this.handleBackupAction(action, backupId);
@@ -1170,15 +1209,15 @@ export class MemoryToolsPanel extends EventEmitter {
   async handleBackupAction(action, backupId) {
     try {
       switch (action) {
-      case 'restore':
-        await this.restoreBackup(backupId);
-        break;
-      case 'download':
-        await this.downloadBackup(backupId);
-        break;
-      case 'delete':
-        await this.deleteBackup(backupId);
-        break;
+        case 'restore':
+          await this.restoreBackup(backupId);
+          break;
+        case 'download':
+          await this.downloadBackup(backupId);
+          break;
+        case 'delete':
+          await this.deleteBackup(backupId);
+          break;
       }
     } catch (error) {
       console.error(`Failed to ${action} backup:`, error);
@@ -1404,13 +1443,13 @@ export class MemoryToolsPanel extends EventEmitter {
    */
   async loadTabData(tabId) {
     switch (tabId) {
-    case 'analytics':
-      await this.loadMemoryMetrics();
-      break;
-    case 'management':
-      await this.loadBackupList();
-      await this.loadCacheStats();
-      break;
+      case 'analytics':
+        await this.loadMemoryMetrics();
+        break;
+      case 'management':
+        await this.loadBackupList();
+        await this.loadCacheStats();
+        break;
     }
   }
 

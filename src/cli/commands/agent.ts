@@ -26,7 +26,7 @@ let agentManager: AgentManager | null = null;
 // Initialize agent manager
 async function initializeAgentManager(): Promise<AgentManager> {
   if (agentManager) return agentManager;
-  
+
   const logger = new Logger({ level: 'info', format: 'text', destination: 'console' });
   const eventBus = EventBus.getInstance();
   const memorySystem = new DistributedMemorySystem(
@@ -34,9 +34,9 @@ async function initializeAgentManager(): Promise<AgentManager> {
     logger,
     eventBus
   );
-  
+
   await memorySystem.initialize();
-  
+
   agentManager = new AgentManager(
     {
       maxAgents: 100,
@@ -54,7 +54,7 @@ async function initializeAgentManager(): Promise<AgentManager> {
     eventBus,
     memorySystem
   );
-  
+
   await agentManager.initialize();
   return agentManager;
 }
@@ -90,58 +90,69 @@ export function createAgentCommand(): Command {
       try {
         const manager = await initializeAgentManager();
         let agents = manager.getAllAgents();
-        
+
         // Apply filters
         if (options.type) {
           agents = agents.filter(agent => agent.type === options.type);
         }
-        
+
         if (options.status) {
           agents = agents.filter(agent => agent.status === options.status);
         }
-        
+
         if (options.unhealthy) {
           agents = agents.filter(agent => agent.health < 0.7);
         }
-        
+
         // Sort agents
         agents.sort((a, b) => {
           switch (options.sort) {
-            case 'type': return a.type.localeCompare(b.type);
-            case 'status': return a.status.localeCompare(b.status);
-            case 'health': return b.health - a.health;
-            case 'workload': return b.workload - a.workload;
-            default: return a.name.localeCompare(b.name);
+            case 'type':
+              return a.type.localeCompare(b.type);
+            case 'status':
+              return a.status.localeCompare(b.status);
+            case 'health':
+              return b.health - a.health;
+            case 'workload':
+              return b.workload - a.workload;
+            default:
+              return a.name.localeCompare(b.name);
           }
         });
-        
+
         if (options.json) {
           console.log(JSON.stringify(agents, null, 2));
           return;
         }
-        
+
         if (agents.length === 0) {
           console.log(chalk.yellow('No agents found matching the criteria'));
           return;
         }
-        
+
         console.log(chalk.cyan(`\n🤖 Agent Status Report (${agents.length} agents)`));
-        console.log('=' .repeat(80));
-        
+        console.log('='.repeat(80));
+
         if (options.detailed) {
           displayDetailedAgentList(agents, manager);
         } else {
           displayCompactAgentList(agents);
         }
-        
+
         // Display system stats
         const stats = manager.getSystemStats();
         console.log('\n' + chalk.cyan('System Overview:'));
-        console.log(`Total Agents: ${stats.totalAgents} | Active: ${stats.activeAgents} | Healthy: ${stats.healthyAgents}`);
-        console.log(`Average Health: ${formatPercentage(stats.averageHealth)} | Pools: ${stats.pools}`);
-        
+        console.log(
+          `Total Agents: ${stats.totalAgents} | Active: ${stats.activeAgents} | Healthy: ${stats.healthyAgents}`
+        );
+        console.log(
+          `Average Health: ${formatPercentage(stats.averageHealth)} | Pools: ${stats.pools}`
+        );
       } catch (error) {
-        console.error(chalk.red('Error listing agents:'), (error instanceof Error ? error.message : String(error)));
+        console.error(
+          chalk.red('Error listing agents:'),
+          error instanceof Error ? error.message : String(error)
+        );
         process.exit(1);
       }
     });
@@ -164,16 +175,16 @@ export function createAgentCommand(): Command {
     .action(async (template: string, options: any) => {
       try {
         const manager = await initializeAgentManager();
-        
+
         let agentConfig: any = {};
-        
+
         // Load from config file if provided
         if (options.config) {
           const configPath = path.resolve(options.config);
           const configData = await fs.readFile(configPath, 'utf-8');
           agentConfig = JSON.parse(configData);
         }
-        
+
         // Interactive mode
         if (options.interactive) {
           agentConfig = await interactiveAgentConfiguration(manager);
@@ -181,20 +192,24 @@ export function createAgentCommand(): Command {
           // Use template or command line options
           const templateName = template || options.template;
           if (!templateName) {
-            console.error(chalk.red('Error: Template name is required. Use --interactive for guided setup.'));
+            console.error(
+              chalk.red('Error: Template name is required. Use --interactive for guided setup.')
+            );
             return;
           }
-          
+
           const templates = manager.getAgentTemplates();
-          const selectedTemplate = templates.find(t => t.name.toLowerCase().includes(templateName.toLowerCase()));
-          
+          const selectedTemplate = templates.find(t =>
+            t.name.toLowerCase().includes(templateName.toLowerCase())
+          );
+
           if (!selectedTemplate) {
             console.error(chalk.red(`Template '${templateName}' not found.`));
             console.log('Available templates:');
             templates.forEach(t => console.log(`  - ${t.name} (${t.type})`));
             return;
           }
-          
+
           agentConfig = {
             template: selectedTemplate.name,
             name: options.name,
@@ -208,22 +223,19 @@ export function createAgentCommand(): Command {
             }
           };
         }
-        
+
         console.log(chalk.cyan('\n🚀 Creating new agent...'));
-        
+
         // Create the agent
-        const agentId = await manager.createAgent(
-          agentConfig.template || 'researcher',
-          {
-            name: agentConfig.name,
-            config: agentConfig.config,
-            environment: agentConfig.environment
-          }
-        );
-        
+        const agentId = await manager.createAgent(agentConfig.template || 'researcher', {
+          name: agentConfig.name,
+          config: agentConfig.config,
+          environment: agentConfig.environment
+        });
+
         console.log(chalk.green(`✅ Agent created successfully!`));
         console.log(`Agent ID: ${chalk.bold(agentId)}`);
-        
+
         // Add to pool if specified
         if (options.pool) {
           const pools = manager.getAllPools();
@@ -235,7 +247,7 @@ export function createAgentCommand(): Command {
             console.log(chalk.yellow(`Warning: Pool '${options.pool}' not found`));
           }
         }
-        
+
         // Start agent if requested
         if (options.start) {
           console.log(chalk.cyan('Starting agent...'));
@@ -244,15 +256,17 @@ export function createAgentCommand(): Command {
         } else {
           console.log(chalk.yellow(`Use 'claude-flow agent start ${agentId}' to start the agent`));
         }
-        
+
         // Display agent info
         const agent = manager.getAgent(agentId);
         if (agent) {
           displayAgentSummary(agent);
         }
-        
       } catch (error) {
-        console.error(chalk.red('Error creating agent:'), (error instanceof Error ? error.message : String(error)));
+        console.error(
+          chalk.red('Error creating agent:'),
+          error instanceof Error ? error.message : String(error)
+        );
         process.exit(1);
       }
     });
@@ -272,10 +286,10 @@ export const agentCommand = createAgentCommand();
 
 async function interactiveAgentConfiguration(manager: AgentManager): Promise<any> {
   console.log(chalk.cyan('\n🛠️  Interactive Agent Configuration'));
-  
+
   const templates = manager.getAgentTemplates();
   const templateChoices = templates.map(t => ({ name: `${t.name} (${t.type})`, value: t.name }));
-  
+
   const answers = await inquirer.prompt([
     {
       type: 'list',
@@ -294,7 +308,7 @@ async function interactiveAgentConfiguration(manager: AgentManager): Promise<any
       name: 'autonomyLevel',
       message: 'Autonomy level (0-1):',
       default: '0.7',
-      validate: (value) => {
+      validate: value => {
         const num = parseFloat(value);
         return (num >= 0 && num <= 1) || 'Must be between 0 and 1';
       }
@@ -304,17 +318,17 @@ async function interactiveAgentConfiguration(manager: AgentManager): Promise<any
       name: 'maxTasks',
       message: 'Maximum concurrent tasks:',
       default: '5',
-      validate: (value) => {
+      validate: value => {
         const num = parseInt(value);
         return (num > 0 && num <= 20) || 'Must be between 1 and 20';
       }
     },
     {
-      type: 'input', 
+      type: 'input',
       name: 'maxMemory',
       message: 'Memory limit (MB):',
       default: '512',
-      validate: (value) => {
+      validate: value => {
         const num = parseInt(value);
         return (num >= 128 && num <= 4096) || 'Must be between 128 and 4096';
       }
@@ -340,7 +354,7 @@ function displayCompactAgentList(agents: any[]): void {
     head: ['ID', 'Name', 'Type', 'Status', 'Health', 'Workload', 'Last Activity'],
     colWidths: [10, 20, 15, 12, 10, 10, 20]
   });
-  
+
   agents.forEach(agent => {
     table.push([
       agent.id.id.slice(-8),
@@ -352,24 +366,28 @@ function displayCompactAgentList(agents: any[]): void {
       formatRelativeTime(agent.metrics?.lastActivity || agent.lastHeartbeat)
     ]);
   });
-  
+
   console.log(table.toString());
 }
 
 function displayDetailedAgentList(agents: any[], manager: AgentManager): void {
   agents.forEach((agent, index) => {
     if (index > 0) console.log('\n' + '-'.repeat(60));
-    
+
     console.log(`\n${chalk.bold(agent.name)} (${agent.id.id.slice(-8)})`);
     console.log(`Type: ${chalk.blue(agent.type)} | Status: ${getStatusDisplay(agent.status)}`);
     console.log(`Health: ${getHealthDisplay(agent.health)} | Workload: ${agent.workload}`);
-    
+
     if (agent.metrics) {
-      console.log(`Tasks: ${agent.metrics.tasksCompleted} completed, ${agent.metrics.tasksFailed} failed`);
+      console.log(
+        `Tasks: ${agent.metrics.tasksCompleted} completed, ${agent.metrics.tasksFailed} failed`
+      );
       console.log(`Success Rate: ${formatPercentage(agent.metrics.successRate)}`);
-      console.log(`CPU: ${formatPercentage(agent.metrics.cpuUsage)} | Memory: ${formatBytes(agent.metrics.memoryUsage)}`);
+      console.log(
+        `CPU: ${formatPercentage(agent.metrics.cpuUsage)} | Memory: ${formatBytes(agent.metrics.memoryUsage)}`
+      );
     }
-    
+
     const health = manager.getAgentHealth(agent.id.id);
     if (health && health.issues.length > 0) {
       console.log(chalk.red(`Issues: ${health.issues.length} active`));
@@ -389,14 +407,22 @@ function displayAgentSummary(agent: any): void {
 
 function getStatusColor(status: string): any {
   switch (status) {
-    case 'idle': return chalk.green;
-    case 'busy': return chalk.blue;
-    case 'error': return chalk.red;
-    case 'offline': return chalk.gray;
-    case 'initializing': return chalk.yellow;
-    case 'terminating': return chalk.yellow;
-    case 'terminated': return chalk.gray;
-    default: return chalk.white;
+    case 'idle':
+      return chalk.green;
+    case 'busy':
+      return chalk.blue;
+    case 'error':
+      return chalk.red;
+    case 'offline':
+      return chalk.gray;
+    case 'initializing':
+      return chalk.yellow;
+    case 'terminating':
+      return chalk.yellow;
+    case 'terminated':
+      return chalk.gray;
+    default:
+      return chalk.white;
   }
 }
 
@@ -408,17 +434,17 @@ function getStatusDisplay(status: string): string {
 function getHealthDisplay(health: number): string {
   const percentage = Math.round(health * 100);
   let color = chalk.green;
-  
+
   if (health < 0.3) color = chalk.red;
   else if (health < 0.7) color = chalk.yellow;
-  
+
   return `${color}${percentage}%${chalk.reset}`;
 }
 
 function formatRelativeTime(date: Date): string {
   const now = new Date();
   const diff = now.getTime() - date.getTime();
-  
+
   if (diff < 60000) return 'just now';
   if (diff < 3600000) return `${Math.floor(diff / 60000)}m ago`;
   if (diff < 86400000) return `${Math.floor(diff / 3600000)}h ago`;

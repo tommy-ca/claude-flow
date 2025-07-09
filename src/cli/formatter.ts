@@ -14,19 +14,19 @@ import * as process from 'process';
  */
 export function formatError(error: unknown): string {
   if (error instanceof Error) {
-    let message = (error instanceof Error ? error.message : String(error));
-    
+    let message = error instanceof Error ? error.message : String(error);
+
     if ('code' in error) {
       message = `[${(error as any).code}] ${message}`;
     }
-    
+
     if ('details' in error && (error as any).details) {
       message += '\n' + chalk.gray('Details: ' + JSON.stringify((error as any).details, null, 2));
     }
-    
+
     return message;
   }
-  
+
   return String(error);
 }
 
@@ -40,9 +40,9 @@ export function formatAgent(agent: AgentProfile): string {
     chalk.gray(`Type: ${agent.type}`),
     chalk.gray(`Priority: ${agent.priority}`),
     chalk.gray(`Max Tasks: ${agent.maxConcurrentTasks}`),
-    chalk.gray(`Capabilities: ${agent.capabilities.join(', ')}`),
+    chalk.gray(`Capabilities: ${agent.capabilities.join(', ')}`)
   ];
-  
+
   return lines.join('\n');
 }
 
@@ -50,22 +50,23 @@ export function formatAgent(agent: AgentProfile): string {
  * Formats a task for display
  */
 export function formatTask(task: Task): string {
-  const statusColor = {
-    pending: chalk.gray,
-    queued: chalk.yellow,
-    assigned: chalk.blue,
-    running: chalk.cyan,
-    completed: chalk.green,
-    failed: chalk.red,
-    cancelled: chalk.magenta,
-  }[task.status] || chalk.white;
+  const statusColor =
+    {
+      pending: chalk.gray,
+      queued: chalk.yellow,
+      assigned: chalk.blue,
+      running: chalk.cyan,
+      completed: chalk.green,
+      failed: chalk.red,
+      cancelled: chalk.magenta
+    }[task.status] || chalk.white;
 
   const lines = [
     chalk.yellow.bold(`Task: ${task.description}`),
     chalk.gray(`ID: ${task.id}`),
     chalk.gray(`Type: ${task.type}`),
     statusColor(`Status: ${task.status}`),
-    chalk.gray(`Priority: ${task.priority}`),
+    chalk.gray(`Priority: ${task.priority}`)
   ];
 
   if (task.assignedAgent) {
@@ -93,7 +94,7 @@ export function formatMemoryEntry(entry: MemoryEntry): string {
     chalk.gray(`Agent: ${entry.agentId}`),
     chalk.gray(`Session: ${entry.sessionId}`),
     chalk.gray(`Timestamp: ${entry.timestamp.toISOString()}`),
-    chalk.gray(`Version: ${entry.version}`),
+    chalk.gray(`Version: ${entry.version}`)
   ];
 
   if (entry.tags.length > 0) {
@@ -112,25 +113,25 @@ export function formatHealthStatus(health: HealthStatus): string {
   const statusColor = {
     healthy: chalk.green,
     degraded: chalk.yellow,
-    unhealthy: chalk.red,
+    unhealthy: chalk.red
   }[health.status];
 
   const lines = [
     statusColor.bold(`System Status: ${health.status.toUpperCase()}`),
     chalk.gray(`Checked at: ${health.timestamp.toISOString()}`),
     '',
-    chalk.cyan.bold('Components:'),
+    chalk.cyan.bold('Components:')
   ];
 
   for (const [name, component] of Object.entries(health.components)) {
     const compColor = {
       healthy: chalk.green,
       degraded: chalk.yellow,
-      unhealthy: chalk.red,
+      unhealthy: chalk.red
     }[component.status];
 
     lines.push(compColor(`  ${name}: ${component.status}`));
-    
+
     if (component.error) {
       lines.push(chalk.red(`    Error: ${component.error}`));
     }
@@ -159,7 +160,7 @@ export function createAgentTable(agents: AgentProfile[]): any {
       agent.name,
       agent.type,
       agent.priority.toString(),
-      agent.maxConcurrentTasks.toString(),
+      agent.maxConcurrentTasks.toString()
     ]);
   }
 
@@ -175,22 +176,23 @@ export function createTaskTable(tasks: Task[]): any {
   });
 
   for (const task of tasks) {
-    const statusCell = {
-      pending: chalk.gray(task.status),
-      queued: chalk.yellow(task.status),
-      assigned: chalk.blue(task.status),
-      running: chalk.cyan(task.status),
-      completed: chalk.green(task.status),
-      failed: chalk.red(task.status),
-      cancelled: chalk.magenta(task.status),
-    }[task.status] || task.status;
+    const statusCell =
+      {
+        pending: chalk.gray(task.status),
+        queued: chalk.yellow(task.status),
+        assigned: chalk.blue(task.status),
+        running: chalk.cyan(task.status),
+        completed: chalk.green(task.status),
+        failed: chalk.red(task.status),
+        cancelled: chalk.magenta(task.status)
+      }[task.status] || task.status;
 
     table.push([
       task.id,
       task.type,
       task.description.substring(0, 40) + (task.description.length > 40 ? '...' : ''),
       statusCell,
-      task.assignedAgent || '-',
+      task.assignedAgent || '-'
     ]);
   }
 
@@ -204,7 +206,7 @@ export function formatDuration(ms: number): string {
   if (ms < 1000) {
     return `${ms}ms`;
   }
-  
+
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
@@ -219,7 +221,7 @@ export function formatDuration(ms: number): string {
   if (minutes > 0) {
     return `${minutes}m ${seconds % 60}s`;
   }
-  
+
   return `${seconds}s`;
 }
 
@@ -256,9 +258,9 @@ export function displayVersion(version: string, buildDate: string): void {
     chalk.white('  • MCP Server'),
     chalk.white('  • Task Coordination'),
     '',
-    chalk.blue('Homepage: ') + chalk.underline('https://github.com/ruvnet/claude-flow'),
+    chalk.blue('Homepage: ') + chalk.underline('https://github.com/ruvnet/claude-flow')
   ];
-  
+
   console.log(info.join('\n'));
 }
 
@@ -274,15 +276,15 @@ export function formatProgressBar(
   const percentage = Math.min(100, (current / total) * 100);
   const filled = Math.floor((percentage / 100) * width);
   const empty = width - filled;
-  
+
   const bar = chalk.green('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
   const percent = percentage.toFixed(1).padStart(5) + '%';
-  
+
   let result = `[${bar}] ${percent}`;
   if (label) {
     result = `${label}: ${result}`;
   }
-  
+
   return result;
 }
 
@@ -296,9 +298,9 @@ export function formatStatusIndicator(status: string): string {
     warning: chalk.yellow('⚠'),
     info: chalk.blue('ℹ'),
     running: chalk.cyan('⟳'),
-    pending: chalk.gray('○'),
+    pending: chalk.gray('○')
   };
-  
+
   return indicators[status as keyof typeof indicators] || status;
 }
 

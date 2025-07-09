@@ -4,9 +4,16 @@
  */
 
 import { EventEmitter } from 'events';
-import { MCPResourceReport, ResourceAllocationRequest, ResourceAllocationResponse } from '../../mcp/resource-protocol';
+import {
+  MCPResourceReport,
+  ResourceAllocationRequest,
+  ResourceAllocationResponse
+} from '../../mcp/resource-protocol';
 import { ResourceMemoryManager } from '../../memory/resource-memory';
-import { ResourceManagerConfig, ResourceManagerConfigManager } from '../../config/resource-manager-config';
+import {
+  ResourceManagerConfig,
+  ResourceManagerConfigManager
+} from '../../config/resource-manager-config';
 import { logger } from '../../utils/logger';
 
 export interface ResourceAnalysis {
@@ -69,10 +76,7 @@ export class ResourceManager extends EventEmitter {
   private monitoringInterval?: NodeJS.Timeout;
   private optimizationSchedule?: NodeJS.Timeout;
 
-  constructor(
-    configManager: ResourceManagerConfigManager,
-    memoryManager: ResourceMemoryManager
-  ) {
+  constructor(configManager: ResourceManagerConfigManager, memoryManager: ResourceMemoryManager) {
     super();
     this.configManager = configManager;
     this.memoryManager = memoryManager;
@@ -87,19 +91,19 @@ export class ResourceManager extends EventEmitter {
   async initialize(): Promise<void> {
     await this.configManager.initialize();
     await this.memoryManager.initialize();
-    
+
     this.config = this.configManager.getConfig();
-    
+
     // Set up monitoring
     if (this.config.monitoring.enabled) {
       await this.startMonitoring();
     }
-    
+
     // Set up optimization schedule
     if (this.config.optimization.enabled && this.config.optimization.schedule.enabled) {
       await this.scheduleOptimization();
     }
-    
+
     logger.info('Resource Manager initialized');
   }
 
@@ -108,15 +112,15 @@ export class ResourceManager extends EventEmitter {
    */
   async registerServer(report: MCPResourceReport): Promise<void> {
     this.servers.set(report.serverId, report);
-    
+
     // Store metrics
     await this.memoryManager.storeMetrics(report);
-    
+
     // Check for alerts
     await this.checkServerHealth(report);
-    
+
     this.emit('server-registered', report);
-    
+
     logger.debug(`Server ${report.serverId} registered`);
   }
 
@@ -126,18 +130,18 @@ export class ResourceManager extends EventEmitter {
   async updateServerStatus(report: MCPResourceReport): Promise<void> {
     const previousReport = this.servers.get(report.serverId);
     this.servers.set(report.serverId, report);
-    
+
     // Store metrics
     await this.memoryManager.storeMetrics(report);
-    
+
     // Check for status changes
     if (previousReport && previousReport.status !== report.status) {
       await this.handleStatusChange(report, previousReport.status);
     }
-    
+
     // Check for alerts
     await this.checkServerHealth(report);
-    
+
     this.emit('server-updated', report);
   }
 
@@ -145,8 +149,8 @@ export class ResourceManager extends EventEmitter {
    * Get all healthy servers
    */
   async getHealthyServers(): Promise<MCPResourceReport[]> {
-    return Array.from(this.servers.values()).filter(server => 
-      server.status === 'healthy' || server.status === 'degraded'
+    return Array.from(this.servers.values()).filter(
+      server => server.status === 'healthy' || server.status === 'degraded'
     );
   }
 
@@ -173,10 +177,10 @@ export class ResourceManager extends EventEmitter {
    */
   async allocateResources(request: ResourceAllocationRequest): Promise<ResourceAllocationResponse> {
     logger.info(`Allocating resources for agent ${request.agentId}`);
-    
+
     // Find suitable servers
     const suitableServers = await this.findSuitableServers(request);
-    
+
     if (suitableServers.length === 0) {
       return {
         requestId: request.requestId,
@@ -185,24 +189,24 @@ export class ResourceManager extends EventEmitter {
         alternativeServers: []
       };
     }
-    
+
     // Select best server based on strategy
     const selectedServer = await this.selectOptimalServer(suitableServers, request);
-    
+
     // Perform allocation
     const allocation = await this.performAllocation(selectedServer, request);
-    
+
     if (allocation.success) {
       // Store allocation
       this.activeAllocations.set(request.requestId, request);
-      
+
       // Emit event
       this.emit('resource-allocated', {
         requestId: request.requestId,
         serverId: selectedServer.serverId,
         agentId: request.agentId
       });
-      
+
       return {
         requestId: request.requestId,
         allocated: true,
@@ -228,21 +232,21 @@ export class ResourceManager extends EventEmitter {
       logger.warn(`No allocation found for request ${requestId}`);
       return false;
     }
-    
+
     // Perform deallocation
     const success = await this.performDeallocation(allocation);
-    
+
     if (success) {
       this.activeAllocations.delete(requestId);
-      
+
       this.emit('resource-released', {
         requestId,
         agentId: allocation.agentId
       });
-      
+
       logger.info(`Resources released for request ${requestId}`);
     }
-    
+
     return success;
   }
 
@@ -253,12 +257,14 @@ export class ResourceManager extends EventEmitter {
     const servers = Array.from(this.servers.values());
     const issues: ResourceAnalysis['issues'] = [];
     const opportunities: ResourceAnalysis['opportunities'] = [];
-    
+
     // Analyze each server
     for (const server of servers) {
       // Check for overload
-      if (server.resources.cpu.usage > 90 || 
-          (server.resources.memory.used / server.resources.memory.total) > 0.95) {
+      if (
+        server.resources.cpu.usage > 90 ||
+        server.resources.memory.used / server.resources.memory.total > 0.95
+      ) {
         issues.push({
           type: 'overload',
           description: `Server ${server.serverId} is overloaded`,
@@ -268,10 +274,12 @@ export class ResourceManager extends EventEmitter {
           recommendation: 'Scale up resources or migrate workloads'
         });
       }
-      
+
       // Check for underutilization
-      if (server.resources.cpu.usage < 20 && 
-          (server.resources.memory.used / server.resources.memory.total) < 0.3) {
+      if (
+        server.resources.cpu.usage < 20 &&
+        server.resources.memory.used / server.resources.memory.total < 0.3
+      ) {
         opportunities.push({
           type: 'consolidation',
           description: `Server ${server.serverId} is underutilized`,
@@ -281,13 +289,13 @@ export class ResourceManager extends EventEmitter {
         });
       }
     }
-    
+
     // Check for imbalance
     if (servers.length > 1) {
       const cpuUsages = servers.map(s => s.resources.cpu.usage);
       const maxCpu = Math.max(...cpuUsages);
       const minCpu = Math.min(...cpuUsages);
-      
+
       if (maxCpu - minCpu > 50) {
         issues.push({
           type: 'imbalance',
@@ -299,18 +307,18 @@ export class ResourceManager extends EventEmitter {
         });
       }
     }
-    
+
     // Generate recommendations
     const recommendations: string[] = [];
-    
+
     if (issues.length > 0) {
       recommendations.push(`Address ${issues.length} identified issues to improve system health`);
     }
-    
+
     if (opportunities.length > 0) {
       recommendations.push(`Explore ${opportunities.length} optimization opportunities`);
     }
-    
+
     return {
       timestamp: Date.now(),
       issues,
@@ -325,25 +333,25 @@ export class ResourceManager extends EventEmitter {
   async generateOptimizationPlan(strategy: string): Promise<OptimizationPlan> {
     const analysis = await this.analyzeResourceUsage();
     const actions: OptimizationPlan['actions'] = [];
-    
+
     // Generate actions based on strategy
     switch (strategy) {
       case 'balanced':
-        actions.push(...await this.generateBalancedActions(analysis));
+        actions.push(...(await this.generateBalancedActions(analysis)));
         break;
       case 'performance':
-        actions.push(...await this.generatePerformanceActions(analysis));
+        actions.push(...(await this.generatePerformanceActions(analysis)));
         break;
       case 'efficiency':
-        actions.push(...await this.generateEfficiencyActions(analysis));
+        actions.push(...(await this.generateEfficiencyActions(analysis)));
         break;
       case 'cost':
-        actions.push(...await this.generateCostActions(analysis));
+        actions.push(...(await this.generateCostActions(analysis)));
         break;
       default:
         throw new Error(`Unknown optimization strategy: ${strategy}`);
     }
-    
+
     return {
       id: `opt-${Date.now()}`,
       timestamp: Date.now(),
@@ -363,15 +371,15 @@ export class ResourceManager extends EventEmitter {
    */
   async applyOptimizationPlan(plan: OptimizationPlan): Promise<OptimizationResult[]> {
     const results: OptimizationResult[] = [];
-    
+
     logger.info(`Applying optimization plan ${plan.id} with ${plan.actions.length} actions`);
-    
+
     for (const action of plan.actions) {
       const startTime = Date.now();
-      
+
       try {
         const success = await this.executeOptimizationAction(action);
-        
+
         results.push({
           action: action.description,
           success,
@@ -382,7 +390,6 @@ export class ResourceManager extends EventEmitter {
             performanceChange: success ? 5 : 0
           }
         });
-        
       } catch (error) {
         results.push({
           action: action.description,
@@ -391,11 +398,13 @@ export class ResourceManager extends EventEmitter {
         });
       }
     }
-    
+
     // Log optimization results
     const successCount = results.filter(r => r.success).length;
-    logger.info(`Optimization plan ${plan.id} completed: ${successCount}/${results.length} actions successful`);
-    
+    logger.info(
+      `Optimization plan ${plan.id} completed: ${successCount}/${results.length} actions successful`
+    );
+
     return results;
   }
 
@@ -410,7 +419,7 @@ export class ResourceManager extends EventEmitter {
     const duration = this.parseDuration(options.duration || '1h');
     const endTime = Date.now();
     const startTime = endTime - duration;
-    
+
     return await this.memoryManager.queryMetrics({
       serverId: options.serverId,
       startTime,
@@ -425,14 +434,17 @@ export class ResourceManager extends EventEmitter {
    */
   async getClusterUtilization(): Promise<Record<string, number>> {
     const servers = Array.from(this.servers.values());
-    
+
     if (servers.length === 0) {
       return {};
     }
-    
+
     const cpuTotal = servers.reduce((sum, s) => sum + s.resources.cpu.usage, 0);
-    const memoryTotal = servers.reduce((sum, s) => sum + (s.resources.memory.used / s.resources.memory.total * 100), 0);
-    
+    const memoryTotal = servers.reduce(
+      (sum, s) => sum + (s.resources.memory.used / s.resources.memory.total) * 100,
+      0
+    );
+
     return {
       cpu: cpuTotal / servers.length,
       memory: memoryTotal / servers.length
@@ -451,11 +463,11 @@ export class ResourceManager extends EventEmitter {
    */
   private async startMonitoring(): Promise<void> {
     const interval = this.config.monitoring.interval;
-    
+
     this.monitoringInterval = setInterval(async () => {
       await this.performMonitoringCycle();
     }, interval);
-    
+
     logger.info(`Resource monitoring started (interval: ${interval}ms)`);
   }
 
@@ -468,15 +480,14 @@ export class ResourceManager extends EventEmitter {
       for (const server of this.servers.values()) {
         await this.checkServerHealth(server);
       }
-      
+
       // Perform cluster analysis
       if (this.servers.size > 1) {
         await this.performClusterAnalysis();
       }
-      
+
       // Clean up old allocations
       await this.cleanupAllocations();
-      
     } catch (error) {
       logger.error('Monitoring cycle failed:', error);
     }
@@ -488,11 +499,11 @@ export class ResourceManager extends EventEmitter {
   private async checkServerHealth(server: MCPResourceReport): Promise<void> {
     const cpuUsage = server.resources.cpu.usage;
     const memoryUsage = (server.resources.memory.used / server.resources.memory.total) * 100;
-    
+
     // Check thresholds
     const cpuThreshold = this.config.thresholds.cpu;
     const memoryThreshold = this.config.thresholds.memory;
-    
+
     if (cpuUsage > cpuThreshold.critical || memoryUsage > memoryThreshold.critical) {
       await this.handleCriticalAlert(server, 'Resource usage critical');
     } else if (cpuUsage > cpuThreshold.warning || memoryUsage > memoryThreshold.warning) {
@@ -503,9 +514,14 @@ export class ResourceManager extends EventEmitter {
   /**
    * Handle status change
    */
-  private async handleStatusChange(server: MCPResourceReport, previousStatus: string): Promise<void> {
-    logger.info(`Server ${server.serverId} status changed from ${previousStatus} to ${server.status}`);
-    
+  private async handleStatusChange(
+    server: MCPResourceReport,
+    previousStatus: string
+  ): Promise<void> {
+    logger.info(
+      `Server ${server.serverId} status changed from ${previousStatus} to ${server.status}`
+    );
+
     if (server.status === 'offline') {
       await this.handleServerOffline(server);
     } else if (server.status === 'healthy' && previousStatus !== 'healthy') {
@@ -518,7 +534,7 @@ export class ResourceManager extends EventEmitter {
    */
   private async handleServerOffline(server: MCPResourceReport): Promise<void> {
     logger.error(`Server ${server.serverId} went offline`);
-    
+
     // Store event
     await this.memoryManager.storeEvent({
       id: `offline-${server.serverId}-${Date.now()}`,
@@ -528,7 +544,7 @@ export class ResourceManager extends EventEmitter {
       serverId: server.serverId,
       message: `Server ${server.serverId} went offline`
     });
-    
+
     // Emit event
     this.emit('server-offline', server);
   }
@@ -538,7 +554,7 @@ export class ResourceManager extends EventEmitter {
    */
   private async handleServerRecovery(server: MCPResourceReport): Promise<void> {
     logger.info(`Server ${server.serverId} recovered`);
-    
+
     // Store event
     await this.memoryManager.storeEvent({
       id: `recovery-${server.serverId}-${Date.now()}`,
@@ -548,7 +564,7 @@ export class ResourceManager extends EventEmitter {
       serverId: server.serverId,
       message: `Server ${server.serverId} recovered`
     });
-    
+
     // Emit event
     this.emit('server-recovery', server);
   }
@@ -558,7 +574,7 @@ export class ResourceManager extends EventEmitter {
    */
   private async handleCriticalAlert(server: MCPResourceReport, message: string): Promise<void> {
     logger.error(`Critical alert for server ${server.serverId}: ${message}`);
-    
+
     // Store event
     await this.memoryManager.storeEvent({
       id: `critical-${server.serverId}-${Date.now()}`,
@@ -568,7 +584,7 @@ export class ResourceManager extends EventEmitter {
       serverId: server.serverId,
       message
     });
-    
+
     // Emit event
     this.emit('critical-alert', server, message);
   }
@@ -578,7 +594,7 @@ export class ResourceManager extends EventEmitter {
    */
   private async handleWarningAlert(server: MCPResourceReport, message: string): Promise<void> {
     logger.warn(`Warning alert for server ${server.serverId}: ${message}`);
-    
+
     // Store event
     await this.memoryManager.storeEvent({
       id: `warning-${server.serverId}-${Date.now()}`,
@@ -588,7 +604,7 @@ export class ResourceManager extends EventEmitter {
       serverId: server.serverId,
       message
     });
-    
+
     // Emit event
     this.emit('warning-alert', server, message);
   }
@@ -596,30 +612,36 @@ export class ResourceManager extends EventEmitter {
   /**
    * Find suitable servers for allocation
    */
-  private async findSuitableServers(request: ResourceAllocationRequest): Promise<MCPResourceReport[]> {
+  private async findSuitableServers(
+    request: ResourceAllocationRequest
+  ): Promise<MCPResourceReport[]> {
     const servers = Array.from(this.servers.values());
-    
+
     return servers.filter(server => {
       // Check basic health
       if (server.status === 'offline') return false;
-      
+
       // Check memory requirements
       if (server.resources.memory.available < request.requirements.memory.minimum) {
         return false;
       }
-      
+
       // Check CPU requirements
-      if (request.requirements.cpu?.cores && 
-          server.resources.cpu.cores < request.requirements.cpu.cores) {
+      if (
+        request.requirements.cpu?.cores &&
+        server.resources.cpu.cores < request.requirements.cpu.cores
+      ) {
         return false;
       }
-      
+
       // Check GPU requirements
-      if (request.requirements.gpu?.required && 
-          (!server.resources.gpu || server.resources.gpu.length === 0)) {
+      if (
+        request.requirements.gpu?.required &&
+        (!server.resources.gpu || server.resources.gpu.length === 0)
+      ) {
         return false;
       }
-      
+
       return true;
     });
   }
@@ -632,7 +654,7 @@ export class ResourceManager extends EventEmitter {
     request: ResourceAllocationRequest
   ): Promise<MCPResourceReport> {
     const strategy = this.config.optimization.strategy;
-    
+
     switch (strategy) {
       case 'balanced':
         // Select server with best overall balance
@@ -641,7 +663,7 @@ export class ResourceManager extends EventEmitter {
           const currentScore = this.calculateBalanceScore(current);
           return currentScore > bestScore ? current : best;
         });
-        
+
       case 'performance':
         // Select most powerful server
         return servers.reduce((best, current) => {
@@ -649,7 +671,7 @@ export class ResourceManager extends EventEmitter {
           const currentScore = this.calculatePerformanceScore(current);
           return currentScore > bestScore ? current : best;
         });
-        
+
       case 'efficiency':
         // Select server with best resource fit
         return servers.reduce((best, current) => {
@@ -657,7 +679,7 @@ export class ResourceManager extends EventEmitter {
           const currentWaste = this.calculateResourceWaste(current, request);
           return currentWaste < bestWaste ? current : best;
         });
-        
+
       default:
         return servers[0];
     }
@@ -669,7 +691,7 @@ export class ResourceManager extends EventEmitter {
   private calculateBalanceScore(server: MCPResourceReport): number {
     const cpuUsage = server.resources.cpu.usage;
     const memoryUsage = (server.resources.memory.used / server.resources.memory.total) * 100;
-    
+
     // Lower usage is better for balance
     return 200 - cpuUsage - memoryUsage;
   }
@@ -679,27 +701,30 @@ export class ResourceManager extends EventEmitter {
    */
   private calculatePerformanceScore(server: MCPResourceReport): number {
     let score = 0;
-    
+
     // CPU score
     score += server.resources.cpu.cores * 10;
-    
+
     // Memory score
     score += (server.resources.memory.total / (1024 * 1024 * 1024)) * 5; // GB
-    
+
     // GPU score
     if (server.resources.gpu) {
       score += server.resources.gpu.length * 50;
     }
-    
+
     return score;
   }
 
   /**
    * Calculate resource waste
    */
-  private calculateResourceWaste(server: MCPResourceReport, request: ResourceAllocationRequest): number {
+  private calculateResourceWaste(
+    server: MCPResourceReport,
+    request: ResourceAllocationRequest
+  ): number {
     const memoryWaste = server.resources.memory.available - request.requirements.memory.minimum;
-    
+
     // Convert to a normalized waste score
     return memoryWaste / (1024 * 1024); // MB
   }
@@ -713,7 +738,7 @@ export class ResourceManager extends EventEmitter {
   ): Promise<{ success: boolean; reason?: string; details?: any }> {
     // Simulate allocation logic
     logger.info(`Allocating ${request.requirements.memory.minimum}MB memory on ${server.serverId}`);
-    
+
     // Check if we can still allocate
     if (server.resources.memory.available < request.requirements.memory.minimum) {
       return {
@@ -721,7 +746,7 @@ export class ResourceManager extends EventEmitter {
         reason: 'Insufficient memory available'
       };
     }
-    
+
     // Simulate successful allocation
     return {
       success: true,
@@ -739,7 +764,7 @@ export class ResourceManager extends EventEmitter {
   private async performDeallocation(allocation: ResourceAllocationRequest): Promise<boolean> {
     // Simulate deallocation logic
     logger.info(`Deallocating resources for agent ${allocation.agentId}`);
-    
+
     // Always successful for simulation
     return true;
   }
@@ -747,9 +772,11 @@ export class ResourceManager extends EventEmitter {
   /**
    * Generate balanced actions
    */
-  private async generateBalancedActions(analysis: ResourceAnalysis): Promise<OptimizationPlan['actions']> {
+  private async generateBalancedActions(
+    analysis: ResourceAnalysis
+  ): Promise<OptimizationPlan['actions']> {
     const actions: OptimizationPlan['actions'] = [];
-    
+
     // Address overloaded servers
     const overloadIssues = analysis.issues.filter(i => i.type === 'overload');
     for (const issue of overloadIssues) {
@@ -762,16 +789,18 @@ export class ResourceManager extends EventEmitter {
         estimatedDuration: 15 * 60 * 1000 // 15 minutes
       });
     }
-    
+
     return actions;
   }
 
   /**
    * Generate performance actions
    */
-  private async generatePerformanceActions(analysis: ResourceAnalysis): Promise<OptimizationPlan['actions']> {
+  private async generatePerformanceActions(
+    analysis: ResourceAnalysis
+  ): Promise<OptimizationPlan['actions']> {
     const actions: OptimizationPlan['actions'] = [];
-    
+
     // Focus on scaling up for performance
     const issues = analysis.issues.filter(i => i.severity === 'high' || i.severity === 'critical');
     for (const issue of issues) {
@@ -784,18 +813,22 @@ export class ResourceManager extends EventEmitter {
         estimatedDuration: 10 * 60 * 1000 // 10 minutes
       });
     }
-    
+
     return actions;
   }
 
   /**
    * Generate efficiency actions
    */
-  private async generateEfficiencyActions(analysis: ResourceAnalysis): Promise<OptimizationPlan['actions']> {
+  private async generateEfficiencyActions(
+    analysis: ResourceAnalysis
+  ): Promise<OptimizationPlan['actions']> {
     const actions: OptimizationPlan['actions'] = [];
-    
+
     // Focus on consolidation
-    const consolidationOpportunities = analysis.opportunities.filter(o => o.type === 'consolidation');
+    const consolidationOpportunities = analysis.opportunities.filter(
+      o => o.type === 'consolidation'
+    );
     for (const opportunity of consolidationOpportunities) {
       actions.push({
         type: 'consolidate',
@@ -806,16 +839,18 @@ export class ResourceManager extends EventEmitter {
         estimatedDuration: 20 * 60 * 1000 // 20 minutes
       });
     }
-    
+
     return actions;
   }
 
   /**
    * Generate cost actions
    */
-  private async generateCostActions(analysis: ResourceAnalysis): Promise<OptimizationPlan['actions']> {
+  private async generateCostActions(
+    analysis: ResourceAnalysis
+  ): Promise<OptimizationPlan['actions']> {
     const actions: OptimizationPlan['actions'] = [];
-    
+
     // Focus on cost reduction
     const opportunities = analysis.opportunities.filter(o => o.type === 'consolidation');
     for (const opportunity of opportunities) {
@@ -828,19 +863,21 @@ export class ResourceManager extends EventEmitter {
         estimatedDuration: 25 * 60 * 1000 // 25 minutes
       });
     }
-    
+
     return actions;
   }
 
   /**
    * Execute optimization action
    */
-  private async executeOptimizationAction(action: OptimizationPlan['actions'][0]): Promise<boolean> {
+  private async executeOptimizationAction(
+    action: OptimizationPlan['actions'][0]
+  ): Promise<boolean> {
     logger.info(`Executing optimization action: ${action.description}`);
-    
+
     // Simulate action execution
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // Simulate success (80% success rate)
     return Math.random() > 0.2;
   }
@@ -853,16 +890,21 @@ export class ResourceManager extends EventEmitter {
     if (!match) {
       throw new Error(`Invalid duration format: ${duration}`);
     }
-    
+
     const value = parseInt(match[1]);
     const unit = match[2];
-    
+
     switch (unit) {
-      case 's': return value * 1000;
-      case 'm': return value * 60 * 1000;
-      case 'h': return value * 60 * 60 * 1000;
-      case 'd': return value * 24 * 60 * 60 * 1000;
-      default: throw new Error(`Invalid duration unit: ${unit}`);
+      case 's':
+        return value * 1000;
+      case 'm':
+        return value * 60 * 1000;
+      case 'h':
+        return value * 60 * 60 * 1000;
+      case 'd':
+        return value * 24 * 60 * 60 * 1000;
+      default:
+        throw new Error(`Invalid duration unit: ${unit}`);
     }
   }
 
@@ -881,7 +923,7 @@ export class ResourceManager extends EventEmitter {
   private async performClusterAnalysis(): Promise<void> {
     // Analyze cluster-wide patterns
     const utilization = await this.getClusterUtilization();
-    
+
     if (utilization.cpu > 80 || utilization.memory > 85) {
       logger.warn('Cluster utilization is high', utilization);
     }
@@ -892,10 +934,11 @@ export class ResourceManager extends EventEmitter {
    */
   private async cleanupAllocations(): Promise<void> {
     // Remove allocations older than 24 hours
-    const cutoff = Date.now() - (24 * 60 * 60 * 1000);
-    
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+
     for (const [requestId, allocation] of this.activeAllocations.entries()) {
-      if (allocation.agentId.includes(cutoff.toString())) { // Simplified check
+      if (allocation.agentId.includes(cutoff.toString())) {
+        // Simplified check
         await this.releaseResources(requestId);
       }
     }
@@ -908,13 +951,13 @@ export class ResourceManager extends EventEmitter {
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
     }
-    
+
     if (this.optimizationSchedule) {
       clearInterval(this.optimizationSchedule);
     }
-    
+
     await this.memoryManager.shutdown();
-    
+
     logger.info('Resource Manager shutdown');
   }
 }

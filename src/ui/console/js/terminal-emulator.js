@@ -16,29 +16,40 @@ export class TerminalEmulator {
 
     // Command suggestions
     this.commands = [
-      'help', 'clear', 'status', 'connect', 'disconnect',
-      'claude-flow', 'swarm', 'init', 'config', 'memory',
-      'tools', 'agents', 'benchmark', 'sparc'
+      'help',
+      'clear',
+      'status',
+      'connect',
+      'disconnect',
+      'claude-flow',
+      'swarm',
+      'init',
+      'config',
+      'memory',
+      'tools',
+      'agents',
+      'benchmark',
+      'sparc'
     ];
 
     // ANSI color codes mapping
     this.ansiColors = {
-      '30': '#000000', // Black
-      '31': '#ff5555', // Red
-      '32': '#50fa7b', // Green
-      '33': '#f1fa8c', // Yellow
-      '34': '#bd93f9', // Blue
-      '35': '#ff79c6', // Magenta
-      '36': '#8be9fd', // Cyan
-      '37': '#f8f8f2', // White
-      '90': '#6272a4', // Bright Black (Gray)
-      '91': '#ff6e6e', // Bright Red
-      '92': '#69ff94', // Bright Green
-      '93': '#ffffa5', // Bright Yellow
-      '94': '#d6acff', // Bright Blue
-      '95': '#ff92df', // Bright Magenta
-      '96': '#a4ffff', // Bright Cyan
-      '97': '#ffffff'  // Bright White
+      30: '#000000', // Black
+      31: '#ff5555', // Red
+      32: '#50fa7b', // Green
+      33: '#f1fa8c', // Yellow
+      34: '#bd93f9', // Blue
+      35: '#ff79c6', // Magenta
+      36: '#8be9fd', // Cyan
+      37: '#f8f8f2', // White
+      90: '#6272a4', // Bright Black (Gray)
+      91: '#ff6e6e', // Bright Red
+      92: '#69ff94', // Bright Green
+      93: '#ffffa5', // Bright Yellow
+      94: '#d6acff', // Bright Blue
+      95: '#ff92df', // Bright Magenta
+      96: '#a4ffff', // Bright Cyan
+      97: '#ffffff' // Bright White
     };
 
     this.setupInputHandlers();
@@ -226,7 +237,9 @@ export class TerminalEmulator {
    * Navigate command history
    */
   navigateHistory(direction) {
-    if (this.history.length === 0) {return;}
+    if (this.history.length === 0) {
+      return;
+    }
 
     if (direction === 'up') {
       if (this.historyIndex === -1) {
@@ -289,21 +302,23 @@ export class TerminalEmulator {
    */
   processAnsiCodes(text) {
     // Simple ANSI processing - convert color codes to HTML
-    return text
-      .replace(/\x1b\[(\d+)m/g, (match, code) => {
-        if (code === '0' || code === '00') {
-          return '</span>'; // Reset
-        }
+    return (
+      text
+        .replace(/\x1b\[(\d+)m/g, (match, code) => {
+          if (code === '0' || code === '00') {
+            return '</span>'; // Reset
+          }
 
-        const color = this.ansiColors[code];
-        if (color) {
-          return `<span style="color: ${color}">`;
-        }
+          const color = this.ansiColors[code];
+          if (color) {
+            return `<span style="color: ${color}">`;
+          }
 
-        return '';
-      })
-      .replace(/\x1b\[[\d;]*m/g, '') // Remove other ANSI codes
-      + '</span>'; // Ensure we close any open spans
+          return '';
+        })
+        .replace(/\x1b\[[\d;]*m/g, '') + // Remove other ANSI codes
+      '</span>'
+    ); // Ensure we close any open spans
   }
 
   /**
@@ -370,46 +385,46 @@ export class TerminalEmulator {
    * Setup input event handlers
    */
   setupInputHandlers() {
-    this.inputElement.addEventListener('keydown', (event) => {
+    this.inputElement.addEventListener('keydown', event => {
       if (this.isLocked) {
         event.preventDefault();
         return;
       }
 
       switch (event.key) {
-      case 'Enter':
-        event.preventDefault();
-        this.handleEnter();
-        break;
-
-      case 'ArrowUp':
-        event.preventDefault();
-        this.navigateHistory('up');
-        break;
-
-      case 'ArrowDown':
-        event.preventDefault();
-        this.navigateHistory('down');
-        break;
-
-      case 'Tab':
-        event.preventDefault();
-        this.handleTab();
-        break;
-
-      case 'l':
-        if (event.ctrlKey) {
+        case 'Enter':
           event.preventDefault();
-          this.clear();
-        }
-        break;
+          this.handleEnter();
+          break;
 
-      case 'c':
-        if (event.ctrlKey) {
+        case 'ArrowUp':
           event.preventDefault();
-          this.handleInterrupt();
-        }
-        break;
+          this.navigateHistory('up');
+          break;
+
+        case 'ArrowDown':
+          event.preventDefault();
+          this.navigateHistory('down');
+          break;
+
+        case 'Tab':
+          event.preventDefault();
+          this.handleTab();
+          break;
+
+        case 'l':
+          if (event.ctrlKey) {
+            event.preventDefault();
+            this.clear();
+          }
+          break;
+
+        case 'c':
+          if (event.ctrlKey) {
+            event.preventDefault();
+            this.handleInterrupt();
+          }
+          break;
       }
     });
 
@@ -647,7 +662,11 @@ export class TerminalEmulator {
     return entries.map(entry => {
       const timestamp = entry.querySelector('.output-timestamp')?.textContent || '';
       const content = entry.querySelector('.output-content')?.textContent || '';
-      const type = entry.querySelector('.output-content')?.className.split(' ').find(c => c.startsWith('output-')) || '';
+      const type =
+        entry
+          .querySelector('.output-content')
+          ?.className.split(' ')
+          .find(c => c.startsWith('output-')) || '';
 
       return { timestamp, content, type };
     });

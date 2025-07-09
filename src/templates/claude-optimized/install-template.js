@@ -34,7 +34,10 @@ for (const [dirName, dirInfo] of Object.entries(manifest.directories)) {
   if (dirInfo.createEmpty) {
     const readmePath = path.join(destPath, 'README.md');
     if (!fs.existsSync(readmePath)) {
-      fs.writeFileSync(readmePath, `# ${dirName}\n\nThis directory is intentionally empty and will be populated during usage.\n`);
+      fs.writeFileSync(
+        readmePath,
+        `# ${dirName}\n\nThis directory is intentionally empty and will be populated during usage.\n`
+      );
     }
   }
 }
@@ -80,8 +83,9 @@ console.log(`  Total files in manifest: ${manifest.files.length}`);
 // Category summary
 console.log('\nFiles by category:');
 for (const [category, info] of Object.entries(manifest.categories)) {
-  const copied = manifest.files.filter(f => f.category === category &&
-    fs.existsSync(path.join(DEST_DIR, f.destination))).length;
+  const copied = manifest.files.filter(
+    f => f.category === category && fs.existsSync(path.join(DEST_DIR, f.destination))
+  ).length;
   console.log(`  ${category}: ${copied}/${info.count} files`);
 }
 

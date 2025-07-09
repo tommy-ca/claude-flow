@@ -7,8 +7,8 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import { ClaudeCodeMCPWrapper } from './claude-code-wrapper.js';
 
 // Check if we should use the legacy server
-const useLegacy = process.env.CLAUDE_FLOW_LEGACY_MCP === 'true' || 
-                  process.argv.includes('--legacy');
+const useLegacy =
+  process.env.CLAUDE_FLOW_LEGACY_MCP === 'true' || process.argv.includes('--legacy');
 
 async function main() {
   if (useLegacy) {

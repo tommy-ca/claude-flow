@@ -35,7 +35,7 @@ export class HttpTransport implements ITransport {
     private port: number,
     private tlsEnabled: boolean,
     private logger: ILogger,
-    private config?: MCPConfig,
+    private config?: MCPConfig
   ) {
     this.app = express();
     this.setupMiddleware();
@@ -47,10 +47,10 @@ export class HttpTransport implements ITransport {
       throw new MCPTransportError('Transport already running');
     }
 
-    this.logger.info('Starting HTTP transport', { 
+    this.logger.info('Starting HTTP transport', {
       host: this.host,
       port: this.port,
-      tls: this.tlsEnabled,
+      tls: this.tlsEnabled
     });
 
     try {
@@ -58,7 +58,7 @@ export class HttpTransport implements ITransport {
       this.server = createServer(this.app);
 
       // Create WebSocket server
-      this.wss = new WebSocketServer({ 
+      this.wss = new WebSocketServer({
         server: this.server,
         path: '/ws'
       });
@@ -71,7 +71,7 @@ export class HttpTransport implements ITransport {
           this.logger.info(`HTTP server listening on ${this.host}:${this.port}`);
           resolve();
         });
-        
+
         this.server!.on('error', reject);
       });
 
@@ -110,7 +110,7 @@ export class HttpTransport implements ITransport {
 
     // Shutdown HTTP server
     if (this.server) {
-      await new Promise<void>((resolve) => {
+      await new Promise<void>(resolve => {
         this.server!.close(() => resolve());
       });
       this.server = undefined;
@@ -127,10 +127,9 @@ export class HttpTransport implements ITransport {
     this.notificationHandler = handler;
   }
 
-
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     return {
@@ -139,8 +138,8 @@ export class HttpTransport implements ITransport {
         messagesReceived: this.messageCount,
         notificationsSent: this.notificationCount,
         activeConnections: this.connections.size,
-        activeWebSockets: this.activeWebSockets.size,
-      },
+        activeWebSockets: this.activeWebSockets.size
+      }
     };
   }
 
@@ -151,11 +150,13 @@ export class HttpTransport implements ITransport {
     // CORS middleware
     if (this.config?.corsEnabled) {
       const origins = this.config.corsOrigins || ['*'];
-      this.app.use(cors({
-        origin: origins,
-        credentials: true,
-        maxAge: 86400, // 24 hours
-      }));
+      this.app.use(
+        cors({
+          origin: origins,
+          credentials: true,
+          maxAge: 86400 // 24 hours
+        })
+      );
     }
 
     // Body parsing middleware
@@ -165,9 +166,10 @@ export class HttpTransport implements ITransport {
 
   private setupRoutes(): void {
     // Get current file directory for static files
-    const __filename = typeof import.meta?.url !== 'undefined' 
-      ? fileURLToPath(import.meta.url)
-      : __filename || __dirname + '/http.ts';
+    const __filename =
+      typeof import.meta?.url !== 'undefined'
+        ? fileURLToPath(import.meta.url)
+        : __filename || __dirname + '/http.ts';
     const __dirname = dirname(__filename);
     const consoleDir = join(__dirname, '../../ui/console');
 
@@ -204,13 +206,15 @@ export class HttpTransport implements ITransport {
     });
 
     // Error handler
-    this.app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-      this.logger.error('Express error', err);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: err.message 
-      });
-    });
+    this.app.use(
+      (err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+        this.logger.error('Express error', err);
+        res.status(500).json({
+          error: 'Internal server error',
+          message: err.message
+        });
+      }
+    );
   }
 
   private setupWebSocketHandlers(): void {
@@ -219,25 +223,25 @@ export class HttpTransport implements ITransport {
     this.wss.on('connection', (ws: WebSocket, req) => {
       this.activeWebSockets.add(ws);
       this.logger.info('WebSocket client connected', {
-        totalClients: this.activeWebSockets.size,
+        totalClients: this.activeWebSockets.size
       });
 
       ws.on('close', () => {
         this.activeWebSockets.delete(ws);
         this.logger.info('WebSocket client disconnected', {
-          totalClients: this.activeWebSockets.size,
+          totalClients: this.activeWebSockets.size
         });
       });
 
-      ws.on('error', (error) => {
+      ws.on('error', error => {
         this.logger.error('WebSocket error', error);
         this.activeWebSockets.delete(ws);
       });
 
-      ws.on('message', async (data) => {
+      ws.on('message', async data => {
         try {
           const message = JSON.parse(data.toString());
-          
+
           if (message.id === undefined) {
             // Notification from client
             await this.handleNotificationMessage(message as MCPNotification);
@@ -248,19 +252,21 @@ export class HttpTransport implements ITransport {
           }
         } catch (error) {
           this.logger.error('Error processing WebSocket message', error);
-          
+
           // Send error response if it was a request
           try {
             const parsed = JSON.parse(data.toString());
             if (parsed.id !== undefined) {
-              ws.send(JSON.stringify({
-                jsonrpc: '2.0',
-                id: parsed.id,
-                error: {
-                  code: -32603,
-                  message: 'Internal error',
-                },
-              }));
+              ws.send(
+                JSON.stringify({
+                  jsonrpc: '2.0',
+                  id: parsed.id,
+                  error: {
+                    code: -32603,
+                    message: 'Internal error'
+                  }
+                })
+              );
             }
           } catch {
             // Ignore parse errors for error responses
@@ -278,8 +284,8 @@ export class HttpTransport implements ITransport {
         id: null,
         error: {
           code: -32600,
-          message: 'Invalid content type - expected application/json',
-        },
+          message: 'Invalid content type - expected application/json'
+        }
       });
       return;
     }
@@ -305,8 +311,8 @@ export class HttpTransport implements ITransport {
           id: mcpMessage.id || null,
           error: {
             code: -32600,
-            message: 'Invalid request - missing or invalid jsonrpc version',
-          },
+            message: 'Invalid request - missing or invalid jsonrpc version'
+          }
         });
         return;
       }
@@ -317,8 +323,8 @@ export class HttpTransport implements ITransport {
           id: mcpMessage.id || null,
           error: {
             code: -32600,
-            message: 'Invalid request - missing method',
-          },
+            message: 'Invalid request - missing method'
+          }
         });
         return;
       }
@@ -345,13 +351,11 @@ export class HttpTransport implements ITransport {
         error: {
           code: -32603,
           message: 'Internal error',
-          data: error instanceof Error ? error.message : String(error),
-        },
+          data: error instanceof Error ? error.message : String(error)
+        }
       });
     }
   }
-
-
 
   private async handleRequestMessage(request: MCPRequest): Promise<MCPResponse> {
     if (!this.requestHandler) {
@@ -360,8 +364,8 @@ export class HttpTransport implements ITransport {
         id: request.id,
         error: {
           code: -32603,
-          message: 'No request handler registered',
-        },
+          message: 'No request handler registered'
+        }
       };
     }
 
@@ -369,15 +373,15 @@ export class HttpTransport implements ITransport {
       return await this.requestHandler(request);
     } catch (error) {
       this.logger.error('Request handler error', { request, error });
-      
+
       return {
         jsonrpc: '2.0',
         id: request.id,
         error: {
           code: -32603,
           message: 'Internal error',
-          data: error instanceof Error ? error.message : String(error),
-        },
+          data: error instanceof Error ? error.message : String(error)
+        }
       };
     }
   }
@@ -385,7 +389,7 @@ export class HttpTransport implements ITransport {
   private async handleNotificationMessage(notification: MCPNotification): Promise<void> {
     if (!this.notificationHandler) {
       this.logger.warn('Received notification but no handler registered', {
-        method: notification.method,
+        method: notification.method
       });
       return;
     }
@@ -400,7 +404,7 @@ export class HttpTransport implements ITransport {
 
   private async validateAuth(req: Request): Promise<{ valid: boolean; error?: string }> {
     const auth = req.headers.authorization;
-    
+
     if (!auth) {
       return { valid: false, error: 'Authorization header required' };
     }
@@ -444,7 +448,7 @@ export class HttpTransport implements ITransport {
   async sendNotification(notification: MCPNotification): Promise<void> {
     // Broadcast notification to all connected WebSocket clients
     const message = JSON.stringify(notification);
-    
+
     for (const ws of this.activeWebSockets) {
       try {
         if (ws.readyState === WebSocket.OPEN) {
@@ -454,7 +458,7 @@ export class HttpTransport implements ITransport {
         this.logger.error('Failed to send notification to WebSocket', error);
       }
     }
-    
+
     this.notificationCount++;
   }
 }

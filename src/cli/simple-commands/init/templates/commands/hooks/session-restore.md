@@ -19,21 +19,25 @@ npx claude-flow hook session-restore [options]
 ## Examples
 
 ### Basic session restore
+
 ```bash
 npx claude-flow hook session-restore --session-id "dev-session-2024"
 ```
 
 ### Full restoration
+
 ```bash
 npx claude-flow hook session-restore -s "feature-auth" --load-memory --restore-files --resume-tasks
 ```
 
 ### Selective restore
+
 ```bash
 npx claude-flow hook session-restore -s "bug-fix-123" --load-memory --resume-tasks
 ```
 
 ### Context merging
+
 ```bash
 npx claude-flow hook session-restore -s "refactor-api" --merge-context
 ```
@@ -41,24 +45,28 @@ npx claude-flow hook session-restore -s "refactor-api" --merge-context
 ## Features
 
 ### Memory Loading
+
 - Retrieves stored decisions
 - Loads implementation notes
 - Restores agent configs
 - Recovers context
 
 ### File Restoration
+
 - Lists previously open files
 - Suggests file reopening
 - Maintains edit history
 - Preserves cursor positions
 
 ### Task Resumption
+
 - Shows incomplete tasks
 - Restores task progress
 - Loads task dependencies
 - Continues workflows
 
 ### Context Merging
+
 - Combines sessions
 - Merges memories
 - Unifies task lists
@@ -67,12 +75,14 @@ npx claude-flow hook session-restore -s "refactor-api" --merge-context
 ## Integration
 
 This hook is automatically called by Claude Code when:
+
 - Resuming previous work
 - After unexpected shutdown
 - Loading saved sessions
 - Switching between projects
 
 Manual usage in agents:
+
 ```bash
 # To restore context
 npx claude-flow hook session-restore --session-id "previous-session" --load-memory
@@ -81,15 +91,13 @@ npx claude-flow hook session-restore --session-id "previous-session" --load-memo
 ## Output
 
 Returns JSON with:
+
 ```json
 {
   "sessionId": "dev-session-2024",
   "restored": true,
   "memories": 25,
-  "files": [
-    "src/auth/login.js",
-    "src/api/users.js"
-  ],
+  "files": ["src/auth/login.js", "src/api/users.js"],
   "tasks": {
     "incomplete": 3,
     "completed": 12

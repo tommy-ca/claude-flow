@@ -31,7 +31,6 @@ export class EnhancedWebUI {
 
         console.log('✅ Enhanced Web UI initialized successfully');
         this.isInitialized = true;
-
       } catch (error) {
         console.warn('⚠️ Full UI initialization failed, using fallback mode:', error);
         this.fallbackMode = true;
@@ -44,7 +43,6 @@ export class EnhancedWebUI {
       }
 
       return this.isInitialized || this.fallbackMode;
-
     } catch (error) {
       console.error('❌ Failed to initialize Enhanced Web UI:', error);
       throw error;
@@ -108,8 +106,10 @@ export class EnhancedWebUI {
     };
 
     // Extend input handling
-    const originalHandleInput = this.originalProcessUI.handleViewSpecificInput.bind(this.originalProcessUI);
-    this.originalProcessUI.handleViewSpecificInput = async (input) => {
+    const originalHandleInput = this.originalProcessUI.handleViewSpecificInput.bind(
+      this.originalProcessUI
+    );
+    this.originalProcessUI.handleViewSpecificInput = async input => {
       // Try enhanced views first
       if (await this.handleEnhancedInput(input)) {
         return; // Handled by enhanced UI
@@ -124,33 +124,35 @@ export class EnhancedWebUI {
    * Handle enhanced views in fallback mode
    */
   handleEnhancedViews() {
-    if (!this.originalProcessUI.currentView) {return;}
+    if (!this.originalProcessUI.currentView) {
+      return;
+    }
 
     switch (this.originalProcessUI.currentView) {
-    case 'neural':
-      this.renderNeuralView();
-      break;
-    case 'memory_mgmt':
-      this.renderMemoryManagementView();
-      break;
-    case 'monitoring_adv':
-      this.renderAdvancedMonitoringView();
-      break;
-    case 'workflow_mgmt':
-      this.renderWorkflowManagementView();
-      break;
-    case 'github_int':
-      this.renderGitHubIntegrationView();
-      break;
-    case 'daa_control':
-      this.renderDAAControlView();
-      break;
-    case 'system_utils':
-      this.renderSystemUtilitiesView();
-      break;
-    case 'cli_bridge':
-      this.renderCLIBridgeView();
-      break;
+      case 'neural':
+        this.renderNeuralView();
+        break;
+      case 'memory_mgmt':
+        this.renderMemoryManagementView();
+        break;
+      case 'monitoring_adv':
+        this.renderAdvancedMonitoringView();
+        break;
+      case 'workflow_mgmt':
+        this.renderWorkflowManagementView();
+        break;
+      case 'github_int':
+        this.renderGitHubIntegrationView();
+        break;
+      case 'daa_control':
+        this.renderDAAControlView();
+        break;
+      case 'system_utils':
+        this.renderSystemUtilitiesView();
+        break;
+      case 'cli_bridge':
+        this.renderCLIBridgeView();
+        break;
     }
   }
 
@@ -162,10 +164,10 @@ export class EnhancedWebUI {
 
     // Enhanced view shortcuts
     const enhancedShortcuts = {
-      '7': () => this.originalProcessUI.currentView = 'neural',
-      '8': () => this.originalProcessUI.currentView = 'memory_mgmt',
-      '9': () => this.originalProcessUI.currentView = 'monitoring_adv',
-      '0': () => this.originalProcessUI.currentView = 'workflow_mgmt'
+      7: () => (this.originalProcessUI.currentView = 'neural'),
+      8: () => (this.originalProcessUI.currentView = 'memory_mgmt'),
+      9: () => (this.originalProcessUI.currentView = 'monitoring_adv'),
+      0: () => (this.originalProcessUI.currentView = 'workflow_mgmt')
     };
 
     if (enhancedShortcuts[input]) {
@@ -175,16 +177,16 @@ export class EnhancedWebUI {
 
     // View-specific enhanced input handling
     switch (currentView) {
-    case 'neural':
-      return this.handleNeuralInput(input);
-    case 'memory_mgmt':
-      return this.handleMemoryInput(input);
-    case 'monitoring_adv':
-      return this.handleMonitoringInput(input);
-    case 'workflow_mgmt':
-      return this.handleWorkflowInput(input);
-    default:
-      return false;
+      case 'neural':
+        return this.handleNeuralInput(input);
+      case 'memory_mgmt':
+        return this.handleMemoryInput(input);
+      case 'monitoring_adv':
+        return this.handleMonitoringInput(input);
+      case 'workflow_mgmt':
+        return this.handleWorkflowInput(input);
+      default:
+        return false;
     }
   }
 
@@ -438,12 +440,12 @@ export class EnhancedWebUI {
    */
   async handleNeuralInput(input) {
     const actions = {
-      't': () => this.executeTool('neural_train'),
-      'p': () => this.executeTool('neural_predict'),
-      's': () => this.executeTool('neural_status'),
-      'a': () => this.executeTool('neural_patterns'),
-      'm': () => this.executeTool('model_load'),
-      'o': () => this.executeTool('wasm_optimize')
+      t: () => this.executeTool('neural_train'),
+      p: () => this.executeTool('neural_predict'),
+      s: () => this.executeTool('neural_status'),
+      a: () => this.executeTool('neural_patterns'),
+      m: () => this.executeTool('model_load'),
+      o: () => this.executeTool('wasm_optimize')
     };
 
     if (actions[input]) {
@@ -455,12 +457,12 @@ export class EnhancedWebUI {
 
   async handleMemoryInput(input) {
     const actions = {
-      's': () => this.executeTool('memory_usage', { action: 'store' }),
-      'r': () => this.executeTool('memory_usage', { action: 'retrieve' }),
-      'b': () => this.executeTool('memory_backup'),
-      'c': () => this.executeTool('memory_compress'),
-      'y': () => this.executeTool('memory_sync'),
-      'a': () => this.executeTool('memory_analytics')
+      s: () => this.executeTool('memory_usage', { action: 'store' }),
+      r: () => this.executeTool('memory_usage', { action: 'retrieve' }),
+      b: () => this.executeTool('memory_backup'),
+      c: () => this.executeTool('memory_compress'),
+      y: () => this.executeTool('memory_sync'),
+      a: () => this.executeTool('memory_analytics')
     };
 
     if (actions[input]) {
@@ -472,12 +474,12 @@ export class EnhancedWebUI {
 
   async handleMonitoringInput(input) {
     const actions = {
-      'p': () => this.executeTool('performance_report'),
-      'b': () => this.executeTool('bottleneck_analyze'),
-      't': () => this.executeTool('token_usage'),
-      'm': () => this.executeTool('metrics_collect'),
-      'h': () => this.executeTool('health_check'),
-      'e': () => this.executeTool('error_analysis')
+      p: () => this.executeTool('performance_report'),
+      b: () => this.executeTool('bottleneck_analyze'),
+      t: () => this.executeTool('token_usage'),
+      m: () => this.executeTool('metrics_collect'),
+      h: () => this.executeTool('health_check'),
+      e: () => this.executeTool('error_analysis')
     };
 
     if (actions[input]) {
@@ -489,17 +491,17 @@ export class EnhancedWebUI {
 
   async handleWorkflowInput(input) {
     const actions = {
-      'c': () => this.executeTool('workflow_create'),
-      'e': () => this.executeTool('workflow_execute'),
-      'a': () => this.executeTool('automation_setup'),
-      'p': () => this.executeTool('pipeline_create'),
-      's': () => this.executeTool('scheduler_manage'),
-      't': () => this.executeTool('trigger_setup'),
-      'w': () => this.executeTool('workflow_template'),
-      'b': () => this.executeTool('batch_process'),
-      'l': () => this.executeTool('parallel_execute'),
-      'm': () => this.executeTool('sparc_mode'),
-      'o': () => this.executeTool('task_orchestrate')
+      c: () => this.executeTool('workflow_create'),
+      e: () => this.executeTool('workflow_execute'),
+      a: () => this.executeTool('automation_setup'),
+      p: () => this.executeTool('pipeline_create'),
+      s: () => this.executeTool('scheduler_manage'),
+      t: () => this.executeTool('trigger_setup'),
+      w: () => this.executeTool('workflow_template'),
+      b: () => this.executeTool('batch_process'),
+      l: () => this.executeTool('parallel_execute'),
+      m: () => this.executeTool('sparc_mode'),
+      o: () => this.executeTool('task_orchestrate')
     };
 
     if (actions[input]) {

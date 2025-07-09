@@ -72,10 +72,10 @@ The `ResourceManager` class serves as the main orchestrator:
 ```typescript
 class ResourceManager {
   - monitor: IResourceMonitor
-  - allocator: IResourceAllocator  
+  - allocator: IResourceAllocator
   - pressureDetector: IResourcePressureDetector
   - agentManagers: Map<string, IAgentResourceManager>
-  
+
   + start(): Promise<void>
   + stop(): Promise<void>
   + createAgentManager(config): IAgentResourceManager
@@ -132,21 +132,25 @@ Component creation and management:
 ## Key Design Patterns
 
 ### 1. Factory Pattern
+
 - Centralized component creation
 - Configuration-driven instantiation
 - Plugin system integration
 
 ### 2. Strategy Pattern
+
 - Pluggable allocation strategies
 - Configurable monitoring approaches
 - Extensible pressure detection
 
 ### 3. Observer Pattern
+
 - Event-driven architecture
 - Real-time monitoring updates
 - Alert propagation
 
 ### 4. Composite Pattern
+
 - Unified monitoring interface
 - Aggregated metric collection
 - Hierarchical resource management
@@ -154,21 +158,25 @@ Component creation and management:
 ## Data Flow
 
 ### Resource Allocation Flow
+
 ```
 Request → Validation → Strategy Selection → Allocation → Tracking → Monitoring
 ```
 
 ### Monitoring Flow
+
 ```
 Collection → Processing → Aggregation → Alerting → Export
 ```
 
 ### Pressure Detection Flow
+
 ```
 Metrics → Analysis → Prediction → Response → Notification
 ```
 
 ### Agent Management Flow
+
 ```
 Registration → Configuration → Monitoring → Scaling → Health Checks
 ```
@@ -176,18 +184,21 @@ Registration → Configuration → Monitoring → Scaling → Health Checks
 ## Performance Characteristics
 
 ### Scalability
+
 - **Agents**: Up to 1000 agents per manager
 - **Allocations**: Up to 10,000 concurrent allocations
 - **Monitoring**: Sub-second metric collection
 - **Memory**: <100MB base footprint
 
 ### Efficiency
+
 - **CPU Overhead**: <1% for monitoring
 - **Memory Overhead**: <5% for tracking
 - **Network Overhead**: Minimal for distributed scenarios
 - **Disk I/O**: Configurable persistence
 
 ### Reliability
+
 - **Fault Tolerance**: Component isolation
 - **Recovery**: Automatic restart capabilities
 - **Persistence**: State export/import
@@ -196,18 +207,21 @@ Registration → Configuration → Monitoring → Scaling → Health Checks
 ## Integration Points
 
 ### 1. MCP (Model Control Protocol)
+
 - Resource metrics reporting
 - Command handling
 - Alert forwarding
 - State synchronization
 
 ### 2. Swarm Coordination
+
 - Multi-node resource sharing
 - Distributed allocation
 - Topology awareness
 - Load balancing
 
 ### 3. Claude Flow Engine
+
 - Flow-aware resource allocation
 - Dynamic scaling based on flow demands
 - Integration with execution engine
@@ -216,12 +230,14 @@ Registration → Configuration → Monitoring → Scaling → Health Checks
 ## Security Model
 
 ### Resource Isolation
+
 - Agent boundary enforcement
 - Secure allocation tracking
 - Access control per agent
 - Audit logging
 
 ### Data Protection
+
 - Encrypted metric storage
 - Secure export/import
 - Privacy-aware monitoring
@@ -230,18 +246,21 @@ Registration → Configuration → Monitoring → Scaling → Health Checks
 ## Future Enhancements
 
 ### Machine Learning Integration
+
 - Predictive scaling algorithms
 - Anomaly detection improvements
 - Optimization learning
 - Pattern recognition
 
 ### Cloud Integration
+
 - Multi-cloud resource management
 - Container orchestration
 - Serverless integration
 - Cost optimization
 
 ### Advanced Monitoring
+
 - Distributed tracing
 - Custom metrics
 - Real-time visualization
@@ -250,18 +269,21 @@ Registration → Configuration → Monitoring → Scaling → Health Checks
 ## Testing Strategy
 
 ### Unit Testing
+
 - Component isolation testing
 - Strategy validation
 - Utility function testing
 - Type safety verification
 
 ### Integration Testing
+
 - End-to-end flow testing
 - Component interaction testing
 - Performance benchmarking
 - Load testing
 
 ### System Testing
+
 - Multi-agent scenarios
 - Stress testing
 - Failure scenarios
@@ -270,18 +292,21 @@ Registration → Configuration → Monitoring → Scaling → Health Checks
 ## Deployment Considerations
 
 ### Environment Requirements
+
 - Node.js 16+ runtime
 - TypeScript 4.5+ compiler
 - Available system resources
 - Network connectivity
 
 ### Configuration Management
+
 - Environment-specific settings
 - Runtime configuration updates
 - Default value management
 - Validation rules
 
 ### Monitoring & Observability
+
 - Health check endpoints
 - Metric collection
 - Log aggregation

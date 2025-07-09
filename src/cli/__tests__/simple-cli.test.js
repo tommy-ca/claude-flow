@@ -49,7 +49,9 @@ describe('Claude-Flow CLI', () => {
     test('should show help when no arguments provided', async () => {
       process.argv = ['node', 'claude-flow'];
 
-      const { executeCommand, hasCommand, showAllCommands } = await import('../command-registry.js');
+      const { executeCommand, hasCommand, showAllCommands } = await import(
+        '../command-registry.js'
+      );
       hasCommand.mockReturnValue(false);
 
       // Import after mocks are set up
@@ -100,7 +102,14 @@ describe('Claude-Flow CLI', () => {
     });
 
     test('should handle command with multiple arguments', async () => {
-      process.argv = ['node', 'claude-flow', 'swarm', 'Build a REST API', '--strategy', 'development'];
+      process.argv = [
+        'node',
+        'claude-flow',
+        'swarm',
+        'Build a REST API',
+        '--strategy',
+        'development'
+      ];
 
       const { executeCommand, hasCommand } = await import('../command-registry.js');
       hasCommand.mockReturnValue(true);
@@ -109,11 +118,9 @@ describe('Claude-Flow CLI', () => {
       await import('../simple-cli.js');
 
       expect(hasCommand).toHaveBeenCalledWith('swarm');
-      expect(executeCommand).toHaveBeenCalledWith(
-        'swarm',
-        ['Build a REST API'],
-        { strategy: 'development' }
-      );
+      expect(executeCommand).toHaveBeenCalledWith('swarm', ['Build a REST API'], {
+        strategy: 'development'
+      });
     });
 
     test('should show error for unknown command', async () => {
@@ -127,9 +134,7 @@ describe('Claude-Flow CLI', () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Unknown command: invalid-command')
       );
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Available commands:')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Available commands:'));
     });
   });
 

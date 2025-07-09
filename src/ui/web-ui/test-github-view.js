@@ -47,7 +47,7 @@ try {
   // Test 5: Event handling
   console.log('\n5️⃣ Testing event handling...');
   let eventReceived = false;
-  eventBus.on('tool:execute', (data) => {
+  eventBus.on('tool:execute', data => {
     eventReceived = true;
     console.log('✅ Event received:', data.tool);
   });
@@ -65,7 +65,6 @@ try {
 
   console.log('\n🎉 All tests passed! GitHub Integration View is ready.');
   console.log('═'.repeat(60));
-
 } catch (error) {
   console.error('❌ Test failed:', error);
   process.exit(1);

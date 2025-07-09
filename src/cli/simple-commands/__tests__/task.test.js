@@ -137,9 +137,7 @@ describe('Task Command', () => {
 
       await taskCommand(['list'], {});
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('No tasks found')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No tasks found'));
     });
   });
 
@@ -151,9 +149,7 @@ describe('Task Command', () => {
 
       await taskCommand(['create', 'New task title', 'Task description'], {});
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('Task created')
-      );
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('Task created'));
 
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks).toHaveLength(1);
@@ -210,9 +206,7 @@ describe('Task Command', () => {
   describe('update subcommand', () => {
     test('should update task status', async () => {
       const mockTasks = {
-        tasks: [
-          { id: 'task-1', title: 'Test task', status: 'pending' }
-        ]
+        tasks: [{ id: 'task-1', title: 'Test task', status: 'pending' }]
       };
 
       fs.pathExists.mockResolvedValue(true);
@@ -223,16 +217,12 @@ describe('Task Command', () => {
 
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks[0].status).toBe('in-progress');
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('Task updated')
-      );
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('Task updated'));
     });
 
     test('should update task assignment', async () => {
       const mockTasks = {
-        tasks: [
-          { id: 'task-1', title: 'Test task', assignedTo: null }
-        ]
+        tasks: [{ id: 'task-1', title: 'Test task', assignedTo: null }]
       };
 
       fs.pathExists.mockResolvedValue(true);
@@ -247,9 +237,7 @@ describe('Task Command', () => {
 
     test('should update task priority', async () => {
       const mockTasks = {
-        tasks: [
-          { id: 'task-1', title: 'Test task', priority: 'medium' }
-        ]
+        tasks: [{ id: 'task-1', title: 'Test task', priority: 'medium' }]
       };
 
       fs.pathExists.mockResolvedValue(true);
@@ -342,9 +330,7 @@ describe('Task Command', () => {
       expect(writeCall[1].tasks).toHaveLength(1);
       expect(writeCall[1].tasks[0].id).toBe('task-2');
 
-      expect(mockSpinner.succeed).toHaveBeenCalledWith(
-        expect.stringContaining('Task deleted')
-      );
+      expect(mockSpinner.succeed).toHaveBeenCalledWith(expect.stringContaining('Task deleted'));
     });
 
     test('should require force flag', async () => {
@@ -451,9 +437,7 @@ describe('Task Command', () => {
 
       await taskCommand(['list'], {});
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error:')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error:'));
     });
 
     test('should handle invalid priority', async () => {
@@ -462,9 +446,7 @@ describe('Task Command', () => {
 
       await taskCommand(['create', 'Test task'], { priority: 'invalid' });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid priority')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid priority'));
     });
 
     test('should handle invalid status', async () => {
@@ -474,9 +456,7 @@ describe('Task Command', () => {
 
       await taskCommand(['update', 'task-1'], { status: 'invalid-status' });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid status')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid status'));
     });
   });
 });

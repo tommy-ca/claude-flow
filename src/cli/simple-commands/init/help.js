@@ -46,7 +46,9 @@ export function showInitHelp() {
   console.log('🚀 STANDARD INITIALIZATION:');
   console.log('  npx claude-flow@latest init --sparc --force  # ⭐ RECOMMENDED: Optimized setup');
   console.log('  npx claude-flow@latest init --sparc          # Standard SPARC setup');
-  console.log('  claude-flow init --sparc --force             # Optimized setup (existing project)');
+  console.log(
+    '  claude-flow init --sparc --force             # Optimized setup (existing project)'
+  );
   console.log('  claude-flow init --sparc --modes architect,tdd,code  # Selective initialization');
   console.log('  claude-flow init --dry-run --sparc          # Preview initialization');
   console.log('  claude-flow init --minimal                  # Minimal setup');

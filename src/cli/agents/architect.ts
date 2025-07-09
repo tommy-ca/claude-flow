@@ -3,7 +3,12 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type {
+  AgentCapabilities,
+  AgentConfig,
+  AgentEnvironment,
+  TaskDefinition
+} from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
@@ -84,15 +89,7 @@ export class ArchitectAgent extends BaseAgent {
       apiIntegration: true,
       fileSystem: true,
       terminalAccess: false,
-      languages: [
-        'typescript',
-        'javascript',
-        'python',
-        'java',
-        'csharp',
-        'go',
-        'rust'
-      ],
+      languages: ['typescript', 'javascript', 'python', 'java', 'csharp', 'go', 'rust'],
       frameworks: [
         'microservices',
         'kubernetes',
@@ -129,7 +126,7 @@ export class ArchitectAgent extends BaseAgent {
       maxMemoryUsage: 1024 * 1024 * 1024, // 1GB
       maxExecutionTime: 2400000, // 40 minutes
       reliability: 0.95,
-      speed: 0.70,
+      speed: 0.7,
       quality: 0.98
     };
   }
@@ -144,20 +141,14 @@ export class ArchitectAgent extends BaseAgent {
       timeoutThreshold: 2400000,
       reportingInterval: 90000,
       heartbeatInterval: 20000,
-      permissions: [
-        'file-read',
-        'file-write',
-        'web-access',
-        'api-access',
-        'cloud-access'
-      ],
+      permissions: ['file-read', 'file-write', 'web-access', 'api-access', 'cloud-access'],
       trustedAgents: [],
       expertise: {
         'system-design': 0.98,
         'architecture-patterns': 0.95,
-        'scalability': 0.92,
-        'security': 0.88,
-        'performance': 0.90,
+        scalability: 0.92,
+        security: 0.88,
+        performance: 0.9,
         'cloud-design': 0.87
       },
       preferences: {
@@ -255,19 +246,23 @@ export class ArchitectAgent extends BaseAgent {
     };
 
     // Store design progress
-    await this.memory.store(`design:${task.id}:progress`, {
-      status: 'designing',
-      startTime: new Date(),
-      requirements
-    }, {
-      type: 'design-progress',
-      tags: ['architecture', this.id, style],
-      partition: 'tasks'
-    });
+    await this.memory.store(
+      `design:${task.id}:progress`,
+      {
+        status: 'designing',
+        startTime: new Date(),
+        requirements
+      },
+      {
+        type: 'design-progress',
+        tags: ['architecture', this.id, style],
+        partition: 'tasks'
+      }
+    );
 
     // Simulate system design
     await this.delay(5000);
-    
+
     design.architecture.components = [
       {
         name: 'API Gateway',
@@ -288,7 +283,7 @@ export class ArchitectAgent extends BaseAgent {
         technology: 'Python/FastAPI'
       }
     ] as any[];
-    
+
     design.patterns = [
       'Microservices Architecture',
       'API Gateway Pattern',
@@ -297,7 +292,7 @@ export class ArchitectAgent extends BaseAgent {
       'CQRS',
       'Circuit Breaker'
     ] as string[];
-    
+
     design.technologies = {
       backend: ['Node.js', 'Python', 'TypeScript'] as string[],
       frontend: ['React', 'TypeScript'] as string[],
@@ -360,9 +355,9 @@ export class ArchitectAgent extends BaseAgent {
       security: 0.78,
       maintainability: 0.92,
       performance: 0.88,
-      reliability: 0.90
+      reliability: 0.9
     };
-    
+
     review.issues = [
       {
         category: 'security',
@@ -515,7 +510,7 @@ export class ArchitectAgent extends BaseAgent {
       { service: 'Lambda', purpose: 'Serverless functions' },
       { service: 'EC2', purpose: 'Virtual machines' }
     ];
-    
+
     cloudDesign.cost.estimated = 2500; // monthly USD
 
     return cloudDesign;
@@ -826,7 +821,7 @@ export const createArchitectAgent = (
     trustedAgents: [],
     expertise: {
       'system-architecture': 0.95,
-      'cloud-architecture': 0.90,
+      'cloud-architecture': 0.9,
       'microservices-design': 0.92,
       'api-design': 0.88,
       'database-architecture': 0.85,

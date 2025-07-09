@@ -84,7 +84,7 @@ export interface Task {
   metadata?: Record<string, unknown>;
 }
 
-export type TaskStatus = 
+export type TaskStatus =
   | 'pending'
   | 'queued'
   | 'assigned'
@@ -155,7 +155,7 @@ export enum SystemEvents {
   RESOURCE_RELEASED = 'resource:released',
   DEADLOCK_DETECTED = 'deadlock:detected',
   MESSAGE_SENT = 'message:sent',
-  MESSAGE_RECEIVED = 'message:received',
+  MESSAGE_RECEIVED = 'message:received'
 }
 
 export interface EventMap extends Record<string, unknown> {
@@ -187,7 +187,7 @@ export interface EventMap extends Record<string, unknown> {
   [SystemEvents.DEADLOCK_DETECTED]: { agents: string[]; resources: string[] };
   [SystemEvents.MESSAGE_SENT]: { from: string; to: string; message: Message };
   [SystemEvents.MESSAGE_RECEIVED]: { from: string; to: string; message: Message };
-  
+
   // Additional events
   'metrics:collected': OrchestratorMetrics;
 }

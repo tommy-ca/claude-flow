@@ -71,7 +71,6 @@ export class ValidationSystem {
       if (!envCheck.success) {
         results.warnings.push(...envCheck.errors);
       }
-
     } catch (error) {
       results.success = false;
       results.errors.push(`Pre-initialization validation failed: ${error.message}`);
@@ -123,7 +122,6 @@ export class ValidationSystem {
       if (!permissionCheck.success) {
         results.warnings.push(...permissionCheck.errors);
       }
-
     } catch (error) {
       results.success = false;
       results.errors.push(`Post-initialization validation failed: ${error.message}`);
@@ -173,7 +171,6 @@ export class ValidationSystem {
       if (!coordinationCheck.success) {
         results.warnings.push(...coordinationCheck.errors);
       }
-
     } catch (error) {
       results.success = false;
       results.errors.push(`Configuration validation failed: ${error.message}`);
@@ -207,7 +204,6 @@ export class ValidationSystem {
       if (modeTests.warnings.length > 0) {
         results.warnings.push(...modeTests.warnings);
       }
-
     } catch (error) {
       results.success = false;
       results.errors.push(`Mode functionality testing failed: ${error.message}`);
@@ -257,7 +253,6 @@ export class ValidationSystem {
       if (!resourceHealth.success) {
         results.warnings.push(...resourceHealth.errors);
       }
-
     } catch (error) {
       results.success = false;
       results.errors.push(`Health check failed: ${error.message}`);

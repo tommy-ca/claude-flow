@@ -107,9 +107,15 @@ export class QueenCoordinator extends EventEmitter {
 
     const score = Object.values(complexityFactors).reduce((a, b) => a + b, 0);
 
-    if (score <= 3) {return 'low';}
-    if (score <= 6) {return 'medium';}
-    if (score <= 9) {return 'high';}
+    if (score <= 3) {
+      return 'low';
+    }
+    if (score <= 6) {
+      return 'medium';
+    }
+    if (score <= 9) {
+      return 'high';
+    }
     return 'very_high';
   }
 
@@ -118,9 +124,19 @@ export class QueenCoordinator extends EventEmitter {
    */
   _countComplexityKeywords(text) {
     const complexKeywords = [
-      'complex', 'advanced', 'enterprise', 'distributed', 'scalable',
-      'microservices', 'architecture', 'integration', 'optimization',
-      'security', 'performance', 'concurrent', 'real-time'
+      'complex',
+      'advanced',
+      'enterprise',
+      'distributed',
+      'scalable',
+      'microservices',
+      'architecture',
+      'integration',
+      'optimization',
+      'security',
+      'performance',
+      'concurrent',
+      'real-time'
     ];
 
     const lowerText = text.toLowerCase();
@@ -196,7 +212,7 @@ export class QueenCoordinator extends EventEmitter {
       very_high: 30
     };
 
-    return baseTaskCount[complexity] + (components * 3);
+    return baseTaskCount[complexity] + components * 3;
   }
 
   /**
@@ -215,7 +231,10 @@ export class QueenCoordinator extends EventEmitter {
       return 'parallel_execution';
     }
 
-    if (objective.toLowerCase().includes('iterative') || objective.toLowerCase().includes('refine')) {
+    if (
+      objective.toLowerCase().includes('iterative') ||
+      objective.toLowerCase().includes('refine')
+    ) {
       return 'sequential_refinement';
     }
 
@@ -331,13 +350,15 @@ export class QueenCoordinator extends EventEmitter {
 
     return {
       strategy: 'parallel_execution',
-      phases: [{
-        name: 'Parallel Execution',
-        tasks: tasks,
-        workers: workers,
-        parallel: true,
-        workerAssignment: this._optimizeWorkerAssignment(tasks, workerGroups)
-      }],
+      phases: [
+        {
+          name: 'Parallel Execution',
+          tasks: tasks,
+          workers: workers,
+          parallel: true,
+          workerAssignment: this._optimizeWorkerAssignment(tasks, workerGroups)
+        }
+      ],
       estimatedDuration: Math.ceil(tasks.length / workers.length) * 10,
       parallelism: 'maximum'
     };
@@ -424,22 +445,14 @@ export class QueenCoordinator extends EventEmitter {
       },
       {
         name: 'Analysis Phase',
-        tasks: [
-          'Analyze results',
-          'Identify patterns',
-          'Select best approaches'
-        ],
+        tasks: ['Analyze results', 'Identify patterns', 'Select best approaches'],
         workers: workers.filter(w => ['analyst', 'researcher'].includes(w.type)),
         parallel: false,
         learning: true
       },
       {
         name: 'Implementation Phase',
-        tasks: [
-          'Implement optimized solution',
-          'Apply learned patterns',
-          'Validate improvements'
-        ],
+        tasks: ['Implement optimized solution', 'Apply learned patterns', 'Validate improvements'],
         workers: workers,
         parallel: true,
         applyLearning: true
@@ -486,11 +499,13 @@ export class QueenCoordinator extends EventEmitter {
       ]
     };
 
-    return taskTemplates[component] || [
-      `Design ${component}`,
-      `Implement ${component}`,
-      `Test ${component}`
-    ];
+    return (
+      taskTemplates[component] || [
+        `Design ${component}`,
+        `Implement ${component}`,
+        `Test ${component}`
+      ]
+    );
   }
 
   /**
@@ -501,11 +516,7 @@ export class QueenCoordinator extends EventEmitter {
     const components = this._identifyComponents(analysis.objective);
 
     // Add general tasks
-    tasks.push(
-      'Analyze requirements',
-      'Design architecture',
-      'Set up project structure'
-    );
+    tasks.push('Analyze requirements', 'Design architecture', 'Set up project structure');
 
     // Add component tasks
     components.forEach(component => {
@@ -513,11 +524,7 @@ export class QueenCoordinator extends EventEmitter {
     });
 
     // Add integration tasks
-    tasks.push(
-      'Integrate components',
-      'Write tests',
-      'Document solution'
-    );
+    tasks.push('Integrate components', 'Write tests', 'Document solution');
 
     return tasks;
   }
@@ -550,9 +557,9 @@ export class QueenCoordinator extends EventEmitter {
 
       if (availableWorkers.length > 0) {
         // Round-robin assignment within type
-        const workerIndex = Object.keys(assignments).filter(
-          t => assignments[t].type === bestWorkerType
-        ).length % availableWorkers.length;
+        const workerIndex =
+          Object.keys(assignments).filter(t => assignments[t].type === bestWorkerType).length %
+          availableWorkers.length;
 
         assignments[task] = availableWorkers[workerIndex];
       }
@@ -594,8 +601,15 @@ export class QueenCoordinator extends EventEmitter {
    */
   _identifyDecisionPoints(analysis) {
     const decisionKeywords = [
-      'choose', 'select', 'decide', 'option', 'approach',
-      'strategy', 'method', 'solution', 'alternative'
+      'choose',
+      'select',
+      'decide',
+      'option',
+      'approach',
+      'strategy',
+      'method',
+      'solution',
+      'alternative'
     ];
 
     const decisions = [];
@@ -718,8 +732,9 @@ export class QueenCoordinator extends EventEmitter {
    */
   _adaptiveVote(topic, options, workerVotes) {
     // Check if we've seen similar decisions before
-    const similarDecisions = Array.from(this.state.learningData.entries())
-      .filter(([key, value]) => key.includes('decision') && value.topic.includes(topic));
+    const similarDecisions = Array.from(this.state.learningData.entries()).filter(
+      ([key, value]) => key.includes('decision') && value.topic.includes(topic)
+    );
 
     if (similarDecisions.length > 0) {
       // Use learned preferences
@@ -750,7 +765,8 @@ export class QueenCoordinator extends EventEmitter {
     });
 
     // Add queen's weighted vote
-    voteCounts[decision.queenVote] = (voteCounts[decision.queenVote] || 0) + this.config.decisionWeight;
+    voteCounts[decision.queenVote] =
+      (voteCounts[decision.queenVote] || 0) + this.config.decisionWeight;
 
     // Find winner
     const sorted = Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);

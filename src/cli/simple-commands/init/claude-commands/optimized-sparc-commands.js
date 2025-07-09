@@ -3,9 +3,10 @@
 // Create batchtools-optimized SPARC mode slash command
 export function createOptimizedSparcSlashCommand(mode) {
   // Extract the full description without truncation
-  const fullDescription = mode.roleDefinition.length > 100
-    ? `${mode.roleDefinition.substring(0, 97)}...`
-    : mode.roleDefinition;
+  const fullDescription =
+    mode.roleDefinition.length > 100
+      ? `${mode.roleDefinition.substring(0, 97)}...`
+      : mode.roleDefinition;
 
   return `---
 name: sparc-${mode.slug}
@@ -35,14 +36,20 @@ ${mode.customInstructions}
 - **Resource Optimization**: Efficient utilization with parallel processing
 
 ## Available Tools (Enhanced)
-${Array.isArray(mode.groups) ? mode.groups.map(g => {
-    if (typeof g === 'string') {
-      return `- **${g}**: ${getOptimizedToolDescription(g)}`;
-    } else if (Array.isArray(g)) {
-      return `- **${g[0]}**: ${g[1]?.description || getOptimizedToolDescription(g[0])} ${g[1]?.fileRegex ? `(Files matching: ${g[1].fileRegex})` : ''} - *Batchtools enabled*`;
-    }
-    return `- ${JSON.stringify(g)}`;
-  }).join('\n') : 'None'}
+${
+  Array.isArray(mode.groups)
+    ? mode.groups
+        .map(g => {
+          if (typeof g === 'string') {
+            return `- **${g}**: ${getOptimizedToolDescription(g)}`;
+          } else if (Array.isArray(g)) {
+            return `- **${g[0]}**: ${g[1]?.description || getOptimizedToolDescription(g[0])} ${g[1]?.fileRegex ? `(Files matching: ${g[1].fileRegex})` : ''} - *Batchtools enabled*`;
+          }
+          return `- ${JSON.stringify(g)}`;
+        })
+        .join('\n')
+    : 'None'
+}
 
 ### Batchtools Integration
 - **parallel()**: Execute multiple operations concurrently
@@ -179,11 +186,11 @@ For detailed ${mode.name} documentation and batchtools integration guides, see:
 // Helper function to get optimized tool descriptions
 function getOptimizedToolDescription(tool) {
   const toolDescriptions = {
-    'read': 'File reading and viewing with parallel processing',
-    'edit': 'File modification and creation with batch operations',
-    'browser': 'Web browsing capabilities with concurrent requests',
-    'mcp': 'Model Context Protocol tools with parallel communication',
-    'command': 'Command execution with concurrent processing'
+    read: 'File reading and viewing with parallel processing',
+    edit: 'File modification and creation with batch operations',
+    browser: 'Web browsing capabilities with concurrent requests',
+    mcp: 'Model Context Protocol tools with parallel communication',
+    command: 'Command execution with concurrent processing'
   };
   return toolDescriptions[tool] || 'Tool access with batchtools optimization';
 }
@@ -191,23 +198,24 @@ function getOptimizedToolDescription(tool) {
 // Helper function to get optimized example tasks
 function getOptimizedExampleTask(slug) {
   const examples = {
-    'architect': 'design microservices architecture with parallel component analysis',
-    'code': 'implement REST API endpoints with concurrent optimization',
-    'tdd': 'create user authentication tests with parallel test generation',
-    'debug': 'fix memory leak in service with concurrent analysis',
+    architect: 'design microservices architecture with parallel component analysis',
+    code: 'implement REST API endpoints with concurrent optimization',
+    tdd: 'create user authentication tests with parallel test generation',
+    debug: 'fix memory leak in service with concurrent analysis',
     'security-review': 'audit API security with parallel vulnerability assessment',
     'docs-writer': 'create API documentation with concurrent content generation',
-    'integration': 'connect payment service with parallel testing',
-    'post-deployment-monitoring-mode': 'monitor production metrics with real-time parallel analysis',
+    integration: 'connect payment service with parallel testing',
+    'post-deployment-monitoring-mode':
+      'monitor production metrics with real-time parallel analysis',
     'refinement-optimization-mode': 'optimize database queries with concurrent profiling',
-    'devops': 'deploy to AWS Lambda with parallel environment setup',
+    devops: 'deploy to AWS Lambda with parallel environment setup',
     'supabase-admin': 'create user authentication schema with batch operations',
     'spec-pseudocode': 'define payment flow requirements with concurrent validation',
-    'mcp': 'integrate with external API using parallel configuration',
-    'swarm': 'build complete feature with parallel testing and documentation',
-    'sparc': 'orchestrate authentication system with concurrent coordination',
-    'ask': 'help me choose the right mode with parallel analysis',
-    'tutorial': 'guide me through SPARC methodology with interactive parallel examples'
+    mcp: 'integrate with external API using parallel configuration',
+    swarm: 'build complete feature with parallel testing and documentation',
+    sparc: 'orchestrate authentication system with concurrent coordination',
+    ask: 'help me choose the right mode with parallel analysis',
+    tutorial: 'guide me through SPARC methodology with interactive parallel examples'
   };
   return examples[slug] || 'implement feature with batchtools optimization';
 }
@@ -215,7 +223,7 @@ function getOptimizedExampleTask(slug) {
 // Helper function to get batchtools best practices for specific modes
 function getBatchtoolsPractices(slug) {
   const practices = {
-    'architect': {
+    architect: {
       parallel: [
         'Analyzing multiple architectural patterns simultaneously',
         'Generating component diagrams concurrently',
@@ -235,7 +243,7 @@ function getBatchtoolsPractices(slug) {
         'Implement parallel validation for architecture consistency'
       ]
     },
-    'code': {
+    code: {
       parallel: [
         'Implementing multiple functions or classes simultaneously',
         'Analyzing code patterns across multiple files',
@@ -255,7 +263,7 @@ function getBatchtoolsPractices(slug) {
         'Implement parallel validation for code quality checks'
       ]
     },
-    'tdd': {
+    tdd: {
       parallel: [
         'Creating multiple test cases simultaneously',
         'Running test suites concurrently',
@@ -277,35 +285,41 @@ function getBatchtoolsPractices(slug) {
     }
   };
 
-  return practices[slug] || {
-    parallel: [
-      'Processing multiple independent components simultaneously',
-      'Analyzing different aspects concurrently',
-      'Generating multiple artifacts in parallel',
-      'Validating multiple criteria simultaneously'
-    ],
-    optimization: [
-      'Use batch operations for related tasks',
-      'Enable parallel processing for independent operations',
-      'Implement concurrent validation and analysis',
-      'Use pipeline processing for complex workflows'
-    ],
-    performance: [
-      'Monitor system resources during parallel operations',
-      'Use smart batching for optimal performance',
-      'Enable concurrent processing based on system capabilities',
-      'Implement parallel validation for comprehensive analysis'
-    ]
-  };
+  return (
+    practices[slug] || {
+      parallel: [
+        'Processing multiple independent components simultaneously',
+        'Analyzing different aspects concurrently',
+        'Generating multiple artifacts in parallel',
+        'Validating multiple criteria simultaneously'
+      ],
+      optimization: [
+        'Use batch operations for related tasks',
+        'Enable parallel processing for independent operations',
+        'Implement concurrent validation and analysis',
+        'Use pipeline processing for complex workflows'
+      ],
+      performance: [
+        'Monitor system resources during parallel operations',
+        'Use smart batching for optimal performance',
+        'Enable concurrent processing based on system capabilities',
+        'Implement parallel validation for comprehensive analysis'
+      ]
+    }
+  );
 }
 
 // Create optimized main SPARC command
 export function createOptimizedMainSparcCommand(modes) {
-  const modeList = modes.map(m => `- \`/sparc-${m.slug}\` - ${m.name} (Batchtools optimized)`).join('\n');
+  const modeList = modes
+    .map(m => `- \`/sparc-${m.slug}\` - ${m.name} (Batchtools optimized)`)
+    .join('\n');
 
   // Find the sparc orchestrator mode for its full description
   const sparcMode = modes.find(m => m.slug === 'sparc');
-  const sparcDescription = sparcMode ? sparcMode.roleDefinition : 'SPARC orchestrator for complex workflows';
+  const sparcDescription = sparcMode
+    ? sparcMode.roleDefinition
+    : 'SPARC orchestrator for complex workflows';
   const sparcInstructions = sparcMode ? sparcMode.customInstructions : '';
 
   return `---

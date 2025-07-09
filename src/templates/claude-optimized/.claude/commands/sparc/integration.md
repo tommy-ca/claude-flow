@@ -12,6 +12,7 @@ You merge the outputs of all modes into a working, tested, production-ready syst
 Verify interface compatibility, shared modules, and env config standards using batchtools for efficient multi-component integration:
 
 ### Parallel Integration Analysis
+
 1. **Concurrent Compatibility Checks**:
    - Validate all interfaces simultaneously
    - Check API contracts across services in parallel
@@ -31,6 +32,7 @@ Verify interface compatibility, shared modules, and env config standards using b
    ```
 
 ### Efficient Integration Workflow
+
 1. **Parallel Component Wiring**:
    - Connect multiple services simultaneously
    - Configure all middleware in parallel
@@ -49,29 +51,32 @@ Verify interface compatibility, shared modules, and env config standards using b
    ```
 
 ### Batch Integration Patterns
+
 - **Parallel Service Registration**:
+
   ```javascript
   // Register all services simultaneously
   await batchtools.parallel([
-     registerAuthService(),
-     registerUserService(),
-     registerNotificationService(),
-     registerAnalyticsService()
-   ]);
+    registerAuthService(),
+    registerUserService(),
+    registerNotificationService(),
+    registerAnalyticsService()
+  ]);
   ```
 
 - **Concurrent Health Checks**:
   ```javascript
   // Verify all services are healthy
   const health = await batchtools.checkHealth([
-     'http://auth-service/health',
-     'http://user-service/health',
-     'http://api-gateway/health',
-     'http://database/health'
-   ]);
+    'http://auth-service/health',
+    'http://user-service/health',
+    'http://api-gateway/health',
+    'http://database/health'
+  ]);
   ```
 
 ### Integration Testing Strategy
+
 ```
 1. Pre-Integration (Parallel):
    ├── Validate all interfaces
@@ -93,14 +98,16 @@ Verify interface compatibility, shared modules, and env config standards using b
 ```
 
 ### Batchtools Integration Operations
+
 - **Parallel Environment Setup**:
+
   ```javascript
   // Set up all environments concurrently
   await batchtools.setupEnvironments([
-     { env: 'development', config: devConfig },
-     { env: 'staging', config: stagingConfig },
-     { env: 'production', config: prodConfig }
-   ]);
+    { env: 'development', config: devConfig },
+    { env: 'staging', config: stagingConfig },
+    { env: 'production', config: prodConfig }
+  ]);
   ```
 
 - **Batch Migration Execution**:
@@ -108,14 +115,15 @@ Verify interface compatibility, shared modules, and env config standards using b
   // Run all database migrations in order but verify in parallel
   await batchtools.runMigrations();
   await batchtools.parallel([
-     verifySchemas(),
-     checkIndexes(),
-     validateConstraints(),
-     testQueries()
-   ]);
+    verifySchemas(),
+    checkIndexes(),
+    validateConstraints(),
+    testQueries()
+  ]);
   ```
 
 ### Integration Documentation
+
 ```
 /integration/
   ├── contracts/      # API contracts validated in parallel
@@ -125,7 +133,9 @@ Verify interface compatibility, shared modules, and env config standards using b
 ```
 
 ### Efficient Deployment Preparation
+
 1. **Parallel Build Process**:
+
    ```javascript
    // Build all components simultaneously
    await batchtools.parallel([
@@ -150,6 +160,7 @@ Verify interface compatibility, shared modules, and env config standards using b
 Split integration logic across domains as needed. Use `new_task` for preflight testing or conflict resolution. End integration tasks with `attempt_completion` summary of what's been connected.
 
 ## Groups/Permissions
+
 - read
 - edit
 - browser
@@ -173,6 +184,7 @@ npx claude-flow sparc run integration "implement user authentication"
 ## Batchtools Integration Examples
 
 ### Complete System Integration
+
 ```javascript
 // Integrate entire system in parallel phases
 await batchtools.integrateSystem({
@@ -184,6 +196,7 @@ await batchtools.integrateSystem({
 ```
 
 ### Parallel Smoke Testing
+
 ```javascript
 // Run smoke tests across all endpoints
 const endpoints = await discoverEndpoints();
@@ -195,6 +208,7 @@ const results = await batchtools.smokeTest(endpoints, {
 ```
 
 ### Batch Performance Validation
+
 ```javascript
 // Validate performance across all services
 await batchtools.performanceTest([

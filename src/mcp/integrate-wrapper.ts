@@ -20,25 +20,24 @@ export class MCPIntegration {
   async connectToClaudeCode(): Promise<void> {
     try {
       // Start Claude Code MCP server process
-      const claudeCodeProcess = spawn('npx', [
-        '-y',
-        '@anthropic/claude-code',
-        'mcp'
-      ], {
-        stdio: ['pipe', 'pipe', 'pipe'],
+      const claudeCodeProcess = spawn('npx', ['-y', '@anthropic/claude-code', 'mcp'], {
+        stdio: ['pipe', 'pipe', 'pipe']
       });
 
       const transport = new StdioClientTransport({
         command: 'npx',
-        args: ['-y', '@anthropic/claude-code', 'mcp'],
+        args: ['-y', '@anthropic/claude-code', 'mcp']
       });
 
-      this.claudeCodeClient = new Client({
-        name: 'claude-flow-wrapper-client',
-        version: '1.0.0',
-      }, {
-        capabilities: {},
-      });
+      this.claudeCodeClient = new Client(
+        {
+          name: 'claude-flow-wrapper-client',
+          version: '1.0.0'
+        },
+        {
+          capabilities: {}
+        }
+      );
 
       await this.claudeCodeClient.connect(transport);
 
@@ -64,17 +63,19 @@ export class MCPIntegration {
 // Update the wrapper to use the real Claude Code MCP client
 export function injectClaudeCodeClient(wrapper: ClaudeCodeMCPWrapper, client: Client): void {
   // Override the forwardToClaudeCode method
-  (wrapper as any).forwardToClaudeCode = async function(toolName: string, args: any) {
+  (wrapper as any).forwardToClaudeCode = async function (toolName: string, args: any) {
     try {
       const result = await client.callTool(toolName, args);
       return result;
     } catch (error) {
       return {
-        content: [{
-          type: 'text',
-          text: `Error calling Claude Code tool ${toolName}: ${error instanceof Error ? error.message : String(error)}`,
-        }],
-        isError: true,
+        content: [
+          {
+            type: 'text',
+            text: `Error calling Claude Code tool ${toolName}: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ],
+        isError: true
       };
     }
   };

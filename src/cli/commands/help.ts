@@ -79,7 +79,8 @@ const HELP_TOPICS: HelpTopic[] = [
       {
         description: 'Spawn a research agent',
         command: 'claude-flow agent spawn researcher --name "Research Assistant"',
-        explanation: 'Creates a new research agent with specialized capabilities for information gathering'
+        explanation:
+          'Creates a new research agent with specialized capabilities for information gathering'
       },
       {
         description: 'List all active agents',
@@ -132,7 +133,8 @@ const HELP_TOPICS: HelpTopic[] = [
       },
       {
         description: 'Create a task with dependencies',
-        command: 'claude-flow task create analysis "Analyze research results" --dependencies task-001',
+        command:
+          'claude-flow task create analysis "Analyze research results" --dependencies task-001',
         explanation: 'Creates a task that waits for task-001 to complete before starting'
       },
       {
@@ -186,7 +188,8 @@ const HELP_TOPICS: HelpTopic[] = [
       {
         description: 'Spawn Claude with web research capabilities',
         command: 'claude-flow claude spawn "implement user authentication" --research --parallel',
-        explanation: 'Creates a Claude instance with WebFetchTool and BatchTool for parallel web research'
+        explanation:
+          'Creates a Claude instance with WebFetchTool and BatchTool for parallel web research'
       },
       {
         description: 'Spawn Claude without permission prompts',
@@ -442,7 +445,8 @@ const HELP_TOPICS: HelpTopic[] = [
     examples: [
       {
         description: 'Save current session',
-        command: 'claude-flow session save "Development Session" --description "Working on API integration"',
+        command:
+          'claude-flow session save "Development Session" --description "Working on API integration"',
         explanation: 'Saves all current agents, tasks, and memory state'
       },
       {
@@ -613,19 +617,19 @@ function showMainHelp(): void {
   console.log(chalk.cyan.bold('Claude-Flow Help System'));
   console.log('─'.repeat(50));
   console.log();
-  
+
   console.log(chalk.white('Claude-Flow is an advanced AI agent orchestration system.'));
   console.log(chalk.white('Use this help system to learn about features and best practices.'));
   console.log();
-  
+
   console.log(chalk.yellow.bold('Quick Start:'));
   console.log(chalk.gray('  claude-flow help getting-started    # Beginner tutorial'));
   console.log(chalk.gray('  claude-flow help --interactive      # Interactive help mode'));
   console.log(chalk.gray('  claude-flow help <topic>            # Specific topic help'));
   console.log();
-  
+
   console.log(chalk.yellow.bold('Help Categories:'));
-  
+
   const categories = {
     basic: 'Essential concepts and commands',
     workflow: 'Building and managing workflows',
@@ -633,18 +637,18 @@ function showMainHelp(): void {
     advanced: 'Advanced features and monitoring',
     troubleshooting: 'Problem diagnosis and solutions'
   };
-  
+
   for (const [category, description] of Object.entries(categories)) {
     console.log();
     console.log(chalk.cyan.bold(`${category.toUpperCase()}:`));
     console.log(chalk.white(`  ${description}`));
-    
+
     const topics = HELP_TOPICS.filter(t => t.category === category);
     for (const topic of topics) {
       console.log(chalk.gray(`    ${topic.name.padEnd(20)} ${topic.description}`));
     }
   }
-  
+
   console.log();
   console.log(chalk.gray('Use "claude-flow help <topic>" for detailed information.'));
   console.log(chalk.gray('Use "claude-flow help --all" to see all topics.'));
@@ -653,39 +657,35 @@ function showMainHelp(): void {
 function showAllTopics(): void {
   console.log(chalk.cyan.bold('All Help Topics'));
   console.log('─'.repeat(50));
-  
+
   const table = new Table.default({
     head: ['Topic', 'Category', 'Description'],
     style: { head: ['cyan'] }
   });
 
   for (const topic of HELP_TOPICS) {
-    table.push([
-      chalk.cyan(topic.name),
-      chalk.yellow(topic.category),
-      topic.description
-    ]);
+    table.push([chalk.cyan(topic.name), chalk.yellow(topic.category), topic.description]);
   }
-  
+
   console.log(table.toString());
-  
+
   console.log();
   console.log(chalk.gray('Use "claude-flow help <topic>" for detailed information.'));
 }
 
 async function showTopicHelp(topicName: string, options: any): Promise<void> {
   const topic = HELP_TOPICS.find(t => t.name === topicName);
-  
+
   if (!topic) {
     console.log(chalk.red(`Help topic '${topicName}' not found.`));
     console.log();
-    
+
     // Suggest similar topics
-    const similar = HELP_TOPICS.filter(t => 
-      t.name.includes(topicName) || 
-      t.description.toLowerCase().includes(topicName.toLowerCase())
+    const similar = HELP_TOPICS.filter(
+      t =>
+        t.name.includes(topicName) || t.description.toLowerCase().includes(topicName.toLowerCase())
     );
-    
+
     if (similar.length > 0) {
       console.log(chalk.gray('Did you mean:'));
       for (const suggestion of similar) {
@@ -696,12 +696,12 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
     }
     return;
   }
-  
+
   console.log(chalk.cyan.bold(`Help: ${topic.name}`));
   console.log('─'.repeat(50));
   console.log(chalk.white(topic.description));
   console.log();
-  
+
   if (options.tutorial && topic.tutorial) {
     console.log(chalk.yellow.bold('Tutorial:'));
     console.log('─'.repeat(20));
@@ -716,7 +716,7 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
     }
     console.log();
   }
-  
+
   if (options.examples && topic.examples) {
     console.log(chalk.yellow.bold('Examples:'));
     console.log('─'.repeat(20));
@@ -729,7 +729,7 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
       console.log();
     }
   }
-  
+
   if (!options.examples && !options.tutorial) {
     // Show both by default
     if (topic.tutorial) {
@@ -747,7 +747,7 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
       console.log(chalk.gray('Use --tutorial for complete tutorial.'));
       console.log();
     }
-    
+
     if (topic.examples) {
       console.log(chalk.yellow.bold('Common Examples:'));
       console.log('─'.repeat(20));
@@ -764,7 +764,7 @@ async function showTopicHelp(topicName: string, options: any): Promise<void> {
       console.log();
     }
   }
-  
+
   if (topic.related && topic.related.length > 0) {
     console.log(chalk.yellow.bold('Related Topics:'));
     console.log('─'.repeat(20));
@@ -779,7 +779,7 @@ async function startInteractiveHelp(): Promise<void> {
   console.log(chalk.cyan.bold('Interactive Help Mode'));
   console.log('─'.repeat(30));
   console.log();
-  
+
   while (true) {
     const categories = [
       { name: 'Getting Started', value: 'getting-started' },
@@ -794,29 +794,31 @@ async function startInteractiveHelp(): Promise<void> {
       { name: 'Browse All Topics', value: 'all' },
       { name: 'Exit', value: 'exit' }
     ];
-    
-    const result = await inquirer.prompt([{
-      type: 'list',
-      name: 'choice',
-      message: 'What would you like help with?',
-      choices: categories,
-    }]);
-    
+
+    const result = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'choice',
+        message: 'What would you like help with?',
+        choices: categories
+      }
+    ]);
+
     const choice = result.choice;
-    
+
     if (choice === 'exit') {
       console.log(chalk.gray('Goodbye!'));
       break;
     }
-    
+
     console.log();
-    
+
     if (choice === 'all') {
       showAllTopics();
     } else {
       await showTopicHelp(choice, { tutorial: true, examples: true });
     }
-    
+
     console.log();
     console.log(chalk.gray('Press Enter to continue...'));
     await new Promise(resolve => {
@@ -824,7 +826,7 @@ async function startInteractiveHelp(): Promise<void> {
       const buffer = new Uint8Array(1);
       stdin.read(buffer).then(() => resolve(undefined));
     });
-    
+
     console.clear();
   }
 }

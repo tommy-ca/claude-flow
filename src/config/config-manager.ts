@@ -66,38 +66,38 @@ const DEFAULT_CONFIG: Config = {
     maxConcurrentAgents: 10,
     taskQueueSize: 100,
     healthCheckInterval: 30000,
-    shutdownTimeout: 30000,
+    shutdownTimeout: 30000
   },
   terminal: {
     type: 'auto',
     poolSize: 5,
     recycleAfter: 10,
     healthCheckInterval: 60000,
-    commandTimeout: 300000,
+    commandTimeout: 300000
   },
   memory: {
     backend: 'hybrid',
     cacheSizeMB: 100,
     syncInterval: 5000,
     conflictResolution: 'crdt',
-    retentionDays: 30,
+    retentionDays: 30
   },
   coordination: {
     maxRetries: 3,
     retryDelay: 1000,
     deadlockDetection: true,
     resourceTimeout: 60000,
-    messageTimeout: 30000,
+    messageTimeout: 30000
   },
   mcp: {
     transport: 'stdio',
     port: 3000,
-    tlsEnabled: false,
+    tlsEnabled: false
   },
   logging: {
     level: 'info',
     format: 'json',
-    destination: 'console',
+    destination: 'console'
   },
   ruvSwarm: {
     enabled: true,
@@ -108,8 +108,8 @@ const DEFAULT_CONFIG: Config = {
     enableHooks: true,
     enablePersistence: true,
     enableNeuralTraining: true,
-    configPath: '.claude/ruv-swarm-config.json',
-  },
+    configPath: '.claude/ruv-swarm-config.json'
+  }
 };
 
 /**
@@ -185,16 +185,16 @@ export class ConfigManager {
     try {
       const content = await fs.readFile(this.configPath, 'utf8');
       const fileConfig = JSON.parse(content) as Partial<Config>;
-      
+
       // Merge with defaults
       this.config = this.deepMerge(DEFAULT_CONFIG, fileConfig);
-      
+
       // Load environment variables
       this.loadFromEnv();
-      
+
       // Validate
       this.validate(this.config);
-      
+
       return this.config;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
@@ -217,7 +217,7 @@ export class ConfigManager {
   get(path: string): any {
     const keys = path.split('.');
     let current: any = this.config;
-    
+
     for (const key of keys) {
       if (current && typeof current === 'object' && key in current) {
         current = current[key];
@@ -225,7 +225,7 @@ export class ConfigManager {
         return undefined;
       }
     }
-    
+
     return current;
   }
 
@@ -235,7 +235,7 @@ export class ConfigManager {
   set(path: string, value: any): void {
     const keys = path.split('.');
     let current: any = this.config;
-    
+
     for (let i = 0; i < keys.length - 1; i++) {
       const key = keys[i];
       if (!(key in current)) {
@@ -243,10 +243,10 @@ export class ConfigManager {
       }
       current = current[key];
     }
-    
+
     const lastKey = keys[keys.length - 1];
     current[lastKey] = value;
-    
+
     // Validate after setting
     this.validate(this.config);
   }
@@ -269,7 +269,10 @@ export class ConfigManager {
    */
   validate(config: Config): void {
     // Orchestrator validation
-    if (config.orchestrator.maxConcurrentAgents < 1 || config.orchestrator.maxConcurrentAgents > 100) {
+    if (
+      config.orchestrator.maxConcurrentAgents < 1 ||
+      config.orchestrator.maxConcurrentAgents > 100
+    ) {
       throw new ConfigError('orchestrator.maxConcurrentAgents must be between 1 and 100');
     }
     if (config.orchestrator.taskQueueSize < 1 || config.orchestrator.taskQueueSize > 10000) {
@@ -318,13 +321,17 @@ export class ConfigManager {
 
     // ruv-swarm validation
     if (!['mesh', 'hierarchical', 'ring', 'star'].includes(config.ruvSwarm.defaultTopology)) {
-      throw new ConfigError('ruvSwarm.defaultTopology must be one of: mesh, hierarchical, ring, star');
+      throw new ConfigError(
+        'ruvSwarm.defaultTopology must be one of: mesh, hierarchical, ring, star'
+      );
     }
     if (config.ruvSwarm.maxAgents < 1 || config.ruvSwarm.maxAgents > 100) {
       throw new ConfigError('ruvSwarm.maxAgents must be between 1 and 100');
     }
     if (!['balanced', 'specialized', 'adaptive'].includes(config.ruvSwarm.defaultStrategy)) {
-      throw new ConfigError('ruvSwarm.defaultStrategy must be one of: balanced, specialized, adaptive');
+      throw new ConfigError(
+        'ruvSwarm.defaultStrategy must be one of: balanced, specialized, adaptive'
+      );
     }
   }
 
@@ -363,7 +370,12 @@ export class ConfigManager {
 
     // Logging settings
     const logLevel = process.env.CLAUDE_FLOW_LOG_LEVEL;
-    if (logLevel === 'debug' || logLevel === 'info' || logLevel === 'warn' || logLevel === 'error') {
+    if (
+      logLevel === 'debug' ||
+      logLevel === 'info' ||
+      logLevel === 'warn' ||
+      logLevel === 'error'
+    ) {
       this.config.logging.level = logLevel;
     }
 
@@ -374,8 +386,12 @@ export class ConfigManager {
     }
 
     const ruvSwarmTopology = process.env.CLAUDE_FLOW_RUV_SWARM_TOPOLOGY;
-    if (ruvSwarmTopology === 'mesh' || ruvSwarmTopology === 'hierarchical' || 
-        ruvSwarmTopology === 'ring' || ruvSwarmTopology === 'star') {
+    if (
+      ruvSwarmTopology === 'mesh' ||
+      ruvSwarmTopology === 'hierarchical' ||
+      ruvSwarmTopology === 'ring' ||
+      ruvSwarmTopology === 'star'
+    ) {
       this.config.ruvSwarm.defaultTopology = ruvSwarmTopology;
     }
 
@@ -420,7 +436,11 @@ export class ConfigManager {
   getFormatParsers(): Record<string, any> {
     return {
       json: { extension: '.json', parse: JSON.parse, stringify: JSON.stringify },
-      yaml: { extension: '.yaml', parse: (content: string) => content, stringify: (obj: any) => JSON.stringify(obj) }
+      yaml: {
+        extension: '.yaml',
+        parse: (content: string) => content,
+        stringify: (obj: any) => JSON.stringify(obj)
+      }
     };
   }
 
@@ -491,31 +511,31 @@ export class ConfigManager {
   getRuvSwarmArgs(): string[] {
     const args: string[] = [];
     const config = this.config.ruvSwarm;
-    
+
     if (!config.enabled) {
       return args;
     }
-    
+
     args.push('--topology', config.defaultTopology);
     args.push('--max-agents', String(config.maxAgents));
     args.push('--strategy', config.defaultStrategy);
-    
+
     if (config.enableHooks) {
       args.push('--enable-hooks');
     }
-    
+
     if (config.enablePersistence) {
       args.push('--enable-persistence');
     }
-    
+
     if (config.enableNeuralTraining) {
       args.push('--enable-training');
     }
-    
+
     if (config.configPath) {
       args.push('--config-path', config.configPath);
     }
-    
+
     return args;
   }
 
@@ -524,7 +544,7 @@ export class ConfigManager {
    */
   private deepMerge(target: Config, source: Partial<Config>): Config {
     const result = this.deepClone(target);
-    
+
     if (source.orchestrator) {
       result.orchestrator = { ...result.orchestrator, ...source.orchestrator };
     }
@@ -546,7 +566,7 @@ export class ConfigManager {
     if (source.ruvSwarm) {
       result.ruvSwarm = { ...result.ruvSwarm, ...source.ruvSwarm };
     }
-    
+
     return result;
   }
 }

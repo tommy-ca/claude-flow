@@ -127,7 +127,7 @@ export async function runCommand(command, args = [], options = {}) {
       const { spawn } = await import('child_process');
       const { promisify } = await import('util');
 
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         const child = spawn(command, args, {
           stdio: ['pipe', 'pipe', 'pipe'],
           shell: true,
@@ -137,15 +137,15 @@ export async function runCommand(command, args = [], options = {}) {
         let stdout = '';
         let stderr = '';
 
-        child.stdout?.on('data', (data) => {
+        child.stdout?.on('data', data => {
           stdout += data.toString();
         });
 
-        child.stderr?.on('data', (data) => {
+        child.stderr?.on('data', data => {
           stderr += data.toString();
         });
 
-        child.on('close', (code) => {
+        child.on('close', code => {
           resolve({
             success: code === 0,
             code: code || 0,
@@ -154,7 +154,7 @@ export async function runCommand(command, args = [], options = {}) {
           });
         });
 
-        child.on('error', (err) => {
+        child.on('error', err => {
           resolve({
             success: false,
             code: -1,
@@ -412,7 +412,9 @@ export async function callRuvSwarmDirectNeural(params = {}) {
     const dataSource = params.data || 'recent';
 
     console.log('🧠 Using REAL ruv-swarm WASM neural training...');
-    console.log(`🚀 Executing: npx ruv-swarm neural train --model ${modelName} --iterations ${epochs} --data-source ${dataSource}`);
+    console.log(
+      `🚀 Executing: npx ruv-swarm neural train --model ${modelName} --iterations ${epochs} --data-source ${dataSource}`
+    );
     console.log('📺 LIVE TRAINING OUTPUT:\n');
 
     // Use a different approach to show live output - spawn with stdio inheritance
@@ -421,21 +423,29 @@ export async function callRuvSwarmDirectNeural(params = {}) {
       // Node.js environment - use spawn with stdio inherit
       const { spawn } = await import('child_process');
 
-      result = await new Promise((resolve) => {
-        const child = spawn('npx', [
-          'ruv-swarm',
-          'neural',
-          'train',
-          '--model', modelName,
-          '--iterations', epochs.toString(),
-          '--data-source', dataSource,
-          '--output-format', 'json'
-        ], {
-          stdio: 'inherit', // This will show live output in Node.js
-          shell: true
-        });
+      result = await new Promise(resolve => {
+        const child = spawn(
+          'npx',
+          [
+            'ruv-swarm',
+            'neural',
+            'train',
+            '--model',
+            modelName,
+            '--iterations',
+            epochs.toString(),
+            '--data-source',
+            dataSource,
+            '--output-format',
+            'json'
+          ],
+          {
+            stdio: 'inherit', // This will show live output in Node.js
+            shell: true
+          }
+        );
 
-        child.on('close', (code) => {
+        child.on('close', code => {
           resolve({
             success: code === 0,
             code: code || 0,
@@ -444,7 +454,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
           });
         });
 
-        child.on('error', (err) => {
+        child.on('error', err => {
           resolve({
             success: false,
             code: -1,
@@ -455,18 +465,26 @@ export async function callRuvSwarmDirectNeural(params = {}) {
       });
     } else {
       // Deno environment - fallback to regular command
-      result = await runCommand('npx', [
-        'ruv-swarm',
-        'neural',
-        'train',
-        '--model', modelName,
-        '--iterations', epochs.toString(),
-        '--data-source', dataSource,
-        '--output-format', 'json'
-      ], {
-        stdout: 'piped',
-        stderr: 'piped'
-      });
+      result = await runCommand(
+        'npx',
+        [
+          'ruv-swarm',
+          'neural',
+          'train',
+          '--model',
+          modelName,
+          '--iterations',
+          epochs.toString(),
+          '--data-source',
+          dataSource,
+          '--output-format',
+          'json'
+        ],
+        {
+          stdout: 'piped',
+          stderr: 'piped'
+        }
+      );
 
       // Show the output manually in Deno
       if (result.stdout) {
@@ -539,7 +557,6 @@ export async function callRuvSwarmDirectNeural(params = {}) {
       ruv_swarm_executed: true,
       timestamp: new Date().toISOString()
     };
-
   } catch (err) {
     console.log(`⚠️ Direct ruv-swarm call failed: ${err.message}`);
     throw err;

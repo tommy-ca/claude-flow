@@ -35,7 +35,6 @@ export class StateTracker {
       }
 
       await this.saveState(state);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to record rollback point: ${error.message}`);
@@ -76,7 +75,6 @@ export class StateTracker {
       }
 
       await this.saveState(state);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to create checkpoint: ${error.message}`);
@@ -107,7 +105,6 @@ export class StateTracker {
           result.errors.push(`Checkpoint not found: ${checkpointId}`);
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to update checkpoint: ${error.message}`);
@@ -146,7 +143,6 @@ export class StateTracker {
       }
 
       await this.saveState(state);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to record rollback: ${error.message}`);
@@ -220,7 +216,6 @@ export class StateTracker {
       }
 
       await this.saveState(state);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to track file operation: ${error.message}`);
@@ -263,7 +258,6 @@ export class StateTracker {
       });
 
       await this.saveState(state);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Failed to set phase: ${error.message}`);
@@ -313,7 +307,7 @@ export class StateTracker {
 
     try {
       const state = await this.loadState();
-      const cutoffTime = Date.now() - (daysToKeep * 24 * 60 * 60 * 1000);
+      const cutoffTime = Date.now() - daysToKeep * 24 * 60 * 60 * 1000;
 
       let cleaned = 0;
 
@@ -343,7 +337,6 @@ export class StateTracker {
       if (cleaned > 0) {
         await this.saveState(state);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`State cleanup failed: ${error.message}`);
@@ -375,7 +368,6 @@ export class StateTracker {
       if (!validationResult.valid) {
         result.warnings.push(...validationResult.issues);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`State tracking validation failed: ${error.message}`);
@@ -453,10 +445,7 @@ export class StateTracker {
     state.lastActivity = Date.now();
     state.version = '1.0';
 
-    await Deno.writeTextFile(
-      this.stateFile,
-      JSON.stringify(state, null, 2)
-    );
+    await Deno.writeTextFile(this.stateFile, JSON.stringify(state, null, 2));
   }
 
   generateId() {

@@ -3,7 +3,7 @@ import { getErrorMessage } from '../../utils/error-handler.js';
 export async function createDirectoryStructure(): Promise<void> {
   const fs = await import('fs/promises');
   const path = await import('path');
-  
+
   // Define directory structure
   const directories = [
     '.claude',
@@ -22,7 +22,7 @@ export async function createDirectoryStructure(): Promise<void> {
     'coordination/orchestration',
     'reports'
   ];
-  
+
   // Create directories
   for (const dir of directories) {
     try {
@@ -34,7 +34,7 @@ export async function createDirectoryStructure(): Promise<void> {
       }
     }
   }
-  
+
   // Create README files for key directories
   const readmeFiles = {
     'memory/agents/README.md': createAgentsReadme(),
@@ -42,21 +42,21 @@ export async function createDirectoryStructure(): Promise<void> {
     'coordination/README.md': createCoordinationReadme(),
     'reports/README.md': createReportsReadme()
   };
-  
+
   for (const [filePath, content] of Object.entries(readmeFiles)) {
     await fs.writeFile(filePath, content);
     console.log(`  ✅ Created ${filePath}`);
   }
-  
+
   // Create initial persistence database
   const initialData = {
     agents: [],
     tasks: [],
     swarms: [],
     lastUpdated: Date.now(),
-    version: "1.0.71"
+    version: '1.0.71'
   };
-  
+
   await fs.writeFile('memory/claude-flow-data.json', JSON.stringify(initialData, null, 2));
   console.log('  ✅ Created memory/claude-flow-data.json (persistence database)');
 }

@@ -51,12 +51,12 @@ npx claude-flow@latest %*
         console.log('  ✓ Created local claude-flow.cmd executable wrapper');
         console.log('    You can now use: claude-flow instead of npx claude-flow');
       }
-
     } else {
       // Check if we're in development mode (claude-code-flow repo)
       const isDevelopment = workingDir.includes('claude-code-flow');
-      const devBinPath = isDevelopment ?
-        workingDir.split('claude-code-flow')[0] + 'claude-code-flow/bin/claude-flow' : '';
+      const devBinPath = isDevelopment
+        ? workingDir.split('claude-code-flow')[0] + 'claude-code-flow/bin/claude-flow'
+        : '';
 
       // Create Unix/Linux/Mac shell script
       const wrapperScript = `#!/usr/bin/env bash
@@ -73,13 +73,17 @@ export CLAUDE_WORKING_DIR="\${PROJECT_DIR}"
 # Try to find claude-flow binary
 # Check common locations for npm/npx installations
 
-${isDevelopment ? `# Development mode - use local bin
+${
+  isDevelopment
+    ? `# Development mode - use local bin
 if [ -f "${devBinPath}" ]; then
   cd "\${PROJECT_DIR}"
   exec "${devBinPath}" "$@"
 fi
 
-` : ''}# 1. Local node_modules (npm install claude-flow)
+`
+    : ''
+}# 1. Local node_modules (npm install claude-flow)
 if [ -f "\${PROJECT_DIR}/node_modules/.bin/claude-flow" ]; then
   cd "\${PROJECT_DIR}"
   exec "\${PROJECT_DIR}/node_modules/.bin/claude-flow" "$@"
@@ -112,7 +116,6 @@ fi
         console.log('    You can now use: ./claude-flow instead of npx claude-flow');
       }
     }
-
   } catch (err) {
     console.log(`  ⚠️  Could not create local executable: ${err.message}`);
   }

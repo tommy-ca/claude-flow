@@ -14,11 +14,9 @@ import {
 /**
  * Create a resource manager with default or custom configuration
  */
-export function createResourceManager(
-  config?: Partial<IResourceManagerConfig>
-): ResourceManager {
+export function createResourceManager(config?: Partial<IResourceManagerConfig>): ResourceManager {
   const factory = new ResourceManagerFactory();
-  
+
   const defaultMonitorConfig: IResourceMonitorConfig = {
     interval: 5000,
     enabled: true,
@@ -33,7 +31,7 @@ export function createResourceManager(
     alertHandlers: [],
     exporters: []
   };
-  
+
   const defaultAllocatorConfig: IResourceAllocatorConfig = {
     strategy: 'priority' as any,
     maxCpuCores: 8,
@@ -55,7 +53,7 @@ export function createResourceManager(
       gracePeriod: 60000
     }
   };
-  
+
   const defaultPressureDetectorConfig: IPressureDetectorConfig = {
     enabled: true,
     interval: 10000,
@@ -74,7 +72,7 @@ export function createResourceManager(
     },
     responseActions: []
   };
-  
+
   return factory.createResourceManager(
     { ...defaultMonitorConfig, ...config?.monitor },
     { ...defaultAllocatorConfig, ...config?.allocator },

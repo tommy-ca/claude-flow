@@ -13,11 +13,11 @@ try {
   if (process.env.CI && process.env.SKIP_NATIVE_MODULES === 'true') {
     throw new Error('Native modules skipped in CI');
   }
-  
+
   // Use dynamic import for optional dependency
   const module = await import('better-sqlite3');
   Database = module.default;
-  
+
   // Test that it actually works (some platforms may have a broken build)
   try {
     const testDb = new Database(':memory:');
@@ -29,13 +29,13 @@ try {
 } catch (error) {
   dbError = error;
   dbAvailable = false;
-  
+
   // Only log in non-CI environments or when debugging
   if (!process.env.CI || process.env.DEBUG) {
     console.warn(`📦 better-sqlite3 not available: ${error.message}`);
     console.warn('   Using in-memory database fallback');
   }
-  
+
   // Comprehensive in-memory database fallback
   class InMemoryDatabase {
     constructor(filename) {
@@ -47,19 +47,19 @@ try {
       this.transactionQueue = [];
       this.closed = false;
     }
-    
+
     prepare(sql) {
       if (this.closed) {
         throw new Error('Database is closed');
       }
-      
+
       const self = this;
       const normalizedSql = sql.trim().toUpperCase();
-      
+
       return {
         run(...params) {
           if (self.closed) throw new Error('Database is closed');
-          
+
           // Handle CREATE TABLE
           if (normalizedSql.includes('CREATE TABLE')) {
             const tableMatch = sql.match(/CREATE TABLE (?:IF NOT EXISTS )?(\w+)/i);
@@ -71,7 +71,7 @@ try {
             }
             return { changes: 0, lastInsertRowid: 0 };
           }
-          
+
           // Handle INSERT
           if (normalizedSql.includes('INSERT')) {
             const tableMatch = sql.match(/INSERT INTO (\w+)/i);
@@ -84,23 +84,23 @@ try {
               return { changes: 1, lastInsertRowid: id };
             }
           }
-          
+
           // Handle UPDATE
           if (normalizedSql.includes('UPDATE')) {
             return { changes: 0, lastInsertRowid: 0 };
           }
-          
+
           // Handle DELETE
           if (normalizedSql.includes('DELETE')) {
             return { changes: 0, lastInsertRowid: 0 };
           }
-          
+
           return { changes: 0, lastInsertRowid: 0 };
         },
-        
+
         get(...params) {
           if (self.closed) throw new Error('Database is closed');
-          
+
           // Handle SELECT
           if (normalizedSql.includes('SELECT')) {
             const key = params[0];
@@ -108,7 +108,7 @@ try {
             if (data) {
               return { id: key, data: JSON.stringify(data) };
             }
-            
+
             // Check tables
             for (const [tableName, table] of self.tables) {
               if (table.has(key)) {
@@ -117,34 +117,34 @@ try {
               }
             }
           }
-          
+
           return undefined;
         },
-        
+
         all(...params) {
           if (self.closed) throw new Error('Database is closed');
-          
+
           const results = [];
-          
+
           // Return all data
           for (const [key, value] of self.data.entries()) {
             results.push({ id: key, data: JSON.stringify(value) });
           }
-          
+
           // Return all table data
           for (const [tableName, table] of self.tables) {
             for (const [key, value] of table.entries()) {
-              results.push({ 
-                id: key, 
+              results.push({
+                id: key,
                 table: tableName,
-                data: JSON.stringify(value) 
+                data: JSON.stringify(value)
               });
             }
           }
-          
+
           return results;
         },
-        
+
         iterate(...params) {
           const all = this.all(...params);
           return {
@@ -163,12 +163,12 @@ try {
         }
       };
     }
-    
+
     transaction(fn) {
       if (this.closed) throw new Error('Database is closed');
-      
+
       const self = this;
-      return function(...args) {
+      return function (...args) {
         self.inTransaction = true;
         try {
           const result = fn.apply(this, args);
@@ -180,35 +180,35 @@ try {
         }
       };
     }
-    
+
     exec(sql) {
       if (this.closed) throw new Error('Database is closed');
       // Simulate exec for multiple statements
       return this;
     }
-    
+
     pragma(name, value) {
       if (this.closed) throw new Error('Database is closed');
       // Simulate pragma commands
       return value !== undefined ? this : true;
     }
-    
+
     close() {
       this.closed = true;
       this.data.clear();
       this.tables.clear();
       this.prepared.clear();
     }
-    
+
     get inTransaction() {
       return this._inTransaction || false;
     }
-    
+
     set inTransaction(value) {
       this._inTransaction = value;
     }
   }
-  
+
   Database = InMemoryDatabase;
 }
 
@@ -216,25 +216,19 @@ try {
 function createDatabase(filename, options = {}) {
   try {
     const db = new Database(filename, options);
-    
+
     // Add helper method to check if using fallback
     db.isInMemory = !dbAvailable;
-    
+
     return db;
   } catch (error) {
     // If even the fallback fails, throw a descriptive error
     throw new Error(
       `Failed to create database: ${error.message}. ` +
-      `Original error: ${dbError ? dbError.message : 'none'}`
+        `Original error: ${dbError ? dbError.message : 'none'}`
     );
   }
 }
 
 // Export both for compatibility
-export { 
-  Database as default, 
-  Database,
-  createDatabase,
-  dbAvailable,
-  dbError
-};
+export { Database as default, Database, createDatabase, dbAvailable, dbError };

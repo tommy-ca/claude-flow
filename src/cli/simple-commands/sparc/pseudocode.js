@@ -75,7 +75,6 @@ export class SparcPseudocode extends SparcPhase {
 
       console.log('✅ Pseudocode phase completed');
       return result;
-
     } catch (error) {
       console.error('❌ Pseudocode phase failed:', error.message);
       throw error;
@@ -98,7 +97,9 @@ export class SparcPseudocode extends SparcPhase {
     // Determine flow type based on requirements
     const requirements = specification.requirements || [];
     const hasApiRequirements = requirements.some(req => req.toLowerCase().includes('api'));
-    const hasUiRequirements = requirements.some(req => req.toLowerCase().includes('ui') || req.toLowerCase().includes('interface'));
+    const hasUiRequirements = requirements.some(
+      req => req.toLowerCase().includes('ui') || req.toLowerCase().includes('interface')
+    );
     const hasDataRequirements = requirements.some(req => req.toLowerCase().includes('data'));
 
     if (hasApiRequirements) {
@@ -284,10 +285,29 @@ export class SparcPseudocode extends SparcPhase {
   generateFunctionName(requirement) {
     const words = requirement.toLowerCase().split(' ');
     const actionWords = words.filter(word =>
-      ['provide', 'handle', 'ensure', 'validate', 'process', 'manage', 'create', 'update', 'delete'].includes(word)
+      [
+        'provide',
+        'handle',
+        'ensure',
+        'validate',
+        'process',
+        'manage',
+        'create',
+        'update',
+        'delete'
+      ].includes(word)
     );
     const objectWords = words.filter(word =>
-      ['api', 'data', 'user', 'system', 'request', 'response', 'authentication', 'authorization'].includes(word)
+      [
+        'api',
+        'data',
+        'user',
+        'system',
+        'request',
+        'response',
+        'authentication',
+        'authorization'
+      ].includes(word)
     );
 
     const action = actionWords[0] || 'execute';
@@ -356,7 +376,9 @@ export class SparcPseudocode extends SparcPhase {
    * Estimate complexity
    */
   estimateComplexity(steps) {
-    const decisionSteps = steps.filter(step => step.includes('IF') || step.includes('WHILE') || step.includes('FOR'));
+    const decisionSteps = steps.filter(
+      step => step.includes('IF') || step.includes('WHILE') || step.includes('FOR')
+    );
     const operationSteps = steps.filter(step => step.includes('EXECUTE') || step.includes('CALL'));
 
     return {
@@ -378,7 +400,11 @@ export class SparcPseudocode extends SparcPhase {
     for (const requirement of requirements) {
       const reqLower = requirement.toLowerCase();
 
-      if (reqLower.includes('sort') || reqLower.includes('search') || reqLower.includes('optimize')) {
+      if (
+        reqLower.includes('sort') ||
+        reqLower.includes('search') ||
+        reqLower.includes('optimize')
+      ) {
         algorithms.push({
           name: 'Search and Sort Algorithm',
           purpose: 'Efficient data retrieval and ordering',
@@ -430,7 +456,11 @@ export class SparcPseudocode extends SparcPhase {
     for (const requirement of requirements) {
       const reqLower = requirement.toLowerCase();
 
-      if (reqLower.includes('list') || reqLower.includes('array') || reqLower.includes('collection')) {
+      if (
+        reqLower.includes('list') ||
+        reqLower.includes('array') ||
+        reqLower.includes('collection')
+      ) {
         dataStructures.push({
           name: 'Dynamic Array',
           purpose: 'Store variable-length collections',
@@ -493,10 +523,30 @@ export class SparcPseudocode extends SparcPhase {
         name: 'APIInterface',
         type: 'REST API',
         methods: [
-          { name: 'GET', purpose: 'Retrieve data', parameters: ['id', 'filters'], returns: 'data object' },
-          { name: 'POST', purpose: 'Create new resource', parameters: ['data'], returns: 'created resource' },
-          { name: 'PUT', purpose: 'Update existing resource', parameters: ['id', 'data'], returns: 'updated resource' },
-          { name: 'DELETE', purpose: 'Remove resource', parameters: ['id'], returns: 'success status' }
+          {
+            name: 'GET',
+            purpose: 'Retrieve data',
+            parameters: ['id', 'filters'],
+            returns: 'data object'
+          },
+          {
+            name: 'POST',
+            purpose: 'Create new resource',
+            parameters: ['data'],
+            returns: 'created resource'
+          },
+          {
+            name: 'PUT',
+            purpose: 'Update existing resource',
+            parameters: ['id', 'data'],
+            returns: 'updated resource'
+          },
+          {
+            name: 'DELETE',
+            purpose: 'Remove resource',
+            parameters: ['id'],
+            returns: 'success status'
+          }
         ]
       });
     }
@@ -507,9 +557,24 @@ export class SparcPseudocode extends SparcPhase {
         name: 'DatabaseInterface',
         type: 'Data Access Layer',
         methods: [
-          { name: 'connect', purpose: 'Establish connection', parameters: ['config'], returns: 'connection object' },
-          { name: 'query', purpose: 'Execute query', parameters: ['sql', 'params'], returns: 'result set' },
-          { name: 'transaction', purpose: 'Execute transaction', parameters: ['operations'], returns: 'transaction result' },
+          {
+            name: 'connect',
+            purpose: 'Establish connection',
+            parameters: ['config'],
+            returns: 'connection object'
+          },
+          {
+            name: 'query',
+            purpose: 'Execute query',
+            parameters: ['sql', 'params'],
+            returns: 'result set'
+          },
+          {
+            name: 'transaction',
+            purpose: 'Execute transaction',
+            parameters: ['operations'],
+            returns: 'transaction result'
+          },
           { name: 'disconnect', purpose: 'Close connection', parameters: [], returns: 'void' }
         ]
       });
@@ -520,9 +585,24 @@ export class SparcPseudocode extends SparcPhase {
       name: 'ServiceInterface',
       type: 'Business Logic Layer',
       methods: [
-        { name: 'initialize', purpose: 'Initialize service', parameters: ['config'], returns: 'service instance' },
-        { name: 'execute', purpose: 'Execute main operation', parameters: ['request'], returns: 'response' },
-        { name: 'validate', purpose: 'Validate input', parameters: ['data'], returns: 'validation result' },
+        {
+          name: 'initialize',
+          purpose: 'Initialize service',
+          parameters: ['config'],
+          returns: 'service instance'
+        },
+        {
+          name: 'execute',
+          purpose: 'Execute main operation',
+          parameters: ['request'],
+          returns: 'response'
+        },
+        {
+          name: 'validate',
+          purpose: 'Validate input',
+          parameters: ['data'],
+          returns: 'validation result'
+        },
         { name: 'cleanup', purpose: 'Clean up resources', parameters: [], returns: 'void' }
       ]
     });
@@ -579,11 +659,21 @@ export class SparcPseudocode extends SparcPhase {
     const inputs = [];
     const reqLower = requirement.toLowerCase();
 
-    if (reqLower.includes('api')) {inputs.push('HTTP request', 'request parameters');}
-    if (reqLower.includes('data')) {inputs.push('data payload', 'database connection');}
-    if (reqLower.includes('user')) {inputs.push('user credentials', 'user input');}
-    if (reqLower.includes('validate')) {inputs.push('validation rules', 'input data');}
-    if (reqLower.includes('authenticate')) {inputs.push('authentication credentials');}
+    if (reqLower.includes('api')) {
+      inputs.push('HTTP request', 'request parameters');
+    }
+    if (reqLower.includes('data')) {
+      inputs.push('data payload', 'database connection');
+    }
+    if (reqLower.includes('user')) {
+      inputs.push('user credentials', 'user input');
+    }
+    if (reqLower.includes('validate')) {
+      inputs.push('validation rules', 'input data');
+    }
+    if (reqLower.includes('authenticate')) {
+      inputs.push('authentication credentials');
+    }
 
     return inputs.length > 0 ? inputs : ['system input'];
   }
@@ -595,10 +685,18 @@ export class SparcPseudocode extends SparcPhase {
     const outputs = [];
     const reqLower = requirement.toLowerCase();
 
-    if (reqLower.includes('api')) {outputs.push('HTTP response', 'status code');}
-    if (reqLower.includes('data')) {outputs.push('processed data', 'transaction result');}
-    if (reqLower.includes('validate')) {outputs.push('validation result', 'error messages');}
-    if (reqLower.includes('authenticate')) {outputs.push('authentication token', 'user session');}
+    if (reqLower.includes('api')) {
+      outputs.push('HTTP response', 'status code');
+    }
+    if (reqLower.includes('data')) {
+      outputs.push('processed data', 'transaction result');
+    }
+    if (reqLower.includes('validate')) {
+      outputs.push('validation result', 'error messages');
+    }
+    if (reqLower.includes('authenticate')) {
+      outputs.push('authentication token', 'user session');
+    }
 
     return outputs.length > 0 ? outputs : ['operation result'];
   }
@@ -610,10 +708,18 @@ export class SparcPseudocode extends SparcPhase {
     const conditions = [];
     const reqLower = requirement.toLowerCase();
 
-    if (reqLower.includes('validate')) {conditions.push('data is valid', 'rules are satisfied');}
-    if (reqLower.includes('authenticate')) {conditions.push('credentials are valid', 'user exists');}
-    if (reqLower.includes('data')) {conditions.push('database is available', 'data integrity maintained');}
-    if (reqLower.includes('api')) {conditions.push('request format is valid', 'service is available');}
+    if (reqLower.includes('validate')) {
+      conditions.push('data is valid', 'rules are satisfied');
+    }
+    if (reqLower.includes('authenticate')) {
+      conditions.push('credentials are valid', 'user exists');
+    }
+    if (reqLower.includes('data')) {
+      conditions.push('database is available', 'data integrity maintained');
+    }
+    if (reqLower.includes('api')) {
+      conditions.push('request format is valid', 'service is available');
+    }
 
     return conditions.length > 0 ? conditions : ['preconditions met'];
   }
@@ -783,7 +889,9 @@ ${result.flowDiagram.edges.map(edge => `- ${edge.from} → ${edge.to} ${edge.lab
 
 ## Pseudocode
 
-${result.pseudocode.map((func, index) => `
+${result.pseudocode
+  .map(
+    (func, index) => `
 ### ${index + 1}. ${func.function}
 **Description**: ${func.description}
 **Complexity**: ${func.complexity ? `Cyclomatic: ${func.complexity.cyclomatic}, Lines: ${func.complexity.lines}` : 'N/A'}
@@ -791,66 +899,96 @@ ${result.pseudocode.map((func, index) => `
 \`\`\`
 ${func.steps.join('\n')}
 \`\`\`
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Algorithms
 
-${result.algorithms.map((algo, index) => `
+${result.algorithms
+  .map(
+    (algo, index) => `
 ### ${index + 1}. ${algo.name}
 **Purpose**: ${algo.purpose}
 **Complexity**: ${algo.complexity}
 **Approach**: ${algo.approach}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Data Structures
 
-${result.dataStructures.map((ds, index) => `
+${result.dataStructures
+  .map(
+    (ds, index) => `
 ### ${index + 1}. ${ds.name}
 **Purpose**: ${ds.purpose}
 **Operations**: ${ds.operations.join(', ')}
 **Complexity**: Access: ${ds.complexity.access}, Insertion: ${ds.complexity.insertion}, Deletion: ${ds.complexity.deletion}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Interfaces
 
-${result.interfaces.map((iface, index) => `
+${result.interfaces
+  .map(
+    (iface, index) => `
 ### ${index + 1}. ${iface.name}
 **Type**: ${iface.type}
 
-${iface.methods.map(method => `
+${iface.methods
+  .map(
+    method => `
 #### ${method.name}
 - **Purpose**: ${method.purpose}
 - **Parameters**: ${method.parameters.join(', ')}
 - **Returns**: ${method.returns}
-`).join('\n')}
-`).join('\n')}
+`
+  )
+  .join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Logic Flow
 
-${result.logicFlow.map(step => `
+${result.logicFlow
+  .map(
+    step => `
 ### Step ${step.step}: ${step.name}
 **Description**: ${step.description}
 **Inputs**: ${step.inputs.join(', ')}
 **Outputs**: ${step.outputs.join(', ')}
 **Conditions**: ${step.conditions.join(', ')}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Edge Cases
 
-${result.edgeCases.map((edge, index) => `
+${result.edgeCases
+  .map(
+    (edge, index) => `
 ### ${index + 1}. ${edge.case}
 **Description**: ${edge.description}
 **Handling**: ${edge.handling}
 **Severity**: ${edge.severity}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Complexity Analysis
 **Overall Complexity**: ${result.complexityAnalysis.overall}
 
 ### Function Complexity
-${Object.entries(result.complexityAnalysis.functions || {}).map(([func, complexity]) => `
+${Object.entries(result.complexityAnalysis.functions || {})
+  .map(
+    ([func, complexity]) => `
 - **${func}**: Cyclomatic: ${complexity.cyclomatic}, Lines: ${complexity.lines}, Level: ${complexity.level}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ### Recommendations
 ${result.complexityAnalysis.recommendations.map(rec => `- ${rec}`).join('\n')}

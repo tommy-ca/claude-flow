@@ -20,23 +20,23 @@ import { getSwarmOrchestration } from './swarm.js';
 
 // Mode orchestration mapping
 const modeOrchestrations = {
-  'architect': getArchitectOrchestration,
-  'code': getCodeOrchestration,
-  'tdd': getTddOrchestration,
-  'debug': getDebugOrchestration,
+  architect: getArchitectOrchestration,
+  code: getCodeOrchestration,
+  tdd: getTddOrchestration,
+  debug: getDebugOrchestration,
   'security-review': getSecurityReviewOrchestration,
   'docs-writer': getDocsWriterOrchestration,
-  'integration': getIntegrationOrchestration,
+  integration: getIntegrationOrchestration,
   'post-deployment-monitoring-mode': getMonitoringOrchestration,
   'refinement-optimization-mode': getOptimizationOrchestration,
   'supabase-admin': getSupabaseAdminOrchestration,
   'spec-pseudocode': getSpecPseudocodeOrchestration,
-  'mcp': getMcpOrchestration,
-  'devops': getDevOpsOrchestration,
-  'ask': getAskOrchestration,
-  'tutorial': getTutorialOrchestration,
-  'sparc': getSparcOrchestratorOrchestration,
-  'swarm': getSwarmOrchestration
+  mcp: getMcpOrchestration,
+  devops: getDevOpsOrchestration,
+  ask: getAskOrchestration,
+  tutorial: getTutorialOrchestration,
+  sparc: getSparcOrchestratorOrchestration,
+  swarm: getSwarmOrchestration
 };
 
 /**

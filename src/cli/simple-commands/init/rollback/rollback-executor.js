@@ -43,7 +43,6 @@ export class RollbackExecutor {
       }
 
       console.log('  ✅ Full rollback completed');
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Full rollback execution failed: ${error.message}`);
@@ -70,24 +69,24 @@ export class RollbackExecutor {
       let rollbackResult;
 
       switch (phase) {
-      case 'sparc-init':
-        rollbackResult = await this.rollbackSparcInitialization();
-        break;
-      case 'claude-commands':
-        rollbackResult = await this.rollbackClaudeCommands();
-        break;
-      case 'memory-setup':
-        rollbackResult = await this.rollbackMemorySetup();
-        break;
-      case 'coordination-setup':
-        rollbackResult = await this.rollbackCoordinationSetup();
-        break;
-      case 'executable-creation':
-        rollbackResult = await this.rollbackExecutableCreation();
-        break;
-      default:
-        rollbackResult = await this.rollbackGenericPhase(phase, checkpoint);
-        break;
+        case 'sparc-init':
+          rollbackResult = await this.rollbackSparcInitialization();
+          break;
+        case 'claude-commands':
+          rollbackResult = await this.rollbackClaudeCommands();
+          break;
+        case 'memory-setup':
+          rollbackResult = await this.rollbackMemorySetup();
+          break;
+        case 'coordination-setup':
+          rollbackResult = await this.rollbackCoordinationSetup();
+          break;
+        case 'executable-creation':
+          rollbackResult = await this.rollbackExecutableCreation();
+          break;
+        default:
+          rollbackResult = await this.rollbackGenericPhase(phase, checkpoint);
+          break;
       }
 
       result.success = rollbackResult.success;
@@ -98,7 +97,6 @@ export class RollbackExecutor {
       if (rollbackResult.success) {
         console.log(`  ✅ Partial rollback completed for phase: ${phase}`);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Partial rollback execution failed: ${error.message}`);
@@ -119,11 +117,7 @@ export class RollbackExecutor {
     };
 
     try {
-      const itemsToRemove = [
-        '.roomodes',
-        '.roo',
-        '.claude/commands/sparc'
-      ];
+      const itemsToRemove = ['.roomodes', '.roo', '.claude/commands/sparc'];
 
       for (const item of itemsToRemove) {
         const itemPath = `${this.workingDir}/${item}`;
@@ -147,7 +141,6 @@ export class RollbackExecutor {
       // Remove SPARC-specific content from CLAUDE.md
       await this.removeSPARCContentFromClaudeMd();
       result.actions.push('Cleaned SPARC content from CLAUDE.md');
-
     } catch (error) {
       result.success = false;
       result.errors.push(`SPARC rollback failed: ${error.message}`);
@@ -184,7 +177,6 @@ export class RollbackExecutor {
       } catch {
         result.actions.push('Commands directory was already clean');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Claude commands rollback failed: ${error.message}`);
@@ -205,11 +197,7 @@ export class RollbackExecutor {
     };
 
     try {
-      const memoryItems = [
-        'memory/claude-flow-data.json',
-        'memory/agents',
-        'memory/sessions'
-      ];
+      const memoryItems = ['memory/claude-flow-data.json', 'memory/agents', 'memory/sessions'];
 
       for (const item of memoryItems) {
         const itemPath = `${this.workingDir}/${item}`;
@@ -236,7 +224,6 @@ export class RollbackExecutor {
       } catch {
         result.warnings.push('Could not recreate memory directory');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Memory setup rollback failed: ${error.message}`);
@@ -273,7 +260,6 @@ export class RollbackExecutor {
       } catch {
         result.actions.push('coordination.md was already clean');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Coordination setup rollback failed: ${error.message}`);
@@ -302,7 +288,6 @@ export class RollbackExecutor {
       } catch {
         result.actions.push('claude-flow executable was already clean');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Executable rollback failed: ${error.message}`);
@@ -337,7 +322,6 @@ export class RollbackExecutor {
           }
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Generic phase rollback failed: ${error.message}`);
@@ -387,7 +371,6 @@ export class RollbackExecutor {
           result.actions.push(`Artifact not found: ${artifact}`);
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Cleanup failed: ${error.message}`);
@@ -416,7 +399,6 @@ export class RollbackExecutor {
       // 2. Restore each file and directory
       // 3. Set correct permissions
       // 4. Verify restoration
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Restore from backup failed: ${error.message}`);
@@ -461,7 +443,6 @@ export class RollbackExecutor {
       } else {
         result.actions.push('Rollback verification passed');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Rollback verification failed: ${error.message}`);
@@ -507,27 +488,27 @@ export class RollbackExecutor {
 
     try {
       switch (action.type) {
-      case 'file_created':
-        await Deno.remove(action.path);
-        result.description = `Removed created file: ${action.path}`;
-        break;
+        case 'file_created':
+          await Deno.remove(action.path);
+          result.description = `Removed created file: ${action.path}`;
+          break;
 
-      case 'directory_created':
-        await Deno.remove(action.path, { recursive: true });
-        result.description = `Removed created directory: ${action.path}`;
-        break;
+        case 'directory_created':
+          await Deno.remove(action.path, { recursive: true });
+          result.description = `Removed created directory: ${action.path}`;
+          break;
 
-      case 'file_modified':
-        if (action.backup) {
-          await Deno.writeTextFile(action.path, action.backup);
-          result.description = `Restored modified file: ${action.path}`;
-        }
-        break;
+        case 'file_modified':
+          if (action.backup) {
+            await Deno.writeTextFile(action.path, action.backup);
+            result.description = `Restored modified file: ${action.path}`;
+          }
+          break;
 
-      default:
-        result.success = false;
-        result.description = `Unknown action type: ${action.type}`;
-        break;
+        default:
+          result.success = false;
+          result.description = `Unknown action type: ${action.type}`;
+          break;
       }
     } catch (error) {
       result.success = false;

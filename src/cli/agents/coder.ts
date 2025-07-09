@@ -3,7 +3,12 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type {
+  AgentCapabilities,
+  AgentConfig,
+  AgentEnvironment,
+  TaskDefinition
+} from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
@@ -136,11 +141,11 @@ export class CoderAgent extends BaseAgent {
       trustedAgents: [],
       expertise: {
         'code-generation': 0.95,
-        'debugging': 0.90,
-        'testing': 0.85,
-        'refactoring': 0.92,
-        'architecture': 0.80,
-        'performance': 0.85
+        debugging: 0.9,
+        testing: 0.85,
+        refactoring: 0.92,
+        architecture: 0.8,
+        performance: 0.85
       },
       preferences: {
         codeStyle: 'functional',
@@ -223,19 +228,23 @@ export class CoderAgent extends BaseAgent {
     };
 
     // Store development progress
-    await this.memory.store(`code:${task.id}:progress`, {
-      status: 'generating',
-      startTime: new Date(),
-      requirements
-    }, {
-      type: 'code-progress',
-      tags: ['coding', this.id, language],
-      partition: 'tasks'
-    });
+    await this.memory.store(
+      `code:${task.id}:progress`,
+      {
+        status: 'generating',
+        startTime: new Date(),
+        requirements
+      },
+      {
+        type: 'code-progress',
+        tags: ['coding', this.id, language],
+        partition: 'tasks'
+      }
+    );
 
     // Simulate code generation
     await this.delay(3000);
-    
+
     result.files = [
       {
         path: `src/main.${this.getFileExtension(language)}`,
@@ -248,7 +257,7 @@ export class CoderAgent extends BaseAgent {
         type: 'types'
       }
     ];
-    
+
     result.tests = [
       {
         path: `tests/main.test.${this.getFileExtension(language)}`,
@@ -256,7 +265,7 @@ export class CoderAgent extends BaseAgent {
         framework: 'jest'
       }
     ];
-    
+
     result.documentation = this.generateDocumentation(requirements, language);
     result.metrics = {
       linesOfCode: 150,
@@ -264,7 +273,7 @@ export class CoderAgent extends BaseAgent {
       testCoverage: 85,
       quality: 0.92
     };
-    
+
     result.dependencies = this.suggestDependencies(language, framework) as any[];
     result.buildInstructions = this.generateBuildInstructions(language, framework) as string[];
 
@@ -327,10 +336,10 @@ export class CoderAgent extends BaseAgent {
         suggestion: 'Implement input sanitization'
       }
     ];
-    
+
     review.metrics = {
       maintainability: 0.85,
-      readability: 0.90,
+      readability: 0.9,
       performance: 0.82,
       security: 0.75,
       testability: 0.88
@@ -378,12 +387,12 @@ export class CoderAgent extends BaseAgent {
       'Optimized database queries using connection pooling',
       'Added comprehensive type definitions'
     ];
-    
+
     refactoring.improvements = {
       maintainability: 0.25,
       performance: 0.15,
-      readability: 0.30,
-      testability: 0.20
+      readability: 0.3,
+      testability: 0.2
     };
 
     return refactoring;
@@ -438,14 +447,14 @@ export class CoderAgent extends BaseAgent {
         testCount: 8
       }
     ];
-    
+
     testing.coverage = {
       lines: 87,
       functions: 92,
       branches: 78,
       statements: 89
     };
-    
+
     testing.testResults = {
       total: 20,
       passed: 19,
@@ -491,7 +500,7 @@ export class CoderAgent extends BaseAgent {
       'Checked environment configuration',
       'Examined dependency versions'
     ];
-    
+
     debugging.rootCause = 'Race condition in async event handler';
     debugging.solution = 'Implement proper synchronization using mutex';
     debugging.confidence = 0.92;
@@ -626,7 +635,7 @@ export class CoderAgent extends BaseAgent {
       'Large object instantiation',
       'Inefficient algorithms'
     ];
-    
+
     optimization.results = {
       speedImprovement: 0.35,
       memoryReduction: 0.22,
@@ -703,7 +712,10 @@ class Application:
         pass
 `
     };
-    return templates[language as keyof typeof templates] || `// ${requirements}\n// Code implementation\n`;
+    return (
+      templates[language as keyof typeof templates] ||
+      `// ${requirements}\n// Code implementation\n`
+    );
   }
 
   private generateTypesCode(language: string): string {
@@ -832,7 +844,9 @@ npm test
       go: ['go mod tidy', 'go build', './main']
     };
 
-    return instructions[language as keyof typeof instructions] || ['Build instructions not available'];
+    return (
+      instructions[language as keyof typeof instructions] || ['Build instructions not available']
+    );
   }
 
   private async delay(ms: number): Promise<void> {
@@ -883,9 +897,9 @@ export const createCoderAgent = (
     trustedAgents: [],
     expertise: {
       'code-generation': 0.95,
-      'debugging': 0.90,
-      'refactoring': 0.88,
-      'testing': 0.85,
+      debugging: 0.9,
+      refactoring: 0.88,
+      testing: 0.85,
       'performance-optimization': 0.87
     },
     preferences: {
@@ -903,14 +917,7 @@ export const createCoderAgent = (
     logDirectory: './logs/coder',
     apiEndpoints: {},
     credentials: {},
-    availableTools: [
-      'git',
-      'editor',
-      'debugger',
-      'linter',
-      'formatter',
-      'compiler'
-    ],
+    availableTools: ['git', 'editor', 'debugger', 'linter', 'formatter', 'compiler'],
     toolConfigs: {
       git: { autoCommit: false, autoSync: true },
       linter: { strict: true, autoFix: true },

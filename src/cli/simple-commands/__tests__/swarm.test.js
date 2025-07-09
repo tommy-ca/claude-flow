@@ -81,7 +81,9 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') {callback(0);}
+        if (event === 'close') {
+          callback(0);
+        }
       });
 
       await swarmCommand(['Research task'], { strategy: 'research' });
@@ -95,7 +97,9 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') {callback(0);}
+        if (event === 'close') {
+          callback(0);
+        }
       });
 
       await swarmCommand(['Task'], { mode: 'mesh' });
@@ -109,7 +113,9 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') {callback(0);}
+        if (event === 'close') {
+          callback(0);
+        }
       });
 
       await swarmCommand(['Task'], { 'max-agents': '10' });
@@ -123,7 +129,9 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') {callback(0);}
+        if (event === 'close') {
+          callback(0);
+        }
       });
 
       await swarmCommand(['Task'], { parallel: true });
@@ -137,7 +145,9 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') {callback(0);}
+        if (event === 'close') {
+          callback(0);
+        }
       });
 
       await swarmCommand(['Task'], { monitor: true });
@@ -188,9 +198,7 @@ describe('Swarm Command', () => {
 
       await swarmCommand(['status'], {});
 
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining('No active swarm found')
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No active swarm found'));
     });
   });
 
@@ -334,9 +342,7 @@ describe('Swarm Command', () => {
 
       await swarmCommand(['Task'], { strategy: 'invalid-strategy' });
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid strategy')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid strategy'));
     });
 
     test('should handle spawn process errors', async () => {
@@ -344,7 +350,9 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'error') {callback(new Error('Spawn failed'));}
+        if (event === 'error') {
+          callback(new Error('Spawn failed'));
+        }
       });
 
       await swarmCommand(['Task'], {});
@@ -359,9 +367,7 @@ describe('Swarm Command', () => {
 
       await swarmCommand(['Task'], {});
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error:')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error:'));
     });
   });
 

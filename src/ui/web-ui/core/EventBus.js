@@ -103,10 +103,14 @@ export class EventBus {
    */
   off(event, handler) {
     const handlers = this.events.get(event);
-    if (!handlers) {return false;}
+    if (!handlers) {
+      return false;
+    }
 
     const index = handlers.findIndex(h => h.handler === handler);
-    if (index === -1) {return false;}
+    if (index === -1) {
+      return false;
+    }
 
     handlers.splice(index, 1);
 
@@ -126,10 +130,14 @@ export class EventBus {
    */
   offOnce(event, handler) {
     const handlers = this.onceEvents.get(event);
-    if (!handlers) {return false;}
+    if (!handlers) {
+      return false;
+    }
 
     const index = handlers.findIndex(h => h.handler === handler);
-    if (index === -1) {return false;}
+    if (index === -1) {
+      return false;
+    }
 
     handlers.splice(index, 1);
 
@@ -145,10 +153,14 @@ export class EventBus {
    */
   offWildcard(pattern, handler) {
     const handlers = this.wildcardHandlers.get(pattern);
-    if (!handlers) {return false;}
+    if (!handlers) {
+      return false;
+    }
 
     const index = handlers.findIndex(h => h.handler === handler);
-    if (index === -1) {return false;}
+    if (index === -1) {
+      return false;
+    }
 
     handlers.splice(index, 1);
 
@@ -334,7 +346,7 @@ export class EventBus {
     return new Promise((resolve, reject) => {
       let timeoutId;
 
-      const unsubscribe = this.once(event, (data) => {
+      const unsubscribe = this.once(event, data => {
         if (timeoutId) {
           clearTimeout(timeoutId);
         }
@@ -422,9 +434,7 @@ export class EventBus {
    */
   getEventsByPattern(pattern, limit = 100) {
     const regex = this.createWildcardRegex(pattern);
-    return this.eventHistory
-      .filter(event => regex.test(event.event))
-      .slice(-limit);
+    return this.eventHistory.filter(event => regex.test(event.event)).slice(-limit);
   }
 
   /**
@@ -488,9 +498,13 @@ export class EventBus {
       onceEvents: this.onceEvents.size,
       wildcardPatterns: this.wildcardHandlers.size,
       historySize: this.eventHistory.length,
-      totalHandlers: Array.from(this.events.values()).reduce((sum, handlers) => sum + handlers.length, 0) +
-                    Array.from(this.onceEvents.values()).reduce((sum, handlers) => sum + handlers.length, 0) +
-                    Array.from(this.wildcardHandlers.values()).reduce((sum, handlers) => sum + handlers.length, 0)
+      totalHandlers:
+        Array.from(this.events.values()).reduce((sum, handlers) => sum + handlers.length, 0) +
+        Array.from(this.onceEvents.values()).reduce((sum, handlers) => sum + handlers.length, 0) +
+        Array.from(this.wildcardHandlers.values()).reduce(
+          (sum, handlers) => sum + handlers.length,
+          0
+        )
     };
   }
 

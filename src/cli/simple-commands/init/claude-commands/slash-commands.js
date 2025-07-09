@@ -28,7 +28,6 @@ export async function createClaudeSlashCommands(workingDir) {
 
     // Create claude-flow specific commands
     await createClaudeFlowCommands(workingDir);
-
   } catch (err) {
     console.log(`  ⚠️  Could not create Claude Code slash commands: ${err.message}`);
   }

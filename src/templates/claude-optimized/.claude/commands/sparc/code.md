@@ -12,6 +12,7 @@ You write clean, efficient, modular code based on pseudocode and architecture us
 Write modular code using clean architecture principles with batchtools optimization:
 
 ### Parallel Code Generation
+
 1. **Batch File Creation**: Generate multiple related files simultaneously:
    - Create interfaces, implementations, and tests in parallel
    - Generate model, controller, and service layers concurrently
@@ -23,7 +24,9 @@ Write modular code using clean architecture principles with batchtools optimizat
    - Build validation and middleware components concurrently
 
 ### Batchtools Code Patterns
+
 - **Parallel Component Generation**:
+
   ```javascript
   // Generate complete feature modules in parallel
   await batchtools.parallel([
@@ -47,6 +50,7 @@ Write modular code using clean architecture principles with batchtools optimizat
   ```
 
 ### Efficient Development Workflow
+
 1. **Parallel Analysis Phase**:
    - Read all related specifications concurrently
    - Analyze existing codebase patterns in parallel
@@ -63,6 +67,7 @@ Write modular code using clean architecture principles with batchtools optimizat
    - Set up error handling and logging concurrently
 
 ### Code Organization Strategy
+
 ```
 /src/
   ├── controllers/    # Generated in parallel
@@ -75,6 +80,7 @@ Write modular code using clean architecture principles with batchtools optimizat
 Never hardcode secrets or environment values. Split code into files < 500 lines. Use config files or environment abstractions. Use `new_task` for subtasks and finish with `attempt_completion`.
 
 ## Tool Usage Guidelines:
+
 - Use batchtools for creating multiple files at once instead of sequential `insert_content`
 - Leverage parallel operations when modifying multiple existing files
 - Use concurrent searches to find patterns across the codebase
@@ -82,6 +88,7 @@ Never hardcode secrets or environment values. Split code into files < 500 lines.
 - Always verify all required parameters are included before executing any tool
 
 ## Groups/Permissions
+
 - read
 - edit
 - browser
@@ -105,6 +112,7 @@ npx claude-flow sparc run code "implement user authentication"
 ## Batchtools Optimization Examples
 
 ### Parallel Feature Implementation
+
 ```javascript
 // Implement complete feature across all layers
 const implementations = await batchtools.parallel([
@@ -117,19 +125,27 @@ const implementations = await batchtools.parallel([
 ```
 
 ### Batch CRUD Generation
+
 ```javascript
 // Generate CRUD operations for multiple entities
 const entities = ['User', 'Product', 'Order'];
-await batchtools.forEach(entities, async (entity) => {
+await batchtools.forEach(entities, async entity => {
   await batchtools.createFiles([
-    { path: `/src/controllers/${entity.toLowerCase()}.controller.ts`, content: generateController(entity) },
+    {
+      path: `/src/controllers/${entity.toLowerCase()}.controller.ts`,
+      content: generateController(entity)
+    },
     { path: `/src/services/${entity.toLowerCase()}.service.ts`, content: generateService(entity) },
-    { path: `/src/repositories/${entity.toLowerCase()}.repository.ts`, content: generateRepository(entity) }
+    {
+      path: `/src/repositories/${entity.toLowerCase()}.repository.ts`,
+      content: generateRepository(entity)
+    }
   ]);
 });
 ```
 
 ### Concurrent Refactoring
+
 ```javascript
 // Refactor multiple files simultaneously
 await batchtools.modifyFiles([

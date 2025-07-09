@@ -43,7 +43,9 @@ export class PostInitValidator {
         // Check file size
         if (stat.size < file.minSize) {
           result.success = false;
-          result.errors.push(`File too small: ${file.path} (${stat.size} bytes, expected >= ${file.minSize})`);
+          result.errors.push(
+            `File too small: ${file.path} (${stat.size} bytes, expected >= ${file.minSize})`
+          );
           result.files[file.path] = { status: 'too_small', size: stat.size };
           continue;
         }
@@ -67,7 +69,6 @@ export class PostInitValidator {
           result.errors.push(`Cannot read file: ${file.path} - ${readError.message}`);
           result.files[file.path] = { status: 'unreadable', size: stat.size };
         }
-
       } catch (error) {
         result.success = false;
         result.errors.push(`File not found: ${file.path}`);
@@ -187,7 +188,6 @@ export class PostInitValidator {
           result.warnings.push('SPARC structure is incomplete');
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Structure validation failed: ${error.message}`);
@@ -240,10 +240,9 @@ export class PostInitValidator {
         if (actualMode !== expectedMode) {
           result.warnings.push(
             `Incorrect permissions on ${item.path}: ` +
-            `${actualMode.toString(8)} (expected ${expectedMode.toString(8)})`
+              `${actualMode.toString(8)} (expected ${expectedMode.toString(8)})`
           );
         }
-
       } catch (error) {
         result.warnings.push(`Could not check permissions for ${item.path}: ${error.message}`);
       }

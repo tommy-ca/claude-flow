@@ -5,12 +5,12 @@ import process from 'process';
 
 // Simple color utilities
 const colors = {
-  cyan: (text) => `\x1b[36m${text}\x1b[0m`,
-  gray: (text) => `\x1b[90m${text}\x1b[0m`,
-  white: (text) => `\x1b[37m${text}\x1b[0m`,
-  yellow: (text) => `\x1b[33m${text}\x1b[0m`,
-  green: (text) => `\x1b[32m${text}\x1b[0m`,
-  red: (text) => `\x1b[31m${text}\x1b[0m`
+  cyan: text => `\x1b[36m${text}\x1b[0m`,
+  gray: text => `\x1b[90m${text}\x1b[0m`,
+  white: text => `\x1b[37m${text}\x1b[0m`,
+  yellow: text => `\x1b[33m${text}\x1b[0m`,
+  green: text => `\x1b[32m${text}\x1b[0m`,
+  red: text => `\x1b[31m${text}\x1b[0m`
 };
 
 const PROCESSES = [
@@ -87,7 +87,9 @@ export class ProcessUI {
       console.log(`     ${colors.gray(process.description)}`);
 
       if (process.status === 'running') {
-        console.log(`     ${colors.gray(`PID: ${process.pid} | Uptime: ${this.formatUptime(process.uptime)}`)}`);
+        console.log(
+          `     ${colors.gray(`PID: ${process.pid} | Uptime: ${this.formatUptime(process.uptime)}`)}`
+        );
       }
       console.log();
 
@@ -97,7 +99,9 @@ export class ProcessUI {
     // Controls
     console.log(colors.gray('─'.repeat(60)));
     console.log(colors.white('Controls:'));
-    console.log(`  ${colors.yellow('1-6')} Select process   ${colors.yellow('Space/Enter')} Toggle selected`);
+    console.log(
+      `  ${colors.yellow('1-6')} Select process   ${colors.yellow('Space/Enter')} Toggle selected`
+    );
     console.log(`  ${colors.yellow('A')} Start all         ${colors.yellow('Z')} Stop all`);
     console.log(`  ${colors.yellow('R')} Restart all       ${colors.yellow('Q')} Quit`);
     console.log();
@@ -106,17 +110,26 @@ export class ProcessUI {
 
   getStatusIcon(status) {
     switch (status) {
-    case 'running': return colors.green('●');
-    case 'stopped': return colors.gray('○');
-    case 'error': return colors.red('✗');
-    case 'starting': return colors.yellow('◐');
-    default: return colors.gray('?');
+      case 'running':
+        return colors.green('●');
+      case 'stopped':
+        return colors.gray('○');
+      case 'error':
+        return colors.red('✗');
+      case 'starting':
+        return colors.yellow('◐');
+      default:
+        return colors.gray('?');
     }
   }
 
   formatUptime(seconds) {
-    if (seconds < 60) {return `${seconds}s`;}
-    if (seconds < 3600) {return `${Math.floor(seconds / 60)}m`;}
+    if (seconds < 60) {
+      return `${seconds}s`;
+    }
+    if (seconds < 3600) {
+      return `${Math.floor(seconds / 60)}m`;
+    }
     return `${Math.floor(seconds / 3600)}h`;
   }
 
@@ -129,7 +142,9 @@ export class ProcessUI {
 
     const buf = new Uint8Array(1024);
     const n = await Deno.stdin.read(buf);
-    if (n === null) {return;}
+    if (n === null) {
+      return;
+    }
 
     const rawInput = decoder.decode(buf.subarray(0, n)).trim();
     // Take only the first line if multiple lines were read
@@ -137,50 +152,50 @@ export class ProcessUI {
 
     // Handle commands
     switch (input) {
-    case 'q':
-    case 'quit':
-      this.running = false;
-      console.clear();
-      printSuccess('Goodbye!');
-      Deno.exit(0);  // Exit immediately
-      break;
+      case 'q':
+      case 'quit':
+        this.running = false;
+        console.clear();
+        printSuccess('Goodbye!');
+        Deno.exit(0); // Exit immediately
+        break;
 
-    case 'a':
-      await this.startAll();
-      break;
+      case 'a':
+        await this.startAll();
+        break;
 
-    case 'z':
-      await this.stopAll();
-      break;
+      case 'z':
+        await this.stopAll();
+        break;
 
-    case 'r':
-      await this.restartAll();
-      break;
+      case 'r':
+        await this.restartAll();
+        break;
 
-    case '1':
-    case '2':
-    case '3':
-    case '4':
-    case '5':
-    case '6':
-      const index = parseInt(input) - 1;
-      if (index >= 0 && index < PROCESSES.length) {
-        this.selectedIndex = index;
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+      case '5':
+      case '6':
+        const index = parseInt(input) - 1;
+        if (index >= 0 && index < PROCESSES.length) {
+          this.selectedIndex = index;
+          await this.toggleSelected();
+        }
+        break;
+
+      case ' ':
+      case 'enter':
+      case '':
         await this.toggleSelected();
-      }
-      break;
+        break;
 
-    case ' ':
-    case 'enter':
-    case '':
-      await this.toggleSelected();
-      break;
-
-    default:
-      if (input) {
-        console.log(colors.yellow(`Unknown command: ${input}`));
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
+      default:
+        if (input) {
+          console.log(colors.yellow(`Unknown command: ${input}`));
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
     }
   }
 
@@ -195,7 +210,9 @@ export class ProcessUI {
 
   async startProcess(id) {
     const process = this.processes.get(id);
-    if (!process) {return;}
+    if (!process) {
+      return;
+    }
 
     console.log(colors.yellow(`Starting ${process.name}...`));
     process.status = 'starting';
@@ -221,7 +238,9 @@ export class ProcessUI {
 
   async stopProcess(id) {
     const process = this.processes.get(id);
-    if (!process) {return;}
+    if (!process) {
+      return;
+    }
 
     console.log(colors.yellow(`Stopping ${process.name}...`));
     process.status = 'stopped';

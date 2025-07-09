@@ -153,7 +153,11 @@ export function validateHookParams(
     result.warnings.push('--load-previous without --session-id may load unexpected data');
   }
 
-  if (hookType === 'post-edit' && params.format && !params.file?.match(/\.(js|ts|jsx|tsx|py|java|cpp|cs)$/)) {
+  if (
+    hookType === 'post-edit' &&
+    params.format &&
+    !params.file?.match(/\.(js|ts|jsx|tsx|py|java|cpp|cs)$/)
+  ) {
     result.warnings.push('--format may not work correctly for this file type');
   }
 

@@ -67,10 +67,7 @@ class AsyncOperationQueue {
         setTimeout(() => reject(new Error('Operation timeout')), this.timeout);
       });
 
-      const result = await Promise.race([
-        item.operation(),
-        timeoutPromise
-      ]);
+      const result = await Promise.race([item.operation(), timeoutPromise]);
 
       const processingTime = performance.now() - startTime;
       this._updateMetrics(processingTime, true);
@@ -100,12 +97,16 @@ class AsyncOperationQueue {
   getMetrics() {
     return {
       ...this.metrics,
-      successRate: this.metrics.processed > 0
-        ? ((this.metrics.processed - this.metrics.failures) / this.metrics.processed * 100).toFixed(2)
-        : 100,
+      successRate:
+        this.metrics.processed > 0
+          ? (
+              ((this.metrics.processed - this.metrics.failures) / this.metrics.processed) *
+              100
+            ).toFixed(2)
+          : 100,
       queueSize: this.queue.length,
       running: this.running,
-      utilization: (this.running / this.maxConcurrency * 100).toFixed(2)
+      utilization: ((this.running / this.maxConcurrency) * 100).toFixed(2)
     };
   }
 }
@@ -168,11 +169,15 @@ class BatchProcessor extends EventEmitter {
 
   async _processBatch(batchKey) {
     const batch = this.batches.get(batchKey);
-    if (!batch || batch.items.length === 0) {return;}
+    if (!batch || batch.items.length === 0) {
+      return;
+    }
 
     // Clear timer and remove from maps
     const timer = this.timers.get(batchKey);
-    if (timer) {clearTimeout(timer);}
+    if (timer) {
+      clearTimeout(timer);
+    }
 
     this.timers.delete(batchKey);
     this.batches.delete(batchKey);
@@ -206,7 +211,6 @@ class BatchProcessor extends EventEmitter {
       });
 
       return results;
-
     } catch (error) {
       // Reject individual item promises
       batch.items.forEach(item => {
@@ -237,8 +241,10 @@ class BatchProcessor extends EventEmitter {
     return {
       ...this.metrics,
       pendingBatches: this.batches.size,
-      pendingItems: Array.from(this.batches.values())
-        .reduce((sum, batch) => sum + batch.items.length, 0)
+      pendingItems: Array.from(this.batches.values()).reduce(
+        (sum, batch) => sum + batch.items.length,
+        0
+      )
     };
   }
 
@@ -356,7 +362,8 @@ export class PerformanceOptimizer extends EventEmitter {
   /**
    * Optimized caching with automatic expiration
    */
-  async optimizeWithCache(key, operation, ttl = 300000) { // 5 minutes default
+  async optimizeWithCache(key, operation, ttl = 300000) {
+    // 5 minutes default
     const cached = this.cache.get(key);
 
     if (cached && Date.now() - cached.timestamp < ttl) {
@@ -394,7 +401,7 @@ export class PerformanceOptimizer extends EventEmitter {
 
       // Track connection efficiency
       this.metrics.system.throughput =
-        (this.metrics.system.throughput * 0.9) + (1000 / executionTime * 0.1);
+        this.metrics.system.throughput * 0.9 + (1000 / executionTime) * 0.1;
 
       return result;
     } finally {
@@ -413,11 +420,7 @@ export class PerformanceOptimizer extends EventEmitter {
     const results = [];
 
     for (const group of groups) {
-      const batchResult = await this.optimizeBatchOperation(
-        'agent_spawn',
-        group,
-        spawnFunction
-      );
+      const batchResult = await this.optimizeBatchOperation('agent_spawn', group, spawnFunction);
       results.push(...(Array.isArray(batchResult) ? batchResult : [batchResult]));
     }
 
@@ -470,7 +473,10 @@ export class PerformanceOptimizer extends EventEmitter {
 
     // Adjust batch sizes based on processing efficiency
     if (batchMetrics.avgBatchSize > 30 && batchMetrics.avgProcessingTime > 5000) {
-      this.batchProcessor.config.maxBatchSize = Math.max(20, this.batchProcessor.config.maxBatchSize - 5);
+      this.batchProcessor.config.maxBatchSize = Math.max(
+        20,
+        this.batchProcessor.config.maxBatchSize - 5
+      );
       this.emit('auto_tune', {
         type: 'batch_size_decreased',
         newValue: this.batchProcessor.config.maxBatchSize
@@ -504,8 +510,10 @@ export class PerformanceOptimizer extends EventEmitter {
 
     // Estimate throughput based on recent operations
     const queueMetrics = this.asyncQueue.getMetrics();
-    this.metrics.system.throughput = queueMetrics.processed > 0 ?
-      (queueMetrics.processed / (queueMetrics.avgProcessingTime / 1000)).toFixed(2) : 0;
+    this.metrics.system.throughput =
+      queueMetrics.processed > 0
+        ? (queueMetrics.processed / (queueMetrics.avgProcessingTime / 1000)).toFixed(2)
+        : 0;
   }
 
   /**
@@ -518,10 +526,15 @@ export class PerformanceOptimizer extends EventEmitter {
       batchProcessor: this.batchProcessor.getMetrics(),
       cache: {
         size: this.cache.size,
-        hitRate: this.metrics.optimizations.cacheHits > 0 ?
-          (this.metrics.optimizations.cacheHits /
-           (this.metrics.optimizations.asyncOperations + this.metrics.optimizations.cacheHits) * 100).toFixed(2)
-          : 0
+        hitRate:
+          this.metrics.optimizations.cacheHits > 0
+            ? (
+                (this.metrics.optimizations.cacheHits /
+                  (this.metrics.optimizations.asyncOperations +
+                    this.metrics.optimizations.cacheHits)) *
+                100
+              ).toFixed(2)
+            : 0
       }
     };
   }
@@ -585,14 +598,20 @@ export class PerformanceOptimizer extends EventEmitter {
       Math.min(100, parseFloat(stats.asyncQueue.successRate)),
       Math.min(100, 100 - parseFloat(stats.asyncQueue.utilization)), // Lower utilization is better
       Math.min(100, parseFloat(stats.cache.hitRate)),
-      Math.min(100, stats.batchProcessor.avgBatchSize / this.config.batchMaxSize * 100)
+      Math.min(100, (stats.batchProcessor.avgBatchSize / this.config.batchMaxSize) * 100)
     ];
 
     const avgScore = factors.reduce((sum, score) => sum + score, 0) / factors.length;
 
-    if (avgScore >= 80) {return 'excellent';}
-    if (avgScore >= 60) {return 'good';}
-    if (avgScore >= 40) {return 'fair';}
+    if (avgScore >= 80) {
+      return 'excellent';
+    }
+    if (avgScore >= 60) {
+      return 'good';
+    }
+    if (avgScore >= 40) {
+      return 'fair';
+    }
     return 'poor';
   }
 

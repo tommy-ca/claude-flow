@@ -98,7 +98,7 @@ export interface TelemetryOptions extends BaseHookOptions {
   tags?: string[];
 }
 
-export type HookType = 
+export type HookType =
   | 'pre-task'
   | 'post-task'
   | 'pre-edit'

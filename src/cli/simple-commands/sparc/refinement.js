@@ -41,7 +41,9 @@ export class SparcRefinement extends SparcPhase {
       const architecture = await this.retrieveFromMemory('architecture_complete');
 
       if (!specification || !pseudocode || !architecture) {
-        throw new Error('Specification, Pseudocode, and Architecture phases must be completed first');
+        throw new Error(
+          'Specification, Pseudocode, and Architecture phases must be completed first'
+        );
       }
 
       // Execute TDD cycles
@@ -57,7 +59,10 @@ export class SparcRefinement extends SparcPhase {
       result.codeQuality = await this.analyzeCodeQuality(result.implementations);
 
       // Apply optimizations
-      result.optimizations = await this.applyOptimizations(result.implementations, result.codeQuality);
+      result.optimizations = await this.applyOptimizations(
+        result.implementations,
+        result.codeQuality
+      );
 
       // Analyze performance
       result.performance = await this.analyzePerformance(result.implementations);
@@ -82,7 +87,6 @@ export class SparcRefinement extends SparcPhase {
 
       console.log('✅ Refinement phase completed');
       return result;
-
     } catch (error) {
       console.error('❌ Refinement phase failed:', error.message);
       throw error;
@@ -192,7 +196,9 @@ export class SparcRefinement extends SparcPhase {
       greenPhase.testResults.push(testResult);
     }
 
-    console.log(`  🟢 GREEN: Made ${greenPhase.testResults.filter(t => t.passed).length} tests pass`);
+    console.log(
+      `  🟢 GREEN: Made ${greenPhase.testResults.filter(t => t.passed).length} tests pass`
+    );
     return greenPhase;
   }
 
@@ -228,7 +234,9 @@ export class SparcRefinement extends SparcPhase {
       refactorPhase.testResults.push(newTestResult);
     }
 
-    console.log(`  🔵 REFACTOR: Applied ${refactorPhase.refactorings.length} refactoring techniques`);
+    console.log(
+      `  🔵 REFACTOR: Applied ${refactorPhase.refactorings.length} refactoring techniques`
+    );
     return refactorPhase;
   }
 
@@ -295,15 +303,19 @@ export class SparcRefinement extends SparcPhase {
     const expected = ${this.generateExpectedOutput(testCase)};
     
     // Act
-    ${testCase.type === 'negative' ? `
+    ${
+      testCase.type === 'negative'
+        ? `
     const action = () => ${functionName}(input);
     
     // Assert
-    expect(action).toThrow();` : `
+    expect(action).toThrow();`
+        : `
     const result = await ${functionName}(input);
     
     // Assert
-    expect(result).toEqual(expected);`}
+    expect(result).toEqual(expected);`
+    }
   });
 });`;
   }
@@ -508,7 +520,9 @@ const ERROR_MESSAGES = {
    */
   generateMainImplementationFile(component) {
     const className = component.name;
-    const dependencies = component.dependencies.map(dep => `import { ${dep} } from './${dep}';`).join('\n');
+    const dependencies = component.dependencies
+      .map(dep => `import { ${dep} } from './${dep}';`)
+      .join('\n');
 
     const code = `${dependencies}
 
@@ -612,26 +626,26 @@ export default ${className};`;
     const compType = component.type.toLowerCase();
 
     switch (compType) {
-    case 'controller':
-      return `// Validate HTTP request structure
+      case 'controller':
+        return `// Validate HTTP request structure
     if (!input.method || !input.path) {
       throw new Error('HTTP method and path required');
     }`;
 
-    case 'service':
-      return `// Validate service input
+      case 'service':
+        return `// Validate service input
     if (!input.data) {
       throw new Error('Service data required');
     }`;
 
-    case 'repository':
-      return `// Validate data operations
+      case 'repository':
+        return `// Validate data operations
     if (!input.operation || !input.entity) {
       throw new Error('Operation and entity required');
     }`;
 
-    default:
-      return `// Generic validation
+      default:
+        return `// Generic validation
     if (Object.keys(input).length === 0) {
       throw new Error('Non-empty input required');
     }`;
@@ -645,8 +659,8 @@ export default ${className};`;
     const compType = component.type.toLowerCase();
 
     switch (compType) {
-    case 'controller':
-      return `// Handle HTTP request
+      case 'controller':
+        return `// Handle HTTP request
     const { method, path, body, query } = input;
     
     // Route to appropriate handler
@@ -659,8 +673,8 @@ export default ${className};`;
       timestamp: new Date().toISOString()
     };`;
 
-    case 'service':
-      return `// Process business logic
+      case 'service':
+        return `// Process business logic
     const { data, operation } = input;
     
     // Apply business rules
@@ -675,8 +689,8 @@ export default ${className};`;
       operation: operation
     };`;
 
-    case 'repository':
-      return `// Handle data operations
+      case 'repository':
+        return `// Handle data operations
     const { operation, entity, data } = input;
     
     switch (operation) {
@@ -692,8 +706,8 @@ export default ${className};`;
         throw new Error(\`Unknown operation: \${operation}\`);
     }`;
 
-    default:
-      return `// Generic processing
+      default:
+        return `// Generic processing
     const processedInput = await this.preProcess(input);
     const result = await this.process(processedInput);
     const finalResult = await this.postProcess(result);
@@ -805,29 +819,29 @@ describe('${className}', () => {
     const compType = component.type.toLowerCase();
 
     switch (compType) {
-    case 'controller':
-      return `{
+      case 'controller':
+        return `{
         method: 'GET',
         path: '/api/test',
         body: {},
         query: {}
       }`;
 
-    case 'service':
-      return `{
+      case 'service':
+        return `{
         data: { id: 1, name: 'test' },
         operation: 'process'
       }`;
 
-    case 'repository':
-      return `{
+      case 'repository':
+        return `{
         operation: 'read',
         entity: 'User',
         data: { id: 1 }
       }`;
 
-    default:
-      return `{
+      default:
+        return `{
         id: 1,
         data: 'test data',
         timestamp: new Date().toISOString()
@@ -932,7 +946,8 @@ export default ${interfaceName};`;
       }
     }
 
-    testResults.coverage = testResults.total > 0 ? (testResults.passed / testResults.total) * 100 : 0;
+    testResults.coverage =
+      testResults.total > 0 ? (testResults.passed / testResults.total) * 100 : 0;
     testResults.duration = tddCycles.reduce((total, cycle) => total + cycle.duration, 0);
 
     return testResults;
@@ -975,25 +990,37 @@ export default ${interfaceName};`;
       averageFileSize: totalFiles > 0 ? totalSize / totalFiles : 0,
       averageComplexity: implementations.length > 0 ? totalComplexity / implementations.length : 0,
       totalFiles: totalFiles,
-      totalLines: implementations.reduce((total, impl) =>
-        total + impl.files.reduce((fileTotal, file) => fileTotal + file.lines, 0), 0
+      totalLines: implementations.reduce(
+        (total, impl) => total + impl.files.reduce((fileTotal, file) => fileTotal + file.lines, 0),
+        0
       ),
-      implementationFiles: implementations.reduce((total, impl) =>
-        total + impl.files.filter(f => f.type === 'implementation').length, 0
+      implementationFiles: implementations.reduce(
+        (total, impl) => total + impl.files.filter(f => f.type === 'implementation').length,
+        0
       ),
-      testFiles: implementations.reduce((total, impl) =>
-        total + impl.files.filter(f => f.type === 'test').length, 0
+      testFiles: implementations.reduce(
+        (total, impl) => total + impl.files.filter(f => f.type === 'test').length,
+        0
       )
     };
 
     // Calculate quality scores
-    quality.complexity = Math.max(0, 100 - (quality.metrics.averageComplexity * 10));
-    quality.maintainability = Math.max(0, 100 - (quality.violations.length * 5));
-    quality.readability = Math.max(0, 100 - (quality.metrics.averageFileSize / 20));
+    quality.complexity = Math.max(0, 100 - quality.metrics.averageComplexity * 10);
+    quality.maintainability = Math.max(0, 100 - quality.violations.length * 5);
+    quality.readability = Math.max(0, 100 - quality.metrics.averageFileSize / 20);
     quality.testCoverage = 95; // High coverage from TDD
-    quality.duplication = Math.max(0, 100 - (quality.violations.filter(v => v.type === 'duplication').length * 10));
+    quality.duplication = Math.max(
+      0,
+      100 - quality.violations.filter(v => v.type === 'duplication').length * 10
+    );
 
-    quality.overall = (quality.maintainability + quality.readability + quality.complexity + quality.testCoverage + quality.duplication) / 5;
+    quality.overall =
+      (quality.maintainability +
+        quality.readability +
+        quality.complexity +
+        quality.testCoverage +
+        quality.duplication) /
+      5;
 
     return quality;
   }
@@ -1206,7 +1233,9 @@ export default ${interfaceName};`;
     documentation.api = this.generateApiDocumentation(implementations);
 
     // Generate component documentation
-    documentation.components = implementations.map(impl => this.generateComponentDocumentation(impl));
+    documentation.components = implementations.map(impl =>
+      this.generateComponentDocumentation(impl)
+    );
 
     // Generate deployment documentation
     documentation.deployment = this.generateDeploymentDocumentation();
@@ -1373,13 +1402,13 @@ export default ${interfaceName};`;
       overall: 0
     };
 
-    refactoring.after.overall = (
-      refactoring.after.complexity +
-      refactoring.after.maintainability +
-      refactoring.after.readability +
-      refactoring.after.testCoverage +
-      refactoring.after.duplication
-    ) / 5;
+    refactoring.after.overall =
+      (refactoring.after.complexity +
+        refactoring.after.maintainability +
+        refactoring.after.readability +
+        refactoring.after.testCoverage +
+        refactoring.after.duplication) /
+      5;
 
     return refactoring;
   }
@@ -1464,13 +1493,19 @@ export default ${interfaceName};`;
       validation.recommendations.push('Increase test coverage by adding more unit tests');
     }
     if (!codeQualityCheck.passed) {
-      validation.recommendations.push('Improve code quality by addressing complexity and maintainability issues');
+      validation.recommendations.push(
+        'Improve code quality by addressing complexity and maintainability issues'
+      );
     }
     if (!performanceCheck.passed) {
-      validation.recommendations.push('Optimize performance by implementing caching and database optimization');
+      validation.recommendations.push(
+        'Optimize performance by implementing caching and database optimization'
+      );
     }
     if (!securityCheck.passed) {
-      validation.recommendations.push('Address security vulnerabilities and implement security best practices');
+      validation.recommendations.push(
+        'Address security vulnerabilities and implement security best practices'
+      );
     }
 
     return validation;
@@ -1488,9 +1523,10 @@ export default ${interfaceName};`;
   }
 
   findRelevantComponent(test, architecture) {
-    return architecture.components.find(comp =>
-      test.name.toLowerCase().includes(comp.name.toLowerCase()) ||
-      test.description.toLowerCase().includes(comp.responsibility.toLowerCase())
+    return architecture.components.find(
+      comp =>
+        test.name.toLowerCase().includes(comp.name.toLowerCase()) ||
+        test.description.toLowerCase().includes(comp.responsibility.toLowerCase())
     );
   }
 
@@ -1537,7 +1573,9 @@ export default ${interfaceName};`;
 - **Failed**: ${result.tddCycles.filter(c => !c.success).length}
 - **Average Duration**: ${(result.tddCycles.reduce((sum, c) => sum + c.duration, 0) / result.tddCycles.length / 1000).toFixed(2)}s
 
-${result.tddCycles.map((cycle, index) => `
+${result.tddCycles
+  .map(
+    (cycle, index) => `
 ### Cycle ${index + 1}: ${cycle.requirement}
 **Status**: ${cycle.success ? '✅ Success' : '❌ Failed'}
 **Duration**: ${(cycle.duration / 1000).toFixed(2)}s
@@ -1554,7 +1592,9 @@ ${result.tddCycles.map((cycle, index) => `
 - Refactoring Techniques: ${cycle.refactorPhase ? cycle.refactorPhase.refactorings.length : 0}
 - Tests Still Passing: ${cycle.refactorPhase ? '✅' : '❌'}
 - Code Quality Improved: ${cycle.refactorPhase ? '✅' : '❌'}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Implementations
 
@@ -1563,7 +1603,9 @@ ${result.tddCycles.map((cycle, index) => `
 - **Total Files**: ${result.implementations.reduce((sum, impl) => sum + impl.files.length, 0)}
 - **Total Lines**: ${result.implementations.reduce((sum, impl) => sum + impl.files.reduce((fileSum, file) => fileSum + file.lines, 0), 0)}
 
-${result.implementations.map((impl, index) => `
+${result.implementations
+  .map(
+    (impl, index) => `
 ### ${index + 1}. ${impl.component}
 **Type**: ${impl.type}
 **Files**: ${impl.files.length}
@@ -1575,7 +1617,9 @@ ${result.implementations.map((impl, index) => `
 
 #### Files
 ${impl.files.map(file => `- **${file.name}** (${file.type}): ${file.lines} lines`).join('\n')}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Test Results
 
@@ -1587,14 +1631,18 @@ ${impl.files.map(file => `- **${file.name}** (${file.type}): ${file.lines} lines
 - **Duration**: ${(result.testResults.duration / 1000).toFixed(2)}s
 
 ### Test Suites
-${result.testResults.suites.map((suite, index) => `
+${result.testResults.suites
+  .map(
+    (suite, index) => `
 #### ${index + 1}. ${suite.name}
 - **Tests**: ${suite.tests}
 - **Passed**: ${suite.passed}
 - **Failed**: ${suite.failed}
 - **Coverage**: ${suite.coverage.toFixed(1)}%
 - **Duration**: ${(suite.duration / 1000).toFixed(2)}s
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Code Quality
 
@@ -1616,11 +1664,19 @@ ${result.testResults.suites.map((suite, index) => `
 - **Test Files**: ${result.codeQuality.metrics.testFiles}
 
 ### Quality Violations
-${result.codeQuality.violations.length > 0 ? result.codeQuality.violations.map((violation, index) => `
+${
+  result.codeQuality.violations.length > 0
+    ? result.codeQuality.violations
+        .map(
+          (violation, index) => `
 #### ${index + 1}. ${violation.type} (${violation.severity})
 - **Message**: ${violation.message}
 - **Location**: ${violation.file || violation.component || 'General'}
-`).join('\n') : 'No quality violations found ✅'}
+`
+        )
+        .join('\n')
+    : 'No quality violations found ✅'
+}
 
 ## Performance Analysis
 
@@ -1642,12 +1698,16 @@ ${result.codeQuality.violations.length > 0 ? result.codeQuality.violations.map((
 - **Network I/O**: ${result.performance.resource.networkIO}%
 
 ### Bottlenecks
-${result.performance.bottlenecks.map((bottleneck, index) => `
+${result.performance.bottlenecks
+  .map(
+    (bottleneck, index) => `
 #### ${index + 1}. ${bottleneck.component}
 - **Impact**: ${bottleneck.impact}
 - **Description**: ${bottleneck.description}
 - **Recommendation**: ${bottleneck.recommendation}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ### Performance Recommendations
 ${result.performance.recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}
@@ -1662,25 +1722,37 @@ ${result.performance.recommendations.map((rec, index) => `${index + 1}. ${rec}`)
 - **ISO 27001**: ${result.security.compliance.iso27001}
 
 ### Vulnerabilities
-${result.security.vulnerabilities.length > 0 ? result.security.vulnerabilities.map((vuln, index) => `
+${
+  result.security.vulnerabilities.length > 0
+    ? result.security.vulnerabilities
+        .map(
+          (vuln, index) => `
 #### ${index + 1}. ${vuln.type} (${vuln.severity})
 - **Description**: ${vuln.description}
 - **Location**: ${vuln.location}
 - **Remediation**: ${vuln.remediation}
-`).join('\n') : 'No security vulnerabilities found ✅'}
+`
+        )
+        .join('\n')
+    : 'No security vulnerabilities found ✅'
+}
 
 ### Security Recommendations
 ${result.security.recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}
 
 ## Optimizations Applied
 
-${result.optimizations.map((opt, index) => `
+${result.optimizations
+  .map(
+    (opt, index) => `
 ### ${index + 1}. ${opt.type} Optimization
 - **Description**: ${opt.description}
 - **Impact**: ${opt.impact}
 - **Effort**: ${opt.effort}
 - **Implementation**: ${opt.implementation}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Documentation Generated
 
@@ -1700,11 +1772,15 @@ ${result.optimizations.map((opt, index) => `
 ## Refactoring Results
 
 ### Techniques Applied
-${result.refactoring.techniques.map((technique, index) => `
+${result.refactoring.techniques
+  .map(
+    (technique, index) => `
 #### ${index + 1}. ${technique.name}
 - **Description**: ${technique.description}
 - **Impact**: ${technique.impact}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ### Improvements Achieved
 ${result.refactoring.improvements.map((improvement, index) => `${index + 1}. ${improvement}`).join('\n')}
@@ -1719,23 +1795,39 @@ ${result.refactoring.improvements.map((improvement, index) => `${index + 1}. ${i
 ### Validation Score: ${result.validation.score}/100
 
 ### Checks Performed
-${result.validation.checks.map((check, index) => `
+${result.validation.checks
+  .map(
+    (check, index) => `
 #### ${index + 1}. ${check.name}
 - **Status**: ${check.passed ? '✅ Passed' : '❌ Failed'}
 - **Score**: ${check.score}/${check.threshold}
 - **Message**: ${check.message}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
-${result.validation.issues.length > 0 ? `
+${
+  result.validation.issues.length > 0
+    ? `
 ### Issues Found
-${result.validation.issues.map((issue, index) => `
+${result.validation.issues
+  .map(
+    (issue, index) => `
 #### ${index + 1}. ${issue.category} (${issue.severity})
 ${issue.message}
-`).join('\n')}` : '### No Issues Found ✅'}
+`
+  )
+  .join('\n')}`
+    : '### No Issues Found ✅'
+}
 
-${result.validation.recommendations.length > 0 ? `
+${
+  result.validation.recommendations.length > 0
+    ? `
 ### Recommendations
-${result.validation.recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}` : ''}
+${result.validation.recommendations.map((rec, index) => `${index + 1}. ${rec}`).join('\n')}`
+    : ''
+}
 
 ## Summary
 
@@ -1748,9 +1840,11 @@ The refinement phase has been completed with TDD methodology, resulting in:
 - ✅ **${result.security.score}/100** security score
 - ✅ **${result.validation.score}/100** final validation score
 
-${result.validation.passed ?
-    '🎉 **All quality gates passed!** The implementation is ready for completion phase.' :
-    '⚠️ **Some quality gates failed.** Please address the issues before proceeding to completion phase.'}
+${
+  result.validation.passed
+    ? '🎉 **All quality gates passed!** The implementation is ready for completion phase.'
+    : '⚠️ **Some quality gates failed.** Please address the issues before proceeding to completion phase.'
+}
 `;
 
     // Save document

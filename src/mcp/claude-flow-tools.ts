@@ -54,7 +54,7 @@ export function createClaudeFlowTools(logger: ILogger): MCPTool[] {
     // Terminal management tools
     createExecuteCommandTool(logger),
     createListTerminalsTool(logger),
-    createCreateTerminalTool(logger),
+    createCreateTerminalTool(logger)
   ];
 }
 
@@ -67,42 +67,54 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
       properties: {
         type: {
           type: 'string',
-          enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'],
-          description: 'Type of agent to spawn',
+          enum: [
+            'coordinator',
+            'researcher',
+            'coder',
+            'analyst',
+            'architect',
+            'tester',
+            'reviewer',
+            'optimizer',
+            'documenter',
+            'monitor',
+            'specialist'
+          ],
+          description: 'Type of agent to spawn'
         },
         name: {
           type: 'string',
-          description: 'Display name for the agent',
+          description: 'Display name for the agent'
         },
         capabilities: {
           type: 'array',
           items: { type: 'string' },
-          description: 'List of capabilities for the agent',
+          description: 'List of capabilities for the agent'
         },
         systemPrompt: {
           type: 'string',
-          description: 'Custom system prompt for the agent',
+          description: 'Custom system prompt for the agent'
         },
         maxConcurrentTasks: {
           type: 'number',
           default: 3,
-          description: 'Maximum number of concurrent tasks',
+          description: 'Maximum number of concurrent tasks'
         },
         priority: {
           type: 'number',
           default: 5,
-          description: 'Agent priority level (1-10)',
+          description: 'Agent priority level (1-10)'
         },
         environment: {
           type: 'object',
-          description: 'Environment variables for the agent',
+          description: 'Environment variables for the agent'
         },
         workingDirectory: {
           type: 'string',
-          description: 'Working directory for the agent',
-        },
+          description: 'Working directory for the agent'
+        }
       },
-      required: ['type', 'name'],
+      required: ['type', 'name']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Spawning agent', { input, sessionId: context?.sessionId });
@@ -120,7 +132,7 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
         maxConcurrentTasks: input.maxConcurrentTasks || 3,
         priority: input.priority || 5,
         environment: input.environment,
-        workingDirectory: input.workingDirectory,
+        workingDirectory: input.workingDirectory
       };
 
       const sessionId = await context.orchestrator.spawnAgent(profile);
@@ -130,9 +142,9 @@ function createSpawnAgentTool(logger: ILogger): MCPTool {
         sessionId,
         profile,
         status: 'spawned',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -146,14 +158,26 @@ function createListAgentsTool(logger: ILogger): MCPTool {
         includeTerminated: {
           type: 'boolean',
           default: false,
-          description: 'Include terminated agents in the list',
+          description: 'Include terminated agents in the list'
         },
         filterByType: {
           type: 'string',
-          enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'],
-          description: 'Filter agents by type',
-        },
-      },
+          enum: [
+            'coordinator',
+            'researcher',
+            'coder',
+            'analyst',
+            'architect',
+            'tester',
+            'reviewer',
+            'optimizer',
+            'documenter',
+            'monitor',
+            'specialist'
+          ],
+          description: 'Filter agents by type'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Listing agents', { input, sessionId: context?.sessionId });
@@ -163,13 +187,13 @@ function createListAgentsTool(logger: ILogger): MCPTool {
       }
 
       const agents = await context.orchestrator.listAgents();
-      
+
       let filteredAgents = agents;
-      
+
       if (!input.includeTerminated) {
         filteredAgents = filteredAgents.filter((agent: any) => agent.status !== 'terminated');
       }
-      
+
       if (input.filterByType) {
         filteredAgents = filteredAgents.filter((agent: any) => agent.type === input.filterByType);
       }
@@ -177,9 +201,9 @@ function createListAgentsTool(logger: ILogger): MCPTool {
       return {
         agents: filteredAgents,
         count: filteredAgents.length,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -192,19 +216,19 @@ function createTerminateAgentTool(logger: ILogger): MCPTool {
       properties: {
         agentId: {
           type: 'string',
-          description: 'ID of the agent to terminate',
+          description: 'ID of the agent to terminate'
         },
         reason: {
           type: 'string',
-          description: 'Reason for termination',
+          description: 'Reason for termination'
         },
         graceful: {
           type: 'boolean',
           default: true,
-          description: 'Whether to perform graceful shutdown',
-        },
+          description: 'Whether to perform graceful shutdown'
+        }
       },
-      required: ['agentId'],
+      required: ['agentId']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Terminating agent', { input, sessionId: context?.sessionId });
@@ -215,16 +239,16 @@ function createTerminateAgentTool(logger: ILogger): MCPTool {
 
       await context.orchestrator.terminateAgent(input.agentId, {
         reason: input.reason || 'Manual termination',
-        graceful: input.graceful !== false,
+        graceful: input.graceful !== false
       });
 
       return {
         agentId: input.agentId,
         status: 'terminated',
         reason: input.reason || 'Manual termination',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -237,10 +261,10 @@ function createGetAgentInfoTool(logger: ILogger): MCPTool {
       properties: {
         agentId: {
           type: 'string',
-          description: 'ID of the agent',
-        },
+          description: 'ID of the agent'
+        }
       },
-      required: ['agentId'],
+      required: ['agentId']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Getting agent info', { input, sessionId: context?.sessionId });
@@ -257,9 +281,9 @@ function createGetAgentInfoTool(logger: ILogger): MCPTool {
 
       return {
         agent: agentInfo,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -272,41 +296,53 @@ function createCreateTaskTool(logger: ILogger): MCPTool {
       properties: {
         type: {
           type: 'string',
-          description: 'Type of task to create',
+          description: 'Type of task to create'
         },
         description: {
           type: 'string',
-          description: 'Description of the task',
+          description: 'Description of the task'
         },
         priority: {
           type: 'number',
           default: 5,
-          description: 'Task priority (1-10)',
+          description: 'Task priority (1-10)'
         },
         dependencies: {
           type: 'array',
           items: { type: 'string' },
-          description: 'List of task IDs this task depends on',
+          description: 'List of task IDs this task depends on'
         },
         assignToAgent: {
           type: 'string',
-          description: 'Specific agent ID to assign the task to',
+          description: 'Specific agent ID to assign the task to'
         },
         assignToAgentType: {
           type: 'string',
-          enum: ['coordinator', 'researcher', 'coder', 'analyst', 'architect', 'tester', 'reviewer', 'optimizer', 'documenter', 'monitor', 'specialist'],
-          description: 'Type of agent to assign the task to',
+          enum: [
+            'coordinator',
+            'researcher',
+            'coder',
+            'analyst',
+            'architect',
+            'tester',
+            'reviewer',
+            'optimizer',
+            'documenter',
+            'monitor',
+            'specialist'
+          ],
+          description: 'Type of agent to assign the task to'
         },
         input: {
           type: 'object',
-          description: 'Input data for the task',
+          description: 'Input data for the task'
         },
         timeout: {
           type: 'number',
-          description: 'Task timeout in milliseconds',
-        },
+          description: 'Task timeout in milliseconds'
+        }
       },
-      required: ['type', 'description'],
+      required: ['type', 'description']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Creating task', { input, sessionId: context?.sessionId });
@@ -322,7 +358,7 @@ function createCreateTaskTool(logger: ILogger): MCPTool {
         dependencies: input.dependencies || [],
         input: input.input || {},
         status: 'pending',
-        createdAt: new Date(),
+        createdAt: new Date()
       };
 
       const taskId = await context.orchestrator.createTask(task);
@@ -337,9 +373,9 @@ function createCreateTaskTool(logger: ILogger): MCPTool {
       return {
         taskId,
         task: { ...task, id: taskId },
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -353,27 +389,27 @@ function createListTasksTool(logger: ILogger): MCPTool {
         status: {
           type: 'string',
           enum: ['pending', 'queued', 'assigned', 'running', 'completed', 'failed', 'cancelled'],
-          description: 'Filter by task status',
+          description: 'Filter by task status'
         },
         agentId: {
           type: 'string',
-          description: 'Filter by assigned agent ID',
+          description: 'Filter by assigned agent ID'
         },
         type: {
           type: 'string',
-          description: 'Filter by task type',
+          description: 'Filter by task type'
         },
         limit: {
           type: 'number',
           default: 50,
-          description: 'Maximum number of tasks to return',
+          description: 'Maximum number of tasks to return'
         },
         offset: {
           type: 'number',
           default: 0,
-          description: 'Number of tasks to skip',
-        },
-      },
+          description: 'Number of tasks to skip'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Listing tasks', { input, sessionId: context?.sessionId });
@@ -387,15 +423,15 @@ function createListTasksTool(logger: ILogger): MCPTool {
         agentId: input.agentId,
         type: input.type,
         limit: input.limit || 50,
-        offset: input.offset || 0,
+        offset: input.offset || 0
       });
 
       return {
         tasks,
         count: tasks.length,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -408,10 +444,10 @@ function createGetTaskStatusTool(logger: ILogger): MCPTool {
       properties: {
         taskId: {
           type: 'string',
-          description: 'ID of the task',
-        },
+          description: 'ID of the task'
+        }
       },
-      required: ['taskId'],
+      required: ['taskId']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Getting task status', { input, sessionId: context?.sessionId });
@@ -428,9 +464,9 @@ function createGetTaskStatusTool(logger: ILogger): MCPTool {
 
       return {
         task,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -443,14 +479,14 @@ function createCancelTaskTool(logger: ILogger): MCPTool {
       properties: {
         taskId: {
           type: 'string',
-          description: 'ID of the task to cancel',
+          description: 'ID of the task to cancel'
         },
         reason: {
           type: 'string',
-          description: 'Reason for cancellation',
-        },
+          description: 'Reason for cancellation'
+        }
       },
-      required: ['taskId'],
+      required: ['taskId']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Cancelling task', { input, sessionId: context?.sessionId });
@@ -465,9 +501,9 @@ function createCancelTaskTool(logger: ILogger): MCPTool {
         taskId: input.taskId,
         status: 'cancelled',
         reason: input.reason || 'Manual cancellation',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -480,14 +516,14 @@ function createAssignTaskTool(logger: ILogger): MCPTool {
       properties: {
         taskId: {
           type: 'string',
-          description: 'ID of the task to assign',
+          description: 'ID of the task to assign'
         },
         agentId: {
           type: 'string',
-          description: 'ID of the agent to assign the task to',
-        },
+          description: 'ID of the agent to assign the task to'
+        }
       },
-      required: ['taskId', 'agentId'],
+      required: ['taskId', 'agentId']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Assigning task', { input, sessionId: context?.sessionId });
@@ -502,9 +538,9 @@ function createAssignTaskTool(logger: ILogger): MCPTool {
         taskId: input.taskId,
         agentId: input.agentId,
         status: 'assigned',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -517,47 +553,47 @@ function createQueryMemoryTool(logger: ILogger): MCPTool {
       properties: {
         agentId: {
           type: 'string',
-          description: 'Filter by agent ID',
+          description: 'Filter by agent ID'
         },
         sessionId: {
           type: 'string',
-          description: 'Filter by session ID',
+          description: 'Filter by session ID'
         },
         type: {
           type: 'string',
           enum: ['observation', 'insight', 'decision', 'artifact', 'error'],
-          description: 'Filter by entry type',
+          description: 'Filter by entry type'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Filter by tags',
+          description: 'Filter by tags'
         },
         search: {
           type: 'string',
-          description: 'Full-text search query',
+          description: 'Full-text search query'
         },
         startTime: {
           type: 'string',
           format: 'date-time',
-          description: 'Filter entries after this time',
+          description: 'Filter entries after this time'
         },
         endTime: {
           type: 'string',
           format: 'date-time',
-          description: 'Filter entries before this time',
+          description: 'Filter entries before this time'
         },
         limit: {
           type: 'number',
           default: 50,
-          description: 'Maximum number of entries to return',
+          description: 'Maximum number of entries to return'
         },
         offset: {
           type: 'number',
           default: 0,
-          description: 'Number of entries to skip',
-        },
-      },
+          description: 'Number of entries to skip'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Querying memory', { input, sessionId: context?.sessionId });
@@ -575,7 +611,7 @@ function createQueryMemoryTool(logger: ILogger): MCPTool {
         startTime: input.startTime ? new Date(input.startTime) : undefined,
         endTime: input.endTime ? new Date(input.endTime) : undefined,
         limit: input.limit || 50,
-        offset: input.offset || 0,
+        offset: input.offset || 0
       };
 
       const entries = await context.orchestrator.queryMemory(query);
@@ -584,9 +620,9 @@ function createQueryMemoryTool(logger: ILogger): MCPTool {
         entries,
         count: entries.length,
         query,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -599,36 +635,36 @@ function createStoreMemoryTool(logger: ILogger): MCPTool {
       properties: {
         agentId: {
           type: 'string',
-          description: 'Agent ID for the memory entry',
+          description: 'Agent ID for the memory entry'
         },
         sessionId: {
           type: 'string',
-          description: 'Session ID for the memory entry',
+          description: 'Session ID for the memory entry'
         },
         type: {
           type: 'string',
           enum: ['observation', 'insight', 'decision', 'artifact', 'error'],
-          description: 'Type of memory entry',
+          description: 'Type of memory entry'
         },
         content: {
           type: 'string',
-          description: 'Content of the memory entry',
+          description: 'Content of the memory entry'
         },
         context: {
           type: 'object',
-          description: 'Context data for the memory entry',
+          description: 'Context data for the memory entry'
         },
         tags: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Tags for the memory entry',
+          description: 'Tags for the memory entry'
         },
         parentId: {
           type: 'string',
-          description: 'Parent memory entry ID',
-        },
+          description: 'Parent memory entry ID'
+        }
       },
-      required: ['agentId', 'sessionId', 'type', 'content'],
+      required: ['agentId', 'sessionId', 'type', 'content']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Storing memory', { input, sessionId: context?.sessionId });
@@ -646,7 +682,7 @@ function createStoreMemoryTool(logger: ILogger): MCPTool {
         tags: input.tags || [],
         parentId: input.parentId,
         timestamp: new Date(),
-        version: 1,
+        version: 1
       };
 
       const entryId = await context.orchestrator.storeMemory(entry);
@@ -654,9 +690,9 @@ function createStoreMemoryTool(logger: ILogger): MCPTool {
       return {
         entryId,
         entry: { ...entry, id: entryId },
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -669,10 +705,10 @@ function createDeleteMemoryTool(logger: ILogger): MCPTool {
       properties: {
         entryId: {
           type: 'string',
-          description: 'ID of the memory entry to delete',
-        },
+          description: 'ID of the memory entry to delete'
+        }
       },
-      required: ['entryId'],
+      required: ['entryId']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Deleting memory', { input, sessionId: context?.sessionId });
@@ -686,9 +722,9 @@ function createDeleteMemoryTool(logger: ILogger): MCPTool {
       return {
         entryId: input.entryId,
         status: 'deleted',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -703,27 +739,27 @@ function createExportMemoryTool(logger: ILogger): MCPTool {
           type: 'string',
           enum: ['json', 'csv', 'markdown'],
           default: 'json',
-          description: 'Export format',
+          description: 'Export format'
         },
         agentId: {
           type: 'string',
-          description: 'Filter by agent ID',
+          description: 'Filter by agent ID'
         },
         sessionId: {
           type: 'string',
-          description: 'Filter by session ID',
+          description: 'Filter by session ID'
         },
         startTime: {
           type: 'string',
           format: 'date-time',
-          description: 'Export entries after this time',
+          description: 'Export entries after this time'
         },
         endTime: {
           type: 'string',
           format: 'date-time',
-          description: 'Export entries before this time',
-        },
-      },
+          description: 'Export entries before this time'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Exporting memory', { input, sessionId: context?.sessionId });
@@ -737,14 +773,14 @@ function createExportMemoryTool(logger: ILogger): MCPTool {
         agentId: input.agentId,
         sessionId: input.sessionId,
         startTime: input.startTime ? new Date(input.startTime) : undefined,
-        endTime: input.endTime ? new Date(input.endTime) : undefined,
+        endTime: input.endTime ? new Date(input.endTime) : undefined
       });
 
       return {
         ...exportResult,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -757,22 +793,22 @@ function createImportMemoryTool(logger: ILogger): MCPTool {
       properties: {
         filePath: {
           type: 'string',
-          description: 'Path to the file to import',
+          description: 'Path to the file to import'
         },
         format: {
           type: 'string',
           enum: ['json', 'csv'],
           default: 'json',
-          description: 'Import format',
+          description: 'Import format'
         },
         mergeStrategy: {
           type: 'string',
           enum: ['skip', 'overwrite', 'version'],
           default: 'skip',
-          description: 'Strategy for handling duplicate entries',
-        },
+          description: 'Strategy for handling duplicate entries'
+        }
       },
-      required: ['filePath'],
+      required: ['filePath']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Importing memory', { input, sessionId: context?.sessionId });
@@ -784,14 +820,14 @@ function createImportMemoryTool(logger: ILogger): MCPTool {
       const importResult = await context.orchestrator.importMemory({
         filePath: input.filePath,
         format: input.format || 'json',
-        mergeStrategy: input.mergeStrategy || 'skip',
+        mergeStrategy: input.mergeStrategy || 'skip'
       });
 
       return {
         ...importResult,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -801,7 +837,7 @@ function createGetSystemStatusTool(logger: ILogger): MCPTool {
     description: 'Get comprehensive system status information',
     inputSchema: {
       type: 'object',
-      properties: {},
+      properties: {}
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Getting system status', { sessionId: context?.sessionId });
@@ -814,9 +850,9 @@ function createGetSystemStatusTool(logger: ILogger): MCPTool {
 
       return {
         ...status,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -831,9 +867,9 @@ function createGetMetricsTool(logger: ILogger): MCPTool {
           type: 'string',
           enum: ['1h', '6h', '24h', '7d'],
           default: '1h',
-          description: 'Time range for metrics',
-        },
-      },
+          description: 'Time range for metrics'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Getting system metrics', { input, sessionId: context?.sessionId });
@@ -847,9 +883,9 @@ function createGetMetricsTool(logger: ILogger): MCPTool {
       return {
         metrics,
         timeRange: input.timeRange || '1h',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -863,9 +899,9 @@ function createHealthCheckTool(logger: ILogger): MCPTool {
         deep: {
           type: 'boolean',
           default: false,
-          description: 'Perform deep health check including component tests',
-        },
-      },
+          description: 'Perform deep health check including component tests'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Performing health check', { input, sessionId: context?.sessionId });
@@ -878,9 +914,9 @@ function createHealthCheckTool(logger: ILogger): MCPTool {
 
       return {
         ...healthCheck,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -894,9 +930,9 @@ function createGetConfigTool(logger: ILogger): MCPTool {
         section: {
           type: 'string',
           enum: ['orchestrator', 'terminal', 'memory', 'coordination', 'mcp', 'logging'],
-          description: 'Specific configuration section to retrieve',
-        },
-      },
+          description: 'Specific configuration section to retrieve'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Getting configuration', { input, sessionId: context?.sessionId });
@@ -910,9 +946,9 @@ function createGetConfigTool(logger: ILogger): MCPTool {
       return {
         config,
         section: input.section,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -926,19 +962,19 @@ function createUpdateConfigTool(logger: ILogger): MCPTool {
         section: {
           type: 'string',
           enum: ['orchestrator', 'terminal', 'memory', 'coordination', 'mcp', 'logging'],
-          description: 'Configuration section to update',
+          description: 'Configuration section to update'
         },
         config: {
           type: 'object',
-          description: 'Configuration values to update',
+          description: 'Configuration values to update'
         },
         restart: {
           type: 'boolean',
           default: false,
-          description: 'Restart affected components after update',
-        },
+          description: 'Restart affected components after update'
+        }
       },
-      required: ['section', 'config'],
+      required: ['section', 'config']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Updating configuration', { input, sessionId: context?.sessionId });
@@ -955,9 +991,9 @@ function createUpdateConfigTool(logger: ILogger): MCPTool {
 
       return {
         ...result,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -970,10 +1006,10 @@ function createValidateConfigTool(logger: ILogger): MCPTool {
       properties: {
         config: {
           type: 'object',
-          description: 'Configuration object to validate',
-        },
+          description: 'Configuration object to validate'
+        }
       },
-      required: ['config'],
+      required: ['config']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Validating configuration', { input, sessionId: context?.sessionId });
@@ -986,9 +1022,9 @@ function createValidateConfigTool(logger: ILogger): MCPTool {
 
       return {
         ...validation,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -1001,17 +1037,17 @@ function createExecuteWorkflowTool(logger: ILogger): MCPTool {
       properties: {
         filePath: {
           type: 'string',
-          description: 'Path to workflow file',
+          description: 'Path to workflow file'
         },
         workflow: {
           type: 'object',
-          description: 'Inline workflow definition',
+          description: 'Inline workflow definition'
         },
         parameters: {
           type: 'object',
-          description: 'Parameters to pass to the workflow',
-        },
-      },
+          description: 'Parameters to pass to the workflow'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Executing workflow', { input, sessionId: context?.sessionId });
@@ -1027,14 +1063,14 @@ function createExecuteWorkflowTool(logger: ILogger): MCPTool {
       const result = await context.orchestrator.executeWorkflow({
         filePath: input.filePath,
         workflow: input.workflow,
-        parameters: input.parameters || {},
+        parameters: input.parameters || {}
       });
 
       return {
         ...result,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -1047,11 +1083,11 @@ function createCreateWorkflowTool(logger: ILogger): MCPTool {
       properties: {
         name: {
           type: 'string',
-          description: 'Name of the workflow',
+          description: 'Name of the workflow'
         },
         description: {
           type: 'string',
-          description: 'Description of the workflow',
+          description: 'Description of the workflow'
         },
         tasks: {
           type: 'array',
@@ -1063,20 +1099,20 @@ function createCreateWorkflowTool(logger: ILogger): MCPTool {
               description: { type: 'string' },
               dependencies: {
                 type: 'array',
-                items: { type: 'string' },
+                items: { type: 'string' }
               },
-              assignTo: { type: 'string' },
+              assignTo: { type: 'string' }
             },
-            required: ['id', 'type', 'description'],
+            required: ['id', 'type', 'description']
           },
-          description: 'List of tasks in the workflow',
+          description: 'List of tasks in the workflow'
         },
         savePath: {
           type: 'string',
-          description: 'Path to save the workflow file',
-        },
+          description: 'Path to save the workflow file'
+        }
       },
-      required: ['name', 'tasks'],
+      required: ['name', 'tasks']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Creating workflow', { input, sessionId: context?.sessionId });
@@ -1089,7 +1125,7 @@ function createCreateWorkflowTool(logger: ILogger): MCPTool {
         name: input.name,
         description: input.description,
         tasks: input.tasks,
-        created: new Date().toISOString(),
+        created: new Date().toISOString()
       };
 
       const result = await context.orchestrator.createWorkflow(workflow, input.savePath);
@@ -1097,9 +1133,9 @@ function createCreateWorkflowTool(logger: ILogger): MCPTool {
       return {
         ...result,
         workflow,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -1112,9 +1148,9 @@ function createListWorkflowsTool(logger: ILogger): MCPTool {
       properties: {
         directory: {
           type: 'string',
-          description: 'Directory to search for workflows',
-        },
-      },
+          description: 'Directory to search for workflows'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Listing workflows', { input, sessionId: context?.sessionId });
@@ -1128,9 +1164,9 @@ function createListWorkflowsTool(logger: ILogger): MCPTool {
       return {
         workflows,
         count: workflows.length,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -1143,32 +1179,32 @@ function createExecuteCommandTool(logger: ILogger): MCPTool {
       properties: {
         command: {
           type: 'string',
-          description: 'Command to execute',
+          description: 'Command to execute'
         },
         args: {
           type: 'array',
           items: { type: 'string' },
-          description: 'Command arguments',
+          description: 'Command arguments'
         },
         cwd: {
           type: 'string',
-          description: 'Working directory for the command',
+          description: 'Working directory for the command'
         },
         env: {
           type: 'object',
-          description: 'Environment variables',
+          description: 'Environment variables'
         },
         timeout: {
           type: 'number',
           default: 30000,
-          description: 'Command timeout in milliseconds',
+          description: 'Command timeout in milliseconds'
         },
         terminalId: {
           type: 'string',
-          description: 'Specific terminal ID to use',
-        },
+          description: 'Specific terminal ID to use'
+        }
       },
-      required: ['command'],
+      required: ['command']
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Executing command', { input, sessionId: context?.sessionId });
@@ -1183,14 +1219,14 @@ function createExecuteCommandTool(logger: ILogger): MCPTool {
         cwd: input.cwd,
         env: input.env,
         timeout: input.timeout || 30000,
-        terminalId: input.terminalId,
+        terminalId: input.terminalId
       });
 
       return {
         ...result,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -1204,9 +1240,9 @@ function createListTerminalsTool(logger: ILogger): MCPTool {
         includeIdle: {
           type: 'boolean',
           default: true,
-          description: 'Include idle terminals',
-        },
-      },
+          description: 'Include idle terminals'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Listing terminals', { input, sessionId: context?.sessionId });
@@ -1220,9 +1256,9 @@ function createListTerminalsTool(logger: ILogger): MCPTool {
       return {
         terminals,
         count: terminals.length,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
@@ -1235,17 +1271,17 @@ function createCreateTerminalTool(logger: ILogger): MCPTool {
       properties: {
         cwd: {
           type: 'string',
-          description: 'Working directory for the terminal',
+          description: 'Working directory for the terminal'
         },
         env: {
           type: 'object',
-          description: 'Environment variables',
+          description: 'Environment variables'
         },
         shell: {
           type: 'string',
-          description: 'Shell to use (bash, zsh, etc.)',
-        },
-      },
+          description: 'Shell to use (bash, zsh, etc.)'
+        }
+      }
     },
     handler: async (input: any, context?: ClaudeFlowToolContext) => {
       logger.info('Creating terminal', { input, sessionId: context?.sessionId });
@@ -1257,24 +1293,28 @@ function createCreateTerminalTool(logger: ILogger): MCPTool {
       const terminal = await context.orchestrator.createTerminal({
         cwd: input.cwd,
         env: input.env,
-        shell: input.shell,
+        shell: input.shell
       });
 
       return {
         terminal,
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
-    },
+    }
   };
 }
 
 function getDefaultSystemPrompt(type: string): string {
   const prompts = {
-    coordinator: 'You are a coordinator agent responsible for planning, delegating, and orchestrating tasks across multiple agents.',
-    researcher: 'You are a research agent specialized in gathering, analyzing, and synthesizing information from various sources.',
-    implementer: 'You are an implementation agent focused on writing code, creating solutions, and executing technical tasks.',
-    analyst: 'You are an analysis agent that identifies patterns, generates insights, and provides data-driven recommendations.',
-    custom: 'You are a specialized agent with custom capabilities defined by your configuration.',
+    coordinator:
+      'You are a coordinator agent responsible for planning, delegating, and orchestrating tasks across multiple agents.',
+    researcher:
+      'You are a research agent specialized in gathering, analyzing, and synthesizing information from various sources.',
+    implementer:
+      'You are an implementation agent focused on writing code, creating solutions, and executing technical tasks.',
+    analyst:
+      'You are an analysis agent that identifies patterns, generates insights, and provides data-driven recommendations.',
+    custom: 'You are a specialized agent with custom capabilities defined by your configuration.'
   };
 
   return prompts[type as keyof typeof prompts] || prompts.custom;

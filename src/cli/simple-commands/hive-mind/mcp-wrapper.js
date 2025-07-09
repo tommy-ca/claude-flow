@@ -10,44 +10,104 @@ import { spawn } from 'child_process';
  */
 const MCP_TOOLS = {
   swarm: [
-    'swarm_init', 'agent_spawn', 'task_orchestrate', 'swarm_status',
-    'agent_list', 'agent_metrics', 'swarm_monitor', 'topology_optimize',
-    'load_balance', 'coordination_sync', 'swarm_scale', 'swarm_destroy'
+    'swarm_init',
+    'agent_spawn',
+    'task_orchestrate',
+    'swarm_status',
+    'agent_list',
+    'agent_metrics',
+    'swarm_monitor',
+    'topology_optimize',
+    'load_balance',
+    'coordination_sync',
+    'swarm_scale',
+    'swarm_destroy'
   ],
   neural: [
-    'neural_status', 'neural_train', 'neural_patterns', 'neural_predict',
-    'model_load', 'model_save', 'wasm_optimize', 'inference_run',
-    'pattern_recognize', 'cognitive_analyze', 'learning_adapt',
-    'neural_compress', 'ensemble_create', 'transfer_learn', 'neural_explain'
+    'neural_status',
+    'neural_train',
+    'neural_patterns',
+    'neural_predict',
+    'model_load',
+    'model_save',
+    'wasm_optimize',
+    'inference_run',
+    'pattern_recognize',
+    'cognitive_analyze',
+    'learning_adapt',
+    'neural_compress',
+    'ensemble_create',
+    'transfer_learn',
+    'neural_explain'
   ],
   memory: [
-    'memory_usage', 'memory_search', 'memory_persist', 'memory_namespace',
-    'memory_backup', 'memory_restore', 'memory_compress', 'memory_sync',
-    'cache_manage', 'state_snapshot', 'context_restore', 'memory_analytics'
+    'memory_usage',
+    'memory_search',
+    'memory_persist',
+    'memory_namespace',
+    'memory_backup',
+    'memory_restore',
+    'memory_compress',
+    'memory_sync',
+    'cache_manage',
+    'state_snapshot',
+    'context_restore',
+    'memory_analytics'
   ],
   performance: [
-    'performance_report', 'bottleneck_analyze', 'token_usage', 'benchmark_run',
-    'metrics_collect', 'trend_analysis', 'cost_analysis', 'quality_assess',
-    'error_analysis', 'usage_stats', 'health_check'
+    'performance_report',
+    'bottleneck_analyze',
+    'token_usage',
+    'benchmark_run',
+    'metrics_collect',
+    'trend_analysis',
+    'cost_analysis',
+    'quality_assess',
+    'error_analysis',
+    'usage_stats',
+    'health_check'
   ],
   github: [
-    'github_repo_analyze', 'github_pr_manage', 'github_issue_track',
-    'github_release_coord', 'github_workflow_auto', 'github_code_review',
-    'github_sync_coord', 'github_metrics'
+    'github_repo_analyze',
+    'github_pr_manage',
+    'github_issue_track',
+    'github_release_coord',
+    'github_workflow_auto',
+    'github_code_review',
+    'github_sync_coord',
+    'github_metrics'
   ],
   workflow: [
-    'workflow_create', 'workflow_execute', 'workflow_export', 'automation_setup',
-    'pipeline_create', 'scheduler_manage', 'trigger_setup', 'workflow_template',
-    'batch_process', 'parallel_execute'
+    'workflow_create',
+    'workflow_execute',
+    'workflow_export',
+    'automation_setup',
+    'pipeline_create',
+    'scheduler_manage',
+    'trigger_setup',
+    'workflow_template',
+    'batch_process',
+    'parallel_execute'
   ],
   daa: [
-    'daa_agent_create', 'daa_capability_match', 'daa_resource_alloc',
-    'daa_lifecycle_manage', 'daa_communication', 'daa_consensus',
-    'daa_fault_tolerance', 'daa_optimization'
+    'daa_agent_create',
+    'daa_capability_match',
+    'daa_resource_alloc',
+    'daa_lifecycle_manage',
+    'daa_communication',
+    'daa_consensus',
+    'daa_fault_tolerance',
+    'daa_optimization'
   ],
   system: [
-    'terminal_execute', 'config_manage', 'features_detect', 'security_scan',
-    'backup_create', 'restore_system', 'log_analysis', 'diagnostic_run'
+    'terminal_execute',
+    'config_manage',
+    'features_detect',
+    'security_scan',
+    'backup_create',
+    'restore_system',
+    'log_analysis',
+    'diagnostic_run'
   ],
   sparc: ['sparc_mode'],
   task: ['task_status', 'task_results']
@@ -111,7 +171,10 @@ export class MCPToolWrapper {
 
       // Real memory storage initialized with SQLite
     } catch (error) {
-      console.warn('Failed to initialize SQLite storage, falling back to in-memory:', error.message);
+      console.warn(
+        'Failed to initialize SQLite storage, falling back to in-memory:',
+        error.message
+      );
       this.memoryDb = null;
       this.memoryStore = new Map(); // Fallback to in-memory storage
     }
@@ -146,7 +209,9 @@ export class MCPToolWrapper {
     // Track failure
     this._trackToolUsage(toolName, Date.now() - startTime, false);
 
-    throw new Error(`Failed to execute ${toolName} after ${this.config.retryCount} attempts: ${lastError.message}`);
+    throw new Error(
+      `Failed to execute ${toolName} after ${this.config.retryCount} attempts: ${lastError.message}`
+    );
   }
 
   /**
@@ -210,7 +275,6 @@ export class MCPToolWrapper {
       this._trackBatchPerformance(toolCalls.length, executionTime, concurrencyLimit);
 
       return allResults;
-
     } catch (error) {
       console.error('Parallel execution failed:', error);
       throw error;
@@ -241,10 +305,10 @@ export class MCPToolWrapper {
    */
   _groupToolsByPriority(toolCalls) {
     const priorities = {
-      critical: [],  // swarm_init, swarm_destroy
-      high: [],      // agent_spawn, memory operations
-      medium: [],    // task operations, monitoring
-      low: []        // analytics, reporting
+      critical: [], // swarm_init, swarm_destroy
+      high: [], // agent_spawn, memory operations
+      medium: [], // task operations, monitoring
+      low: [] // analytics, reporting
     };
 
     toolCalls.forEach(call => {
@@ -263,8 +327,9 @@ export class MCPToolWrapper {
     });
 
     // Return groups in priority order, filtering empty groups
-    return [priorities.critical, priorities.high, priorities.medium, priorities.low]
-      .filter(group => group.length > 0);
+    return [priorities.critical, priorities.high, priorities.medium, priorities.low].filter(
+      group => group.length > 0
+    );
   }
 
   /**
@@ -457,12 +522,13 @@ export class MCPToolWrapper {
    * Calculate overall success rate
    */
   _calculateOverallSuccessRate() {
-    const total = Array.from(this.toolStats.values())
-      .reduce((sum, stat) => sum + stat.calls, 0);
-    const successes = Array.from(this.toolStats.values())
-      .reduce((sum, stat) => sum + stat.successes, 0);
+    const total = Array.from(this.toolStats.values()).reduce((sum, stat) => sum + stat.calls, 0);
+    const successes = Array.from(this.toolStats.values()).reduce(
+      (sum, stat) => sum + stat.successes,
+      0
+    );
 
-    return total > 0 ? (successes / total * 100).toFixed(2) : 100;
+    return total > 0 ? ((successes / total) * 100).toFixed(2) : 100;
   }
 
   /**
@@ -470,7 +536,9 @@ export class MCPToolWrapper {
    */
   _calculateAvgLatency() {
     const stats = Array.from(this.toolStats.values()).filter(stat => stat.calls > 0);
-    if (stats.length === 0) {return 0;}
+    if (stats.length === 0) {
+      return 0;
+    }
 
     const totalLatency = stats.reduce((sum, stat) => sum + stat.avgDuration, 0);
     return (totalLatency / stats.length).toFixed(2);
@@ -481,7 +549,9 @@ export class MCPToolWrapper {
    */
   _calculateThroughput() {
     const batchStats = this.batchStats;
-    if (!batchStats || batchStats.totalTime === 0) {return 0;}
+    if (!batchStats || batchStats.totalTime === 0) {
+      return 0;
+    }
 
     return (batchStats.totalTools / (batchStats.totalTime / 1000)).toFixed(2);
   }
@@ -506,23 +576,29 @@ export class MCPToolWrapper {
     try {
       // Phase 1: Critical initialization (sequential)
       const criticalOps = [
-        { tool: 'swarm_init', params: {
-          topology: config.topology || 'hierarchical',
-          maxAgents: config.maxAgents || 8,
-          strategy: 'auto',
-          swarmId
-        } }
+        {
+          tool: 'swarm_init',
+          params: {
+            topology: config.topology || 'hierarchical',
+            maxAgents: config.maxAgents || 8,
+            strategy: 'auto',
+            swarmId
+          }
+        }
       ];
 
       const [swarmInitResult] = await this.executeParallel(criticalOps);
 
       // Phase 2: Supporting services (parallel)
       const supportingOps = [
-        { tool: 'memory_namespace', params: {
-          action: 'create',
-          namespace: swarmId,
-          maxSize: config.memorySize || 100
-        } },
+        {
+          tool: 'memory_namespace',
+          params: {
+            action: 'create',
+            namespace: swarmId,
+            maxSize: config.memorySize || 100
+          }
+        },
         { tool: 'neural_status', params: {} },
         { tool: 'performance_report', params: { format: 'summary' } },
         { tool: 'features_detect', params: { component: 'swarm' } }
@@ -532,15 +608,19 @@ export class MCPToolWrapper {
 
       // Store initialization metadata
       const initTime = Date.now() - startTime;
-      await this.storeMemory(swarmId, 'init_performance', {
-        initTime,
-        topology: config.topology,
-        maxAgents: config.maxAgents,
-        timestamp: Date.now()
-      }, 'metrics');
+      await this.storeMemory(
+        swarmId,
+        'init_performance',
+        {
+          initTime,
+          topology: config.topology,
+          maxAgents: config.maxAgents,
+          timestamp: Date.now()
+        },
+        'metrics'
+      );
 
       return [swarmInitResult, ...supportingResults];
-
     } catch (error) {
       console.error('Swarm initialization failed:', error);
       throw error;
@@ -583,7 +663,6 @@ export class MCPToolWrapper {
       this._trackSpawnPerformance(types.length, spawnTime);
 
       return allResults;
-
     } catch (error) {
       console.error('Agent spawning failed:', error);
       throw error;
@@ -612,7 +691,9 @@ export class MCPToolWrapper {
         result.push(groupAgents);
         groupAgents.forEach(type => {
           const index = remaining.indexOf(type);
-          if (index > -1) {remaining.splice(index, 1);}
+          if (index > -1) {
+            remaining.splice(index, 1);
+          }
         });
       }
     });
@@ -805,10 +886,12 @@ export class MCPToolWrapper {
         // Fallback in-memory search
         for (const [memKey, memory] of this.memoryStore) {
           if (memory.namespace === swarmId) {
-            if (!pattern ||
-                memory.key.includes(pattern) ||
-                memory.value.includes(pattern) ||
-                memory.type.includes(pattern)) {
+            if (
+              !pattern ||
+              memory.key.includes(pattern) ||
+              memory.value.includes(pattern) ||
+              memory.type.includes(pattern)
+            ) {
               try {
                 results.push({
                   ...memory,
@@ -847,30 +930,41 @@ export class MCPToolWrapper {
     const complexity = metadata.complexity || 'medium';
 
     // Adjust monitoring frequency based on task complexity
-    const monitoringInterval = {
-      low: 10000,
-      medium: 5000,
-      high: 2000
-    }[complexity] || 5000;
+    const monitoringInterval =
+      {
+        low: 10000,
+        medium: 5000,
+        high: 2000
+      }[complexity] || 5000;
 
     const batch = [
-      { tool: 'task_orchestrate', params: {
-        task,
-        strategy,
-        taskId,
-        priority: metadata.priority || 5,
-        estimatedDuration: metadata.estimatedDuration || 30000
-      } },
-      { tool: 'swarm_monitor', params: {
-        interval: monitoringInterval,
-        taskId,
-        metrics: ['performance', 'progress', 'bottlenecks']
-      } },
+      {
+        tool: 'task_orchestrate',
+        params: {
+          task,
+          strategy,
+          taskId,
+          priority: metadata.priority || 5,
+          estimatedDuration: metadata.estimatedDuration || 30000
+        }
+      },
+      {
+        tool: 'swarm_monitor',
+        params: {
+          interval: monitoringInterval,
+          taskId,
+          metrics: ['performance', 'progress', 'bottlenecks']
+        }
+      },
       // Add performance tracking for high-priority tasks
-      ...(metadata.priority > 7 ? [{
-        tool: 'performance_report',
-        params: { format: 'detailed', taskId }
-      }] : [])
+      ...(metadata.priority > 7
+        ? [
+            {
+              tool: 'performance_report',
+              params: { format: 'detailed', taskId }
+            }
+          ]
+        : [])
     ];
 
     return await this.executeParallel(batch);
@@ -933,14 +1027,20 @@ export class MCPToolWrapper {
   async destroySwarm(swarmId) {
     const batch = [
       { tool: 'swarm_destroy', params: { swarmId } },
-      { tool: 'memory_namespace', params: {
-        action: 'delete',
-        namespace: swarmId
-      } },
-      { tool: 'cache_manage', params: {
-        action: 'clear',
-        key: `swarm-${swarmId}`
-      } }
+      {
+        tool: 'memory_namespace',
+        params: {
+          action: 'delete',
+          namespace: swarmId
+        }
+      },
+      {
+        tool: 'cache_manage',
+        params: {
+          action: 'clear',
+          key: `swarm-${swarmId}`
+        }
+      }
     ];
 
     return await this.executeParallel(batch);

@@ -24,24 +24,30 @@ describe('Debug Mode Batch Integration Tests', () => {
       ];
 
       // Add files with various issues
-      harness.mockFS.set('src/buggy1.ts', `function test() {
+      harness.mockFS.set(
+        'src/buggy1.ts',
+        `function test() {
         const x = 1
         console.log(x  // Missing closing parenthesis
-      }`);
-      
-      harness.mockFS.set('src/buggy2.ts', `export function calculate(a: number, b: string) {
+      }`
+      );
+
+      harness.mockFS.set(
+        'src/buggy2.ts',
+        `export function calculate(a: number, b: string) {
         return a + b; // Type error
-      }`);
-      
+      }`
+      );
+
       harness.mockFS.set('src/buggy3.ts', `const password = "admin123"; // Security issue`);
 
-      const diagnostics = await harness.executeBatch(diagnosticTypes, async (diagnostic) => {
+      const diagnostics = await harness.executeBatch(diagnosticTypes, async diagnostic => {
         const files = Array.from(harness.mockFS.keys()).filter(f => f.endsWith('.ts'));
         const issues = [];
-        
+
         for (const file of files) {
           const content = await harness.mockReadFile(file);
-          
+
           if (diagnostic.type === 'syntax' && content.includes('console.log(x')) {
             issues.push({
               file,
@@ -50,7 +56,7 @@ describe('Debug Mode Batch Integration Tests', () => {
               severity: 'error'
             });
           }
-          
+
           if (diagnostic.type === 'type-checking' && content.includes('a + b')) {
             issues.push({
               file,
@@ -59,7 +65,7 @@ describe('Debug Mode Batch Integration Tests', () => {
               severity: 'error'
             });
           }
-          
+
           if (diagnostic.type === 'security' && content.includes('password =')) {
             issues.push({
               file,
@@ -69,7 +75,7 @@ describe('Debug Mode Batch Integration Tests', () => {
             });
           }
         }
-        
+
         return {
           diagnostic: diagnostic.type,
           issueCount: issues.length,
@@ -102,41 +108,42 @@ describe('Debug Mode Batch Integration Tests', () => {
           return fs.readSync(file);
         }`
       };
-      
+
       Object.entries(errorPatterns).forEach(([path, content]) => {
         harness.mockFS.set(path, content);
       });
-      
-      const patternAnalysis = await harness.executeBatch(
-        Object.keys(errorPatterns),
-        async (file) => {
-          const content = await harness.mockReadFile(file);
-          const patterns = [];
-          
-          if (content.includes('.value.') || content.includes('[index].')) {
-            patterns.push({ type: 'null-reference', confidence: 0.9 });
-          }
-          if (content.includes('await') && !content.includes('try')) {
-            patterns.push({ type: 'unhandled-promise', confidence: 0.8 });
-          }
-          if (content.includes('openSync') && !content.includes('closeSync')) {
-            patterns.push({ type: 'resource-leak', confidence: 0.95 });
-          }
-          
-          return {
-            file,
-            patterns,
-            riskLevel: patterns.length > 0 ? 'high' : 'low',
-            suggestions: patterns.map(p => ({
-              pattern: p.type,
-              fix: `Add ${p.type === 'null-reference' ? 'null checks' : 
-                       p.type === 'unhandled-promise' ? 'try-catch blocks' : 
-                       'proper resource cleanup'}`
-            }))
-          };
+
+      const patternAnalysis = await harness.executeBatch(Object.keys(errorPatterns), async file => {
+        const content = await harness.mockReadFile(file);
+        const patterns = [];
+
+        if (content.includes('.value.') || content.includes('[index].')) {
+          patterns.push({ type: 'null-reference', confidence: 0.9 });
         }
-      );
-      
+        if (content.includes('await') && !content.includes('try')) {
+          patterns.push({ type: 'unhandled-promise', confidence: 0.8 });
+        }
+        if (content.includes('openSync') && !content.includes('closeSync')) {
+          patterns.push({ type: 'resource-leak', confidence: 0.95 });
+        }
+
+        return {
+          file,
+          patterns,
+          riskLevel: patterns.length > 0 ? 'high' : 'low',
+          suggestions: patterns.map(p => ({
+            pattern: p.type,
+            fix: `Add ${
+              p.type === 'null-reference'
+                ? 'null checks'
+                : p.type === 'unhandled-promise'
+                  ? 'try-catch blocks'
+                  : 'proper resource cleanup'
+            }`
+          }))
+        };
+      });
+
       assert.strictEqual(patternAnalysis.successful.length, 4);
       const highRiskFiles = patternAnalysis.successful.filter(r => r.riskLevel === 'high');
       assert(highRiskFiles.length >= 3);
@@ -168,23 +175,26 @@ describe('Debug Mode Batch Integration Tests', () => {
     at App.setupServices (src/app.ts:45:30)`
         }
       ];
-      
-      const traceAnalysis = await harness.executeBatch(stackTraces, async (error) => {
+
+      const traceAnalysis = await harness.executeBatch(stackTraces, async error => {
         const lines = error.trace.split('\n');
         const errorType = lines[0].split(':')[0];
-        const stackFrames = lines.slice(1).map(line => {
-          const match = line.match(/at (.+) \((.+):(\d+):(\d+)\)/);
-          if (match) {
-            return {
-              function: match[1],
-              file: match[2],
-              line: parseInt(match[3]),
-              column: parseInt(match[4])
-            };
-          }
-          return null;
-        }).filter(Boolean);
-        
+        const stackFrames = lines
+          .slice(1)
+          .map(line => {
+            const match = line.match(/at (.+) \((.+):(\d+):(\d+)\)/);
+            if (match) {
+              return {
+                function: match[1],
+                file: match[2],
+                line: parseInt(match[3]),
+                column: parseInt(match[4])
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
+
         return {
           errorId: error.id,
           errorType,
@@ -194,12 +204,16 @@ describe('Debug Mode Batch Integration Tests', () => {
           analysis: {
             isUserCode: stackFrames[0].file.startsWith('src/'),
             depth: stackFrames.length,
-            pattern: errorType === 'TypeError' ? 'null-safety' : 
-                    errorType === 'ReferenceError' ? 'undefined-variable' : 'runtime'
+            pattern:
+              errorType === 'TypeError'
+                ? 'null-safety'
+                : errorType === 'ReferenceError'
+                  ? 'undefined-variable'
+                  : 'runtime'
           }
         };
       });
-      
+
       assert.strictEqual(traceAnalysis.successful.length, 3);
       assert(traceAnalysis.successful.every(r => r.callStack.length > 0));
       assert(traceAnalysis.successful.some(r => r.analysis.pattern === 'null-safety'));
@@ -219,44 +233,39 @@ describe('Debug Mode Batch Integration Tests', () => {
 ERROR: Database connection issues recurring
 WARNING: High memory usage detected`
       };
-      
+
       Object.entries(logFiles).forEach(([path, content]) => {
         harness.mockFS.set(path, content);
       });
-      
-      const logAnalysis = await harness.executeBatch(
-        Object.keys(logFiles),
-        async (logFile) => {
-          const content = await harness.mockReadFile(logFile);
-          const lines = content.split('\n');
-          
-          const errors = lines.filter(line => line.includes('ERROR'));
-          const warnings = lines.filter(line => line.includes('WARN'));
-          
-          // Extract error patterns
-          const patterns = {};
-          errors.forEach(error => {
-            const match = error.match(/ERROR (\w+)/);
-            if (match) {
-              patterns[match[1]] = (patterns[match[1]] || 0) + 1;
-            }
-          });
-          
-          return {
-            file: logFile,
-            errorCount: errors.length,
-            warningCount: warnings.length,
-            patterns,
-            topIssue: Object.entries(patterns)
-              .sort(([,a], [,b]) => b - a)[0]?.[0] || 'none',
-            timeRange: logFile.includes('2024') ? 
-              logFile.match(/\d{4}-\d{2}-\d{2}/)[0] : 'ongoing'
-          };
-        }
-      );
-      
+
+      const logAnalysis = await harness.executeBatch(Object.keys(logFiles), async logFile => {
+        const content = await harness.mockReadFile(logFile);
+        const lines = content.split('\n');
+
+        const errors = lines.filter(line => line.includes('ERROR'));
+        const warnings = lines.filter(line => line.includes('WARN'));
+
+        // Extract error patterns
+        const patterns = {};
+        errors.forEach(error => {
+          const match = error.match(/ERROR (\w+)/);
+          if (match) {
+            patterns[match[1]] = (patterns[match[1]] || 0) + 1;
+          }
+        });
+
+        return {
+          file: logFile,
+          errorCount: errors.length,
+          warningCount: warnings.length,
+          patterns,
+          topIssue: Object.entries(patterns).sort(([, a], [, b]) => b - a)[0]?.[0] || 'none',
+          timeRange: logFile.includes('2024') ? logFile.match(/\d{4}-\d{2}-\d{2}/)[0] : 'ongoing'
+        };
+      });
+
       assert.strictEqual(logAnalysis.successful.length, 3);
-      
+
       // Aggregate patterns across all logs
       const allPatterns = {};
       logAnalysis.successful.forEach(log => {
@@ -264,7 +273,7 @@ WARNING: High memory usage detected`
           allPatterns[pattern] = (allPatterns[pattern] || 0) + count;
         });
       });
-      
+
       assert(allPatterns.UserService >= 3);
       assert(allPatterns.Database >= 2);
     });
@@ -278,26 +287,28 @@ WARNING: High memory usage detected`
         { function: 'processStrings', iterations: 2000 },
         { function: 'recursiveTraversal', iterations: 100 }
       ];
-      
-      const profiling = await harness.executeBatch(profilingTargets, async (target) => {
+
+      const profiling = await harness.executeBatch(profilingTargets, async target => {
         const measurements = [];
-        
+
         // Simulate profiling runs
         for (let i = 0; i < 5; i++) {
           const startTime = performance.now();
           await harness.simulateDelay(Math.random() * 50 + 10);
           const endTime = performance.now();
-          
+
           measurements.push({
             run: i + 1,
             duration: endTime - startTime,
             memoryUsage: Math.random() * 1000000 + 500000 // bytes
           });
         }
-        
-        const avgDuration = measurements.reduce((sum, m) => sum + m.duration, 0) / measurements.length;
-        const avgMemory = measurements.reduce((sum, m) => sum + m.memoryUsage, 0) / measurements.length;
-        
+
+        const avgDuration =
+          measurements.reduce((sum, m) => sum + m.duration, 0) / measurements.length;
+        const avgMemory =
+          measurements.reduce((sum, m) => sum + m.memoryUsage, 0) / measurements.length;
+
         return {
           function: target.function,
           iterations: target.iterations,
@@ -310,7 +321,7 @@ WARNING: High memory usage detected`
           bottleneck: avgDuration > 40 ? 'CPU' : 'none'
         };
       });
-      
+
       assert.strictEqual(profiling.successful.length, 4);
       assert(profiling.successful.every(r => r.measurements.length === 5));
       assert(profiling.successful.some(r => r.bottleneck === 'CPU'));
@@ -323,33 +334,33 @@ WARNING: High memory usage detected`
         { name: 'ConnectionPool', type: 'infrastructure' },
         { name: 'RequestHandler', type: 'middleware' }
       ];
-      
-      const memoryAnalysis = await harness.executeBatch(components, async (component) => {
+
+      const memoryAnalysis = await harness.executeBatch(components, async component => {
         const memorySnapshots = [];
-        
+
         // Simulate memory growth over time
         for (let i = 0; i < 10; i++) {
           await harness.simulateDelay(20);
           const baseMemory = 1000000; // 1MB base
           let growth = 0;
-          
+
           // Some components have memory leaks
           if (component.name === 'EventEmitter' || component.name === 'ConnectionPool') {
             growth = i * 50000; // 50KB per iteration
           }
-          
+
           memorySnapshots.push({
             iteration: i,
             heapUsed: baseMemory + growth + Math.random() * 10000,
             external: 500000 + Math.random() * 50000
           });
         }
-        
+
         // Analyze memory trend
         const firstSnapshot = memorySnapshots[0].heapUsed;
         const lastSnapshot = memorySnapshots[memorySnapshots.length - 1].heapUsed;
         const growthRate = (lastSnapshot - firstSnapshot) / firstSnapshot;
-        
+
         return {
           component: component.name,
           type: component.type,
@@ -363,7 +374,7 @@ WARNING: High memory usage detected`
           }
         };
       });
-      
+
       assert.strictEqual(memoryAnalysis.successful.length, 4);
       const leaks = memoryAnalysis.successful.filter(r => r.analysis.hasLeak);
       assert(leaks.length >= 2);
@@ -379,16 +390,16 @@ WARNING: High memory usage detected`
         { file: 'src/utils/validation.ts', lines: [10, 20, 30] },
         { file: 'src/models/user.model.ts', lines: [5, 15] }
       ];
-      
-      const breakpointSetting = await harness.executeBatch(breakpointRequests, async (request) => {
+
+      const breakpointSetting = await harness.executeBatch(breakpointRequests, async request => {
         const content = await harness.mockReadFile(request.file);
         const lines = content.split('\n');
-        
+
         const validBreakpoints = request.lines.filter(line => {
           // Simulate checking if line is valid for breakpoint
           return line <= lines.length && lines[line - 1]?.trim().length > 0;
         });
-        
+
         return {
           file: request.file,
           requested: request.lines.length,
@@ -402,7 +413,7 @@ WARNING: High memory usage detected`
           failed: request.lines.length - validBreakpoints.length
         };
       });
-      
+
       assert.strictEqual(breakpointSetting.successful.length, 4);
       const totalBreakpoints = breakpointSetting.successful.reduce((sum, r) => sum + r.set, 0);
       assert(totalBreakpoints >= 10);
@@ -416,11 +427,11 @@ WARNING: High memory usage detected`
         { expression: 'Math.max(a, b)', context: { a: 10, b: 20 } },
         { expression: 'error.message', context: { error: null } }
       ];
-      
-      const evaluations = await harness.executeBatch(watchExpressions, async (watch) => {
+
+      const evaluations = await harness.executeBatch(watchExpressions, async watch => {
         try {
           // Simulate expression evaluation
-          const result = await new Promise((resolve) => {
+          const result = await new Promise(resolve => {
             setTimeout(() => {
               if (watch.expression === 'user.name') resolve('John');
               else if (watch.expression === 'items.length') resolve(5);
@@ -429,7 +440,7 @@ WARNING: High memory usage detected`
               else if (watch.expression === 'error.message') resolve(undefined);
             }, 30);
           });
-          
+
           return {
             expression: watch.expression,
             value: result,
@@ -445,7 +456,7 @@ WARNING: High memory usage detected`
           };
         }
       });
-      
+
       assert.strictEqual(evaluations.successful.length, 5);
       assert.strictEqual(evaluations.successful[0].value, 'John');
       assert.strictEqual(evaluations.successful[1].value, 5);
@@ -460,30 +471,30 @@ WARNING: High memory usage detected`
         type: i % 3 === 0 ? 'stackTrace' : i % 3 === 1 ? 'variables' : 'evaluate',
         complexity: Math.random() > 0.5 ? 'high' : 'low'
       }));
-      
+
       // Sequential simulation
       harness.concurrencyLimit = 1;
       const sequentialStart = Date.now();
-      await harness.executeBatch(debugOperations, async (op) => {
+      await harness.executeBatch(debugOperations, async op => {
         const delay = op.complexity === 'high' ? 100 : 50;
         await harness.simulateDelay(delay);
         return { operation: op.id, completed: true };
       });
       const sequentialTime = Date.now() - sequentialStart;
-      
+
       // Parallel execution
       harness.concurrencyLimit = 5;
       const parallelStart = Date.now();
-      await harness.executeBatch(debugOperations, async (op) => {
+      await harness.executeBatch(debugOperations, async op => {
         const delay = op.complexity === 'high' ? 100 : 50;
         await harness.simulateDelay(delay);
         return { operation: op.id, completed: true };
       });
       const parallelTime = Date.now() - parallelStart;
-      
+
       const speedup = sequentialTime / parallelTime;
       assert(speedup > 3, `Expected speedup > 3x, got ${speedup.toFixed(2)}x`);
-      
+
       console.log(`Debug operations speedup: ${speedup.toFixed(2)}x`);
     });
   });

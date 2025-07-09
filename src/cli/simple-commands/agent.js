@@ -5,40 +5,40 @@ export async function agentCommand(subArgs, flags) {
   const agentCmd = subArgs[0];
 
   switch (agentCmd) {
-  case 'spawn':
-    await spawnAgent(subArgs, flags);
-    break;
+    case 'spawn':
+      await spawnAgent(subArgs, flags);
+      break;
 
-  case 'list':
-    await listAgents(subArgs, flags);
-    break;
+    case 'list':
+      await listAgents(subArgs, flags);
+      break;
 
-  case 'hierarchy':
-    await manageHierarchy(subArgs, flags);
-    break;
+    case 'hierarchy':
+      await manageHierarchy(subArgs, flags);
+      break;
 
-  case 'network':
-    await manageNetwork(subArgs, flags);
-    break;
+    case 'network':
+      await manageNetwork(subArgs, flags);
+      break;
 
-  case 'ecosystem':
-    await manageEcosystem(subArgs, flags);
-    break;
+    case 'ecosystem':
+      await manageEcosystem(subArgs, flags);
+      break;
 
-  case 'provision':
-    await provisionAgent(subArgs, flags);
-    break;
+    case 'provision':
+      await provisionAgent(subArgs, flags);
+      break;
 
-  case 'terminate':
-    await terminateAgent(subArgs, flags);
-    break;
+    case 'terminate':
+      await terminateAgent(subArgs, flags);
+      break;
 
-  case 'info':
-    await showAgentInfo(subArgs, flags);
-    break;
+    case 'info':
+      await showAgentInfo(subArgs, flags);
+      break;
 
-  default:
-    showAgentHelp();
+    default:
+      showAgentHelp();
   }
 }
 
@@ -68,25 +68,25 @@ async function manageHierarchy(subArgs, flags) {
   const hierarchyCmd = subArgs[1];
 
   switch (hierarchyCmd) {
-  case 'create':
-    const hierarchyType = subArgs[2] || 'basic';
-    printSuccess(`Creating ${hierarchyType} agent hierarchy`);
-    console.log('🏗️  Hierarchy structure would include:');
-    console.log('   - Coordinator Agent (manages workflow)');
-    console.log('   - Specialist Agents (domain-specific tasks)');
-    console.log('   - Worker Agents (execution tasks)');
-    break;
+    case 'create':
+      const hierarchyType = subArgs[2] || 'basic';
+      printSuccess(`Creating ${hierarchyType} agent hierarchy`);
+      console.log('🏗️  Hierarchy structure would include:');
+      console.log('   - Coordinator Agent (manages workflow)');
+      console.log('   - Specialist Agents (domain-specific tasks)');
+      console.log('   - Worker Agents (execution tasks)');
+      break;
 
-  case 'show':
-    printSuccess('Current agent hierarchy:');
-    console.log('📊 No hierarchy configured (orchestrator not running)');
-    break;
+    case 'show':
+      printSuccess('Current agent hierarchy:');
+      console.log('📊 No hierarchy configured (orchestrator not running)');
+      break;
 
-  default:
-    console.log('Hierarchy commands: create, show');
-    console.log('Examples:');
-    console.log('  claude-flow agent hierarchy create enterprise');
-    console.log('  claude-flow agent hierarchy show');
+    default:
+      console.log('Hierarchy commands: create, show');
+      console.log('Examples:');
+      console.log('  claude-flow agent hierarchy create enterprise');
+      console.log('  claude-flow agent hierarchy show');
   }
 }
 
@@ -94,18 +94,18 @@ async function manageNetwork(subArgs, flags) {
   const networkCmd = subArgs[1];
 
   switch (networkCmd) {
-  case 'topology':
-    printSuccess('Agent network topology:');
-    console.log('🌐 Network visualization would show agent connections');
-    break;
+    case 'topology':
+      printSuccess('Agent network topology:');
+      console.log('🌐 Network visualization would show agent connections');
+      break;
 
-  case 'metrics':
-    printSuccess('Network performance metrics:');
-    console.log('📈 Communication latency, throughput, reliability stats');
-    break;
+    case 'metrics':
+      printSuccess('Network performance metrics:');
+      console.log('📈 Communication latency, throughput, reliability stats');
+      break;
 
-  default:
-    console.log('Network commands: topology, metrics');
+    default:
+      console.log('Network commands: topology, metrics');
   }
 }
 
@@ -113,24 +113,24 @@ async function manageEcosystem(subArgs, flags) {
   const ecosystemCmd = subArgs[1];
 
   switch (ecosystemCmd) {
-  case 'status':
-    printSuccess('Agent ecosystem status:');
-    console.log('🌱 Ecosystem health: Not running');
-    console.log('   Active Agents: 0');
-    console.log('   Resource Usage: 0%');
-    console.log('   Task Queue: Empty');
-    break;
+    case 'status':
+      printSuccess('Agent ecosystem status:');
+      console.log('🌱 Ecosystem health: Not running');
+      console.log('   Active Agents: 0');
+      console.log('   Resource Usage: 0%');
+      console.log('   Task Queue: Empty');
+      break;
 
-  case 'optimize':
-    printSuccess('Optimizing agent ecosystem...');
-    console.log('⚡ Optimization would include:');
-    console.log('   - Load balancing across agents');
-    console.log('   - Resource allocation optimization');
-    console.log('   - Communication path optimization');
-    break;
+    case 'optimize':
+      printSuccess('Optimizing agent ecosystem...');
+      console.log('⚡ Optimization would include:');
+      console.log('   - Load balancing across agents');
+      console.log('   - Resource allocation optimization');
+      console.log('   - Communication path optimization');
+      break;
 
-  default:
-    console.log('Ecosystem commands: status, optimize');
+    default:
+      console.log('Ecosystem commands: status, optimize');
   }
 }
 

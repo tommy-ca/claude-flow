@@ -30,11 +30,13 @@ This test suite validates the batch operation optimizations implemented in the S
 ## Running Tests
 
 ### Run All Tests
+
 ```bash
 npm test .claude/tests
 ```
 
 ### Run Specific Test Categories
+
 ```bash
 # Unit tests only
 npm test .claude/tests/unit
@@ -53,6 +55,7 @@ npm test .claude/tests/e2e
 ```
 
 ### Run Individual Test Files
+
 ```bash
 npm test .claude/tests/unit/batch-operations.test.js
 ```
@@ -60,14 +63,18 @@ npm test .claude/tests/unit/batch-operations.test.js
 ## Test Categories
 
 ### 1. Unit Tests
+
 Test individual batch operation functions in isolation:
+
 - Parallel file operations
 - Concurrent search functionality
 - Batch task execution
 - Resource pooling
 
 ### 2. Integration Tests
+
 Test SPARC modes with batch operations:
+
 - Architect mode with parallel analysis
 - Code mode with concurrent file generation
 - TDD mode with batch test execution
@@ -75,21 +82,27 @@ Test SPARC modes with batch operations:
 - Security mode with concurrent vulnerability scanning
 
 ### 3. Performance Tests
+
 Measure and validate performance improvements:
+
 - Operation throughput benchmarks
 - Response time measurements
 - Resource utilization metrics
 - Scalability tests
 
 ### 4. Error Handling Tests
+
 Verify robust error handling in batch operations:
+
 - Partial failure scenarios
 - Rollback mechanisms
 - Error propagation
 - Recovery strategies
 
 ### 5. End-to-End Tests
+
 Test complete workflows using batch operations:
+
 - Multi-mode SPARC workflows
 - Real-world project scenarios
 - Cross-mode parallel execution
@@ -98,6 +111,7 @@ Test complete workflows using batch operations:
 ## Test Utilities
 
 The `test-harness.js` file provides:
+
 - Mock file system for safe testing
 - Performance measurement utilities
 - Batch operation simulators
@@ -107,6 +121,7 @@ The `test-harness.js` file provides:
 ## Performance Baselines
 
 Expected performance improvements from batch operations:
+
 - File operations: 3-5x faster with parallel execution
 - Search operations: 2-4x faster with concurrent searches
 - Multi-mode execution: 2-3x faster with parallel mode execution
@@ -115,6 +130,7 @@ Expected performance improvements from batch operations:
 ## Mock Data
 
 Tests use realistic mock data including:
+
 - Sample project structures
 - Code repositories
 - Test suites
@@ -124,6 +140,7 @@ Tests use realistic mock data including:
 ## Continuous Integration
 
 These tests should be run:
+
 - On every pull request
 - Before releases
 - During nightly builds
@@ -132,6 +149,7 @@ These tests should be run:
 ## Contributing
 
 When adding new batch operations:
+
 1. Add unit tests for the operation
 2. Add integration tests for affected SPARC modes
 3. Add performance benchmarks

@@ -23,10 +23,12 @@ class WorkflowAutomationView {
    * Initialize the workflow & automation view
    */
   async initialize() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     // Get component library from event bus
-    this.eventBus.emit('component-library:get', (library) => {
+    this.eventBus.emit('component-library:get', library => {
       this.componentLibrary = library;
     });
 
@@ -736,19 +738,18 @@ npm run lint</textarea>
 
       // Handle specific tool actions
       switch (toolName) {
-      case 'workflow_create':
-        await this.handleWorkflowCreate(params);
-        break;
-      case 'automation_setup':
-        await this.handleAutomationSetup(params);
-        break;
-      case 'sparc_mode':
-        await this.handleSparcMode(params);
-        break;
-      default:
-        console.log(`Tool ${toolName} executed`);
+        case 'workflow_create':
+          await this.handleWorkflowCreate(params);
+          break;
+        case 'automation_setup':
+          await this.handleAutomationSetup(params);
+          break;
+        case 'sparc_mode':
+          await this.handleSparcMode(params);
+          break;
+        default:
+          console.log(`Tool ${toolName} executed`);
       }
-
     } catch (error) {
       console.error(`❌ Error executing ${toolName}:`, error);
     }
@@ -881,7 +882,9 @@ npm run lint</textarea>
    * Initialize drag and drop for workflow builder
    */
   initializeDragDrop() {
-    if (!this.container) {return;}
+    if (!this.container) {
+      return;
+    }
 
     // Setup draggable components
     const draggables = this.container.querySelectorAll('.draggable-component');
@@ -938,7 +941,9 @@ npm run lint</textarea>
    */
   addWorkflowComponent(type, event) {
     const canvas = document.getElementById('workflow-canvas');
-    if (!canvas) {return;}
+    if (!canvas) {
+      return;
+    }
 
     const component = document.createElement('div');
     component.className = 'workflow-component';
@@ -977,7 +982,9 @@ npm run lint</textarea>
     const modeSelect = document.getElementById('sparc-mode');
     const descriptionEl = document.getElementById('sparc-description');
 
-    if (!modeSelect || !descriptionEl) {return;}
+    if (!modeSelect || !descriptionEl) {
+      return;
+    }
 
     const descriptions = {
       architect: '🏗️ Design system architecture and create technical specifications',
@@ -1006,7 +1013,7 @@ npm run lint</textarea>
    */
   setupEventHandlers() {
     // Listen for tool results
-    this.eventBus.on('tool:executed', (data) => {
+    this.eventBus.on('tool:executed', data => {
       if (data.source === 'workflow-view') {
         this.handleToolResult(data);
       }
@@ -1018,7 +1025,7 @@ npm run lint</textarea>
     });
 
     // Listen for theme changes
-    this.eventBus.on('ui:theme:changed', (theme) => {
+    this.eventBus.on('ui:theme:changed', theme => {
       this.updateTheme(theme);
     });
 
@@ -1065,28 +1072,36 @@ npm run lint</textarea>
     const workflowsStatEl = document.getElementById('workflows-stat');
     if (workflowsStatEl) {
       const valueEl = workflowsStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.workflows.size;}
+      if (valueEl) {
+        valueEl.textContent = this.workflows.size;
+      }
     }
 
     // Update pipeline count
     const pipelinesStatEl = document.getElementById('pipelines-stat');
     if (pipelinesStatEl) {
       const valueEl = pipelinesStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.pipelines.size;}
+      if (valueEl) {
+        valueEl.textContent = this.pipelines.size;
+      }
     }
 
     // Update automation rules count
     const rulesStatEl = document.getElementById('rules-stat');
     if (rulesStatEl) {
       const valueEl = rulesStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.automationRules.size;}
+      if (valueEl) {
+        valueEl.textContent = this.automationRules.size;
+      }
     }
 
     // Update scheduled tasks count
     const scheduledStatEl = document.getElementById('scheduled-stat');
     if (scheduledStatEl) {
       const valueEl = scheduledStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.scheduledTasks.size;}
+      if (valueEl) {
+        valueEl.textContent = this.scheduledTasks.size;
+      }
     }
   }
 

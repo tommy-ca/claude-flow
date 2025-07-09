@@ -84,14 +84,17 @@ router.get('/performance-report', (req, res) => {
   try {
     const now = Date.now();
     const uptime = now - performanceMetrics.startTime;
-    const avgResponseTime = performanceMetrics.responseTime.length > 0
-      ? performanceMetrics.responseTime.reduce((a, b) => a + b, 0) / performanceMetrics.responseTime.length
-      : 0;
+    const avgResponseTime =
+      performanceMetrics.responseTime.length > 0
+        ? performanceMetrics.responseTime.reduce((a, b) => a + b, 0) /
+          performanceMetrics.responseTime.length
+        : 0;
 
     const throughput = performanceMetrics.requestCount / (uptime / 1000 / 60); // requests per minute
-    const errorRate = performanceMetrics.requestCount > 0
-      ? (performanceMetrics.errorCount / performanceMetrics.requestCount) * 100
-      : 0;
+    const errorRate =
+      performanceMetrics.requestCount > 0
+        ? (performanceMetrics.errorCount / performanceMetrics.requestCount) * 100
+        : 0;
 
     const report = {
       timestamp: now,
@@ -327,22 +330,26 @@ router.ws('/ws', (ws, req) => {
   console.log('Analysis WebSocket connected');
 
   // Send initial metrics
-  ws.send(JSON.stringify({
-    type: 'metrics_update',
-    payload: getCurrentMetrics()
-  }));
+  ws.send(
+    JSON.stringify({
+      type: 'metrics_update',
+      payload: getCurrentMetrics()
+    })
+  );
 
   // Set up periodic updates
   const interval = setInterval(() => {
     if (ws.readyState === ws.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'metrics_update',
-        payload: getCurrentMetrics()
-      }));
+      ws.send(
+        JSON.stringify({
+          type: 'metrics_update',
+          payload: getCurrentMetrics()
+        })
+      );
     }
   }, 5000);
 
-  ws.on('message', (message) => {
+  ws.on('message', message => {
     try {
       const data = JSON.parse(message);
       handleWebSocketMessage(ws, data);
@@ -365,9 +372,15 @@ function formatUptime(milliseconds) {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
 
-  if (days > 0) {return `${days}d ${hours % 24}h`;}
-  if (hours > 0) {return `${hours}h ${minutes % 60}m`;}
-  if (minutes > 0) {return `${minutes}m ${seconds % 60}s`;}
+  if (days > 0) {
+    return `${days}d ${hours % 24}h`;
+  }
+  if (hours > 0) {
+    return `${hours}h ${minutes % 60}m`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${seconds % 60}s`;
+  }
   return `${seconds}s`;
 }
 
@@ -399,7 +412,7 @@ function generatePerformanceRecommendations(avgResponseTime, throughput, errorRa
 function analyzeBottlenecks() {
   const bottlenecks = [];
   const cpuUsage = os.loadavg()[0];
-  const memoryUsage = (os.totalmem() - os.freemem()) / os.totalmem() * 100;
+  const memoryUsage = ((os.totalmem() - os.freemem()) / os.totalmem()) * 100;
 
   if (cpuUsage > 0.8) {
     bottlenecks.push({
@@ -421,9 +434,11 @@ function analyzeBottlenecks() {
     });
   }
 
-  const avgResponseTime = performanceMetrics.responseTime.length > 0
-    ? performanceMetrics.responseTime.reduce((a, b) => a + b, 0) / performanceMetrics.responseTime.length
-    : 0;
+  const avgResponseTime =
+    performanceMetrics.responseTime.length > 0
+      ? performanceMetrics.responseTime.reduce((a, b) => a + b, 0) /
+        performanceMetrics.responseTime.length
+      : 0;
 
   if (avgResponseTime > 500) {
     bottlenecks.push({
@@ -443,15 +458,15 @@ function generateBottleneckRecommendations(bottlenecks) {
 
   bottlenecks.forEach(bottleneck => {
     switch (bottleneck.component) {
-    case 'CPU':
-      recommendations.push('Consider upgrading CPU or optimizing CPU-intensive operations');
-      break;
-    case 'Memory':
-      recommendations.push('Implement memory optimization or increase available RAM');
-      break;
-    case 'API Response':
-      recommendations.push('Optimize API endpoints and implement caching');
-      break;
+      case 'CPU':
+        recommendations.push('Consider upgrading CPU or optimizing CPU-intensive operations');
+        break;
+      case 'Memory':
+        recommendations.push('Implement memory optimization or increase available RAM');
+        break;
+      case 'API Response':
+        recommendations.push('Optimize API endpoints and implement caching');
+        break;
     }
   });
 
@@ -467,7 +482,7 @@ function calculateTokenUsage() {
     cachedTokens: Math.floor(Math.random() * 100000) + 50000
   };
 
-  baseUsage.cost = (baseUsage.totalTokens * 0.0001);
+  baseUsage.cost = baseUsage.totalTokens * 0.0001;
   return baseUsage;
 }
 
@@ -522,7 +537,7 @@ function collectSystemMetrics() {
     memory: {
       total: os.totalmem(),
       free: os.freemem(),
-      usage: (os.totalmem() - os.freemem()) / os.totalmem() * 100
+      usage: ((os.totalmem() - os.freemem()) / os.totalmem()) * 100
     },
     cpu: {
       count: os.cpus().length,
@@ -537,7 +552,7 @@ function collectSystemMetrics() {
 }
 
 function performHealthCheck() {
-  const memoryUsage = (os.totalmem() - os.freemem()) / os.totalmem() * 100;
+  const memoryUsage = ((os.totalmem() - os.freemem()) / os.totalmem()) * 100;
   const cpuUsage = os.loadavg()[0] * 100;
 
   return {
@@ -566,14 +581,18 @@ function monitorLoad() {
 }
 
 function getCurrentMetrics() {
-  const avgResponseTime = performanceMetrics.responseTime.length > 0
-    ? performanceMetrics.responseTime.reduce((a, b) => a + b, 0) / performanceMetrics.responseTime.length
-    : 0;
+  const avgResponseTime =
+    performanceMetrics.responseTime.length > 0
+      ? performanceMetrics.responseTime.reduce((a, b) => a + b, 0) /
+        performanceMetrics.responseTime.length
+      : 0;
 
-  const throughput = performanceMetrics.requestCount / ((Date.now() - performanceMetrics.startTime) / 1000);
-  const errorRate = performanceMetrics.requestCount > 0
-    ? (performanceMetrics.errorCount / performanceMetrics.requestCount) * 100
-    : 0;
+  const throughput =
+    performanceMetrics.requestCount / ((Date.now() - performanceMetrics.startTime) / 1000);
+  const errorRate =
+    performanceMetrics.requestCount > 0
+      ? (performanceMetrics.errorCount / performanceMetrics.requestCount) * 100
+      : 0;
 
   const uptime = Date.now() - performanceMetrics.startTime;
   const tokenUsage = calculateTokenUsage();
@@ -595,14 +614,16 @@ function getCurrentMetrics() {
 
 function handleWebSocketMessage(ws, data) {
   switch (data.type) {
-  case 'request_metrics':
-    ws.send(JSON.stringify({
-      type: 'metrics_update',
-      payload: getCurrentMetrics()
-    }));
-    break;
-  default:
-    console.log('Unknown WebSocket message type:', data.type);
+    case 'request_metrics':
+      ws.send(
+        JSON.stringify({
+          type: 'metrics_update',
+          payload: getCurrentMetrics()
+        })
+      );
+      break;
+    default:
+      console.log('Unknown WebSocket message type:', data.type);
   }
 }
 
@@ -662,7 +683,7 @@ function generateBenchmarkComparisons(benchmarks) {
     name: value.name,
     current: value.score,
     baseline: value.baseline,
-    improvement: ((value.score - value.baseline) / value.baseline * 100).toFixed(1)
+    improvement: (((value.score - value.baseline) / value.baseline) * 100).toFixed(1)
   }));
 }
 
@@ -727,13 +748,13 @@ function generateTrendInsights(trends) {
 function analyzeCosts() {
   return {
     current: {
-      compute: 125.50,
-      storage: 45.20,
-      network: 23.10,
-      tokens: 89.40
+      compute: 125.5,
+      storage: 45.2,
+      network: 23.1,
+      tokens: 89.4
     },
     previous: {
-      compute: 118.30,
+      compute: 118.3,
       storage: 42.15,
       network: 21.85,
       tokens: 76.25
@@ -856,9 +877,15 @@ function calculateOverallHealth(health) {
   const scores = Object.values(health);
   const average = scores.reduce((a, b) => a + b, 0) / scores.length;
 
-  if (average >= 90) {return 'excellent';}
-  if (average >= 70) {return 'good';}
-  if (average >= 50) {return 'warning';}
+  if (average >= 90) {
+    return 'excellent';
+  }
+  if (average >= 70) {
+    return 'good';
+  }
+  if (average >= 50) {
+    return 'warning';
+  }
   return 'critical';
 }
 

@@ -22,7 +22,7 @@ export enum LogLevel {
   DEBUG = 0,
   INFO = 1,
   WARN = 2,
-  ERROR = 3,
+  ERROR = 3
 }
 
 interface LogEntry {
@@ -50,15 +50,15 @@ export class Logger implements ILogger {
     config: LoggingConfig = {
       level: 'info',
       format: 'json',
-      destination: 'console',
+      destination: 'console'
     },
-    context: Record<string, unknown> = {},
+    context: Record<string, unknown> = {}
   ) {
     // Validate file path if file destination
     if ((config.destination === 'file' || config.destination === 'both') && !config.filePath) {
       throw new Error('File path required for file logging');
     }
-    
+
     this.config = config;
     this.context = context;
   }
@@ -77,7 +77,7 @@ export class Logger implements ILogger {
         config = {
           level: 'info',
           format: 'json',
-          destination: 'console',
+          destination: 'console'
         };
       }
       Logger.instance = new Logger(config);
@@ -90,7 +90,7 @@ export class Logger implements ILogger {
    */
   async configure(config: LoggingConfig): Promise<void> {
     this.config = config;
-    
+
     // Reset file handle if destination changed
     if (this.fileHandle && config.destination !== 'file' && config.destination !== 'both') {
       await this.fileHandle.close();
@@ -148,7 +148,7 @@ export class Logger implements ILogger {
       message,
       context: this.context,
       data,
-      error,
+      error
     };
 
     const formatted = this.format(entry);
@@ -175,24 +175,22 @@ export class Logger implements ILogger {
         jsonEntry.error = {
           name: jsonEntry.error.name,
           message: jsonEntry.error.message,
-          stack: jsonEntry.error.stack,
+          stack: jsonEntry.error.stack
         };
       }
       return JSON.stringify(jsonEntry);
     }
 
     // Text format
-    const contextStr = Object.keys(entry.context).length > 0
-      ? ` ${JSON.stringify(entry.context)}`
-      : '';
-    const dataStr = entry.data !== undefined
-      ? ` ${JSON.stringify(entry.data)}`
-      : '';
-    const errorStr = entry.error !== undefined
-      ? entry.error instanceof Error
-        ? `\n  Error: ${entry.error.message}\n  Stack: ${entry.error.stack}`
-        : ` Error: ${JSON.stringify(entry.error)}`
-      : '';
+    const contextStr =
+      Object.keys(entry.context).length > 0 ? ` ${JSON.stringify(entry.context)}` : '';
+    const dataStr = entry.data !== undefined ? ` ${JSON.stringify(entry.data)}` : '';
+    const errorStr =
+      entry.error !== undefined
+        ? entry.error instanceof Error
+          ? `\n  Error: ${entry.error.message}\n  Stack: ${entry.error.stack}`
+          : ` Error: ${JSON.stringify(entry.error)}`
+        : '';
 
     return `[${entry.timestamp}] ${entry.level} ${entry.message}${contextStr}${dataStr}${errorStr}`;
   }
@@ -286,7 +284,7 @@ export class Logger implements ILogger {
     try {
       const entries = await fs.readdir(dir, { withFileTypes: true });
       const files: string[] = [];
-      
+
       for (const entry of entries) {
         if (entry.isFile() && entry.name.startsWith(baseFileName + '.')) {
           files.push(entry.name);

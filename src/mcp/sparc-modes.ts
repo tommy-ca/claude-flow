@@ -19,27 +19,27 @@ export interface SparcMode {
 
 export async function loadSparcModes(): Promise<SparcMode[]> {
   const modesPath = path.join(__dirname, '../../.roomodes');
-  
+
   try {
     const content = await fs.readFile(modesPath, 'utf-8');
     const modesData = JSON.parse(content);
     const modes: SparcMode[] = [];
-    
+
     // Convert JSON format to SparcMode format
     for (const [name, config] of Object.entries(modesData)) {
       const mode: SparcMode = {
         name: name,
         description: (config as any).description || '',
         tools: (config as any).tools || [],
-        systemPrompt: (config as any).prompt || '',
+        systemPrompt: (config as any).prompt || ''
       };
-      
+
       // Add default best practices based on mode
       mode.bestPractices = getModeBestPractices(name);
-      
+
       modes.push(mode);
     }
-    
+
     // Successfully loaded modes
     return modes;
   } catch (error) {
@@ -50,134 +50,136 @@ export async function loadSparcModes(): Promise<SparcMode[]> {
 
 function getModeBestPractices(modeName: string): string[] {
   const bestPracticesMap: Record<string, string[]> = {
-    'orchestrator': [
+    orchestrator: [
       'Use batch operations when working with multiple files',
       'Store intermediate results in Memory for coordination',
       'Enable parallel execution for independent tasks',
       'Monitor resource usage during intensive operations',
-      'Leverage centralized coordination for team management',
+      'Leverage centralized coordination for team management'
     ],
-    'coder': [
+    coder: [
       'Follow existing code patterns and conventions',
       'Write comprehensive tests for new code',
       'Use batch file operations for efficiency',
       'Implement proper error handling',
-      'Add meaningful comments and documentation',
+      'Add meaningful comments and documentation'
     ],
-    'researcher': [
+    researcher: [
       'Verify information from multiple sources',
       'Store findings in Memory for later reference',
       'Create structured research reports',
       'Cross-reference and validate data',
-      'Document sources and methodology',
+      'Document sources and methodology'
     ],
-    'tdd': [
+    tdd: [
       'Write tests before implementation',
       'Follow red-green-refactor cycle',
       'Aim for comprehensive test coverage',
       'Test edge cases and error conditions',
-      'Keep tests simple and focused',
+      'Keep tests simple and focused'
     ],
-    'architect': [
+    architect: [
       'Design for scalability and maintainability',
       'Document architectural decisions',
       'Create clear component boundaries',
       'Plan for future extensibility',
-      'Consider performance implications',
+      'Consider performance implications'
     ],
-    'reviewer': [
+    reviewer: [
       'Check for security vulnerabilities',
       'Verify code follows conventions',
       'Suggest performance improvements',
       'Ensure proper error handling',
-      'Validate test coverage',
+      'Validate test coverage'
     ],
-    'debugger': [
+    debugger: [
       'Reproduce issues consistently',
       'Use systematic debugging approach',
       'Add diagnostic logging',
       'Fix root causes not symptoms',
-      'Write tests to prevent regression',
+      'Write tests to prevent regression'
     ],
-    'tester': [
+    tester: [
       'Test all code paths',
       'Include edge cases',
       'Verify error handling',
       'Test performance characteristics',
-      'Automate test execution',
+      'Automate test execution'
     ],
-    'analyst': [
+    analyst: [
       'Use efficient search patterns',
       'Analyze code metrics',
       'Identify patterns and anomalies',
       'Store analysis results',
-      'Create actionable insights',
+      'Create actionable insights'
     ],
-    'optimizer': [
+    optimizer: [
       'Profile before optimizing',
       'Focus on bottlenecks',
       'Measure improvements',
       'Balance readability and performance',
-      'Document optimization rationale',
+      'Document optimization rationale'
     ],
-    'documenter': [
+    documenter: [
       'Keep documentation current',
       'Include examples',
       'Document APIs thoroughly',
       'Use clear language',
-      'Organize logically',
+      'Organize logically'
     ],
-    'designer': [
+    designer: [
       'Follow design principles',
       'Consider accessibility',
       'Create consistent interfaces',
       'Test with users',
-      'Document design decisions',
+      'Document design decisions'
     ],
-    'innovator': [
+    innovator: [
       'Think outside conventional solutions',
       'Explore emerging technologies',
       'Prototype rapidly',
       'Learn from failures',
-      'Document innovative approaches',
+      'Document innovative approaches'
     ],
     'swarm-coordinator': [
       'Coordinate agent activities',
       'Balance workload distribution',
       'Monitor swarm progress',
       'Handle agent failures gracefully',
-      'Optimize resource usage',
+      'Optimize resource usage'
     ],
     'memory-manager': [
       'Organize information hierarchically',
       'Implement retention policies',
       'Enable efficient retrieval',
       'Prevent memory bloat',
-      'Backup critical data',
+      'Backup critical data'
     ],
     'batch-executor': [
       'Maximize parallelization',
       'Handle dependencies correctly',
       'Monitor resource usage',
       'Implement retry logic',
-      'Aggregate results efficiently',
+      'Aggregate results efficiently'
     ],
     'workflow-manager': [
       'Design efficient workflows',
       'Handle error conditions',
       'Enable workflow monitoring',
       'Support workflow versioning',
-      'Document workflow logic',
-    ],
+      'Document workflow logic'
+    ]
   };
-  
-  return bestPracticesMap[modeName] || [
-    'Follow best practices for the specific mode',
-    'Document your approach',
-    'Test thoroughly',
-    'Handle errors gracefully',
-    'Optimize for efficiency',
-  ];
+
+  return (
+    bestPracticesMap[modeName] || [
+      'Follow best practices for the specific mode',
+      'Document your approach',
+      'Test thoroughly',
+      'Handle errors gracefully',
+      'Optimize for efficiency'
+    ]
+  );
 }
 
 function getDefaultModes(): SparcMode[] {
@@ -191,8 +193,8 @@ function getDefaultModes(): SparcMode[] {
         'Store intermediate results in Memory for coordination',
         'Enable parallel execution for independent tasks',
         'Monitor resource usage during intensive operations',
-        'Leverage centralized coordination for team management',
-      ],
+        'Leverage centralized coordination for team management'
+      ]
     },
     {
       name: 'coder',
@@ -203,8 +205,8 @@ function getDefaultModes(): SparcMode[] {
         'Write comprehensive tests for new code',
         'Use batch file operations for efficiency',
         'Implement proper error handling',
-        'Add meaningful comments and documentation',
-      ],
+        'Add meaningful comments and documentation'
+      ]
     },
     {
       name: 'researcher',
@@ -215,8 +217,8 @@ function getDefaultModes(): SparcMode[] {
         'Store findings in Memory for later reference',
         'Create structured research reports',
         'Cross-reference and validate data',
-        'Document sources and methodology',
-      ],
+        'Document sources and methodology'
+      ]
     },
     {
       name: 'tdd',
@@ -227,8 +229,8 @@ function getDefaultModes(): SparcMode[] {
         'Follow red-green-refactor cycle',
         'Aim for comprehensive test coverage',
         'Test edge cases and error conditions',
-        'Keep tests simple and focused',
-      ],
+        'Keep tests simple and focused'
+      ]
     },
     {
       name: 'architect',
@@ -239,8 +241,8 @@ function getDefaultModes(): SparcMode[] {
         'Document architectural decisions',
         'Create clear component boundaries',
         'Plan for future extensibility',
-        'Consider performance implications',
-      ],
+        'Consider performance implications'
+      ]
     },
     {
       name: 'reviewer',
@@ -251,8 +253,8 @@ function getDefaultModes(): SparcMode[] {
         'Verify code follows conventions',
         'Suggest performance improvements',
         'Ensure proper error handling',
-        'Validate test coverage',
-      ],
+        'Validate test coverage'
+      ]
     },
     {
       name: 'debugger',
@@ -263,8 +265,8 @@ function getDefaultModes(): SparcMode[] {
         'Use systematic debugging approach',
         'Add diagnostic logging',
         'Fix root causes not symptoms',
-        'Write tests to prevent regression',
-      ],
+        'Write tests to prevent regression'
+      ]
     },
     {
       name: 'tester',
@@ -275,8 +277,8 @@ function getDefaultModes(): SparcMode[] {
         'Include edge cases',
         'Verify error handling',
         'Test performance characteristics',
-        'Automate test execution',
-      ],
+        'Automate test execution'
+      ]
     },
     {
       name: 'analyst',
@@ -287,8 +289,8 @@ function getDefaultModes(): SparcMode[] {
         'Analyze code metrics',
         'Identify patterns and anomalies',
         'Store analysis results',
-        'Create actionable insights',
-      ],
+        'Create actionable insights'
+      ]
     },
     {
       name: 'optimizer',
@@ -299,8 +301,8 @@ function getDefaultModes(): SparcMode[] {
         'Focus on bottlenecks',
         'Measure improvements',
         'Balance readability and performance',
-        'Document optimization rationale',
-      ],
+        'Document optimization rationale'
+      ]
     },
     {
       name: 'documenter',
@@ -311,8 +313,8 @@ function getDefaultModes(): SparcMode[] {
         'Include examples',
         'Document APIs thoroughly',
         'Use clear language',
-        'Organize logically',
-      ],
+        'Organize logically'
+      ]
     },
     {
       name: 'designer',
@@ -323,8 +325,8 @@ function getDefaultModes(): SparcMode[] {
         'Consider accessibility',
         'Create consistent interfaces',
         'Test with users',
-        'Document design decisions',
-      ],
+        'Document design decisions'
+      ]
     },
     {
       name: 'innovator',
@@ -335,8 +337,8 @@ function getDefaultModes(): SparcMode[] {
         'Explore emerging technologies',
         'Prototype rapidly',
         'Learn from failures',
-        'Document innovative approaches',
-      ],
+        'Document innovative approaches'
+      ]
     },
     {
       name: 'swarm-coordinator',
@@ -347,8 +349,8 @@ function getDefaultModes(): SparcMode[] {
         'Balance workload distribution',
         'Monitor swarm progress',
         'Handle agent failures gracefully',
-        'Optimize resource usage',
-      ],
+        'Optimize resource usage'
+      ]
     },
     {
       name: 'memory-manager',
@@ -359,8 +361,8 @@ function getDefaultModes(): SparcMode[] {
         'Implement retention policies',
         'Enable efficient retrieval',
         'Prevent memory bloat',
-        'Backup critical data',
-      ],
+        'Backup critical data'
+      ]
     },
     {
       name: 'batch-executor',
@@ -371,8 +373,8 @@ function getDefaultModes(): SparcMode[] {
         'Handle dependencies correctly',
         'Monitor resource usage',
         'Implement retry logic',
-        'Aggregate results efficiently',
-      ],
+        'Aggregate results efficiently'
+      ]
     },
     {
       name: 'workflow-manager',
@@ -383,8 +385,8 @@ function getDefaultModes(): SparcMode[] {
         'Handle error conditions',
         'Enable workflow monitoring',
         'Support workflow versioning',
-        'Document workflow logic',
-      ],
-    },
+        'Document workflow logic'
+      ]
+    }
   ];
 }

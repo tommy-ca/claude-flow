@@ -32,9 +32,12 @@ export async function launchUI(args = []) {
 
         // Open browser if possible
         try {
-          const openCommand = process.platform === 'darwin' ? 'open' :
-            process.platform === 'win32' ? 'start' :
-              'xdg-open';
+          const openCommand =
+            process.platform === 'darwin'
+              ? 'open'
+              : process.platform === 'win32'
+                ? 'start'
+                : 'xdg-open';
 
           const { exec } = await import('child_process');
           exec(`${openCommand} http://localhost:${port}/console`);
@@ -55,7 +58,6 @@ export async function launchUI(args = []) {
 
         // Keep process alive
         await new Promise(() => {});
-
       } catch (err) {
         printError(`Failed to launch Web UI: ${err.message}`);
         console.error('Stack trace:', err.stack);
@@ -69,7 +71,6 @@ export async function launchUI(args = []) {
     if (terminal) {
       await launchTerminalUI(port);
     }
-
   } catch (err) {
     printError(`Failed to launch UI: ${err.message}`);
     console.error('Stack trace:', err.stack);

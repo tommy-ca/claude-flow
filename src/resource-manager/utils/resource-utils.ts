@@ -27,7 +27,7 @@ export class ResourceUtils {
       return ResourcePressureLevel.CRITICAL;
     } else if (usage >= thresholds.cpuUsage * 0.85) {
       return ResourcePressureLevel.HIGH;
-    } else if (usage >= thresholds.cpuUsage * 0.70) {
+    } else if (usage >= thresholds.cpuUsage * 0.7) {
       return ResourcePressureLevel.MODERATE;
     } else {
       return ResourcePressureLevel.NORMAL;
@@ -40,12 +40,18 @@ export class ResourceUtils {
   static calculateResourceScore(metrics: IResourceMetrics): number {
     const cpuScore = metrics.cpu.usage / 100;
     const memoryScore = metrics.memory.usagePercentage / 100;
-    const diskScore = metrics.disks.length > 0 
-      ? metrics.disks.reduce((sum, disk) => sum + disk.usagePercentage, 0) / metrics.disks.length / 100
-      : 0;
-    const networkScore = metrics.network.length > 0
-      ? metrics.network.reduce((sum, net) => sum + (net.bandwidthUtilization || 0), 0) / metrics.network.length / 100
-      : 0;
+    const diskScore =
+      metrics.disks.length > 0
+        ? metrics.disks.reduce((sum, disk) => sum + disk.usagePercentage, 0) /
+          metrics.disks.length /
+          100
+        : 0;
+    const networkScore =
+      metrics.network.length > 0
+        ? metrics.network.reduce((sum, net) => sum + (net.bandwidthUtilization || 0), 0) /
+          metrics.network.length /
+          100
+        : 0;
 
     // Weighted average (CPU and memory are more important)
     return (cpuScore * 0.3 + memoryScore * 0.3 + diskScore * 0.2 + networkScore * 0.2) * 100;
@@ -56,11 +62,11 @@ export class ResourceUtils {
    */
   static formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
-    
+
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    
+
     return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
   }
 
@@ -81,9 +87,10 @@ export class ResourceUtils {
     const cpuEfficiency = allocated.cpuCores > 0 ? used.cpuCores / allocated.cpuCores : 1;
     const memoryEfficiency = allocated.memory > 0 ? used.memory / allocated.memory : 1;
     const diskEfficiency = allocated.diskSpace > 0 ? used.diskSpace / allocated.diskSpace : 1;
-    const networkEfficiency = allocated.networkBandwidth > 0 ? used.networkBandwidth / allocated.networkBandwidth : 1;
+    const networkEfficiency =
+      allocated.networkBandwidth > 0 ? used.networkBandwidth / allocated.networkBandwidth : 1;
 
-    return (cpuEfficiency + memoryEfficiency + diskEfficiency + networkEfficiency) / 4 * 100;
+    return ((cpuEfficiency + memoryEfficiency + diskEfficiency + networkEfficiency) / 4) * 100;
   }
 
   /**
@@ -119,20 +126,21 @@ export class ResourceUtils {
   /**
    * Merge resource requests
    */
-  static mergeResourceRequests(
-    ...requests: IAgentResourceRequests[]
-  ): IAgentResourceRequests {
-    return requests.reduce((merged, request) => ({
-      cpuCores: merged.cpuCores + request.cpuCores,
-      memory: merged.memory + request.memory,
-      diskSpace: merged.diskSpace + request.diskSpace,
-      networkBandwidth: merged.networkBandwidth + request.networkBandwidth
-    }), {
-      cpuCores: 0,
-      memory: 0,
-      diskSpace: 0,
-      networkBandwidth: 0
-    });
+  static mergeResourceRequests(...requests: IAgentResourceRequests[]): IAgentResourceRequests {
+    return requests.reduce(
+      (merged, request) => ({
+        cpuCores: merged.cpuCores + request.cpuCores,
+        memory: merged.memory + request.memory,
+        diskSpace: merged.diskSpace + request.diskSpace,
+        networkBandwidth: merged.networkBandwidth + request.networkBandwidth
+      }),
+      {
+        cpuCores: 0,
+        memory: 0,
+        diskSpace: 0,
+        networkBandwidth: 0
+      }
+    );
   }
 
   /**
@@ -166,7 +174,8 @@ export class ResourceUtils {
       cpu: total.cpuCores > 0 ? (used.cpuCores / total.cpuCores) * 100 : 0,
       memory: total.memory > 0 ? (used.memory / total.memory) * 100 : 0,
       disk: total.diskSpace > 0 ? (used.diskSpace / total.diskSpace) * 100 : 0,
-      network: total.networkBandwidth > 0 ? (used.networkBandwidth / total.networkBandwidth) * 100 : 0
+      network:
+        total.networkBandwidth > 0 ? (used.networkBandwidth / total.networkBandwidth) * 100 : 0
     };
   }
 
@@ -369,13 +378,16 @@ export class ResourceUtils {
 
     // Disk health
     if (metrics.disks.length > 0) {
-      const avgDiskUsage = metrics.disks.reduce((sum, disk) => sum + disk.usagePercentage, 0) / metrics.disks.length;
+      const avgDiskUsage =
+        metrics.disks.reduce((sum, disk) => sum + disk.usagePercentage, 0) / metrics.disks.length;
       scores.push(Math.max(0, 100 - avgDiskUsage));
     }
 
     // Network health
     if (metrics.network.length > 0) {
-      const avgNetworkUsage = metrics.network.reduce((sum, net) => sum + (net.bandwidthUtilization || 0), 0) / metrics.network.length;
+      const avgNetworkUsage =
+        metrics.network.reduce((sum, net) => sum + (net.bandwidthUtilization || 0), 0) /
+        metrics.network.length;
       scores.push(Math.max(0, 100 - avgNetworkUsage));
     }
 

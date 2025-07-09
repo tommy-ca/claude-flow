@@ -58,15 +58,33 @@ export function isRawModeSupported() {
  * Get environment type for logging/debugging
  */
 export function getEnvironmentType() {
-  if (!process.stdin.isTTY) {return 'non-tty-stdin';}
-  if (!process.stdout.isTTY) {return 'non-tty-stdout';}
-  if (process.env.CI) {return 'ci-environment';}
-  if (process.env.GITHUB_ACTIONS) {return 'github-actions';}
-  if (process.env.DOCKER_CONTAINER) {return 'docker';}
-  if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) {return 'wsl';}
-  if (process.platform === 'win32') {return 'windows';}
-  if (process.env.TERM_PROGRAM === 'vscode') {return 'vscode';}
-  if (!isRawModeSupported()) {return 'no-raw-mode';}
+  if (!process.stdin.isTTY) {
+    return 'non-tty-stdin';
+  }
+  if (!process.stdout.isTTY) {
+    return 'non-tty-stdout';
+  }
+  if (process.env.CI) {
+    return 'ci-environment';
+  }
+  if (process.env.GITHUB_ACTIONS) {
+    return 'github-actions';
+  }
+  if (process.env.DOCKER_CONTAINER) {
+    return 'docker';
+  }
+  if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) {
+    return 'wsl';
+  }
+  if (process.platform === 'win32') {
+    return 'windows';
+  }
+  if (process.env.TERM_PROGRAM === 'vscode') {
+    return 'vscode';
+  }
+  if (!isRawModeSupported()) {
+    return 'no-raw-mode';
+  }
   return 'interactive';
 }
 
@@ -92,7 +110,9 @@ export function handleNonInteractive(commandName, interactiveFn, nonInteractiveF
         console.error('3. Use --non-interactive flag with required parameters');
         console.error('4. If using Docker, run with: docker run -it');
         console.error('5. If using SSH, ensure pseudo-TTY allocation with: ssh -t');
-        console.error('\nFor more info: https://github.com/ruvnet/claude-code-flow/docs/non-interactive.md\n');
+        console.error(
+          '\nFor more info: https://github.com/ruvnet/claude-code-flow/docs/non-interactive.md\n'
+        );
         process.exit(1);
       }
     }
@@ -104,8 +124,12 @@ export function handleNonInteractive(commandName, interactiveFn, nonInteractiveF
  */
 export function warnNonInteractive(commandName) {
   if (!isInteractive()) {
-    console.warn(`\n⚠️  Running '${commandName}' in non-interactive mode (${getEnvironmentType()})`);
-    console.warn('Some features may be limited. For full functionality, use an interactive terminal.\n');
+    console.warn(
+      `\n⚠️  Running '${commandName}' in non-interactive mode (${getEnvironmentType()})`
+    );
+    console.warn(
+      'Some features may be limited. For full functionality, use an interactive terminal.\n'
+    );
   }
 }
 

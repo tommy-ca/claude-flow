@@ -99,7 +99,6 @@ export async function optimizeHiveMindDatabase(dbPath, options = {}) {
     }
 
     return { success: true, optimizations: optimizationsApplied };
-
   } catch (error) {
     spinner.fail('Database optimization failed');
     console.error(chalk.red('Error:'), error.message);
@@ -113,10 +112,14 @@ export async function optimizeHiveMindDatabase(dbPath, options = {}) {
 function getSchemaVersion(db) {
   try {
     // Check if schema_version table exists
-    const tableExists = db.prepare(`
+    const tableExists = db
+      .prepare(
+        `
       SELECT name FROM sqlite_master 
       WHERE type='table' AND name='schema_version'
-    `).get();
+    `
+      )
+      .get();
 
     if (!tableExists) {
       // Create schema version table
@@ -129,22 +132,27 @@ function getSchemaVersion(db) {
       `);
 
       // Insert initial version
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO schema_version (version, description) 
         VALUES (1.0, 'Initial schema')
-      `).run();
+      `
+      ).run();
 
       return 1.0;
     }
 
     // Get latest version
-    const result = db.prepare(`
+    const result = db
+      .prepare(
+        `
       SELECT version FROM schema_version 
       ORDER BY version DESC LIMIT 1
-    `).get();
+    `
+      )
+      .get();
 
     return result ? result.version : 1.0;
-
   } catch (error) {
     // If any error, assume version 1.0
     return 1.0;
@@ -155,10 +163,12 @@ function getSchemaVersion(db) {
  * Update schema version
  */
 function updateSchemaVersion(db, version, description = '') {
-  db.prepare(`
+  db.prepare(
+    `
     INSERT OR REPLACE INTO schema_version (version, description) 
     VALUES (?, ?)
-  `).run(version, description || `Updated to version ${version}`);
+  `
+  ).run(version, description || `Updated to version ${version}`);
 }
 
 /**
@@ -169,10 +179,15 @@ function applyBasicIndexes(db) {
   ensureRequiredColumns(db);
 
   // Check which tables exist before creating indexes
-  const tables = db.prepare(`
+  const tables = db
+    .prepare(
+      `
     SELECT name FROM sqlite_master 
     WHERE type='table' AND name NOT LIKE 'sqlite_%'
-  `).all().map(row => row.name);
+  `
+    )
+    .all()
+    .map(row => row.name);
 
   const tableSet = new Set(tables);
 
@@ -232,81 +247,113 @@ function applyBasicIndexes(db) {
  */
 function ensureRequiredColumns(db) {
   // First check which tables exist
-  const tables = db.prepare(`
+  const tables = db
+    .prepare(
+      `
     SELECT name FROM sqlite_master 
     WHERE type='table' AND name NOT LIKE 'sqlite_%'
-  `).all().map(row => row.name);
+  `
+    )
+    .all()
+    .map(row => row.name);
 
   const tableSet = new Set(tables);
 
   // Only check columns for tables that exist
   if (tableSet.has('tasks')) {
     // Check and add priority column to tasks table
-    const hasPriority = db.prepare(`
+    const hasPriority = db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
       WHERE name = 'priority'
-    `).get();
+    `
+      )
+      .get();
 
     if (!hasPriority || hasPriority.count === 0) {
       try {
         db.exec('ALTER TABLE tasks ADD COLUMN priority INTEGER DEFAULT 5');
         console.log('Added missing priority column to tasks table');
       } catch (error) {
-        if (!error.message.includes('duplicate column') && !error.message.includes('no such table')) {
+        if (
+          !error.message.includes('duplicate column') &&
+          !error.message.includes('no such table')
+        ) {
           throw error;
         }
       }
     }
 
     // Check and add completed_at column to tasks table
-    const hasCompletedAt = db.prepare(`
+    const hasCompletedAt = db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
       WHERE name = 'completed_at'
-    `).get();
+    `
+      )
+      .get();
 
     if (!hasCompletedAt || hasCompletedAt.count === 0) {
       try {
         db.exec('ALTER TABLE tasks ADD COLUMN completed_at DATETIME');
         console.log('Added missing completed_at column to tasks table');
       } catch (error) {
-        if (!error.message.includes('duplicate column') && !error.message.includes('no such table')) {
+        if (
+          !error.message.includes('duplicate column') &&
+          !error.message.includes('no such table')
+        ) {
           throw error;
         }
       }
     }
 
     // Check and add result column to tasks table
-    const hasResult = db.prepare(`
+    const hasResult = db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
       WHERE name = 'result'
-    `).get();
+    `
+      )
+      .get();
 
     if (!hasResult || hasResult.count === 0) {
       try {
         db.exec('ALTER TABLE tasks ADD COLUMN result TEXT');
         console.log('Added missing result column to tasks table');
       } catch (error) {
-        if (!error.message.includes('duplicate column') && !error.message.includes('no such table')) {
+        if (
+          !error.message.includes('duplicate column') &&
+          !error.message.includes('no such table')
+        ) {
           throw error;
         }
       }
     }
   }
 
-
   if (tableSet.has('swarms')) {
     // Check and add updated_at column to swarms table
-    const hasUpdatedAt = db.prepare(`
+    const hasUpdatedAt = db
+      .prepare(
+        `
       SELECT COUNT(*) as count FROM pragma_table_info('swarms') 
       WHERE name = 'updated_at'
-    `).get();
+    `
+      )
+      .get();
 
     if (!hasUpdatedAt || hasUpdatedAt.count === 0) {
       try {
         db.exec('ALTER TABLE swarms ADD COLUMN updated_at DATETIME');
         console.log('Added missing updated_at column to swarms table');
       } catch (error) {
-        if (!error.message.includes('duplicate column') && !error.message.includes('no such table')) {
+        if (
+          !error.message.includes('duplicate column') &&
+          !error.message.includes('no such table')
+        ) {
           throw error;
         }
       }
@@ -319,10 +366,15 @@ function ensureRequiredColumns(db) {
  */
 function applyAdvancedIndexes(db) {
   // Check which tables exist
-  const tables = db.prepare(`
+  const tables = db
+    .prepare(
+      `
     SELECT name FROM sqlite_master 
     WHERE type='table' AND name NOT LIKE 'sqlite_%'
-  `).all().map(row => row.name);
+  `
+    )
+    .all()
+    .map(row => row.name);
 
   const tableSet = new Set(tables);
   const indexes = [];
@@ -332,7 +384,7 @@ function applyAdvancedIndexes(db) {
     indexes.push(
       'CREATE INDEX IF NOT EXISTS idx_tasks_swarm_status ON tasks(swarm_id, status)',
       'CREATE INDEX IF NOT EXISTS idx_tasks_full ON tasks(swarm_id, agent_id, status, priority)',
-      'CREATE INDEX IF NOT EXISTS idx_tasks_pending ON tasks(swarm_id, priority) WHERE status = \'pending\''
+      "CREATE INDEX IF NOT EXISTS idx_tasks_pending ON tasks(swarm_id, priority) WHERE status = 'pending'"
     );
   }
 
@@ -351,7 +403,7 @@ function applyAdvancedIndexes(db) {
 
   if (tableSet.has('swarms')) {
     indexes.push(
-      'CREATE INDEX IF NOT EXISTS idx_swarms_active ON swarms(id, name) WHERE status = \'active\''
+      "CREATE INDEX IF NOT EXISTS idx_swarms_active ON swarms(id, name) WHERE status = 'active'"
     );
   }
 
@@ -417,10 +469,14 @@ function addPerformanceTracking(db) {
  */
 function addMemoryOptimization(db) {
   // Check if collective_memory table exists
-  const tables = db.prepare(`
+  const tables = db
+    .prepare(
+      `
     SELECT name FROM sqlite_master 
     WHERE type='table' AND name = 'collective_memory'
-  `).all();
+  `
+    )
+    .all();
 
   if (tables.length === 0) {
     console.log('collective_memory table does not exist, skipping memory optimization');
@@ -428,10 +484,14 @@ function addMemoryOptimization(db) {
   }
 
   // Check and add access_count column
-  const hasAccessCount = db.prepare(`
+  const hasAccessCount = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM pragma_table_info('collective_memory') 
     WHERE name = 'access_count'
-  `).get();
+  `
+    )
+    .get();
 
   if (!hasAccessCount || hasAccessCount.count === 0) {
     try {
@@ -448,10 +508,14 @@ function addMemoryOptimization(db) {
   }
 
   // Check and add accessed_at column (not last_accessed)
-  const hasAccessedAt = db.prepare(`
+  const hasAccessedAt = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM pragma_table_info('collective_memory') 
     WHERE name = 'accessed_at'
-  `).get();
+  `
+    )
+    .get();
 
   if (!hasAccessedAt || hasAccessedAt.count === 0) {
     try {
@@ -468,10 +532,14 @@ function addMemoryOptimization(db) {
   }
 
   // Add compressed and size columns if missing
-  const hasCompressed = db.prepare(`
+  const hasCompressed = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM pragma_table_info('collective_memory') 
     WHERE name = 'compressed'
-  `).get();
+  `
+    )
+    .get();
 
   if (!hasCompressed || hasCompressed.count === 0) {
     try {
@@ -486,10 +554,14 @@ function addMemoryOptimization(db) {
     }
   }
 
-  const hasSize = db.prepare(`
+  const hasSize = db
+    .prepare(
+      `
     SELECT COUNT(*) as count FROM pragma_table_info('collective_memory') 
     WHERE name = 'size'
-  `).get();
+  `
+    )
+    .get();
 
   if (!hasSize || hasSize.count === 0) {
     try {
@@ -584,10 +656,14 @@ export async function performMaintenance(dbPath, options = {}) {
     // Clean up old memory entries
     if (options.cleanMemory) {
       // Check if collective_memory table exists
-      const hasMemoryTable = db.prepare(`
+      const hasMemoryTable = db
+        .prepare(
+          `
         SELECT name FROM sqlite_master 
         WHERE type='table' AND name='collective_memory'
-      `).get();
+      `
+        )
+        .get();
 
       if (hasMemoryTable) {
         spinner.text = 'Cleaning old memory entries...';
@@ -595,10 +671,14 @@ export async function performMaintenance(dbPath, options = {}) {
         cutoffDate.setDate(cutoffDate.getDate() - (options.memoryRetentionDays || 30));
 
         try {
-          const result = db.prepare(`
+          const result = db
+            .prepare(
+              `
             DELETE FROM collective_memory 
             WHERE accessed_at < ? AND access_count < 5
-          `).run(cutoffDate.toISOString());
+          `
+            )
+            .run(cutoffDate.toISOString());
 
           console.log(chalk.green(`✓ Removed ${result.changes} old memory entries`));
         } catch (error) {
@@ -620,10 +700,14 @@ export async function performMaintenance(dbPath, options = {}) {
       `);
 
       // Check if completed_at column exists
-      const hasCompletedAt = db.prepare(`
+      const hasCompletedAt = db
+        .prepare(
+          `
         SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
         WHERE name = 'completed_at'
-      `).get();
+      `
+        )
+        .get();
 
       let archived = { changes: 0 };
 
@@ -638,10 +722,14 @@ export async function performMaintenance(dbPath, options = {}) {
           WHERE status = 'completed' AND completed_at < '${archiveCutoff.toISOString()}'
         `);
 
-        archived = db.prepare(`
+        archived = db
+          .prepare(
+            `
           DELETE FROM tasks 
           WHERE status = 'completed' AND completed_at < ?
-        `).run(archiveCutoff.toISOString());
+        `
+          )
+          .run(archiveCutoff.toISOString());
       } else {
         // Use created_at as fallback
         const archiveCutoff = new Date();
@@ -653,10 +741,14 @@ export async function performMaintenance(dbPath, options = {}) {
           WHERE status = 'completed' AND created_at < '${archiveCutoff.toISOString()}'
         `);
 
-        archived = db.prepare(`
+        archived = db
+          .prepare(
+            `
           DELETE FROM tasks 
           WHERE status = 'completed' AND created_at < ?
-        `).run(archiveCutoff.toISOString());
+        `
+          )
+          .run(archiveCutoff.toISOString());
       }
 
       console.log(chalk.green(`✓ Archived ${archived.changes} completed tasks`));
@@ -679,7 +771,6 @@ export async function performMaintenance(dbPath, options = {}) {
 
     db.close();
     spinner.succeed('Database maintenance complete!');
-
   } catch (error) {
     spinner.fail('Database maintenance failed');
     console.error(chalk.red('Error:'), error.message);
@@ -701,15 +792,23 @@ export async function generateOptimizationReport(dbPath) {
     };
 
     // Get table statistics
-    const tables = db.prepare(`
+    const tables = db
+      .prepare(
+        `
       SELECT name FROM sqlite_master WHERE type='table'
-    `).all();
+    `
+      )
+      .all();
 
     for (const table of tables) {
       const count = db.prepare(`SELECT COUNT(*) as count FROM ${table.name}`).get();
-      const size = db.prepare(`
+      const size = db
+        .prepare(
+          `
         SELECT SUM(pgsize) as size FROM dbstat WHERE name=?
-      `).get(table.name);
+      `
+        )
+        .get(table.name);
 
       report.tables[table.name] = {
         rowCount: count.count,
@@ -718,24 +817,36 @@ export async function generateOptimizationReport(dbPath) {
     }
 
     // Get index information
-    report.indexes = db.prepare(`
+    report.indexes = db
+      .prepare(
+        `
       SELECT name, tbl_name FROM sqlite_master WHERE type='index'
-    `).all();
+    `
+      )
+      .all();
 
     // Get performance metrics (check if completed_at column exists)
     let avgTaskTime = { avg_minutes: 0 };
     try {
       // First check if completed_at column exists
-      const hasCompletedAt = db.prepare(`
+      const hasCompletedAt = db
+        .prepare(
+          `
         SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
         WHERE name = 'completed_at'
-      `).get();
+      `
+        )
+        .get();
 
       if (hasCompletedAt && hasCompletedAt.count > 0) {
-        avgTaskTime = db.prepare(`
+        avgTaskTime = db
+          .prepare(
+            `
           SELECT AVG(julianday(completed_at) - julianday(created_at)) * 24 * 60 as avg_minutes
           FROM tasks WHERE completed_at IS NOT NULL
-        `).get();
+        `
+          )
+          .get();
       }
     } catch (error) {
       // If error, just use default value
@@ -747,7 +858,6 @@ export async function generateOptimizationReport(dbPath) {
     db.close();
 
     return report;
-
   } catch (error) {
     console.error('Error generating report:', error);
     return null;

@@ -91,10 +91,17 @@ function testTabSwitching() {
     tabButton.click();
 
     // Check if tab is active
-    const isActive = tabButton.classList.contains('active') && tabContent.classList.contains('active');
-    logTest(`Tab "${tabName}" switching`, isActive, isActive ? '' : 'Tab did not activate properly');
+    const isActive =
+      tabButton.classList.contains('active') && tabContent.classList.contains('active');
+    logTest(
+      `Tab "${tabName}" switching`,
+      isActive,
+      isActive ? '' : 'Tab did not activate properly'
+    );
 
-    if (!isActive) {allTabsWork = false;}
+    if (!isActive) {
+      allTabsWork = false;
+    }
   });
 
   return allTabsWork;
@@ -104,12 +111,16 @@ function testTabSwitching() {
 function testToolCards() {
   // Switch to tools tab first
   const toolsTab = document.querySelector('[data-tab="tools"]');
-  if (toolsTab) {toolsTab.click();}
+  if (toolsTab) {
+    toolsTab.click();
+  }
 
   const toolCards = document.querySelectorAll('.neural-tool-card');
   logTest('Tool cards exist', toolCards.length > 0, `Found ${toolCards.length} tool cards`);
 
-  if (toolCards.length === 0) {return false;}
+  if (toolCards.length === 0) {
+    return false;
+  }
 
   let allButtonsWork = true;
   toolCards.forEach((card, index) => {
@@ -130,7 +141,9 @@ function testToolCards() {
 function testTrainingControls() {
   // Switch to training tab
   const trainingTab = document.querySelector('[data-tab="training"]');
-  if (trainingTab) {trainingTab.click();}
+  if (trainingTab) {
+    trainingTab.click();
+  }
 
   const controls = {
     'Training Type Select': document.getElementById('trainingType'),
@@ -145,7 +158,9 @@ function testTrainingControls() {
   Object.entries(controls).forEach(([name, element]) => {
     const exists = !!element;
     logTest(`${name} exists`, exists, exists ? '' : 'Control not found');
-    if (!exists) {allControlsExist = false;}
+    if (!exists) {
+      allControlsExist = false;
+    }
   });
 
   return allControlsExist;
@@ -155,7 +170,9 @@ function testTrainingControls() {
 function testModelControls() {
   // Switch to models tab
   const modelsTab = document.querySelector('[data-tab="models"]');
-  if (modelsTab) {modelsTab.click();}
+  if (modelsTab) {
+    modelsTab.click();
+  }
 
   const loadButton = document.getElementById('loadModel');
   const createButton = document.getElementById('createModel');
@@ -172,7 +189,9 @@ function testModelControls() {
 function testPatternControls() {
   // Switch to patterns tab
   const patternsTab = document.querySelector('[data-tab="patterns"]');
-  if (patternsTab) {patternsTab.click();}
+  if (patternsTab) {
+    patternsTab.click();
+  }
 
   const analyzeButton = document.getElementById('analyzePatterns');
   const recognizeButton = document.getElementById('recognizePatterns');
@@ -191,7 +210,9 @@ function testPatternControls() {
 function testPerformanceControls() {
   // Switch to performance tab
   const performanceTab = document.querySelector('[data-tab="performance"]');
-  if (performanceTab) {performanceTab.click();}
+  if (performanceTab) {
+    performanceTab.click();
+  }
 
   const optimizeButton = document.getElementById('optimizeWasm');
   const compressButton = document.getElementById('compressModels');

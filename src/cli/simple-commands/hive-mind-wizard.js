@@ -51,8 +51,12 @@ async function runInteractiveWizard() {
 
     console.log(chalk.cyan('📊 Recommended Configuration:'));
     console.log(chalk.gray(`  • Topology: ${swarmConfig.topology} (best for structured tasks)`));
-    console.log(chalk.gray(`  • Coordination: ${swarmConfig.coordination} (fastest decision making)`));
-    console.log(chalk.gray(`  • Agent Count: ${swarmConfig.agents} (optimal for medium complexity)`));
+    console.log(
+      chalk.gray(`  • Coordination: ${swarmConfig.coordination} (fastest decision making)`)
+    );
+    console.log(
+      chalk.gray(`  • Agent Count: ${swarmConfig.agents} (optimal for medium complexity)`)
+    );
     console.log(chalk.gray(`  • Complexity: ${swarmConfig.complexity}\n`));
 
     // Create the swarm
@@ -77,7 +81,6 @@ async function runInteractiveWizard() {
     } else {
       console.log(chalk.red('❌ Failed to create swarm. Please try again.'));
     }
-
   } catch (error) {
     console.log(chalk.red(`❌ Wizard error: ${error.message}`));
     console.log(chalk.gray('You can try manual setup with: claude-flow hive-mind init'));
@@ -172,9 +175,12 @@ async function initializeHiveMind() {
                 )
             `);
 
-      db.close((err) => {
-        if (err) {reject(err);}
-        else {resolve();}
+      db.close(err => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
       });
     });
   });
@@ -261,15 +267,17 @@ async function createSwarm(objective, config) {
         insertSwarm.finalize();
         insertAgent.finalize();
 
-        db.close((err) => {
-          if (err) {reject(err);}
-          else {resolve();}
+        db.close(err => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
         });
       });
     });
 
     return { success: true, swarmId, queenId };
-
   } catch (error) {
     console.error('Error creating swarm:', error);
     return { success: false, error: error.message };

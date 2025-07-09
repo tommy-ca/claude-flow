@@ -29,12 +29,15 @@ const analysisTask = [
   { tool: 'Glob', params: { pattern: '**/*.{ts,js,tsx,jsx}' } },
   { tool: 'Glob', params: { pattern: '**/package.json' } },
   { tool: 'Glob', params: { pattern: '**/*.test.*' } },
-  
+
   // Concurrent search for key patterns
   { tool: 'Grep', params: { pattern: 'TODO|FIXME|HACK', include: '*.{ts,js}' } },
   { tool: 'Grep', params: { pattern: 'class.*extends|interface.*{', include: '*.ts' } },
-  { tool: 'Grep', params: { pattern: 'export (default |const |function |class)', include: '*.{ts,js}' } },
-  
+  {
+    tool: 'Grep',
+    params: { pattern: 'export (default |const |function |class)', include: '*.{ts,js}' }
+  },
+
   // Parallel configuration analysis
   { tool: 'Read', params: { file_path: 'package.json' } },
   { tool: 'Read', params: { file_path: 'tsconfig.json' } },
@@ -77,18 +80,21 @@ const results = await batchtools.execute(analysisTask);
 // Example: Parallel pseudocode generation for authentication system
 const pseudocodeTask = [
   // Phase 1: Requirements Analysis (Parallel)
-  { 
+  {
     tool: 'MultiEdit',
     params: {
       file_path: 'specs/01_requirements.md',
       edits: [
-        { old_string: '', new_string: '# Authentication Requirements\n\n## Functional Requirements\n' },
+        {
+          old_string: '',
+          new_string: '# Authentication Requirements\n\n## Functional Requirements\n'
+        },
         { old_string: '', new_string: '## Non-Functional Requirements\n' },
         { old_string: '', new_string: '## Edge Cases\n' }
       ]
     }
   },
-  
+
   // Phase 2: Flow Diagrams (Concurrent)
   {
     tool: 'Write',
@@ -97,7 +103,7 @@ const pseudocodeTask = [
       content: generateAuthFlowPseudocode()
     }
   },
-  
+
   // Phase 3: Data Structures (Parallel)
   {
     tool: 'Write',
@@ -110,6 +116,7 @@ const pseudocodeTask = [
 ```
 
 ## Groups/Permissions
+
 - read
 - edit
 - batchtools

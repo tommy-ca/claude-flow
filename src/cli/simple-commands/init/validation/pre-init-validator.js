@@ -27,7 +27,6 @@ export class PreInitValidator {
       const testDir = `${this.workingDir}/.claude-flow-dir-test`;
       await Deno.mkdir(testDir);
       await Deno.remove(testDir);
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Insufficient permissions in ${this.workingDir}: ${error.message}`);
@@ -71,7 +70,9 @@ export class PreInitValidator {
             // Require at least 100MB free space
             if (availableMB < 100) {
               result.success = false;
-              result.errors.push(`Insufficient disk space: ${availableMB.toFixed(2)}MB available (minimum 100MB required)`);
+              result.errors.push(
+                `Insufficient disk space: ${availableMB.toFixed(2)}MB available (minimum 100MB required)`
+              );
             } else if (availableMB < 500) {
               result.warnings.push(`Low disk space: ${availableMB.toFixed(2)}MB available`);
             }
@@ -105,12 +106,7 @@ export class PreInitValidator {
       'memory/claude-flow-data.json'
     ];
 
-    const criticalDirs = [
-      '.roo',
-      '.claude',
-      'memory',
-      'coordination'
-    ];
+    const criticalDirs = ['.roo', '.claude', 'memory', 'coordination'];
 
     // Check critical files
     for (const file of criticalFiles) {

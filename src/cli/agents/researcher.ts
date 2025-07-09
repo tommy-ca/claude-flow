@@ -3,7 +3,12 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type {
+  AgentCapabilities,
+  AgentConfig,
+  AgentEnvironment,
+  TaskDefinition
+} from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
@@ -75,17 +80,11 @@ export class ResearcherAgent extends BaseAgent {
       timeoutThreshold: 900000,
       reportingInterval: 30000,
       heartbeatInterval: 10000,
-      permissions: [
-        'web-access',
-        'file-read',
-        'api-access',
-        'search-engines',
-        'database-read'
-      ],
+      permissions: ['web-access', 'file-read', 'api-access', 'search-engines', 'database-read'],
       trustedAgents: [],
       expertise: {
         research: 0.95,
-        analysis: 0.90,
+        analysis: 0.9,
         documentation: 0.85,
         'data-collection': 0.92,
         'fact-checking': 0.88
@@ -159,29 +158,30 @@ export class ResearcherAgent extends BaseAgent {
     };
 
     // Store research progress
-    await this.memory.store(`research:${task.id}:progress`, {
-      status: 'in-progress',
-      startTime: new Date(),
-      query
-    }, {
-      type: 'research-progress',
-      tags: ['research', this.id],
-      partition: 'tasks'
-    });
+    await this.memory.store(
+      `research:${task.id}:progress`,
+      {
+        status: 'in-progress',
+        startTime: new Date(),
+        query
+      },
+      {
+        type: 'research-progress',
+        tags: ['research', this.id],
+        partition: 'tasks'
+      }
+    );
 
     // Simulate research process
     await this.delay(2000);
-    
+
     results.summary = `Research findings for: ${query}`;
     results.findings = [
       'Key insight 1 based on research',
       'Important trend identified',
       'Relevant data points discovered'
     ];
-    results.recommendations = [
-      'Recommendation based on findings',
-      'Suggested next steps'
-    ];
+    results.recommendations = ['Recommendation based on findings', 'Suggested next steps'];
     results.confidence = 0.85;
     results.metadata.totalSources = 15;
     results.metadata.sourcesAnalyzed = 12;
@@ -286,7 +286,7 @@ export class ResearcherAgent extends BaseAgent {
       'Emerging trend in recent publications',
       'Contradictory results require further investigation'
     ];
-    review.confidence = 0.90;
+    review.confidence = 0.9;
 
     return review;
   }
@@ -373,19 +373,13 @@ export const createResearcherAgent = (
     timeoutThreshold: 600000,
     reportingInterval: 120000,
     heartbeatInterval: 60000,
-    permissions: [
-      'web-search',
-      'data-access',
-      'file-read',
-      'api-access',
-      'research-tools'
-    ],
+    permissions: ['web-search', 'data-access', 'file-read', 'api-access', 'research-tools'],
     trustedAgents: [],
     expertise: {
       'information-gathering': 0.95,
       'fact-checking': 0.92,
       'data-analysis': 0.88,
-      'literature-review': 0.90,
+      'literature-review': 0.9,
       'market-research': 0.85
     },
     preferences: {
@@ -403,12 +397,7 @@ export const createResearcherAgent = (
     logDirectory: './logs/researcher',
     apiEndpoints: {},
     credentials: {},
-    availableTools: [
-      'web-search',
-      'document-reader',
-      'data-extractor',
-      'citation-generator'
-    ],
+    availableTools: ['web-search', 'document-reader', 'data-extractor', 'citation-generator'],
     toolConfigs: {}
   };
 

@@ -73,7 +73,7 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
     this.config = { ...DEFAULT_FACTORY_CONFIG, ...config };
     this.strategyRegistry = strategyRegistry || new StrategyRegistry();
     this.logger = logger || new ConsoleLogger();
-    
+
     this.initializeDefaultStrategies();
   }
 
@@ -87,7 +87,7 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
     };
 
     this.logger.debug('Creating resource monitor', { config: mergedConfig });
-    
+
     // Implementation would create actual monitor
     return new ResourceMonitorImpl(mergedConfig, this.logger);
   }
@@ -102,7 +102,7 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
     };
 
     this.logger.debug('Creating resource allocator', { config: mergedConfig });
-    
+
     // Get allocation strategy
     const strategy = this.strategyRegistry.getAllocationStrategy(mergedConfig.strategy);
     if (!strategy) {
@@ -123,7 +123,7 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
     };
 
     this.logger.debug('Creating pressure detector', { config: mergedConfig });
-    
+
     // Implementation would create actual pressure detector
     return new ResourcePressureDetectorImpl(mergedConfig, this.logger);
   }
@@ -138,7 +138,7 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
     };
 
     this.logger.debug('Creating agent resource manager', { agentId: config.agentId });
-    
+
     // Implementation would create actual agent manager
     return new AgentResourceManagerImpl(mergedConfig, this.logger);
   }
@@ -203,11 +203,11 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
     // Import the required dependencies
     const { ResourceManagerConfigManager } = require('../../config/resource-manager-config');
     const { ResourceMemoryManager } = require('../../memory/resource-memory');
-    
+
     // Create mock implementations for testing
     const configManager = new ResourceManagerConfigManager();
     const memoryManager = new ResourceMemoryManager();
-    
+
     return new ResourceManager(configManager, memoryManager);
   }
 
@@ -218,7 +218,7 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
     // Register default monitoring strategies
     this.registerMonitorStrategy(new SystemMonitoringStrategy());
     this.registerMonitorStrategy(new ProcessMonitoringStrategy());
-    
+
     // Register default allocation strategies
     this.registerAllocationStrategy(new PriorityAllocationStrategy());
     this.registerAllocationStrategy(new FairShareAllocationStrategy());
@@ -292,60 +292,63 @@ class ConsoleLogger implements ILogger {
 
 // Placeholder implementations - these would be implemented in their respective directories
 class ResourceMonitorImpl implements IResourceMonitor {
-  constructor(private config: IResourceMonitorConfig, private logger: ILogger) {}
-  
+  constructor(
+    private config: IResourceMonitorConfig,
+    private logger: ILogger
+  ) {}
+
   async start(): Promise<void> {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   async stop(): Promise<void> {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   async getCurrentMetrics(): Promise<any> {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   async getHistoricalMetrics(): Promise<any[]> {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   async getAverageMetrics(): Promise<any> {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   subscribe(): () => void {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   subscribeToAlerts(): () => void {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   updateConfig(): void {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   getConfig(): IResourceMonitorConfig {
     return this.config;
   }
-  
+
   isActive(): boolean {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   async collect(): Promise<any> {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   getAlertHistory(): any[] {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   clearAlertHistory(): void {
     throw new Error('ResourceMonitor implementation not yet created');
   }
-  
+
   async exportMetrics(): Promise<void> {
     throw new Error('ResourceMonitor implementation not yet created');
   }
@@ -357,187 +360,193 @@ class ResourceAllocatorImpl implements IResourceAllocator {
     private strategy: IAllocationStrategy,
     private logger: ILogger
   ) {}
-  
+
   async allocate(): Promise<any> {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   async deallocate(): Promise<boolean> {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   async updateAllocation(): Promise<any> {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   getAllocations(): any[] {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   getAllocation(): any {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   getAllocationsByRequester(): any[] {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   getAvailableResources(): any {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   getUtilization(): any {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   canAllocate(): boolean {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   async predictAvailability(): Promise<boolean> {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   async optimize(): Promise<any> {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   setStrategy(): void {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   updateConfig(): void {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   getConfig(): IResourceAllocatorConfig {
     return this.config;
   }
-  
+
   exportState(): any {
     throw new Error('ResourceAllocator implementation not yet created');
   }
-  
+
   async importState(): Promise<void> {
     throw new Error('ResourceAllocator implementation not yet created');
   }
 }
 
 class ResourcePressureDetectorImpl implements IResourcePressureDetector {
-  constructor(private config: IPressureDetectorConfig, private logger: ILogger) {}
-  
+  constructor(
+    private config: IPressureDetectorConfig,
+    private logger: ILogger
+  ) {}
+
   async start(): Promise<void> {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   async stop(): Promise<void> {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   getCurrentPressure(): any {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   getPressureHistory(): any[] {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   async predictPressure(): Promise<any> {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   detectAnomalies(): any[] {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   subscribe(): () => void {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   registerAction(): void {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   updateConfig(): void {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   getConfig(): IPressureDetectorConfig {
     return this.config;
   }
-  
+
   async check(): Promise<any> {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   getActionHistory(): any[] {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
-  
+
   async exportData(): Promise<string> {
     throw new Error('ResourcePressureDetector implementation not yet created');
   }
 }
 
 class AgentResourceManagerImpl implements IAgentResourceManager {
-  constructor(private config: IAgentResourceConfig, private logger: ILogger) {}
-  
+  constructor(
+    private config: IAgentResourceConfig,
+    private logger: ILogger
+  ) {}
+
   getAgentId(): string {
     return this.config.agentId;
   }
-  
+
   async requestResources(): Promise<any> {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   async releaseResources(): Promise<boolean> {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   updateConfig(): void {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   getConfig(): IAgentResourceConfig {
     return this.config;
   }
-  
+
   getCurrentAllocation(): any {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   async getUsageMetrics(): Promise<any> {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   async getPerformanceMetrics(): Promise<any> {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   areResourcesSufficient(): boolean {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   async requestAdjustment(): Promise<any> {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   setAutoScaling(): void {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   async scaleResources(): Promise<any> {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   getResourceHistory(): any[] {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   subscribe(): () => void {
     throw new Error('AgentResourceManager implementation not yet created');
   }
-  
+
   getHealthStatus(): any {
     throw new Error('AgentResourceManager implementation not yet created');
   }
@@ -546,15 +555,15 @@ class AgentResourceManagerImpl implements IAgentResourceManager {
 // Placeholder strategy implementations
 class SystemMonitoringStrategy implements IMonitoringStrategy {
   name = 'system';
-  
+
   async collect(): Promise<any> {
     throw new Error('SystemMonitoringStrategy implementation not yet created');
   }
-  
+
   isAvailable(): boolean {
     return true;
   }
-  
+
   getResourceTypes(): any[] {
     return [];
   }
@@ -562,15 +571,15 @@ class SystemMonitoringStrategy implements IMonitoringStrategy {
 
 class ProcessMonitoringStrategy implements IMonitoringStrategy {
   name = 'process';
-  
+
   async collect(): Promise<any> {
     throw new Error('ProcessMonitoringStrategy implementation not yet created');
   }
-  
+
   isAvailable(): boolean {
     return true;
   }
-  
+
   getResourceTypes(): any[] {
     return [];
   }
@@ -578,15 +587,15 @@ class ProcessMonitoringStrategy implements IMonitoringStrategy {
 
 class PriorityAllocationStrategy implements IAllocationStrategy {
   name = 'priority' as any;
-  
+
   findAllocation(): any {
     throw new Error('PriorityAllocationStrategy implementation not yet created');
   }
-  
+
   optimize(): any[] {
     throw new Error('PriorityAllocationStrategy implementation not yet created');
   }
-  
+
   calculatePriority(): number {
     throw new Error('PriorityAllocationStrategy implementation not yet created');
   }
@@ -594,15 +603,15 @@ class PriorityAllocationStrategy implements IAllocationStrategy {
 
 class FairShareAllocationStrategy implements IAllocationStrategy {
   name = 'fair-share' as any;
-  
+
   findAllocation(): any {
     throw new Error('FairShareAllocationStrategy implementation not yet created');
   }
-  
+
   optimize(): any[] {
     throw new Error('FairShareAllocationStrategy implementation not yet created');
   }
-  
+
   calculatePriority(): number {
     throw new Error('FairShareAllocationStrategy implementation not yet created');
   }
@@ -610,15 +619,15 @@ class FairShareAllocationStrategy implements IAllocationStrategy {
 
 class BestFitAllocationStrategy implements IAllocationStrategy {
   name = 'best-fit' as any;
-  
+
   findAllocation(): any {
     throw new Error('BestFitAllocationStrategy implementation not yet created');
   }
-  
+
   optimize(): any[] {
     throw new Error('BestFitAllocationStrategy implementation not yet created');
   }
-  
+
   calculatePriority(): number {
     throw new Error('BestFitAllocationStrategy implementation not yet created');
   }

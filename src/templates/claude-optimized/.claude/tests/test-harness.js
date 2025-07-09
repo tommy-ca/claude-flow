@@ -42,10 +42,7 @@ class TestHarness {
    */
   async batchReadFiles(filePaths) {
     const startTime = performance.now();
-    const results = await this.executeBatch(
-      filePaths,
-      async (path) => await this.mockReadFile(path)
-    );
+    const results = await this.executeBatch(filePaths, async path => await this.mockReadFile(path));
     const duration = performance.now() - startTime;
     this.recordMetric('batchReadFiles', filePaths.length, duration);
     return results;
@@ -67,7 +64,7 @@ class TestHarness {
     const startTime = performance.now();
     const results = await this.executeBatch(
       patterns,
-      async (pattern) => await this.performSearch(pattern, searchIn)
+      async pattern => await this.performSearch(pattern, searchIn)
     );
     const duration = performance.now() - startTime;
     this.recordMetric('batchSearch', patterns.length, duration);
@@ -80,7 +77,7 @@ class TestHarness {
   async executeBatch(items, operation) {
     const results = [];
     const errors = [];
-    
+
     // Process items in chunks based on concurrency limit
     for (let i = 0; i < items.length; i += this.concurrencyLimit) {
       const chunk = items.slice(i, i + this.concurrencyLimit);
@@ -92,17 +89,19 @@ class TestHarness {
           return { success: false, error, index: i + index };
         }
       });
-      
+
       const chunkResults = await Promise.all(chunkPromises);
       results.push(...chunkResults);
     }
-    
+
     return {
       successful: results.filter(r => r.success).map(r => r.result),
-      failed: results.filter(r => !r.success).map(r => ({ 
-        index: r.index, 
-        error: r.error 
-      })),
+      failed: results
+        .filter(r => !r.success)
+        .map(r => ({
+          index: r.index,
+          error: r.error
+        })),
       totalProcessed: items.length,
       successRate: results.filter(r => r.success).length / items.length
     };
@@ -134,7 +133,7 @@ class TestHarness {
     for (const [operation, metrics] of Object.entries(grouped)) {
       const avgDuration = metrics.reduce((sum, m) => sum + m.duration, 0) / metrics.length;
       const avgThroughput = metrics.reduce((sum, m) => sum + m.throughput, 0) / metrics.length;
-      
+
       report[operation] = {
         totalCalls: metrics.length,
         averageDuration: avgDuration.toFixed(2) + 'ms',
@@ -142,7 +141,7 @@ class TestHarness {
         totalItemsProcessed: metrics.reduce((sum, m) => sum + m.itemCount, 0)
       };
     }
-    
+
     return report;
   }
 
@@ -162,13 +161,13 @@ class TestHarness {
     const startMemory = process.memoryUsage();
     const startCPU = process.cpuUsage();
     const startTime = performance.now();
-    
+
     const result = await operation();
-    
+
     const endMemory = process.memoryUsage();
     const endCPU = process.cpuUsage();
     const endTime = performance.now();
-    
+
     return {
       result,
       metrics: {
@@ -200,12 +199,12 @@ class TestHarness {
       large: this.generateLargeProject(100),
       complex: this.generateComplexProject()
     };
-    
+
     const project = projects[type] || projects.standard;
     for (const [filePath, content] of Object.entries(project)) {
       this.mockFS.set(filePath, content);
     }
-    
+
     return Object.keys(project);
   }
 
@@ -247,22 +246,23 @@ class TestHarness {
     await this.simulateDelay();
     const regex = new RegExp(pattern, 'gi');
     const results = [];
-    
+
     for (const [filePath, content] of this.mockFS.entries()) {
       if (searchIn && !filePath.includes(searchIn)) continue;
-      
+
       const matches = content.match(regex);
       if (matches) {
         results.push({
           file: filePath,
           matches: matches.length,
-          lines: content.split('\n')
+          lines: content
+            .split('\n')
             .map((line, i) => ({ line: i + 1, content: line }))
             .filter(({ content }) => regex.test(content))
         });
       }
     }
-    
+
     return results;
   }
 

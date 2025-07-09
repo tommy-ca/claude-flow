@@ -61,7 +61,7 @@ export abstract class BaseAgent extends EventEmitter {
   protected logger: ILogger;
   protected eventBus: IEventBus;
   protected memory: DistributedMemorySystem;
-  
+
   private heartbeatInterval?: NodeJS.Timeout;
   private metricsInterval?: NodeJS.Timeout;
   private isShuttingDown = false;
@@ -81,7 +81,7 @@ export abstract class BaseAgent extends EventEmitter {
     this.logger = logger;
     this.eventBus = eventBus;
     this.memory = memory;
-    
+
     // Merge with defaults
     this.capabilities = { ...this.getDefaultCapabilities(), ...(config as any).capabilities };
     this.config = { ...this.getDefaultConfig(), ...config };
@@ -108,7 +108,7 @@ export abstract class BaseAgent extends EventEmitter {
 
     // Start heartbeat
     this.startHeartbeat();
-    
+
     // Start metrics collection
     this.startMetricsCollection();
 
@@ -188,11 +188,11 @@ export abstract class BaseAgent extends EventEmitter {
 
       // Update metrics
       this.updateTaskMetrics(task.id, executionTime, true);
-      
+
       // Remove from current tasks
       this.currentTasks = this.currentTasks.filter(id => id !== task.id);
       this.taskHistory.push(task.id);
-      
+
       // Update status
       this.status = this.currentTasks.length > 0 ? 'busy' : 'idle';
       this.workload = this.currentTasks.length / this.capabilities.maxConcurrentTasks;
@@ -211,13 +211,12 @@ export abstract class BaseAgent extends EventEmitter {
       });
 
       return result;
-
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       // Update metrics
       this.updateTaskMetrics(task.id, 0, false);
-      
+
       // Add to error history
       this.addError({
         timestamp: new Date(),
@@ -404,7 +403,7 @@ export abstract class BaseAgent extends EventEmitter {
     // Update response time based on recent tasks
     const recentTasksTime = this.getRecentTasksAverageTime();
     this.metrics.responseTime = recentTasksTime;
-    
+
     // Update activity timestamp
     if (this.currentTasks.length > 0) {
       this.metrics.lastActivity = new Date();
@@ -427,9 +426,10 @@ export abstract class BaseAgent extends EventEmitter {
   protected updateTaskMetrics(taskId: TaskId, executionTime: number, success: boolean): void {
     if (success) {
       this.metrics.tasksCompleted++;
-      
+
       // Update average execution time
-      const totalTime = this.metrics.averageExecutionTime * (this.metrics.tasksCompleted - 1) + executionTime;
+      const totalTime =
+        this.metrics.averageExecutionTime * (this.metrics.tasksCompleted - 1) + executionTime;
       this.metrics.averageExecutionTime = totalTime / this.metrics.tasksCompleted;
     } else {
       this.metrics.tasksFailed++;
@@ -440,7 +440,7 @@ export abstract class BaseAgent extends EventEmitter {
 
   protected addError(error: AgentError): void {
     this.errorHistory.push(error);
-    
+
     // Keep only last 50 errors
     if (this.errorHistory.length > 50) {
       this.errorHistory.shift();
@@ -452,12 +452,13 @@ export abstract class BaseAgent extends EventEmitter {
     });
 
     // Reduce health based on error severity
-    const healthImpact = {
-      low: 0.01,
-      medium: 0.05,
-      high: 0.1,
-      critical: 0.2
-    }[error.severity] || 0.05;
+    const healthImpact =
+      {
+        low: 0.01,
+        medium: 0.05,
+        high: 0.1,
+        critical: 0.2
+      }[error.severity] || 0.05;
 
     this.updateHealth(this.health - healthImpact);
   }
@@ -470,7 +471,7 @@ export abstract class BaseAgent extends EventEmitter {
   protected async waitForTasksCompletion(): Promise<void> {
     if (this.currentTasks.length === 0) return;
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const checkTasks = () => {
         if (this.currentTasks.length === 0) {
           resolve();

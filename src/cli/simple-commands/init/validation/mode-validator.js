@@ -41,7 +41,6 @@ export class ModeValidator {
           result.errors.push(`Mode ${mode} failed testing: ${modeTest.error}`);
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Mode testing failed: ${error.message}`);
@@ -91,7 +90,6 @@ export class ModeValidator {
         result.error = execTest.error;
         return result;
       }
-
     } catch (error) {
       result.success = false;
       result.error = error.message;
@@ -129,7 +127,6 @@ export class ModeValidator {
       }
 
       result.initialized = result.hasRoomodes && result.hasExecutable;
-
     } catch (error) {
       result.error = error.message;
     }
@@ -152,7 +149,6 @@ export class ModeValidator {
       if (config.modes && typeof config.modes === 'object') {
         modes.push(...Object.keys(config.modes));
       }
-
     } catch (error) {
       // Fallback to common modes
       modes.push(
@@ -195,7 +191,6 @@ export class ModeValidator {
         const errorOutput = new TextDecoder().decode(stderr);
         result.error = `Mode not accessible: ${errorOutput}`;
       }
-
     } catch (error) {
       result.error = `Failed to test mode access: ${error.message}`;
     }
@@ -241,7 +236,6 @@ export class ModeValidator {
       }
 
       result.success = true;
-
     } catch (error) {
       result.error = `Configuration validation failed: ${error.message}`;
     }
@@ -297,7 +291,6 @@ export class ModeValidator {
           result.error = `Mode execution failed: ${errorOutput}`;
         }
       }
-
     } catch (error) {
       result.error = `Execution test failed: ${error.message}`;
     }
@@ -341,11 +334,9 @@ export class ModeValidator {
         if (entries.length === 0) {
           result.warnings.push('No workflow files found');
         }
-
       } catch {
         result.warnings.push('Workflow directory not accessible');
       }
-
     } catch (error) {
       result.errors.push(`Workflow testing failed: ${error.message}`);
     }
@@ -385,7 +376,6 @@ export class ModeValidator {
           return result;
         }
       }
-
     } catch (error) {
       result.success = false;
       result.error = `Workflow validation failed: ${error.message}`;

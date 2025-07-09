@@ -18,7 +18,7 @@ export class RequestRouter {
 
   constructor(
     private toolRegistry: ToolRegistry,
-    private logger: ILogger,
+    private logger: ILogger
   ) {}
 
   /**
@@ -68,7 +68,7 @@ export class RequestRouter {
     return {
       totalRequests: this.totalRequests,
       successfulRequests: this.successfulRequests,
-      failedRequests: this.failedRequests,
+      failedRequests: this.failedRequests
     };
   }
 
@@ -120,7 +120,7 @@ export class RequestRouter {
       'rpc.describe': 'Describe a specific method',
       'tools.list': 'List all available tools',
       'tools.invoke': 'Invoke a specific tool',
-      'tools.describe': 'Describe a specific tool',
+      'tools.describe': 'Describe a specific tool'
     };
 
     // Add all registered tools
@@ -147,7 +147,7 @@ export class RequestRouter {
       return {
         name: tool.name,
         description: tool.description,
-        inputSchema: tool.inputSchema,
+        inputSchema: tool.inputSchema
       };
     }
 
@@ -155,25 +155,25 @@ export class RequestRouter {
     const builtInMethods: Record<string, unknown> = {
       'rpc.discover': {
         description: 'Discover all available methods',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: {} }
       },
       'rpc.ping': {
         description: 'Ping the server',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: {} }
       },
       'rpc.describe': {
         description: 'Describe a specific method',
         inputSchema: {
           type: 'object',
           properties: {
-            method: { type: 'string' },
+            method: { type: 'string' }
           },
-          required: ['method'],
-        },
+          required: ['method']
+        }
       },
       'tools.list': {
         description: 'List all available tools',
-        inputSchema: { type: 'object', properties: {} },
+        inputSchema: { type: 'object', properties: {} }
       },
       'tools.invoke': {
         description: 'Invoke a specific tool',
@@ -181,21 +181,21 @@ export class RequestRouter {
           type: 'object',
           properties: {
             tool: { type: 'string' },
-            input: { type: 'object' },
+            input: { type: 'object' }
           },
-          required: ['tool', 'input'],
-        },
+          required: ['tool', 'input']
+        }
       },
       'tools.describe': {
         description: 'Describe a specific tool',
         inputSchema: {
           type: 'object',
           properties: {
-            tool: { type: 'string' },
+            tool: { type: 'string' }
           },
-          required: ['tool'],
-        },
-      },
+          required: ['tool']
+        }
+      }
     };
 
     if (method in builtInMethods) {
@@ -235,7 +235,7 @@ export class RequestRouter {
     return {
       name: tool.name,
       description: tool.description,
-      inputSchema: tool.inputSchema,
+      inputSchema: tool.inputSchema
     };
   }
 }

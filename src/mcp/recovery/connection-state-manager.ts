@@ -52,9 +52,9 @@ export class ConnectionStateManager {
     totalReconnections: 0,
     averageSessionDuration: 0,
     averageReconnectionTime: 0,
-    connectionHistory: [],
+    connectionHistory: []
   };
-  
+
   private persistenceTimer?: NodeJS.Timeout;
   private statePath: string;
   private metricsPath: string;
@@ -63,7 +63,7 @@ export class ConnectionStateManager {
     enablePersistence: true,
     stateDirectory: '.mcp-state',
     maxHistorySize: 1000,
-    persistenceInterval: 60000, // 1 minute
+    persistenceInterval: 60000 // 1 minute
   };
 
   constructor(
@@ -71,10 +71,10 @@ export class ConnectionStateManager {
     config?: Partial<StateManagerConfig>
   ) {
     this.config = { ...this.defaultConfig, ...config };
-    
+
     this.statePath = join(this.config.stateDirectory, 'connection-state.json');
     this.metricsPath = join(this.config.stateDirectory, 'connection-metrics.json');
-    
+
     this.initialize().catch(error => {
       this.logger.error('Failed to initialize state manager', error);
     });
@@ -93,16 +93,16 @@ export class ConnectionStateManager {
     try {
       // Ensure state directory exists
       await fs.mkdir(this.config.stateDirectory, { recursive: true });
-      
+
       // Load existing state
       await this.loadState();
       await this.loadMetrics();
-      
+
       // Start persistence timer
       this.startPersistenceTimer();
-      
+
       this.logger.info('Connection state manager initialized', {
-        stateDirectory: this.config.stateDirectory,
+        stateDirectory: this.config.stateDirectory
       });
     } catch (error) {
       this.logger.error('Failed to initialize state manager', error);
@@ -117,13 +117,13 @@ export class ConnectionStateManager {
       ...state,
       metadata: {
         ...state.metadata,
-        lastSaved: new Date().toISOString(),
-      },
+        lastSaved: new Date().toISOString()
+      }
     };
 
     this.logger.debug('Connection state saved', {
       sessionId: state.sessionId,
-      pendingRequests: state.pendingRequests.length,
+      pendingRequests: state.pendingRequests.length
     });
 
     // Persist immediately if critical
@@ -145,7 +145,7 @@ export class ConnectionStateManager {
 
     this.logger.info('Restoring connection state', {
       sessionId: this.currentState.sessionId,
-      pendingRequests: this.currentState.pendingRequests.length,
+      pendingRequests: this.currentState.pendingRequests.length
     });
 
     return { ...this.currentState };
@@ -157,11 +157,11 @@ export class ConnectionStateManager {
   recordEvent(event: Omit<ConnectionEvent, 'timestamp'>): void {
     const fullEvent: ConnectionEvent = {
       ...event,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     this.connectionHistory.push(fullEvent);
-    
+
     // Trim history if needed
     if (this.connectionHistory.length > this.config.maxHistorySize) {
       this.connectionHistory = this.connectionHistory.slice(-this.config.maxHistorySize);
@@ -172,7 +172,7 @@ export class ConnectionStateManager {
 
     this.logger.debug('Connection event recorded', {
       type: event.type,
-      sessionId: event.sessionId,
+      sessionId: event.sessionId
     });
   }
 
@@ -182,7 +182,7 @@ export class ConnectionStateManager {
   getMetrics(): ConnectionMetrics {
     return {
       ...this.metrics,
-      connectionHistory: [...this.connectionHistory],
+      connectionHistory: [...this.connectionHistory]
     };
   }
 
@@ -192,9 +192,9 @@ export class ConnectionStateManager {
   clearSession(sessionId: string): void {
     if (this.currentState?.sessionId === sessionId) {
       this.currentState = undefined;
-      
+
       this.logger.info('Session state cleared', { sessionId });
-      
+
       this.persistState().catch(error => {
         this.logger.error('Failed to persist cleared state', error);
       });
@@ -211,11 +211,11 @@ export class ConnectionStateManager {
     }
 
     this.currentState.pendingRequests.push(request);
-    
+
     this.logger.debug('Pending request added', {
       requestId: request.id,
       method: request.method,
-      total: this.currentState.pendingRequests.length,
+      total: this.currentState.pendingRequests.length
     });
   }
 
@@ -249,7 +249,7 @@ export class ConnectionStateManager {
 
     this.currentState.metadata = {
       ...this.currentState.metadata,
-      ...metadata,
+      ...metadata
     };
   }
 
@@ -260,7 +260,7 @@ export class ConnectionStateManager {
     const connectEvent = this.connectionHistory.find(
       e => e.sessionId === sessionId && e.type === 'connect'
     );
-    
+
     const disconnectEvent = this.connectionHistory.find(
       e => e.sessionId === sessionId && e.type === 'disconnect'
     );
@@ -280,10 +280,12 @@ export class ConnectionStateManager {
     const disconnectEvent = this.connectionHistory.find(
       e => e.sessionId === sessionId && e.type === 'disconnect'
     );
-    
+
     const reconnectEvent = this.connectionHistory.find(
-      e => e.sessionId === sessionId && e.type === 'reconnect' &&
-      e.timestamp > (disconnectEvent?.timestamp || new Date(0))
+      e =>
+        e.sessionId === sessionId &&
+        e.type === 'reconnect' &&
+        e.timestamp > (disconnectEvent?.timestamp || new Date(0))
     );
 
     if (!disconnectEvent || !reconnectEvent) {
@@ -298,31 +300,32 @@ export class ConnectionStateManager {
       case 'connect':
         this.metrics.totalConnections++;
         break;
-      
+
       case 'disconnect':
         this.metrics.totalDisconnections++;
-        
+
         // Calculate session duration
         const duration = this.getSessionDuration(event.sessionId);
         if (duration !== null) {
           this.metrics.lastConnectionDuration = duration;
-          
+
           // Update average
-          const totalDuration = this.metrics.averageSessionDuration * 
-            (this.metrics.totalDisconnections - 1) + duration;
+          const totalDuration =
+            this.metrics.averageSessionDuration * (this.metrics.totalDisconnections - 1) + duration;
           this.metrics.averageSessionDuration = totalDuration / this.metrics.totalDisconnections;
         }
         break;
-      
+
       case 'reconnect':
         this.metrics.totalReconnections++;
-        
+
         // Calculate reconnection time
         const reconnectTime = this.getReconnectionTime(event.sessionId);
         if (reconnectTime !== null) {
           // Update average
-          const totalTime = this.metrics.averageReconnectionTime * 
-            (this.metrics.totalReconnections - 1) + reconnectTime;
+          const totalTime =
+            this.metrics.averageReconnectionTime * (this.metrics.totalReconnections - 1) +
+            reconnectTime;
           this.metrics.averageReconnectionTime = totalTime / this.metrics.totalReconnections;
         }
         break;
@@ -333,18 +336,18 @@ export class ConnectionStateManager {
     try {
       const data = await fs.readFile(this.statePath, 'utf-8');
       const state = JSON.parse(data);
-      
+
       // Convert date strings back to Date objects
       state.lastConnected = new Date(state.lastConnected);
       if (state.lastDisconnected) {
         state.lastDisconnected = new Date(state.lastDisconnected);
       }
-      
+
       this.currentState = state;
-      
+
       this.logger.info('Connection state loaded', {
         sessionId: state.sessionId,
-        pendingRequests: state.pendingRequests.length,
+        pendingRequests: state.pendingRequests.length
       });
     } catch (error) {
       if ((error as any).code !== 'ENOENT') {
@@ -357,19 +360,19 @@ export class ConnectionStateManager {
     try {
       const data = await fs.readFile(this.metricsPath, 'utf-8');
       const loaded = JSON.parse(data);
-      
+
       // Convert date strings back to Date objects
       loaded.connectionHistory = loaded.connectionHistory.map((event: any) => ({
         ...event,
-        timestamp: new Date(event.timestamp),
+        timestamp: new Date(event.timestamp)
       }));
-      
+
       this.metrics = loaded;
       this.connectionHistory = loaded.connectionHistory;
-      
+
       this.logger.info('Connection metrics loaded', {
         totalConnections: this.metrics.totalConnections,
-        historySize: this.connectionHistory.length,
+        historySize: this.connectionHistory.length
       });
     } catch (error) {
       if ((error as any).code !== 'ENOENT') {
@@ -385,20 +388,20 @@ export class ConnectionStateManager {
 
     try {
       if (this.currentState) {
-        await fs.writeFile(
-          this.statePath,
-          JSON.stringify(this.currentState, null, 2),
-          'utf-8'
-        );
+        await fs.writeFile(this.statePath, JSON.stringify(this.currentState, null, 2), 'utf-8');
       }
 
       // Also persist metrics
       await fs.writeFile(
         this.metricsPath,
-        JSON.stringify({
-          ...this.metrics,
-          connectionHistory: this.connectionHistory,
-        }, null, 2),
+        JSON.stringify(
+          {
+            ...this.metrics,
+            connectionHistory: this.connectionHistory
+          },
+          null,
+          2
+        ),
         'utf-8'
       );
 

@@ -54,16 +54,16 @@ export class EnhancedWebUIComplete {
 
     // Colors for consistent styling
     this.colors = {
-      cyan: (text) => `\x1b[36m${text}\x1b[0m`,
-      gray: (text) => `\x1b[90m${text}\x1b[0m`,
-      white: (text) => `\x1b[37m${text}\x1b[0m`,
-      yellow: (text) => `\x1b[33m${text}\x1b[0m`,
-      green: (text) => `\x1b[32m${text}\x1b[0m`,
-      red: (text) => `\x1b[31m${text}\x1b[0m`,
-      blue: (text) => `\x1b[34m${text}\x1b[0m`,
-      magenta: (text) => `\x1b[35m${text}\x1b[0m`,
-      bold: (text) => `\x1b[1m${text}\x1b[0m`,
-      dim: (text) => `\x1b[2m${text}\x1b[0m`
+      cyan: text => `\x1b[36m${text}\x1b[0m`,
+      gray: text => `\x1b[90m${text}\x1b[0m`,
+      white: text => `\x1b[37m${text}\x1b[0m`,
+      yellow: text => `\x1b[33m${text}\x1b[0m`,
+      green: text => `\x1b[32m${text}\x1b[0m`,
+      red: text => `\x1b[31m${text}\x1b[0m`,
+      blue: text => `\x1b[34m${text}\x1b[0m`,
+      magenta: text => `\x1b[35m${text}\x1b[0m`,
+      bold: text => `\x1b[1m${text}\x1b[0m`,
+      dim: text => `\x1b[2m${text}\x1b[0m`
     };
 
     this.initializeEnhancedUI();
@@ -99,7 +99,6 @@ export class EnhancedWebUIComplete {
       this.startSystemMonitoring();
 
       this.addLog('success', '🚀 Enhanced Web UI fully initialized with all 87 MCP tools');
-
     } catch (error) {
       this.addLog('error', `Failed to initialize enhanced UI: ${error.message}`);
       throw error;
@@ -159,14 +158,46 @@ export class EnhancedWebUIComplete {
 
     // Initialize logs
     this.logs = [
-      { time: new Date(), level: 'success', message: '🧠 Neural engine initialized with 27 models' },
-      { time: new Date(), level: 'success', message: '🐝 Swarm orchestration active with hierarchical topology' },
-      { time: new Date(), level: 'info', message: '📊 Analysis service monitoring 13 performance metrics' },
-      { time: new Date(), level: 'success', message: '🔄 Workflow engine loaded 11 automation tools' },
-      { time: new Date(), level: 'info', message: '🐙 GitHub connector established with 8 integration tools' },
-      { time: new Date(), level: 'success', message: '🤖 DAA controller managing 8 dynamic agent tools' },
-      { time: new Date(), level: 'success', message: '💾 Memory system active with 12 persistence tools' },
-      { time: new Date(), level: 'success', message: '🛠️ System utilities loaded 8 management tools' }
+      {
+        time: new Date(),
+        level: 'success',
+        message: '🧠 Neural engine initialized with 27 models'
+      },
+      {
+        time: new Date(),
+        level: 'success',
+        message: '🐝 Swarm orchestration active with hierarchical topology'
+      },
+      {
+        time: new Date(),
+        level: 'info',
+        message: '📊 Analysis service monitoring 13 performance metrics'
+      },
+      {
+        time: new Date(),
+        level: 'success',
+        message: '🔄 Workflow engine loaded 11 automation tools'
+      },
+      {
+        time: new Date(),
+        level: 'info',
+        message: '🐙 GitHub connector established with 8 integration tools'
+      },
+      {
+        time: new Date(),
+        level: 'success',
+        message: '🤖 DAA controller managing 8 dynamic agent tools'
+      },
+      {
+        time: new Date(),
+        level: 'success',
+        message: '💾 Memory system active with 12 persistence tools'
+      },
+      {
+        time: new Date(),
+        level: 'success',
+        message: '🛠️ System utilities loaded 8 management tools'
+      }
     ];
 
     // Start uptime counter
@@ -187,8 +218,14 @@ export class EnhancedWebUIComplete {
   startSystemMonitoring() {
     setInterval(() => {
       // Update system stats
-      this.systemStats.cpuUsage = Math.max(0, this.systemStats.cpuUsage + (Math.random() - 0.5) * 2);
-      this.systemStats.memoryUsage = Math.max(0, this.systemStats.memoryUsage + (Math.random() - 0.5) * 3);
+      this.systemStats.cpuUsage = Math.max(
+        0,
+        this.systemStats.cpuUsage + (Math.random() - 0.5) * 2
+      );
+      this.systemStats.memoryUsage = Math.max(
+        0,
+        this.systemStats.memoryUsage + (Math.random() - 0.5) * 3
+      );
 
       // Update process stats
       this.processes.forEach(process => {
@@ -257,7 +294,9 @@ export class EnhancedWebUIComplete {
 
     console.log(this.colors.cyan('📂 Available Tool Categories:'));
     categories.forEach(cat => {
-      console.log(`  ${cat.icon} ${this.colors.white(cat.name)}: ${this.colors.yellow(cat.count)} tools`);
+      console.log(
+        `  ${cat.icon} ${this.colors.white(cat.name)}: ${this.colors.yellow(cat.count)} tools`
+      );
     });
     console.log();
     console.log(this.colors.green(`Total: ${this.colors.bold('87')} MCP tools ready for use`));
@@ -287,45 +326,45 @@ export class EnhancedWebUIComplete {
 
     // Main content based on current view
     switch (this.currentView) {
-    case ALL_VIEWS.PROCESSES:
-      this.renderProcessView();
-      break;
-    case ALL_VIEWS.STATUS:
-      this.renderStatusView();
-      break;
-    case ALL_VIEWS.ORCHESTRATION:
-      this.renderOrchestrationView();
-      break;
-    case ALL_VIEWS.MEMORY:
-      this.renderMemoryView();
-      break;
-    case ALL_VIEWS.LOGS:
-      this.renderLogsView();
-      break;
-    case ALL_VIEWS.NEURAL:
-      this.enhancedViews.renderNeuralView();
-      break;
-    case ALL_VIEWS.ANALYSIS:
-      this.enhancedViews.renderAnalysisView();
-      break;
-    case ALL_VIEWS.WORKFLOW:
-      this.enhancedViews.renderWorkflowView();
-      break;
-    case ALL_VIEWS.GITHUB:
-      this.enhancedViews.renderGitHubView();
-      break;
-    case ALL_VIEWS.DAA:
-      this.enhancedViews.renderDAAView();
-      break;
-    case ALL_VIEWS.SYSTEM:
-      this.enhancedViews.renderSystemView();
-      break;
-    case ALL_VIEWS.TOOLS:
-      this.enhancedViews.renderToolsView();
-      break;
-    case ALL_VIEWS.HELP:
-      this.renderEnhancedHelpView();
-      break;
+      case ALL_VIEWS.PROCESSES:
+        this.renderProcessView();
+        break;
+      case ALL_VIEWS.STATUS:
+        this.renderStatusView();
+        break;
+      case ALL_VIEWS.ORCHESTRATION:
+        this.renderOrchestrationView();
+        break;
+      case ALL_VIEWS.MEMORY:
+        this.renderMemoryView();
+        break;
+      case ALL_VIEWS.LOGS:
+        this.renderLogsView();
+        break;
+      case ALL_VIEWS.NEURAL:
+        this.enhancedViews.renderNeuralView();
+        break;
+      case ALL_VIEWS.ANALYSIS:
+        this.enhancedViews.renderAnalysisView();
+        break;
+      case ALL_VIEWS.WORKFLOW:
+        this.enhancedViews.renderWorkflowView();
+        break;
+      case ALL_VIEWS.GITHUB:
+        this.enhancedViews.renderGitHubView();
+        break;
+      case ALL_VIEWS.DAA:
+        this.enhancedViews.renderDAAView();
+        break;
+      case ALL_VIEWS.SYSTEM:
+        this.enhancedViews.renderSystemView();
+        break;
+      case ALL_VIEWS.TOOLS:
+        this.enhancedViews.renderToolsView();
+        break;
+      case ALL_VIEWS.HELP:
+        this.renderEnhancedHelpView();
+        break;
     }
 
     // Enhanced footer with more controls
@@ -351,7 +390,9 @@ export class EnhancedWebUIComplete {
     let mainTabLine = '';
     mainTabs.forEach(tab => {
       const isActive = this.currentView === tab.view;
-      const label = isActive ? this.colors.yellow(`[${tab.label}]`) : this.colors.gray(`${tab.label}`);
+      const label = isActive
+        ? this.colors.yellow(`[${tab.label}]`)
+        : this.colors.gray(`${tab.label}`);
       mainTabLine += `  ${this.colors.bold(tab.key)}:${label}`;
     });
 
@@ -369,7 +410,9 @@ export class EnhancedWebUIComplete {
     let toolTabLine = '';
     toolTabs.forEach(tab => {
       const isActive = this.currentView === tab.view;
-      const label = isActive ? this.colors.yellow(`[${tab.icon}${tab.label}]`) : this.colors.gray(`${tab.icon}${tab.label}`);
+      const label = isActive
+        ? this.colors.yellow(`[${tab.icon}${tab.label}]`)
+        : this.colors.gray(`${tab.icon}${tab.label}`);
       toolTabLine += `  ${this.colors.bold(tab.key)}:${label}`;
     });
 
@@ -385,7 +428,9 @@ export class EnhancedWebUIComplete {
     let additionalTabLine = '';
     additionalTabs.forEach(tab => {
       const isActive = this.currentView === tab.view;
-      const label = isActive ? this.colors.yellow(`[${tab.icon}${tab.label}]`) : this.colors.gray(`${tab.icon}${tab.label}`);
+      const label = isActive
+        ? this.colors.yellow(`[${tab.icon}${tab.label}]`)
+        : this.colors.gray(`${tab.icon}${tab.label}`);
       additionalTabLine += `  ${this.colors.bold(tab.key)}:${label}`;
     });
 
@@ -475,8 +520,8 @@ export class EnhancedWebUIComplete {
    * Enhanced input handling
    */
   async handleInput() {
-    return new Promise((resolve) => {
-      const onData = async (chunk) => {
+    return new Promise(resolve => {
+      const onData = async chunk => {
         const key = chunk.toString();
 
         // Remove listener
@@ -503,7 +548,6 @@ export class EnhancedWebUIComplete {
 
           // Handle original input
           await this.handleOriginalInput(key);
-
         } catch (error) {
           this.addLog('error', `Input handling error: ${error.message}`);
         }
@@ -520,19 +564,19 @@ export class EnhancedWebUIComplete {
    */
   async handleNavigationInput(key) {
     const navigationMap = {
-      '1': ALL_VIEWS.PROCESSES,
-      '2': ALL_VIEWS.STATUS,
-      '3': ALL_VIEWS.ORCHESTRATION,
-      '4': ALL_VIEWS.MEMORY,
-      '5': ALL_VIEWS.LOGS,
-      '6': ALL_VIEWS.NEURAL,
-      '7': ALL_VIEWS.ANALYSIS,
-      '8': ALL_VIEWS.WORKFLOW,
-      '9': ALL_VIEWS.GITHUB,
-      '0': ALL_VIEWS.DAA,
-      't': ALL_VIEWS.TOOLS,
-      's': ALL_VIEWS.SYSTEM,
-      'h': ALL_VIEWS.HELP
+      1: ALL_VIEWS.PROCESSES,
+      2: ALL_VIEWS.STATUS,
+      3: ALL_VIEWS.ORCHESTRATION,
+      4: ALL_VIEWS.MEMORY,
+      5: ALL_VIEWS.LOGS,
+      6: ALL_VIEWS.NEURAL,
+      7: ALL_VIEWS.ANALYSIS,
+      8: ALL_VIEWS.WORKFLOW,
+      9: ALL_VIEWS.GITHUB,
+      0: ALL_VIEWS.DAA,
+      t: ALL_VIEWS.TOOLS,
+      s: ALL_VIEWS.SYSTEM,
+      h: ALL_VIEWS.HELP
     };
 
     if (navigationMap[key]) {
@@ -560,22 +604,22 @@ export class EnhancedWebUIComplete {
    */
   async handleGlobalCommands(key) {
     switch (key) {
-    case 'r':
-      await this.promptRunTool();
-      return true;
-    case 'w':
-      await this.promptRunWorkflow();
-      return true;
-    case 'b':
-      await this.promptBatchExecution();
-      return true;
-    case 'c':
-      console.clear();
-      return true;
-    case 'q':
-    case '\x03': // Ctrl+C
-      await this.shutdown();
-      return true;
+      case 'r':
+        await this.promptRunTool();
+        return true;
+      case 'w':
+        await this.promptRunWorkflow();
+        return true;
+      case 'b':
+        await this.promptBatchExecution();
+        return true;
+      case 'c':
+        console.clear();
+        return true;
+      case 'q':
+      case '\x03': // Ctrl+C
+        await this.shutdown();
+        return true;
     }
 
     return false;
@@ -626,7 +670,10 @@ export class EnhancedWebUIComplete {
 
     try {
       const result = await this.toolFramework.executeToolsBatch(batchTools, { parallel: true });
-      this.addLog('success', `Batch completed: ${result.summary.successful}/${result.summary.total} successful`);
+      this.addLog(
+        'success',
+        `Batch completed: ${result.summary.successful}/${result.summary.total} successful`
+      );
     } catch (error) {
       this.addLog('error', `Batch execution failed: ${error.message}`);
     }
@@ -639,16 +686,16 @@ export class EnhancedWebUIComplete {
     // Handle original process view navigation
     if (this.currentView === ALL_VIEWS.PROCESSES) {
       switch (key) {
-      case '\x1b[A': // Up arrow
-        this.selectedIndex = Math.max(0, this.selectedIndex - 1);
-        break;
-      case '\x1b[B': // Down arrow
-        this.selectedIndex = Math.min(this.processes.size - 1, this.selectedIndex + 1);
-        break;
-      case ' ':
-      case '\r':
-        await this.toggleSelectedProcess();
-        break;
+        case '\x1b[A': // Up arrow
+          this.selectedIndex = Math.max(0, this.selectedIndex - 1);
+          break;
+        case '\x1b[B': // Down arrow
+          this.selectedIndex = Math.min(this.processes.size - 1, this.selectedIndex + 1);
+          break;
+        case ' ':
+        case '\r':
+          await this.toggleSelectedProcess();
+          break;
       }
     }
   }
@@ -714,7 +761,9 @@ export class EnhancedWebUIComplete {
       console.log(`     ${this.colors.gray(process.description)}`);
 
       if (process.status === 'running') {
-        const stats = this.colors.dim(`PID: ${process.pid} | Uptime: ${this.formatUptime(process.uptime)} | CPU: ${process.cpu.toFixed(1)}% | Mem: ${process.memory.toFixed(0)}MB`);
+        const stats = this.colors.dim(
+          `PID: ${process.pid} | Uptime: ${this.formatUptime(process.uptime)} | CPU: ${process.cpu.toFixed(1)}% | Mem: ${process.memory.toFixed(0)}MB`
+        );
         console.log(`     ${stats}`);
       }
       console.log();
@@ -725,8 +774,16 @@ export class EnhancedWebUIComplete {
     // Enhanced stats
     const running = Array.from(this.processes.values()).filter(p => p.status === 'running').length;
     console.log(this.colors.gray('─'.repeat(80)));
-    console.log(this.colors.white(`Total: ${this.processes.size} | Running: ${this.colors.green(running)} | Stopped: ${this.colors.gray(this.processes.size - running)}`));
-    console.log(this.colors.cyan(`Enhanced: ${this.colors.yellow('87 MCP tools')} available across ${this.colors.yellow('8 categories')}`));
+    console.log(
+      this.colors.white(
+        `Total: ${this.processes.size} | Running: ${this.colors.green(running)} | Stopped: ${this.colors.gray(this.processes.size - running)}`
+      )
+    );
+    console.log(
+      this.colors.cyan(
+        `Enhanced: ${this.colors.yellow('87 MCP tools')} available across ${this.colors.yellow('8 categories')}`
+      )
+    );
   }
 
   /**
@@ -746,13 +803,19 @@ export class EnhancedWebUIComplete {
 
     // Enhanced resource usage
     console.log(this.colors.cyan('💻 Resource Usage'));
-    console.log(`  CPU Usage: ${this.getUsageBar(this.systemStats.cpuUsage, 100)} ${this.systemStats.cpuUsage.toFixed(1)}%`);
-    console.log(`  Memory: ${this.getUsageBar(this.systemStats.memoryUsage, 100)} ${this.systemStats.memoryUsage.toFixed(1)}%`);
+    console.log(
+      `  CPU Usage: ${this.getUsageBar(this.systemStats.cpuUsage, 100)} ${this.systemStats.cpuUsage.toFixed(1)}%`
+    );
+    console.log(
+      `  Memory: ${this.getUsageBar(this.systemStats.memoryUsage, 100)} ${this.systemStats.memoryUsage.toFixed(1)}%`
+    );
     console.log();
 
     // Enhanced activity metrics
     console.log(this.colors.cyan('📈 Enhanced Activity Metrics'));
-    console.log(`  Active Agents: ${this.colors.yellow(this.agents.filter(a => a.status === 'working').length)}/${this.agents.length}`);
+    console.log(
+      `  Active Agents: ${this.colors.yellow(this.agents.filter(a => a.status === 'working').length)}/${this.agents.length}`
+    );
     console.log(`  Total Tasks: ${this.tasks.length}`);
     console.log(`  Tool Executions: ${this.colors.green('Running')}`);
     console.log(`  Real-time Updates: ${this.colors.green('Active')}`);
@@ -762,7 +825,9 @@ export class EnhancedWebUIComplete {
     const mcpStatus = this.mcpIntegration ? this.mcpIntegration.getStatus() : null;
     if (mcpStatus) {
       console.log(this.colors.cyan('🔧 Tool System Status'));
-      console.log(`  MCP Connection: ${mcpStatus.mcpAvailable ? this.colors.green('Connected') : this.colors.red('Mock Mode')}`);
+      console.log(
+        `  MCP Connection: ${mcpStatus.mcpAvailable ? this.colors.green('Connected') : this.colors.red('Mock Mode')}`
+      );
       console.log(`  Active Executions: ${this.colors.yellow(mcpStatus.activeExecutions || 0)}`);
       console.log(`  Cache Size: ${this.colors.blue(mcpStatus.cacheSize || 0)} entries`);
       console.log();
@@ -772,10 +837,22 @@ export class EnhancedWebUIComplete {
     console.log(this.colors.cyan('🔔 Recent Events'));
     this.logs.slice(0, 5).forEach(log => {
       const time = log.time.toLocaleTimeString();
-      const icon = log.level === 'success' ? '✓' : log.level === 'warning' ? '⚠' : log.level === 'error' ? '❌' : 'ℹ';
-      const color = log.level === 'success' ? this.colors.green :
-        log.level === 'warning' ? this.colors.yellow :
-          log.level === 'error' ? this.colors.red : this.colors.blue;
+      const icon =
+        log.level === 'success'
+          ? '✓'
+          : log.level === 'warning'
+            ? '⚠'
+            : log.level === 'error'
+              ? '❌'
+              : 'ℹ';
+      const color =
+        log.level === 'success'
+          ? this.colors.green
+          : log.level === 'warning'
+            ? this.colors.yellow
+            : log.level === 'error'
+              ? this.colors.red
+              : this.colors.blue;
       console.log(`  ${this.colors.gray(time)} ${color(icon)} ${log.message}`);
     });
   }
@@ -793,8 +870,12 @@ export class EnhancedWebUIComplete {
       console.log(this.colors.cyan('🐝 Swarm Status'));
       console.log(`  Swarm ID: ${this.colors.yellow(metrics.swarmId)}`);
       console.log(`  Topology: ${this.colors.blue('hierarchical')} (optimized)`);
-      console.log(`  Agents: ${this.colors.green(metrics.agents.active)}/${metrics.agents.total} active`);
-      console.log(`  Tasks: ${this.colors.yellow(metrics.tasks.inProgress)} in progress, ${this.colors.green(metrics.tasks.completed)} completed`);
+      console.log(
+        `  Agents: ${this.colors.green(metrics.agents.active)}/${metrics.agents.total} active`
+      );
+      console.log(
+        `  Tasks: ${this.colors.yellow(metrics.tasks.inProgress)} in progress, ${this.colors.green(metrics.tasks.completed)} completed`
+      );
       console.log(`  Efficiency: ${this.colors.green(metrics.efficiency + '%')}`);
       console.log(`  Coordination Tools: ${this.colors.cyan('12')} available`);
       console.log();
@@ -806,7 +887,8 @@ export class EnhancedWebUIComplete {
     this.agents.forEach((agent, index) => {
       const selected = this.currentView === ALL_VIEWS.ORCHESTRATION && index === this.selectedIndex;
       const prefix = selected ? this.colors.yellow('▶ ') : '  ';
-      const statusIcon = agent.status === 'working' ? this.colors.green('●') : this.colors.gray('○');
+      const statusIcon =
+        agent.status === 'working' ? this.colors.green('●') : this.colors.gray('○');
       const name = selected ? this.colors.yellow(agent.name) : this.colors.white(agent.name);
 
       console.log(`${prefix}${statusIcon} ${name} (${agent.type})`);
@@ -818,7 +900,9 @@ export class EnhancedWebUIComplete {
     });
 
     console.log(this.colors.gray('─'.repeat(40)));
-    console.log(this.colors.cyan('⚡ Quick Actions: [1-9] Execute swarm tools | [r] Run custom tool'));
+    console.log(
+      this.colors.cyan('⚡ Quick Actions: [1-9] Execute swarm tools | [r] Run custom tool')
+    );
   }
 
   /**
@@ -840,7 +924,9 @@ export class EnhancedWebUIComplete {
     console.log(this.colors.cyan('📂 Namespace Details'));
     this.memoryStats.namespaces.forEach(ns => {
       const usageBar = this.getUsageBar(ns.entries, 100);
-      console.log(`  ${this.colors.white(ns.name.padEnd(12))} ${usageBar} ${this.colors.yellow(ns.entries)} entries (${this.colors.blue(ns.size)})`);
+      console.log(
+        `  ${this.colors.white(ns.name.padEnd(12))} ${usageBar} ${this.colors.yellow(ns.entries)} entries (${this.colors.blue(ns.size)})`
+      );
     });
 
     console.log();
@@ -863,16 +949,25 @@ export class EnhancedWebUIComplete {
 
     this.logs.slice(0, 15).forEach(log => {
       const time = log.time.toLocaleTimeString();
-      const icon = log.level === 'success' ? this.colors.green('✅') :
-        log.level === 'warning' ? this.colors.yellow('⚠️') :
-          log.level === 'error' ? this.colors.red('❌') : this.colors.blue('ℹ️');
+      const icon =
+        log.level === 'success'
+          ? this.colors.green('✅')
+          : log.level === 'warning'
+            ? this.colors.yellow('⚠️')
+            : log.level === 'error'
+              ? this.colors.red('❌')
+              : this.colors.blue('ℹ️');
 
       console.log(`${this.colors.gray(time)} ${icon} ${log.message}`);
     });
 
     console.log();
     console.log(this.colors.gray('─'.repeat(80)));
-    console.log(this.colors.cyan('🔍 Log Analysis Tools Available: Pattern detection, error analysis, usage statistics'));
+    console.log(
+      this.colors.cyan(
+        '🔍 Log Analysis Tools Available: Pattern detection, error analysis, usage statistics'
+      )
+    );
   }
 
   /**
@@ -901,7 +996,8 @@ export class EnhancedWebUIComplete {
     const filled = Math.round((percentage / 100) * width);
     const empty = width - filled;
 
-    const color = percentage > 80 ? this.colors.red : percentage > 60 ? this.colors.yellow : this.colors.green;
+    const color =
+      percentage > 80 ? this.colors.red : percentage > 60 ? this.colors.yellow : this.colors.green;
     return color('█'.repeat(filled)) + this.colors.gray('░'.repeat(empty));
   }
 

@@ -4,10 +4,10 @@
  */
 
 import { EventEmitter } from 'events';
-import { 
-  Resource, 
-  ResourceMetrics, 
-  ResourceMonitorConfig, 
+import {
+  Resource,
+  ResourceMetrics,
+  ResourceMonitorConfig,
   ResourceEvent,
   ResourceEventType,
   CPUResource,
@@ -100,7 +100,7 @@ export class ResourceMonitor extends EventEmitter {
     }
 
     this.isMonitoring = false;
-    this.emit('monitoring:stopped', { 
+    this.emit('monitoring:stopped', {
       timestamp: new Date(),
       duration: Date.now() - this.startTime.getTime()
     });
@@ -161,11 +161,13 @@ export class ResourceMonitor extends EventEmitter {
     // Store metrics in history
     if (!this.metricsHistory.has(resource.id)) {
       this.metricsHistory.set(
-        resource.id, 
-        createCircularBuffer<ResourceMetrics>(this.config.historySize) as CircularBufferImpl<ResourceMetrics>
+        resource.id,
+        createCircularBuffer<ResourceMetrics>(
+          this.config.historySize
+        ) as CircularBufferImpl<ResourceMetrics>
       );
     }
-    
+
     const history = this.metricsHistory.get(resource.id)!;
     history.push(metrics);
 
@@ -196,7 +198,7 @@ export class ResourceMonitor extends EventEmitter {
         const cpu = resource as CPUResource;
         metrics.usage = cpu.usage;
         metrics.temperature = cpu.temperature;
-        metrics.performance = cpu.frequency.current / cpu.frequency.max * 100;
+        metrics.performance = (cpu.frequency.current / cpu.frequency.max) * 100;
         metrics.custom = {
           loadAverage: cpu.loadAverage,
           cores: cpu.cores,
@@ -337,11 +339,11 @@ export class ResourceMonitor extends EventEmitter {
    */
   getAllMetricsHistory(): Map<string, ResourceMetrics[]> {
     const allHistory = new Map<string, ResourceMetrics[]>();
-    
+
     this.metricsHistory.forEach((buffer, resourceId) => {
       allHistory.set(resourceId, buffer.toArray());
     });
-    
+
     return allHistory;
   }
 
@@ -373,7 +375,7 @@ export class ResourceMonitor extends EventEmitter {
 
     // Calculate average usage by type
     const usageByType: Record<string, number[]> = {};
-    
+
     this.metricsHistory.forEach((buffer, resourceId) => {
       const resource = this.lastResources.get(resourceId);
       if (!resource) return;
@@ -399,7 +401,7 @@ export class ResourceMonitor extends EventEmitter {
    */
   updateConfig(config: Partial<ResourceMonitorConfig>): void {
     this.config = { ...this.config, ...config };
-    
+
     // Restart monitoring if interval changed
     if (config.interval && this.isMonitoring) {
       this.stop();
@@ -437,7 +439,7 @@ export class ResourceMonitor extends EventEmitter {
     const memory = await resourceDetector.detectMemory();
     const disks = await resourceDetector.detectDisks();
     const networks = await resourceDetector.detectNetworks();
-    
+
     return {
       cpu: {
         cores: cpu.cores,
@@ -452,7 +454,12 @@ export class ResourceMonitor extends EventEmitter {
       disk: {
         total: disks.reduce((sum, disk) => sum + disk.total, 0),
         used: disks.reduce((sum, disk) => sum + disk.used, 0),
-        usage: disks.length > 0 ? (disks.reduce((sum, disk) => sum + disk.used, 0) / disks.reduce((sum, disk) => sum + disk.total, 0)) * 100 : 0
+        usage:
+          disks.length > 0
+            ? (disks.reduce((sum, disk) => sum + disk.used, 0) /
+                disks.reduce((sum, disk) => sum + disk.total, 0)) *
+              100
+            : 0
       },
       network: {
         usage: networks.length > 0 ? networks[0].speed || 0 : 0

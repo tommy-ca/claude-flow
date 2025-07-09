@@ -88,7 +88,7 @@ export class ClaudeCodeWebServer {
 
       // Start listening
       await new Promise((resolve, reject) => {
-        this.server.listen(this.port, (err) => {
+        this.server.listen(this.port, err => {
           if (err) {
             reject(err);
           } else {
@@ -103,7 +103,6 @@ export class ClaudeCodeWebServer {
       console.log(`🔗 WebSocket: ws://localhost:${this.port}/ws`);
       console.log(`📁 Serving UI from: ${this.uiPath}`);
       console.log();
-
     } catch (error) {
       printError(`Failed to start web server: ${error.message}`);
       throw error;
@@ -114,7 +113,9 @@ export class ClaudeCodeWebServer {
    * Stop the web server
    */
   async stop() {
-    if (!this.isRunning) {return;}
+    if (!this.isRunning) {
+      return;
+    }
 
     // Close all WebSocket connections
     this.connections.forEach(ws => {
@@ -130,7 +131,7 @@ export class ClaudeCodeWebServer {
 
     // Close HTTP server
     if (this.server) {
-      await new Promise((resolve) => {
+      await new Promise(resolve => {
         this.server.close(resolve);
       });
     }
@@ -255,20 +256,20 @@ export class ClaudeCodeWebServer {
     const ext = filePath.split('.').pop().toLowerCase();
 
     const contentTypes = {
-      'html': 'text/html',
-      'css': 'text/css',
-      'js': 'application/javascript',
-      'json': 'application/json',
-      'png': 'image/png',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'gif': 'image/gif',
-      'svg': 'image/svg+xml',
-      'ico': 'image/x-icon',
-      'woff': 'font/woff',
-      'woff2': 'font/woff2',
-      'ttf': 'font/ttf',
-      'eot': 'application/vnd.ms-fontobject'
+      html: 'text/html',
+      css: 'text/css',
+      js: 'application/javascript',
+      json: 'application/json',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      svg: 'image/svg+xml',
+      ico: 'image/x-icon',
+      woff: 'font/woff',
+      woff2: 'font/woff2',
+      ttf: 'font/ttf',
+      eot: 'application/vnd.ms-fontobject'
     };
 
     return contentTypes[ext] || 'text/plain';
@@ -360,7 +361,7 @@ export class ClaudeCodeWebServer {
       this.handleWebSocketConnection(ws, req);
     });
 
-    this.wss.on('error', (error) => {
+    this.wss.on('error', error => {
       console.error('WebSocket server error:', error);
     });
   }
@@ -386,7 +387,7 @@ export class ClaudeCodeWebServer {
     });
 
     // Handle messages
-    ws.on('message', (data) => {
+    ws.on('message', data => {
       this.handleWebSocketMessage(ws, data);
     });
 
@@ -397,7 +398,7 @@ export class ClaudeCodeWebServer {
     });
 
     // Handle error
-    ws.on('error', (error) => {
+    ws.on('error', error => {
       console.error('WebSocket connection error:', error);
       this.connections.delete(ws);
     });
@@ -418,28 +419,27 @@ export class ClaudeCodeWebServer {
 
       // Handle different message types
       switch (message.method) {
-      case 'initialize':
-        this.handleInitialize(ws, message);
-        break;
+        case 'initialize':
+          this.handleInitialize(ws, message);
+          break;
 
-      case 'ping':
-        this.handlePing(ws, message);
-        break;
+        case 'ping':
+          this.handlePing(ws, message);
+          break;
 
-      case 'tools/call':
-        this.handleToolCall(ws, message);
-        break;
+        case 'tools/call':
+          this.handleToolCall(ws, message);
+          break;
 
-      case 'tools/list':
-        console.log('Handling tools/list request');
-        this.handleToolsList(ws, message);
-        break;
+        case 'tools/list':
+          console.log('Handling tools/list request');
+          this.handleToolsList(ws, message);
+          break;
 
-      default:
-        console.log('Unknown method:', message.method);
-        this.handleUnknownMethod(ws, message);
+        default:
+          console.log('Unknown method:', message.method);
+          this.handleUnknownMethod(ws, message);
       }
-
     } catch (error) {
       console.error('Error processing WebSocket message:', error);
       this.sendError(ws, null, 'Invalid JSON message');
@@ -622,51 +622,51 @@ export class ClaudeCodeWebServer {
    */
   executeMockTool(name, args) {
     switch (name) {
-    case 'claude-flow/execute':
-      return this.executeClaudeFlowCommand(args.command, args.args);
+      case 'claude-flow/execute':
+        return this.executeClaudeFlowCommand(args.command, args.args);
 
-    case 'system/health':
-      const healthData = {
-        status: 'healthy',
-        uptime: Math.floor(process.uptime()),
-        memory: process.memoryUsage(),
-        connections: this.connections.size,
-        platform: compat.platform,
-        timestamp: new Date().toISOString()
-      };
-
-      if (args.detailed) {
-        healthData.detailed = {
-          nodeVersion: process.version,
-          architecture: process.arch,
-          pid: process.pid,
-          cpuUsage: process.cpuUsage(),
-          resourceUsage: process.resourceUsage ? process.resourceUsage() : 'N/A'
+      case 'system/health':
+        const healthData = {
+          status: 'healthy',
+          uptime: Math.floor(process.uptime()),
+          memory: process.memoryUsage(),
+          connections: this.connections.size,
+          platform: compat.platform,
+          timestamp: new Date().toISOString()
         };
-      }
 
-      return JSON.stringify(healthData, null, 2);
+        if (args.detailed) {
+          healthData.detailed = {
+            nodeVersion: process.version,
+            architecture: process.arch,
+            pid: process.pid,
+            cpuUsage: process.cpuUsage(),
+            resourceUsage: process.resourceUsage ? process.resourceUsage() : 'N/A'
+          };
+        }
 
-    case 'swarm/orchestrate':
-      return this.executeSwarmCommand(args.action, args.args);
+        return JSON.stringify(healthData, null, 2);
 
-    case 'swarm/status':
-      return this.executeSwarmCommand('status', args.args);
+      case 'swarm/orchestrate':
+        return this.executeSwarmCommand(args.action, args.args);
 
-    case 'memory/manage':
-      return this.executeMemoryCommand(args.operation, args.key, args.value);
+      case 'swarm/status':
+        return this.executeSwarmCommand('status', args.args);
 
-    case 'agents/manage':
-      return this.executeAgentsCommand(args.action, args.agentType, args.agentId);
+      case 'memory/manage':
+        return this.executeMemoryCommand(args.operation, args.key, args.value);
 
-    case 'sparc/execute':
-      return this.executeSPARCCommand(args.mode, args.task, args.options);
+      case 'agents/manage':
+        return this.executeAgentsCommand(args.action, args.agentType, args.agentId);
 
-    case 'benchmark/run':
-      return this.executeBenchmarkCommand(args.suite, args.iterations);
+      case 'sparc/execute':
+        return this.executeSPARCCommand(args.mode, args.task, args.options);
 
-    default:
-      return `Tool '${name}' executed successfully with args: ${JSON.stringify(args)}`;
+      case 'benchmark/run':
+        return this.executeBenchmarkCommand(args.suite, args.iterations);
+
+      default:
+        return `Tool '${name}' executed successfully with args: ${JSON.stringify(args)}`;
     }
   }
 
@@ -675,31 +675,31 @@ export class ClaudeCodeWebServer {
    */
   executeClaudeFlowCommand(command, args = {}) {
     switch (command) {
-    case 'status':
-      return `Claude Flow Status:
+      case 'status':
+        return `Claude Flow Status:
   Version: 2.0.0
   Mode: Web Console
   Active Processes: 3
   Memory Usage: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB
   Uptime: ${Math.floor(process.uptime())}s`;
 
-    case 'init':
-      return `Claude Flow initialization complete:
+      case 'init':
+        return `Claude Flow initialization complete:
   ✅ Project structure created
   ✅ Configuration files generated
   ✅ Memory bank initialized
   ✅ Ready for development`;
 
-    case 'agents':
-      return `Active Agents:
+      case 'agents':
+        return `Active Agents:
   • Research Agent (idle) - 0 tasks
   • Code Developer (working) - 2 tasks  
   • Data Analyst (idle) - 0 tasks
   
   Total: 3 agents`;
 
-    default:
-      return `Claude Flow command '${command}' executed successfully`;
+      default:
+        return `Claude Flow command '${command}' executed successfully`;
     }
   }
 
@@ -708,8 +708,8 @@ export class ClaudeCodeWebServer {
    */
   executeSwarmCommand(action = 'status', args = []) {
     switch (action) {
-    case 'status':
-      return `Swarm Orchestration Status:
+      case 'status':
+        return `Swarm Orchestration Status:
   🐝 Swarm: ACTIVE
   🏗️ Topology: hierarchical
   👥 Agents: 5/8 active
@@ -718,31 +718,31 @@ export class ClaudeCodeWebServer {
   🧠 Memory: 15 coordination points stored
   📈 Efficiency: 78%`;
 
-    case 'init':
-      return `Swarm initialization complete:
+      case 'init':
+        return `Swarm initialization complete:
   ✅ Hierarchical topology established
   ✅ 5 agents spawned successfully
   ✅ Coordination protocols active
   ✅ Memory synchronization enabled`;
 
-    case 'agents':
-      return `Swarm Agent Status:
+      case 'agents':
+        return `Swarm Agent Status:
   🟢 architect: Designing system components...
   🟢 coder-1: Implementing user authentication...
   🟢 coder-2: Building API endpoints...
   🟡 analyst: Analyzing performance metrics...
   🔴 tester: Waiting for code completion...`;
 
-    case 'test':
-      return `Swarm Test Results:
+      case 'test':
+        return `Swarm Test Results:
   ✅ Agent communication: PASS
   ✅ Task distribution: PASS  
   ✅ Memory coordination: PASS
   ✅ Error handling: PASS
   📊 Overall health: 95%`;
 
-    default:
-      return `Swarm ${action} completed successfully`;
+      default:
+        return `Swarm ${action} completed successfully`;
     }
   }
 
@@ -751,20 +751,20 @@ export class ClaudeCodeWebServer {
    */
   executeMemoryCommand(operation, key, value) {
     switch (operation) {
-    case 'store':
-      return `Memory stored successfully:\n  Key: ${key}\n  Value: ${value}\n  Timestamp: ${new Date().toISOString()}`;
+      case 'store':
+        return `Memory stored successfully:\n  Key: ${key}\n  Value: ${value}\n  Timestamp: ${new Date().toISOString()}`;
 
-    case 'retrieve':
-      return `Memory retrieved:\n  Key: ${key}\n  Value: "example stored value"\n  Last Modified: ${new Date().toISOString()}`;
+      case 'retrieve':
+        return `Memory retrieved:\n  Key: ${key}\n  Value: "example stored value"\n  Last Modified: ${new Date().toISOString()}`;
 
-    case 'list':
-      return 'Memory Keys:\n  • project/settings\n  • swarm/topology\n  • agents/coordination\n  • session/state\n  • benchmark/results\n  \n  Total: 5 entries';
+      case 'list':
+        return 'Memory Keys:\n  • project/settings\n  • swarm/topology\n  • agents/coordination\n  • session/state\n  • benchmark/results\n  \n  Total: 5 entries';
 
-    case 'delete':
-      return `Memory deleted:\n  Key: ${key}\n  Status: Success`;
+      case 'delete':
+        return `Memory deleted:\n  Key: ${key}\n  Status: Success`;
 
-    default:
-      return `Memory operation '${operation}' completed`;
+      default:
+        return `Memory operation '${operation}' completed`;
     }
   }
 
@@ -773,23 +773,27 @@ export class ClaudeCodeWebServer {
    */
   executeAgentsCommand(action, agentType, agentId) {
     switch (action) {
-    case 'list':
-      return 'Active Agents:\n  🟢 agent-001 (architect) - Designing system components\n  🟢 agent-002 (coder) - Implementing features\n  🟡 agent-003 (analyst) - Analyzing performance\n  🔴 agent-004 (tester) - Waiting for code\n  🟢 agent-005 (coordinator) - Managing workflow\n  \n  Total: 5 agents';
+      case 'list':
+        return 'Active Agents:\n  🟢 agent-001 (architect) - Designing system components\n  🟢 agent-002 (coder) - Implementing features\n  🟡 agent-003 (analyst) - Analyzing performance\n  🔴 agent-004 (tester) - Waiting for code\n  🟢 agent-005 (coordinator) - Managing workflow\n  \n  Total: 5 agents';
 
-    case 'create':
-      return `Agent created successfully:\n  Type: ${agentType}\n  ID: agent-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}\n  Status: Active\n  Capabilities: Full ${agentType} functionality`;
+      case 'create':
+        return `Agent created successfully:\n  Type: ${agentType}\n  ID: agent-${Math.floor(
+          Math.random() * 1000
+        )
+          .toString()
+          .padStart(3, '0')}\n  Status: Active\n  Capabilities: Full ${agentType} functionality`;
 
-    case 'start':
-      return `Agent started:\n  ID: ${agentId}\n  Status: Running\n  Tasks: Ready to accept work`;
+      case 'start':
+        return `Agent started:\n  ID: ${agentId}\n  Status: Running\n  Tasks: Ready to accept work`;
 
-    case 'stop':
-      return `Agent stopped:\n  ID: ${agentId}\n  Status: Stopped\n  Tasks: Completed gracefully`;
+      case 'stop':
+        return `Agent stopped:\n  ID: ${agentId}\n  Status: Stopped\n  Tasks: Completed gracefully`;
 
-    case 'status':
-      return `Agent Status:\n  ID: ${agentId}\n  Status: Active\n  Type: researcher\n  Current Task: Data analysis\n  Uptime: 2h 15m\n  Tasks Completed: 12\n  Efficiency: 92%`;
+      case 'status':
+        return `Agent Status:\n  ID: ${agentId}\n  Status: Active\n  Type: researcher\n  Current Task: Data analysis\n  Uptime: 2h 15m\n  Tasks Completed: 12\n  Efficiency: 92%`;
 
-    default:
-      return `Agent ${action} completed for ${agentId || agentType}`;
+      default:
+        return `Agent ${action} completed for ${agentId || agentType}`;
     }
   }
 
@@ -914,7 +918,6 @@ export async function startWebServer(port = 3000) {
 
     // Keep server running
     return server;
-
   } catch (error) {
     printError(`Failed to start web server: ${error.message}`);
     process.exit(1);

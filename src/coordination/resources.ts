@@ -28,24 +28,24 @@ export class ResourceManager {
   constructor(
     private config: CoordinationConfig,
     private eventBus: IEventBus,
-    private logger: ILogger,
+    private logger: ILogger
   ) {}
 
   async initialize(): Promise<void> {
     this.logger.info('Initializing resource manager');
-    
+
     // Set up periodic cleanup
     setInterval(() => this.cleanup(), 30000); // Every 30 seconds
   }
 
   async shutdown(): Promise<void> {
     this.logger.info('Shutting down resource manager');
-    
+
     // Release all locks
     for (const [resourceId, agentId] of this.locks) {
       await this.release(resourceId, agentId);
     }
-    
+
     this.resources.clear();
     this.locks.clear();
     this.waitQueue.clear();
@@ -60,7 +60,7 @@ export class ResourceManager {
       this.resources.set(resourceId, {
         id: resourceId,
         type: 'generic',
-        locked: false,
+        locked: false
       });
     }
 
@@ -83,7 +83,7 @@ export class ResourceManager {
       agentId,
       resourceId,
       timestamp: new Date(),
-      priority,
+      priority
     };
 
     if (!this.waitQueue.has(resourceId)) {
@@ -92,7 +92,7 @@ export class ResourceManager {
 
     const queue = this.waitQueue.get(resourceId)!;
     queue.push(request);
-    
+
     // Sort by priority and timestamp
     queue.sort((a, b) => {
       if (a.priority !== b.priority) {
@@ -101,10 +101,10 @@ export class ResourceManager {
       return a.timestamp.getTime() - b.timestamp.getTime(); // Earlier first
     });
 
-    this.logger.info('Agent added to resource wait queue', { 
+    this.logger.info('Agent added to resource wait queue', {
       resourceId,
       agentId,
-      queueLength: queue.length,
+      queueLength: queue.length
     });
 
     // Wait for resource with timeout
@@ -135,10 +135,11 @@ export class ResourceManager {
       queue.splice(index, 1);
     }
 
-    throw new ResourceLockError(
-      `Resource acquisition timeout for ${resourceId}`,
-      { resourceId, agentId, timeout: this.config.resourceTimeout },
-    );
+    throw new ResourceLockError(`Resource acquisition timeout for ${resourceId}`, {
+      resourceId,
+      agentId,
+      timeout: this.config.resourceTimeout
+    });
   }
 
   async release(resourceId: string, agentId: string): Promise<void> {
@@ -146,10 +147,10 @@ export class ResourceManager {
 
     const currentLock = this.locks.get(resourceId);
     if (currentLock !== agentId) {
-      this.logger.warn('Attempted to release unowned resource', { 
+      this.logger.warn('Attempted to release unowned resource', {
         resourceId,
         agentId,
-        currentLock,
+        currentLock
       });
       return;
     }
@@ -161,7 +162,7 @@ export class ResourceManager {
     const queue = this.waitQueue.get(resourceId);
     if (queue && queue.length > 0) {
       const nextRequest = queue.shift()!;
-      
+
       // Grant lock to next in queue
       await this.lockResource(resourceId, nextRequest.agentId);
     }
@@ -173,14 +174,12 @@ export class ResourceManager {
       return;
     }
 
-    this.logger.info('Releasing all resources for agent', { 
+    this.logger.info('Releasing all resources for agent', {
       agentId,
-      resourceCount: resources.size,
+      resourceCount: resources.size
     });
 
-    const promises = Array.from(resources).map(
-      resourceId => this.release(resourceId, agentId),
-    );
+    const promises = Array.from(resources).map(resourceId => this.release(resourceId, agentId));
 
     await Promise.all(promises);
     this.agentResources.delete(agentId);
@@ -192,22 +191,19 @@ export class ResourceManager {
 
   getWaitingRequests(): Map<string, string[]> {
     const waiting = new Map<string, string[]>();
-    
+
     for (const [resourceId, queue] of this.waitQueue) {
       if (queue.length > 0) {
-        waiting.set(
-          queue[0].agentId,
-          [...(waiting.get(queue[0].agentId) || []), resourceId],
-        );
+        waiting.set(queue[0].agentId, [...(waiting.get(queue[0].agentId) || []), resourceId]);
       }
     }
-    
+
     return waiting;
   }
 
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     const totalResources = this.resources.size;
@@ -227,20 +223,20 @@ export class ResourceManager {
         lockedResources,
         freeResources: totalResources - lockedResources,
         waitingAgents: waitingAgents.size,
-        totalWaitingRequests: totalWaiting,
-      },
+        totalWaitingRequests: totalWaiting
+      }
     };
   }
 
   private async lockResource(resourceId: string, agentId: string): Promise<void> {
     const resource = this.resources.get(resourceId)!;
-    
+
     resource.locked = true;
     resource.lockedBy = agentId;
     resource.lockedAt = new Date();
-    
+
     this.locks.set(resourceId, agentId);
-    
+
     // Track agent resources
     if (!this.agentResources.has(agentId)) {
       this.agentResources.set(agentId, new Set());
@@ -262,9 +258,9 @@ export class ResourceManager {
     resource.locked = false;
     delete resource.lockedBy;
     delete resource.lockedAt;
-    
+
     this.locks.delete(resourceId);
-    
+
     // Remove from agent resources
     this.agentResources.get(agentId)?.delete(resourceId);
 
@@ -287,10 +283,10 @@ export class ResourceManager {
       const filtered = queue.filter(req => {
         const age = now - req.timestamp.getTime();
         if (age > this.config.resourceTimeout) {
-          this.logger.warn('Removing stale resource request', { 
+          this.logger.warn('Removing stale resource request', {
             resourceId,
             agentId: req.agentId,
-            age,
+            age
           });
           return false;
         }
@@ -310,10 +306,10 @@ export class ResourceManager {
       if (resource?.lockedAt) {
         const lockAge = now - resource.lockedAt.getTime();
         if (lockAge > this.config.resourceTimeout * 2) {
-          this.logger.warn('Force releasing stale lock', { 
+          this.logger.warn('Force releasing stale lock', {
             resourceId,
             agentId,
-            lockAge,
+            lockAge
           });
           this.unlockResource(resourceId, agentId);
         }

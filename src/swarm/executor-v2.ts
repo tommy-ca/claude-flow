@@ -10,9 +10,16 @@ import * as os from 'node:os';
 import chalk from 'chalk';
 import { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
-import { detectExecutionEnvironment, applySmartDefaults } from '../cli/utils/environment-detector.js';
 import {
-  TaskDefinition, AgentState, TaskResult, SwarmEvent, EventType,
+  detectExecutionEnvironment,
+  applySmartDefaults
+} from '../cli/utils/environment-detector.js';
+import {
+  TaskDefinition,
+  AgentState,
+  TaskResult,
+  SwarmEvent,
+  EventType,
   SWARM_CONSTANTS
 } from './types.js';
 
@@ -26,10 +33,10 @@ export interface ClaudeExecutionOptionsV2 extends ClaudeExecutionOptions {
 
 export class TaskExecutorV2 extends TaskExecutor {
   private environment = detectExecutionEnvironment();
-  
+
   constructor(config: Partial<ExecutionConfig> = {}) {
     super(config);
-    
+
     // Log environment info on initialization
     this.logger.info('Task Executor v2.0 initialized', {
       environment: this.environment.terminalType,
@@ -45,7 +52,7 @@ export class TaskExecutorV2 extends TaskExecutor {
   ): Promise<ExecutionResult> {
     // Apply smart defaults based on environment
     const enhancedOptions = applySmartDefaults(claudeOptions, this.environment);
-    
+
     // Log if defaults were applied
     if (enhancedOptions.appliedDefaults.length > 0) {
       this.logger.info('Applied environment-based defaults', {
@@ -53,7 +60,7 @@ export class TaskExecutorV2 extends TaskExecutor {
         environment: this.environment.terminalType
       });
     }
-    
+
     try {
       return await this.executeClaudeWithTimeoutV2(
         generateId('claude-execution'),
@@ -68,11 +75,11 @@ export class TaskExecutorV2 extends TaskExecutor {
         this.logger.warn('Interactive error detected, retrying with non-interactive mode', {
           error: error.message
         });
-        
+
         // Force non-interactive mode and retry
         enhancedOptions.nonInteractive = true;
         enhancedOptions.dangerouslySkipPermissions = true;
-        
+
         return await this.executeClaudeWithTimeoutV2(
           generateId('claude-execution-retry'),
           task,
@@ -81,7 +88,7 @@ export class TaskExecutorV2 extends TaskExecutor {
           enhancedOptions
         );
       }
-      
+
       throw error;
     }
   }
@@ -98,7 +105,7 @@ export class TaskExecutorV2 extends TaskExecutor {
 
     // Build Claude command with v2 enhancements
     const command = this.buildClaudeCommandV2(task, agent, options);
-    
+
     // Create execution environment with enhancements
     const env = {
       ...process.env,
@@ -141,7 +148,7 @@ export class TaskExecutorV2 extends TaskExecutor {
             pid: process.pid,
             timeout
           });
-          
+
           process.kill('SIGTERM');
           setTimeout(() => {
             if (process && !process.killed) {
@@ -180,7 +187,7 @@ export class TaskExecutorV2 extends TaskExecutor {
           process.stdout.on('data', (data: Buffer) => {
             const chunk = data.toString();
             outputBuffer += chunk;
-            
+
             if (this.config.streamOutput) {
               this.emit('output', {
                 sessionId,
@@ -195,7 +202,7 @@ export class TaskExecutorV2 extends TaskExecutor {
           process.stderr.on('data', (data: Buffer) => {
             const chunk = data.toString();
             errorBuffer += chunk;
-            
+
             // Check for interactive mode errors
             if (this.isInteractiveErrorMessage(chunk)) {
               this.logger.warn('Interactive mode error detected in stderr', {
@@ -203,7 +210,7 @@ export class TaskExecutorV2 extends TaskExecutor {
                 error: chunk.trim()
               });
             }
-            
+
             if (this.config.streamOutput) {
               this.emit('output', {
                 sessionId,
@@ -228,10 +235,10 @@ export class TaskExecutorV2 extends TaskExecutor {
         // Handle process completion
         process.on('close', async (code: number | null, signal: string | null) => {
           clearTimeout(timeoutHandle);
-          
+
           const duration = Date.now() - startTime;
           const exitCode = code || 0;
-          
+
           this.logger.info('Claude process completed (v2)', {
             sessionId,
             exitCode,
@@ -244,10 +251,10 @@ export class TaskExecutorV2 extends TaskExecutor {
           try {
             // Collect resource usage
             const resourceUsage = await this.collectResourceUsage(sessionId);
-            
+
             // Collect artifacts
             const artifacts = await this.collectArtifacts(context);
-            
+
             const result: ExecutionResult = {
               success: !isTimeout && exitCode === 0,
               output: outputBuffer,
@@ -270,13 +277,12 @@ export class TaskExecutorV2 extends TaskExecutor {
             } else {
               resolve(result);
             }
-
           } catch (collectionError) {
             this.logger.error('Error collecting execution results', {
               sessionId,
               error: collectionError.message
             });
-            
+
             // Still resolve with basic result
             resolve({
               success: !isTimeout && exitCode === 0,
@@ -290,7 +296,6 @@ export class TaskExecutorV2 extends TaskExecutor {
             });
           }
         });
-
       } catch (spawnError) {
         clearTimeout(timeoutHandle);
         this.logger.error('Failed to spawn process', {
@@ -312,7 +317,7 @@ export class TaskExecutorV2 extends TaskExecutor {
 
     // Build prompt
     const prompt = this.buildClaudePrompt(task, agent);
-    
+
     if (options.useStdin) {
       input = prompt;
     } else {
@@ -340,8 +345,11 @@ export class TaskExecutorV2 extends TaskExecutor {
     }
 
     // Skip permissions check for non-interactive environments
-    if (options.nonInteractive || options.dangerouslySkipPermissions || 
-        this.environment.recommendedFlags.includes('--dangerously-skip-permissions')) {
+    if (
+      options.nonInteractive ||
+      options.dangerouslySkipPermissions ||
+      this.environment.recommendedFlags.includes('--dangerously-skip-permissions')
+    ) {
       args.push('--dangerously-skip-permissions');
     }
 
@@ -364,11 +372,14 @@ export class TaskExecutorV2 extends TaskExecutor {
     }
 
     // Add environment info for debugging
-    args.push('--metadata', JSON.stringify({
-      environment: this.environment.terminalType,
-      interactive: this.environment.isInteractive,
-      executor: 'v2'
-    }));
+    args.push(
+      '--metadata',
+      JSON.stringify({
+        environment: this.environment.terminalType,
+        interactive: this.environment.isInteractive,
+        executor: 'v2'
+      })
+    );
 
     return {
       command: options.claudePath || 'claude',
@@ -379,21 +390,25 @@ export class TaskExecutorV2 extends TaskExecutor {
 
   private isInteractiveError(error: any): boolean {
     if (!(error instanceof Error)) return false;
-    
+
     const errorMessage = error.message.toLowerCase();
-    return errorMessage.includes('raw mode') ||
-           errorMessage.includes('stdin') ||
-           errorMessage.includes('interactive') ||
-           errorMessage.includes('tty') ||
-           errorMessage.includes('terminal');
+    return (
+      errorMessage.includes('raw mode') ||
+      errorMessage.includes('stdin') ||
+      errorMessage.includes('interactive') ||
+      errorMessage.includes('tty') ||
+      errorMessage.includes('terminal')
+    );
   }
 
   private isInteractiveErrorMessage(message: string): boolean {
     const lowerMessage = message.toLowerCase();
-    return lowerMessage.includes('raw mode is not supported') ||
-           lowerMessage.includes('stdin is not a tty') ||
-           lowerMessage.includes('requires interactive terminal') ||
-           lowerMessage.includes('manual ui agreement needed');
+    return (
+      lowerMessage.includes('raw mode is not supported') ||
+      lowerMessage.includes('stdin is not a tty') ||
+      lowerMessage.includes('requires interactive terminal') ||
+      lowerMessage.includes('manual ui agreement needed')
+    );
   }
 
   private getDefaultResourceUsage(): ResourceUsage {

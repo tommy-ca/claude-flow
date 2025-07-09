@@ -155,7 +155,9 @@ async function interactiveOptimization(dbPath, flags) {
       return;
     }
   } else {
-    console.log(chalk.yellow(`⚠ Database can be optimized from version ${schemaVersion} to 1.5\n`));
+    console.log(
+      chalk.yellow(`⚠ Database can be optimized from version ${schemaVersion} to 1.5\n`)
+    );
   }
 
   // Ask for optimization options
@@ -296,7 +298,9 @@ async function generateReport(dbPath) {
 
   if (report.performance.avgTaskCompletionMinutes > 0) {
     console.log(chalk.cyan('\nPerformance Metrics:'));
-    console.log(`  Avg Task Completion: ${report.performance.avgTaskCompletionMinutes.toFixed(1)} minutes`);
+    console.log(
+      `  Avg Task Completion: ${report.performance.avgTaskCompletionMinutes.toFixed(1)} minutes`
+    );
   }
 
   // Optimization suggestions

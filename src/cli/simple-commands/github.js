@@ -253,7 +253,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
 
     // Wait for the process to complete
     await new Promise((resolve, reject) => {
-      claudeProcess.on('close', (code) => {
+      claudeProcess.on('close', code => {
         if (code === 0) {
           printSuccess('✅ GitHub automation completed successfully!');
           resolve();
@@ -262,11 +262,10 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
         }
       });
 
-      claudeProcess.on('error', (err) => {
+      claudeProcess.on('error', err => {
         reject(err);
       });
     });
-
   } catch (error) {
     printError(`❌ GitHub automation failed: ${error.message}`);
 

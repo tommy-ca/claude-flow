@@ -188,59 +188,48 @@ export interface IPerformanceObjectives {
 export interface IAgentResourceManager {
   /** Get agent ID */
   getAgentId(): string;
-  
+
   /** Request resources for agent */
   requestResources(
     request?: Partial<IResourceAllocationRequest>
   ): Promise<IResourceAllocationResponse>;
-  
+
   /** Release resources */
   releaseResources(): Promise<boolean>;
-  
+
   /** Update resource configuration */
-  updateConfig(
-    config: Partial<IAgentResourceConfig>
-  ): void;
-  
+  updateConfig(config: Partial<IAgentResourceConfig>): void;
+
   /** Get current configuration */
   getConfig(): IAgentResourceConfig;
-  
+
   /** Get current resource allocation */
   getCurrentAllocation(): IResourceAllocation | undefined;
-  
+
   /** Get resource usage metrics */
   getUsageMetrics(): Promise<IAgentResourceMetrics>;
-  
+
   /** Get performance metrics */
   getPerformanceMetrics(): Promise<IAgentPerformanceMetrics>;
-  
+
   /** Check if resources are sufficient */
   areResourcesSufficient(): boolean;
-  
+
   /** Request resource adjustment based on load */
-  requestAdjustment(
-    load: IAgentLoad
-  ): Promise<IResourceAllocationResponse>;
-  
+  requestAdjustment(load: IAgentLoad): Promise<IResourceAllocationResponse>;
+
   /** Enable/disable auto-scaling */
   setAutoScaling(enabled: boolean): void;
-  
+
   /** Manually scale resources */
-  scaleResources(
-    factor: number
-  ): Promise<IResourceAllocationResponse>;
-  
+  scaleResources(factor: number): Promise<IResourceAllocationResponse>;
+
   /** Get resource history */
-  getResourceHistory(
-    duration: number
-  ): IAgentResourceHistory[];
-  
+  getResourceHistory(duration: number): IAgentResourceHistory[];
+
   /** Subscribe to resource events */
-  subscribe(
-    event: AgentResourceEvent,
-    callback: AgentResourceCallback
-  ): () => void;
-  
+  subscribe(event: AgentResourceEvent, callback: AgentResourceCallback): () => void;
+
   /** Get health status */
   getHealthStatus(): IAgentHealthStatus;
 }
@@ -382,9 +371,7 @@ export enum EventSeverity {
 /**
  * Agent resource callback
  */
-export type AgentResourceCallback = (
-  event: IAgentResourceEventData
-) => void;
+export type AgentResourceCallback = (event: IAgentResourceEventData) => void;
 
 /**
  * Agent health status

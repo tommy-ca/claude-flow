@@ -1,7 +1,7 @@
 import { getErrorMessage } from '../utils/error-handler.js';
 /**
  * ruv-swarm integration helper for Claude Code configuration
- * 
+ *
  * This module bridges the main claude-flow configuration with
  * ruv-swarm specific settings and provides utility functions
  * for seamless integration.
@@ -69,12 +69,12 @@ export class RuvSwarmIntegration {
 
     // Main config takes precedence, then ruv-swarm specific
     const unified = [...mainArgs];
-    
+
     // Add ruv-swarm specific args that aren't in main config
     for (let i = 0; i < ruvSwarmArgs.length; i += 2) {
       const flag = ruvSwarmArgs[i];
       const value = ruvSwarmArgs[i + 1];
-      
+
       // Skip if already set by main config
       if (!unified.includes(flag)) {
         unified.push(flag, value);
@@ -118,16 +118,15 @@ export class RuvSwarmIntegration {
       }
 
       // logger.info('ruv-swarm integration initialized successfully');
-      
+
       return {
         success: true,
         message: 'ruv-swarm integration initialized and configured'
       };
-
     } catch (error) {
       const message = `Failed to initialize ruv-swarm integration: ${(error as Error).message}`;
       // logger.error(message, { error });
-      
+
       return {
         success: false,
         message
@@ -234,7 +233,10 @@ export function getRuvSwarmIntegration(): RuvSwarmIntegration {
 /**
  * Initialize ruv-swarm integration with claude-flow
  */
-export async function initializeRuvSwarmIntegration(): Promise<{ success: boolean; message: string }> {
+export async function initializeRuvSwarmIntegration(): Promise<{
+  success: boolean;
+  message: string;
+}> {
   const integration = getRuvSwarmIntegration();
   return integration.initialize();
 }
@@ -243,13 +245,12 @@ export async function initializeRuvSwarmIntegration(): Promise<{ success: boolea
  * Helper functions for CLI commands
  */
 export class RuvSwarmConfigHelpers {
-  
   /**
    * Quick setup for development environment
    */
   static setupDevelopmentConfig(): void {
     const integration = getRuvSwarmIntegration();
-    
+
     integration.updateConfiguration({
       main: {
         enabled: true,
@@ -271,7 +272,7 @@ export class RuvSwarmConfigHelpers {
    */
   static setupResearchConfig(): void {
     const integration = getRuvSwarmIntegration();
-    
+
     integration.updateConfiguration({
       main: {
         enabled: true,
@@ -293,7 +294,7 @@ export class RuvSwarmConfigHelpers {
    */
   static setupProductionConfig(): void {
     const integration = getRuvSwarmIntegration();
-    
+
     integration.updateConfiguration({
       main: {
         enabled: true,
@@ -315,7 +316,7 @@ export class RuvSwarmConfigHelpers {
    */
   static getConfigForUseCase(useCase: 'development' | 'research' | 'production'): any {
     const integration = getRuvSwarmIntegration();
-    
+
     switch (useCase) {
       case 'development':
         return {
@@ -324,7 +325,7 @@ export class RuvSwarmConfigHelpers {
           strategy: 'specialized',
           features: ['hooks', 'persistence', 'neural-training']
         };
-      
+
       case 'research':
         return {
           topology: 'mesh',
@@ -332,7 +333,7 @@ export class RuvSwarmConfigHelpers {
           strategy: 'adaptive',
           features: ['hooks', 'persistence', 'neural-training', 'advanced-metrics']
         };
-        
+
       case 'production':
         return {
           topology: 'star',
@@ -340,7 +341,7 @@ export class RuvSwarmConfigHelpers {
           strategy: 'balanced',
           features: ['hooks', 'persistence']
         };
-        
+
       default:
         return integration.getStatus().mainConfig;
     }

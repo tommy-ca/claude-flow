@@ -31,14 +31,14 @@ async function runDemo() {
   });
 
   // Set up event listeners
-  resourceManager.on('resource:event', (event) => {
+  resourceManager.on('resource:event', event => {
     console.log(`📊 Event: ${event.type} - ${event.resourceType} - ${event.severity}`);
     if (event.data.resource) {
       console.log(`   Resource: ${event.data.resource}`);
     }
   });
 
-  resourceManager.on('resources:updated', (resources) => {
+  resourceManager.on('resources:updated', resources => {
     console.log(`🔄 Resources updated: ${resources.length} resources detected`);
   });
 
@@ -46,7 +46,7 @@ async function runDemo() {
     // Initialize resource manager
     console.log('📋 Initializing resource manager...');
     await resourceManager.initialize();
-    
+
     // Wait for initial resource detection
     await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -92,13 +92,17 @@ async function runDemo() {
       priority: 'medium',
       metadata: { purpose: 'data-processing' }
     });
-    console.log(`✅ Memory allocated: ${(memoryAllocation.amount / 1024 / 1024).toFixed(0)}MB to ${memoryAllocation.agentId}`);
+    console.log(
+      `✅ Memory allocated: ${(memoryAllocation.amount / 1024 / 1024).toFixed(0)}MB to ${memoryAllocation.agentId}`
+    );
 
     // Show allocations
     console.log('\n📋 Active Allocations:');
     const allocations = resourceManager.getAllocations();
     allocations.forEach(allocation => {
-      console.log(`  ${allocation.id}: ${allocation.resourceType} - ${allocation.amount} (${allocation.priority})`);
+      console.log(
+        `  ${allocation.id}: ${allocation.resourceType} - ${allocation.amount} (${allocation.priority})`
+      );
       console.log(`    Agent: ${allocation.agentId}`);
       console.log(`    Status: ${allocation.status}`);
       console.log('');
@@ -108,7 +112,7 @@ async function runDemo() {
     console.log('🤖 Agent-Specific Allocations:');
     const agent1Allocations = resourceManager.getAllocationsByAgent('demo-agent-1');
     console.log(`  demo-agent-1: ${agent1Allocations.length} allocations`);
-    
+
     const agent2Allocations = resourceManager.getAllocationsByAgent('demo-agent-2');
     console.log(`  demo-agent-2: ${agent2Allocations.length} allocations`);
 
@@ -137,9 +141,13 @@ async function runDemo() {
     const history = resourceManager.getAllocationHistory();
     history.slice(-5).forEach(allocation => {
       console.log(`  ${allocation.id}: ${allocation.resourceType} - ${allocation.status}`);
-      console.log(`    Duration: ${allocation.endTime ? 
-        (allocation.endTime.getTime() - allocation.startTime.getTime()) + 'ms' : 
-        'ongoing'}`);
+      console.log(
+        `    Duration: ${
+          allocation.endTime
+            ? allocation.endTime.getTime() - allocation.startTime.getTime() + 'ms'
+            : 'ongoing'
+        }`
+      );
     });
 
     // Test resource limits
@@ -182,7 +190,6 @@ async function runDemo() {
     console.log(`  Uptime: ${(status.uptime / 1000).toFixed(1)}s`);
     console.log(`  Resources tracked: ${status.resourceCount}`);
     console.log(`  History entries: ${status.historySize}`);
-
   } catch (error) {
     console.error('❌ Demo failed:', error);
   } finally {

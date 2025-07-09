@@ -31,25 +31,25 @@ export class MessageRouter {
   constructor(
     private config: CoordinationConfig,
     private eventBus: IEventBus,
-    private logger: ILogger,
+    private logger: ILogger
   ) {}
 
   async initialize(): Promise<void> {
     this.logger.info('Initializing message router');
-    
+
     // Set up periodic cleanup
     setInterval(() => this.cleanup(), 60000); // Every minute
   }
 
   async shutdown(): Promise<void> {
     this.logger.info('Shutting down message router');
-    
+
     // Reject all pending responses
     for (const [id, pending] of this.pendingResponses) {
       pending.reject(new Error('Message router shutdown'));
       clearTimeout(pending.timeout);
     }
-    
+
     this.queues.clear();
     this.pendingResponses.clear();
   }
@@ -60,7 +60,7 @@ export class MessageRouter {
       type: 'agent-message',
       payload,
       timestamp: new Date(),
-      priority: 0,
+      priority: 0
     };
 
     await this.sendMessage(from, to, message);
@@ -70,14 +70,14 @@ export class MessageRouter {
     from: string,
     to: string,
     payload: unknown,
-    timeoutMs?: number,
+    timeoutMs?: number
   ): Promise<T> {
     const message: Message = {
       id: generateId('msg'),
       type: 'agent-request',
       payload,
       timestamp: new Date(),
-      priority: 1,
+      priority: 1
     };
 
     // Create response promise
@@ -90,7 +90,7 @@ export class MessageRouter {
       this.pendingResponses.set(message.id, {
         resolve: resolve as (response: unknown) => void,
         reject,
-        timeout: timeout as unknown as number,
+        timeout: timeout as unknown as number
       });
     });
 
@@ -107,15 +107,13 @@ export class MessageRouter {
       type: 'broadcast',
       payload,
       timestamp: new Date(),
-      priority: 0,
+      priority: 0
     };
 
     // Send to all agents
     const agents = Array.from(this.queues.keys()).filter(id => id !== from);
-    
-    await Promise.all(
-      agents.map(to => this.sendMessage(from, to, message)),
-    );
+
+    await Promise.all(agents.map(to => this.sendMessage(from, to, message)));
   }
 
   subscribe(agentId: string, handler: (message: Message) => void): void {
@@ -130,10 +128,7 @@ export class MessageRouter {
     }
   }
 
-  async sendResponse(
-    originalMessageId: string,
-    response: unknown,
-  ): Promise<void> {
+  async sendResponse(originalMessageId: string, response: unknown): Promise<void> {
     const pending = this.pendingResponses.get(originalMessageId);
     if (!pending) {
       this.logger.warn('No pending response found', { messageId: originalMessageId });
@@ -145,9 +140,9 @@ export class MessageRouter {
     pending.resolve(response);
   }
 
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     const totalQueues = this.queues.size;
@@ -166,21 +161,17 @@ export class MessageRouter {
         pendingMessages: totalMessages,
         registeredHandlers: totalHandlers,
         pendingResponses: this.pendingResponses.size,
-        totalMessagesSent: this.messageCount,
-      },
+        totalMessagesSent: this.messageCount
+      }
     };
   }
 
-  private async sendMessage(
-    from: string,
-    to: string,
-    message: Message,
-  ): Promise<void> {
-    this.logger.debug('Sending message', { 
+  private async sendMessage(from: string, to: string, message: Message): Promise<void> {
+    this.logger.debug('Sending message', {
       from,
       to,
       messageId: message.id,
-      type: message.type,
+      type: message.type
     });
 
     // Ensure destination queue exists
@@ -218,20 +209,20 @@ export class MessageRouter {
         try {
           handler(message);
         } catch (error) {
-          this.logger.error('Message handler error', { 
+          this.logger.error('Message handler error', {
             agentId,
             messageId: message.id,
-            error,
+            error
           });
         }
-      }),
+      })
     );
 
     // Emit received event
-    this.eventBus.emit(SystemEvents.MESSAGE_RECEIVED, { 
+    this.eventBus.emit(SystemEvents.MESSAGE_RECEIVED, {
       from: '', // Would need to track this
       to: agentId,
-      message,
+      message
     });
   }
 
@@ -239,7 +230,7 @@ export class MessageRouter {
     if (!this.queues.has(agentId)) {
       this.queues.set(agentId, {
         messages: [],
-        handlers: new Map(),
+        handlers: new Map()
       });
     }
     return this.queues.get(agentId)!;
@@ -257,15 +248,15 @@ export class MessageRouter {
     for (const [agentId, queue] of this.queues) {
       const filtered = queue.messages.filter(msg => {
         const age = now - msg.timestamp.getTime();
-        const maxAge = msg.expiry 
+        const maxAge = msg.expiry
           ? msg.expiry.getTime() - msg.timestamp.getTime()
           : this.config.messageTimeout;
 
         if (age > maxAge) {
-          this.logger.warn('Dropping expired message', { 
+          this.logger.warn('Dropping expired message', {
             agentId,
             messageId: msg.id,
-            age,
+            age
           });
           return false;
         }

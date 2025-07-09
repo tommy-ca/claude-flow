@@ -70,7 +70,7 @@ export class PerformanceTest {
     }
     const sequentialTime = performance.now() - sequentialStart;
 
-    const improvement = ((sequentialTime - batchTime) / sequentialTime * 100).toFixed(2);
+    const improvement = (((sequentialTime - batchTime) / sequentialTime) * 100).toFixed(2);
 
     this.results.push({
       test: 'Batch Agent Spawning',
@@ -81,7 +81,9 @@ export class PerformanceTest {
       status: improvement > 50 ? 'PASS' : 'WARN'
     });
 
-    console.log(`  ✅ Batch: ${batchTime.toFixed(2)}ms | Sequential: ${sequentialTime.toFixed(2)}ms | Improvement: ${improvement}%\n`);
+    console.log(
+      `  ✅ Batch: ${batchTime.toFixed(2)}ms | Sequential: ${sequentialTime.toFixed(2)}ms | Improvement: ${improvement}%\n`
+    );
 
     await hiveMind.shutdown();
   }
@@ -119,7 +121,7 @@ export class PerformanceTest {
     }
     const sequentialTime = performance.now() - sequentialStart;
 
-    const improvement = ((sequentialTime - parallelTime) / sequentialTime * 100).toFixed(2);
+    const improvement = (((sequentialTime - parallelTime) / sequentialTime) * 100).toFixed(2);
 
     this.results.push({
       test: 'Async Operation Queue',
@@ -130,7 +132,9 @@ export class PerformanceTest {
       status: improvement > 60 ? 'PASS' : 'WARN'
     });
 
-    console.log(`  ✅ Parallel: ${parallelTime.toFixed(2)}ms | Sequential: ${sequentialTime.toFixed(2)}ms | Improvement: ${improvement}%\n`);
+    console.log(
+      `  ✅ Parallel: ${parallelTime.toFixed(2)}ms | Sequential: ${sequentialTime.toFixed(2)}ms | Improvement: ${improvement}%\n`
+    );
 
     await optimizer.close();
   }
@@ -146,10 +150,12 @@ export class PerformanceTest {
     const pooledStart = performance.now();
 
     // Simulate 100 memory operations with connection pooling
-    const operations = Array(100).fill(null).map(async (_, i) => {
-      await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
-      return { key: `test-${i}`, value: `data-${i}` };
-    });
+    const operations = Array(100)
+      .fill(null)
+      .map(async (_, i) => {
+        await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
+        return { key: `test-${i}`, value: `data-${i}` };
+      });
 
     await Promise.all(operations);
     const pooledTime = performance.now() - pooledStart;
@@ -161,7 +167,7 @@ export class PerformanceTest {
     }
     const serialTime = performance.now() - serialStart;
 
-    const improvement = ((serialTime - pooledTime) / serialTime * 100).toFixed(2);
+    const improvement = (((serialTime - pooledTime) / serialTime) * 100).toFixed(2);
 
     this.results.push({
       test: 'Memory Operations',
@@ -172,7 +178,9 @@ export class PerformanceTest {
       status: improvement > 25 ? 'PASS' : 'WARN'
     });
 
-    console.log(`  ✅ Pooled: ${pooledTime.toFixed(2)}ms | Serial: ${serialTime.toFixed(2)}ms | Improvement: ${improvement}%\n`);
+    console.log(
+      `  ✅ Pooled: ${pooledTime.toFixed(2)}ms | Serial: ${serialTime.toFixed(2)}ms | Improvement: ${improvement}%\n`
+    );
   }
 
   /**
@@ -225,7 +233,9 @@ export class PerformanceTest {
       status: status.tasks.total === tasks.length ? 'PASS' : 'WARN'
     });
 
-    console.log(`  ✅ Tasks: ${status.tasks.total} | Workers: ${status.workers.length} | Time: ${concurrentTime.toFixed(2)}ms\n`);
+    console.log(
+      `  ✅ Tasks: ${status.tasks.total} | Workers: ${status.workers.length} | Time: ${concurrentTime.toFixed(2)}ms\n`
+    );
 
     await hiveMind.shutdown();
   }
@@ -275,7 +285,7 @@ export class PerformanceTest {
         optimizer.optimizeBatchOperation(
           'test-batch',
           { id: i, data: `test-${i}` },
-          async (items) => {
+          async items => {
             await new Promise(resolve => setTimeout(resolve, 50));
             return items.map(item => ({ processed: item.id }));
           }
@@ -297,7 +307,9 @@ export class PerformanceTest {
       status: stats.cache.hitRate > 50 ? 'PASS' : 'WARN'
     });
 
-    console.log(`  ✅ Cache Hit Rate: ${((cacheHits / (cacheHits + cacheMisses)) * 100).toFixed(2)}% | Batches: ${stats.batchProcessor.batchesProcessed}\n`);
+    console.log(
+      `  ✅ Cache Hit Rate: ${((cacheHits / (cacheHits + cacheMisses)) * 100).toFixed(2)}% | Batches: ${stats.batchProcessor.batchesProcessed}\n`
+    );
 
     await optimizer.close();
   }
@@ -307,7 +319,7 @@ export class PerformanceTest {
    */
   generateReport() {
     console.log('📊 Performance Test Results');
-    console.log('=' .repeat(80));
+    console.log('='.repeat(80));
 
     let totalPassed = 0;
     const totalTests = this.results.length;
@@ -325,7 +337,9 @@ export class PerformanceTest {
       const statusIcon = result.status === 'PASS' ? '✅' : '⚠️';
       console.log(`   Status: ${statusIcon} ${result.status}`);
 
-      if (result.status === 'PASS') {totalPassed++;}
+      if (result.status === 'PASS') {
+        totalPassed++;
+      }
     });
 
     console.log('\n' + '='.repeat(80));

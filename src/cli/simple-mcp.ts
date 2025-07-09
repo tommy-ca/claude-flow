@@ -16,7 +16,7 @@ function printError(message: string) {
 
 // Check if MCP server is running
 async function checkMCPStatus(host: string, port: number): Promise<boolean> {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const options = {
       hostname: host,
       port: port,
@@ -25,7 +25,7 @@ async function checkMCPStatus(host: string, port: number): Promise<boolean> {
       timeout: 2000
     };
 
-    const req = http.request(options, (res) => {
+    const req = http.request(options, res => {
       resolve(res.statusCode === 200 || res.statusCode === 404);
     });
 
@@ -43,17 +43,15 @@ async function checkMCPStatus(host: string, port: number): Promise<boolean> {
 }
 
 export function createMCPCommand() {
-  const mcpCmd = new Command('mcp')
-    .description('Manage MCP server and tools')
-    .action(() => {
-      printSuccess('MCP Server Management');
-      console.log('\n🌐 Available MCP commands:');
-      console.log('  • mcp start - Start the MCP server');
-      console.log('  • mcp status - Show MCP server status');
-      console.log('  • mcp tools - List available MCP tools');
-      console.log('  • mcp stop - Stop the MCP server');
-      console.log('\n💡 Use "mcp start --port 3001" to use a different port');
-    });
+  const mcpCmd = new Command('mcp').description('Manage MCP server and tools').action(() => {
+    printSuccess('MCP Server Management');
+    console.log('\n🌐 Available MCP commands:');
+    console.log('  • mcp start - Start the MCP server');
+    console.log('  • mcp status - Show MCP server status');
+    console.log('  • mcp tools - List available MCP tools');
+    console.log('  • mcp stop - Stop the MCP server');
+    console.log('\n💡 Use "mcp start --port 3001" to use a different port');
+  });
 
   mcpCmd
     .command('start')
@@ -61,7 +59,7 @@ export function createMCPCommand() {
     .option('--port <port>', 'Port for MCP server', '3000')
     .option('--host <host>', 'Host for MCP server', 'localhost')
     .option('--transport <transport>', 'Transport type (stdio, http)', 'http')
-    .action(async (options) => {
+    .action(async options => {
       // This is handled by the actual MCP implementation
       console.log('Starting MCP server...');
       console.log('(This command is handled by the MCP module)');
@@ -72,15 +70,15 @@ export function createMCPCommand() {
     .description('Show MCP server status')
     .option('--port <port>', 'Port to check', '3000')
     .option('--host <host>', 'Host to check', 'localhost')
-    .action(async (options) => {
+    .action(async options => {
       printSuccess('MCP Server Status:');
-      
+
       const host = options.host || 'localhost';
       const port = parseInt(options.port) || 3000;
-      
+
       // Check if server is actually running
       const isRunning = await checkMCPStatus(host, port);
-      
+
       if (isRunning) {
         console.log('🟢 Status: Running');
         console.log(`📍 Address: ${host}:${port}`);

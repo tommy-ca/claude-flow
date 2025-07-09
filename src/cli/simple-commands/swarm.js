@@ -118,7 +118,9 @@ export async function swarmCommand(args, flags) {
         console.log('Install it with: npm install -g @anthropic-ai/claude-code');
         console.log('\nWould spawn Claude Code with swarm objective:');
         console.log(`📋 Objective: ${objective}`);
-        console.log('\nTo use the built-in executor instead: claude-flow swarm "objective" --executor');
+        console.log(
+          '\nTo use the built-in executor instead: claude-flow swarm "objective" --executor'
+        );
         return;
       }
 
@@ -138,7 +140,8 @@ export async function swarmCommand(args, flags) {
       const modeGuidance = getModeGuidance(mode);
       const agentRecommendations = getAgentRecommendations(strategy, maxAgents, objective);
 
-      const enableSparc = flags.sparc !== false && (strategy === 'development' || strategy === 'auto');
+      const enableSparc =
+        flags.sparc !== false && (strategy === 'development' || strategy === 'auto');
 
       const swarmPrompt = `You are orchestrating a Claude Flow Swarm with advanced MCP tool coordination.
 
@@ -352,7 +355,9 @@ ${agentRecommendations}
    - Tools: agent_communicate, memory_store/retrieve
 
 ⚡ EXECUTION WORKFLOW - ALWAYS USE BATCHTOOL:
-${enableSparc ? `
+${
+  enableSparc
+    ? `
 1. SPARC METHODOLOGY WITH PARALLEL EXECUTION:
    
    S - Specification Phase (Single BatchTool):
@@ -400,7 +405,8 @@ ${enableSparc ? `
      mcp__claude-flow__memory_retrieve { pattern: "**/*" }
      TodoWrite { todos: [{content: "Final review", status: "completed"}] }
    \`\`\`
-` : `
+`
+    : `
 1. STANDARD SWARM EXECUTION WITH PARALLEL OPERATIONS:
    
    Initial Setup (Single BatchTool):
@@ -428,7 +434,8 @@ ${enableSparc ? `
      mcp__claude-flow__agent_communicate { to: "all", message: "Status update" }
      mcp__claude-flow__memory_store { key: "progress", value: {...} }
    \`\`\`
-`}
+`
+}
 
 🤝 AGENT TYPES & THEIR MCP TOOL USAGE:
 
@@ -500,7 +507,9 @@ The swarm should be self-documenting - use memory_store to save all important in
       // Add auto-permission flag by default for swarm mode (unless explicitly disabled)
       if (flags['dangerously-skip-permissions'] !== false && !flags['no-auto-permissions']) {
         claudeArgs.push('--dangerously-skip-permissions');
-        console.log('🔓 Using --dangerously-skip-permissions by default for seamless swarm execution');
+        console.log(
+          '🔓 Using --dangerously-skip-permissions by default for seamless swarm execution'
+        );
       }
 
       // Spawn claude with the prompt as the first argument
@@ -518,13 +527,12 @@ The swarm should be self-documenting - use memory_store to save all important in
       console.log('   • Complete workflow documentation\n');
 
       // Handle process events
-      claudeProcess.on('error', (err) => {
+      claudeProcess.on('error', err => {
         console.error('❌ Failed to launch Claude Code:', err.message);
       });
 
       // Don't wait for completion - let it run
       return;
-
     } catch (error) {
       console.error('❌ Failed to spawn Claude Code:', error.message);
       console.log('\nFalling back to built-in executor...');
@@ -586,13 +594,20 @@ await swarmCommand(args, flags);
       await writeTextFile(scriptPath, scriptContent);
 
       // Save process info first
-      await writeTextFile(`${swarmRunDir}/process.json`, JSON.stringify({
-        swarmId: swarmId,
-        objective: objective,
-        startTime: new Date().toISOString(),
-        logFile: logFile,
-        status: 'starting'
-      }, null, 2));
+      await writeTextFile(
+        `${swarmRunDir}/process.json`,
+        JSON.stringify(
+          {
+            swarmId: swarmId,
+            objective: objective,
+            startTime: new Date().toISOString(),
+            logFile: logFile,
+            status: 'starting'
+          },
+          null,
+          2
+        )
+      );
 
       // Close log handle before spawning
       logHandle.close();
@@ -671,14 +686,18 @@ exit 0
     const objective = (args || []).join(' ').trim();
 
     // Get the claude-flow-swarm-bg script path
-    const bgScriptPath = path.join(path.dirname(new URL(import.meta.url).pathname), '../../../bin/claude-flow-swarm-bg');
+    const bgScriptPath = path.join(
+      path.dirname(new URL(import.meta.url).pathname),
+      '../../../bin/claude-flow-swarm-bg'
+    );
 
     // Check if background script exists
     if (fs.existsSync(bgScriptPath)) {
       // Build command args
       const commandArgs = [objective];
       for (const [key, value] of Object.entries(flags)) {
-        if (key !== 'background') { // Skip background flag
+        if (key !== 'background') {
+          // Skip background flag
           commandArgs.push(`--${key}`);
           if (value !== true) {
             commandArgs.push(String(value));
@@ -700,7 +719,12 @@ exit 0
       console.log(`📋 Objective: ${objective}`);
       console.log('\n⚠️  Background execution requires the claude-flow-swarm-bg script.');
       console.log('\nFor true background execution, use:');
-      console.log(`  nohup claude-flow swarm "${objective}" ${Object.entries(flags).filter(([k,v]) => k !== 'background' && v).map(([k,v]) => `--${k}${v !== true ? ` ${v}` : ''}`).join(' ')} > swarm.log 2>&1 &`);
+      console.log(
+        `  nohup claude-flow swarm "${objective}" ${Object.entries(flags)
+          .filter(([k, v]) => k !== 'background' && v)
+          .map(([k, v]) => `--${k}${v !== true ? ` ${v}` : ''}`)
+          .join(' ')} > swarm.log 2>&1 &`
+      );
     }
     return;
   }
@@ -734,7 +758,11 @@ exit 0
     await swarmAction(ctx);
   } catch (error) {
     // If import fails (e.g., in node_modules), provide inline implementation
-    if (error.code === 'ERR_MODULE_NOT_FOUND' || error.code === 'ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING' || error.code === 'ERR_UNKNOWN_FILE_EXTENSION') {
+    if (
+      error.code === 'ERR_MODULE_NOT_FOUND' ||
+      error.code === 'ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING' ||
+      error.code === 'ERR_UNKNOWN_FILE_EXTENSION'
+    ) {
       // Provide a basic swarm implementation that works without TypeScript imports
       const objective = (args || []).join(' ').trim();
 
@@ -839,11 +867,11 @@ exit 0
             stdio: 'inherit'
           });
 
-          swarmProcess.on('error', (err) => {
+          swarmProcess.on('error', err => {
             console.error('❌ Failed to launch swarm:', err.message);
           });
 
-          swarmProcess.on('exit', (code) => {
+          swarmProcess.on('exit', code => {
             if (code !== 0) {
               console.error(`❌ Swarm exited with code ${code}`);
             }
@@ -896,7 +924,9 @@ CONFIGURATION:
 - Quality Threshold: ${flags['quality-threshold'] || 0.8}
 ${enableSparc ? '- SPARC Enabled: YES - Use full Specification, Pseudocode, Architecture, Refinement (TDD), Completion methodology' : ''}
 
-${enableSparc ? `
+${
+  enableSparc
+    ? `
 SPARC METHODOLOGY REQUIREMENTS:
 
 1. SPECIFICATION PHASE:
@@ -928,7 +958,9 @@ SPARC METHODOLOGY REQUIREMENTS:
    - Create comprehensive documentation
    - Perform end-to-end testing
    - Validate against original requirements
-` : ''}
+`
+    : ''
+}
 
 EXECUTION APPROACH:
 1. Analyze the objective and break it down into specific tasks
@@ -974,7 +1006,7 @@ Begin execution now. Create all necessary files and provide a complete, working 
 
         // Wait for the process to complete
         await new Promise((resolve, reject) => {
-          claudeProcess.on('close', (code) => {
+          claudeProcess.on('close', code => {
             if (code === 0) {
               resolve();
             } else {
@@ -982,11 +1014,10 @@ Begin execution now. Create all necessary files and provide a complete, working 
             }
           });
 
-          claudeProcess.on('error', (err) => {
+          claudeProcess.on('error', err => {
             reject(err);
           });
         });
-
       } catch (error) {
         // Fallback if Claude execution fails
         console.log(`✅ Swarm initialized with ID: ${swarmId}`);
@@ -1107,8 +1138,8 @@ async function createSwarmFiles(objective, flags) {
   await fs.promises.mkdir(targetDir, { recursive: true });
 
   // Determine what to build based on objective
-  const isRestAPI = objective.toLowerCase().includes('rest api') ||
-                    objective.toLowerCase().includes('api');
+  const isRestAPI =
+    objective.toLowerCase().includes('rest api') || objective.toLowerCase().includes('api');
 
   if (isRestAPI) {
     // Create REST API
@@ -1304,7 +1335,7 @@ main();
  */
 function getStrategyGuidance(strategy, objective) {
   const guidanceMap = {
-    'auto': `🤖 AUTO STRATEGY - INTELLIGENT TASK ANALYSIS:
+    auto: `🤖 AUTO STRATEGY - INTELLIGENT TASK ANALYSIS:
 The swarm will analyze "${objective}" and automatically determine the best approach.
 
 ANALYSIS APPROACH:
@@ -1319,7 +1350,7 @@ MCP TOOL PATTERN:
 - Spawn agents with agent_spawn based on detected requirements
 - Monitor with swarm_monitor and adjust strategy as needed`,
 
-    'research': `🔬 RESEARCH STRATEGY - INFORMATION GATHERING & ANALYSIS:
+    research: `🔬 RESEARCH STRATEGY - INFORMATION GATHERING & ANALYSIS:
 Optimized for: "${objective}"
 
 RESEARCH PHASES:
@@ -1340,7 +1371,7 @@ MCP TOOL USAGE:
 - agent_communicate: Share discoveries between researchers
 - task_create: Break research into focused sub-investigations`,
 
-    'development': `💻 DEVELOPMENT STRATEGY - SOFTWARE CREATION:
+    development: `💻 DEVELOPMENT STRATEGY - SOFTWARE CREATION:
 Building: "${objective}"
 
 DEVELOPMENT WORKFLOW:
@@ -1363,7 +1394,7 @@ MCP TOOL USAGE:
 - agent_assign: Assign specific components to developers
 - swarm_monitor: Track build progress and blockers`,
 
-    'analysis': `📊 ANALYSIS STRATEGY - DATA EXAMINATION:
+    analysis: `📊 ANALYSIS STRATEGY - DATA EXAMINATION:
 Analyzing: "${objective}"
 
 ANALYSIS FRAMEWORK:
@@ -1386,7 +1417,7 @@ MCP TOOL USAGE:
 - task_create: Define analysis pipelines
 - agent_coordinate: Sync analysis phases`,
 
-    'testing': `🧪 TESTING STRATEGY - QUALITY ASSURANCE:
+    testing: `🧪 TESTING STRATEGY - QUALITY ASSURANCE:
 Testing: "${objective}"
 
 TESTING PHASES:
@@ -1409,7 +1440,7 @@ MCP TOOL USAGE:
 - agent_communicate: Report bugs to developers
 - swarm_monitor: Track testing coverage and progress`,
 
-    'optimization': `⚡ OPTIMIZATION STRATEGY - PERFORMANCE IMPROVEMENT:
+    optimization: `⚡ OPTIMIZATION STRATEGY - PERFORMANCE IMPROVEMENT:
 Optimizing: "${objective}"
 
 OPTIMIZATION PROCESS:
@@ -1432,7 +1463,7 @@ MCP TOOL USAGE:
 - swarm_monitor: Track performance improvements
 - agent_communicate: Coordinate optimization efforts`,
 
-    'maintenance': `🔧 MAINTENANCE STRATEGY - SYSTEM UPKEEP:
+    maintenance: `🔧 MAINTENANCE STRATEGY - SYSTEM UPKEEP:
 Maintaining: "${objective}"
 
 MAINTENANCE WORKFLOW:
@@ -1464,7 +1495,7 @@ MCP TOOL USAGE:
  */
 function getModeGuidance(mode) {
   const modeMap = {
-    'centralized': `🎯 CENTRALIZED MODE - SINGLE COORDINATOR:
+    centralized: `🎯 CENTRALIZED MODE - SINGLE COORDINATOR:
 All decisions flow through one coordinator agent.
 
 COORDINATION PATTERN:
@@ -1485,7 +1516,7 @@ BEST FOR:
 - Well-defined objectives
 - Clear task dependencies`,
 
-    'distributed': `🌐 DISTRIBUTED MODE - MULTIPLE COORDINATORS:
+    distributed: `🌐 DISTRIBUTED MODE - MULTIPLE COORDINATORS:
 Multiple coordinators share responsibility by domain.
 
 COORDINATION PATTERN:
@@ -1507,7 +1538,7 @@ BEST FOR:
 - Complex systems
 - High availability needs`,
 
-    'hierarchical': `🏗️ HIERARCHICAL MODE - TREE STRUCTURE:
+    hierarchical: `🏗️ HIERARCHICAL MODE - TREE STRUCTURE:
 Agents organized in management layers.
 
 COORDINATION PATTERN:
@@ -1529,7 +1560,7 @@ BEST FOR:
 - Complex hierarchies
 - Phased deliveries`,
 
-    'mesh': `🔗 MESH MODE - PEER-TO-PEER:
+    mesh: `🔗 MESH MODE - PEER-TO-PEER:
 Agents coordinate directly without central authority.
 
 COORDINATION PATTERN:
@@ -1551,7 +1582,7 @@ BEST FOR:
 - Innovation tasks
 - Small expert teams`,
 
-    'hybrid': `🎨 HYBRID MODE - MIXED STRATEGIES:
+    hybrid: `🎨 HYBRID MODE - MIXED STRATEGIES:
 Combine different coordination patterns as needed.
 
 COORDINATION PATTERN:
@@ -1581,7 +1612,7 @@ BEST FOR:
  */
 function getAgentRecommendations(strategy, maxAgents, objective) {
   const recommendations = {
-    'auto': `
+    auto: `
 🤖 RECOMMENDED AGENT COMPOSITION (Auto-detected):
 ⚡ SPAWN ALL AGENTS IN ONE BATCH - Copy this entire block:
 
@@ -1601,7 +1632,7 @@ function getAgentRecommendations(strategy, maxAgents, objective) {
   ]}
 \`\`\``,
 
-    'research': `
+    research: `
 🔬 RECOMMENDED RESEARCH AGENTS:
 ⚡ SPAWN ALL AGENTS IN ONE BATCH - Copy this entire block:
 
@@ -1626,7 +1657,7 @@ function getAgentRecommendations(strategy, maxAgents, objective) {
   ]}
 \`\`\``,
 
-    'development': `
+    development: `
 💻 RECOMMENDED DEVELOPMENT AGENTS:
 ⚡ SPAWN ALL AGENTS IN ONE BATCH - Copy this entire block:
 
@@ -1651,7 +1682,7 @@ function getAgentRecommendations(strategy, maxAgents, objective) {
   ]}
 \`\`\``,
 
-    'analysis': `
+    analysis: `
 📊 RECOMMENDED ANALYSIS AGENTS:
 ⚡ SPAWN ALL AGENTS IN ONE BATCH - Copy this entire block:
 
@@ -1676,7 +1707,7 @@ function getAgentRecommendations(strategy, maxAgents, objective) {
   ]}
 \`\`\``,
 
-    'testing': `
+    testing: `
 🧪 RECOMMENDED TESTING AGENTS:
 ⚡ SPAWN ALL AGENTS IN ONE BATCH - Copy this entire block:
 
@@ -1701,7 +1732,7 @@ function getAgentRecommendations(strategy, maxAgents, objective) {
   ]}
 \`\`\``,
 
-    'optimization': `
+    optimization: `
 ⚡ RECOMMENDED OPTIMIZATION AGENTS:
 ⚡ SPAWN ALL AGENTS IN ONE BATCH - Copy this entire block:
 
@@ -1726,7 +1757,7 @@ function getAgentRecommendations(strategy, maxAgents, objective) {
   ]}
 \`\`\``,
 
-    'maintenance': `
+    maintenance: `
 🔧 RECOMMENDED MAINTENANCE AGENTS:
 ⚡ SPAWN ALL AGENTS IN ONE BATCH - Copy this entire block:
 

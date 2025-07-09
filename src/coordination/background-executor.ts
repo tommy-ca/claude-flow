@@ -167,7 +167,7 @@ export class BackgroundExecutor extends EventEmitter {
   ): Promise<string> {
     // Build claude command arguments
     const args = ['-p', prompt];
-    
+
     if (tools.length > 0) {
       args.push('--allowedTools', tools.join(','));
     }
@@ -192,8 +192,7 @@ export class BackgroundExecutor extends EventEmitter {
     if (!this.isRunning) return;
 
     // Check how many tasks are running
-    const runningTasks = Array.from(this.tasks.values())
-      .filter(t => t.status === 'running').length;
+    const runningTasks = Array.from(this.tasks.values()).filter(t => t.status === 'running').length;
 
     const availableSlots = this.config.maxConcurrentTasks - runningTasks;
 
@@ -237,18 +236,18 @@ export class BackgroundExecutor extends EventEmitter {
       let stdout = '';
       let stderr = '';
 
-      process.stdout?.on('data', (data) => {
+      process.stdout?.on('data', data => {
         stdout += data.toString();
         this.emit('task:output', { taskId: task.id, data: data.toString() });
       });
 
-      process.stderr?.on('data', (data) => {
+      process.stderr?.on('data', data => {
         stderr += data.toString();
         this.emit('task:error', { taskId: task.id, data: data.toString() });
       });
 
       // Handle process completion
-      process.on('close', async (code) => {
+      process.on('close', async code => {
         task.endTime = new Date();
         task.output = stdout;
         task.error = stderr;
@@ -260,13 +259,15 @@ export class BackgroundExecutor extends EventEmitter {
         } else {
           task.status = 'failed';
           this.logger.error(`Task ${task.id} failed with code ${code}`);
-          
+
           // Retry logic
           if (task.retryCount < (task.options?.retries || 0)) {
             task.retryCount++;
             task.status = 'pending';
             this.queue.push(task.id);
-            this.logger.info(`Retrying task ${task.id} (${task.retryCount}/${task.options?.retries})`);
+            this.logger.info(
+              `Retrying task ${task.id} (${task.retryCount}/${task.options?.retries})`
+            );
             this.emit('task:retry', task);
           } else {
             this.emit('task:failed', task);
@@ -300,12 +301,11 @@ export class BackgroundExecutor extends EventEmitter {
       if (this.config.enablePersistence) {
         await this.saveTaskState(task);
       }
-
     } catch (error) {
       task.status = 'failed';
       task.error = String(error);
       task.endTime = new Date();
-      
+
       this.logger.error(`Failed to execute task ${task.id}:`, error);
       this.emit('task:failed', task);
 
@@ -330,7 +330,7 @@ export class BackgroundExecutor extends EventEmitter {
         if (process) {
           this.logger.warn(`Killing timed out task ${taskId}`);
           process.kill('SIGTERM');
-          
+
           // Force kill after 5 seconds
           setTimeout(() => {
             if (this.processes.has(taskId)) {
@@ -371,11 +371,11 @@ export class BackgroundExecutor extends EventEmitter {
 
     try {
       const logDir = path.join(this.config.logPath, task.id);
-      
+
       if (task.output) {
         await fs.writeFile(path.join(logDir, 'stdout.log'), task.output);
       }
-      
+
       if (task.error) {
         await fs.writeFile(path.join(logDir, 'stderr.log'), task.error);
       }
@@ -410,9 +410,11 @@ export class BackgroundExecutor extends EventEmitter {
         return;
       }
 
-      const timeoutHandle = timeout ? setTimeout(() => {
-        reject(new Error('Wait timeout'));
-      }, timeout) : undefined;
+      const timeoutHandle = timeout
+        ? setTimeout(() => {
+            reject(new Error('Wait timeout'));
+          }, timeout)
+        : undefined;
 
       const checkTask = () => {
         const currentTask = this.tasks.get(taskId);
@@ -444,7 +446,7 @@ export class BackgroundExecutor extends EventEmitter {
     if (process) {
       this.logger.info(`Killing task ${taskId}`);
       process.kill('SIGTERM');
-      
+
       // Force kill after 5 seconds
       setTimeout(() => {
         if (this.processes.has(taskId)) {
@@ -456,7 +458,7 @@ export class BackgroundExecutor extends EventEmitter {
     task.status = 'failed';
     task.error = 'Task killed by user';
     task.endTime = new Date();
-    
+
     this.emit('task:killed', task);
   }
 

@@ -77,74 +77,55 @@ export interface IResourceReclaimSettings {
  */
 export interface IResourceAllocator {
   /** Allocate resources based on request */
-  allocate(
-    request: IResourceAllocationRequest
-  ): Promise<IResourceAllocationResponse>;
-  
+  allocate(request: IResourceAllocationRequest): Promise<IResourceAllocationResponse>;
+
   /** Deallocate resources */
-  deallocate(
-    allocationId: string
-  ): Promise<boolean>;
-  
+  deallocate(allocationId: string): Promise<boolean>;
+
   /** Update an existing allocation */
   updateAllocation(
     allocationId: string,
     request: Partial<IResourceAllocationRequest>
   ): Promise<IResourceAllocationResponse>;
-  
+
   /** Get current allocations */
   getAllocations(): IResourceAllocation[];
-  
+
   /** Get allocation by ID */
-  getAllocation(
-    allocationId: string
-  ): IResourceAllocation | undefined;
-  
+  getAllocation(allocationId: string): IResourceAllocation | undefined;
+
   /** Get allocations for a specific requester */
-  getAllocationsByRequester(
-    requesterId: string
-  ): IResourceAllocation[];
-  
+  getAllocationsByRequester(requesterId: string): IResourceAllocation[];
+
   /** Get available resources */
   getAvailableResources(): IAvailableResources;
-  
+
   /** Get resource utilization */
   getUtilization(): IResourceUtilization;
-  
+
   /** Check if resources can be allocated */
-  canAllocate(
-    request: IResourceAllocationRequest
-  ): boolean;
-  
+  canAllocate(request: IResourceAllocationRequest): boolean;
+
   /** Predict if resources will be available at a future time */
-  predictAvailability(
-    request: IResourceAllocationRequest,
-    futureTime: Date
-  ): Promise<boolean>;
-  
+  predictAvailability(request: IResourceAllocationRequest, futureTime: Date): Promise<boolean>;
+
   /** Optimize current allocations */
   optimize(): Promise<IOptimizationResult>;
-  
+
   /** Set allocation strategy */
-  setStrategy(
-    strategy: AllocationStrategy
-  ): void;
-  
+  setStrategy(strategy: AllocationStrategy): void;
+
   /** Update configuration */
-  updateConfig(
-    config: Partial<IResourceAllocatorConfig>
-  ): void;
-  
+  updateConfig(config: Partial<IResourceAllocatorConfig>): void;
+
   /** Get current configuration */
   getConfig(): IResourceAllocatorConfig;
-  
+
   /** Export allocation state */
   exportState(): IAllocatorState;
-  
+
   /** Import allocation state */
-  importState(
-    state: IAllocatorState
-  ): Promise<void>;
+  importState(state: IAllocatorState): Promise<void>;
 }
 
 /**
@@ -323,23 +304,20 @@ export interface IAllocatorState {
 export interface IAllocationStrategy {
   /** Strategy name */
   name: AllocationStrategy;
-  
+
   /** Find allocation for request */
   findAllocation(
     request: IResourceAllocationRequest,
     available: IAvailableResources,
     currentAllocations: IResourceAllocation[]
   ): IResourceAllocationResponse;
-  
+
   /** Optimize existing allocations */
   optimize(
     allocations: IResourceAllocation[],
     totalResources: IAvailableResources
   ): IOptimizationAction[];
-  
+
   /** Calculate priority score for request */
-  calculatePriority(
-    request: IResourceAllocationRequest,
-    currentMetrics: IResourceMetrics
-  ): number;
+  calculatePriority(request: IResourceAllocationRequest, currentMetrics: IResourceMetrics): number;
 }

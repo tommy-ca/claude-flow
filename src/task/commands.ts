@@ -59,7 +59,11 @@ export function createTaskCancelCommand(context: TaskCommandContext) {
   return {
     name: 'cancel',
     description: 'Cancel a task',
-    execute: async (taskId: string, reason: string = 'User requested', rollback: boolean = true) => {
+    execute: async (
+      taskId: string,
+      reason: string = 'User requested',
+      rollback: boolean = true
+    ) => {
       try {
         await context.taskEngine.cancelTask(taskId, reason, rollback);
         context.logger?.info('Task cancelled successfully', { taskId, reason });
@@ -82,12 +86,16 @@ export function createTaskWorkflowCommand(context: TaskCommandContext) {
           case 'create':
             const [workflowData] = args;
             const createdWorkflow = await context.taskEngine.createWorkflow(workflowData);
-            context.logger?.info('Workflow created successfully', { workflowId: createdWorkflow.id });
+            context.logger?.info('Workflow created successfully', {
+              workflowId: createdWorkflow.id
+            });
             return createdWorkflow;
           case 'execute':
             const [workflowToExecute] = args;
             await context.taskEngine.executeWorkflow(workflowToExecute);
-            context.logger?.info('Workflow execution started', { workflowId: workflowToExecute.id });
+            context.logger?.info('Workflow execution started', {
+              workflowId: workflowToExecute.id
+            });
             return { success: true, workflowId: workflowToExecute.id };
           case 'list':
             context.logger?.info('Workflow list requested');

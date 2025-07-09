@@ -39,7 +39,10 @@ class NativeTerminal implements Terminal {
   private stdoutData = '';
   private stderrData = '';
 
-  constructor(shell: string, private logger: ILogger) {
+  constructor(
+    shell: string,
+    private logger: ILogger
+  ) {
     this.id = generateId('native-term');
     this.shell = shell;
     this.commandMarker = `__CLAUDE_FLOW_${this.id}__`;
@@ -48,7 +51,7 @@ class NativeTerminal implements Terminal {
   async initialize(): Promise<void> {
     try {
       const shellConfig = this.getShellConfig();
-      
+
       // Start shell process
       this.process = spawn(shellConfig.path, shellConfig.args, {
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -56,10 +59,10 @@ class NativeTerminal implements Terminal {
           ...process.env,
           ...shellConfig.env,
           CLAUDE_FLOW_TERMINAL: 'true',
-          CLAUDE_FLOW_TERMINAL_ID: this.id,
-        },
+          CLAUDE_FLOW_TERMINAL_ID: this.id
+        }
       });
-      
+
       // Get PID
       this.pid = this.process.pid;
 
@@ -71,11 +74,11 @@ class NativeTerminal implements Terminal {
 
       // Wait for shell to be ready
       await this.waitForReady();
-      
-      this.logger.debug('Native terminal initialized', { 
-        id: this.id, 
+
+      this.logger.debug('Native terminal initialized', {
+        id: this.id,
         pid: this.pid,
-        shell: this.shell,
+        shell: this.shell
       });
     } catch (error) {
       this.alive = false;
@@ -103,9 +106,9 @@ class NativeTerminal implements Terminal {
       const output = await timeout(
         this.commandDeferred.promise,
         30000,
-        'Command execution timeout',
+        'Command execution timeout'
       );
-      
+
       return output;
     } catch (error) {
       throw new TerminalCommandError('Failed to execute command', { command, error });
@@ -122,8 +125,8 @@ class NativeTerminal implements Terminal {
         reject(new TerminalError('Process stdin not available'));
         return;
       }
-      
-      this.process.stdin.write(data, (error) => {
+
+      this.process.stdin.write(data, error => {
         if (error) {
           reject(error);
         } else {
@@ -171,7 +174,7 @@ class NativeTerminal implements Terminal {
       try {
         this.process.kill('SIGTERM');
         await delay(500);
-        
+
         // Use SIGKILL if SIGTERM didn't work
         if (!this.process.killed) {
           this.process.kill('SIGKILL');
@@ -202,47 +205,47 @@ class NativeTerminal implements Terminal {
 
   private getShellConfig(): ShellConfig {
     const osplatform = platform();
-    
+
     switch (this.shell) {
       case 'bash':
         return {
           path: osplatform === 'win32' ? 'C:\\Program Files\\Git\\bin\\bash.exe' : '/bin/bash',
           args: ['--norc', '--noprofile'],
-          env: { PS1: '$ ' },
+          env: { PS1: '$ ' }
         };
-      
+
       case 'zsh':
         return {
           path: '/bin/zsh',
           args: ['--no-rcs'],
-          env: { PS1: '$ ' },
+          env: { PS1: '$ ' }
         };
-      
+
       case 'powershell':
         return {
           path: osplatform === 'win32' ? 'powershell.exe' : 'pwsh',
-          args: ['-NoProfile', '-NonInteractive', '-NoLogo'],
+          args: ['-NoProfile', '-NonInteractive', '-NoLogo']
         };
-      
+
       case 'cmd':
         return {
           path: 'cmd.exe',
-          args: ['/Q', '/K', 'prompt $G'],
+          args: ['/Q', '/K', 'prompt $G']
         };
-      
+
       case 'sh':
       default:
         return {
           path: '/bin/sh',
           args: [],
-          env: { PS1: '$ ' },
+          env: { PS1: '$ ' }
         };
     }
   }
 
   private wrapCommand(command: string): string {
     const osplatform = platform();
-    
+
     if (this.shell === 'powershell') {
       // PowerShell command wrapping
       return `${command}; Write-Host "${this.commandMarker}"`;
@@ -268,13 +271,13 @@ class NativeTerminal implements Terminal {
     this.process.stderr?.on('data', (data: Buffer) => {
       const text = data.toString();
       this.errorBuffer += text;
-      
+
       // Also send stderr to output listeners
       this.notifyListeners(text);
     });
 
     // Handle process errors
-    this.process.on('error', (error) => {
+    this.process.on('error', error => {
       if (this.alive) {
         this.logger.error('Process error', { id: this.id, error });
       }
@@ -283,25 +286,25 @@ class NativeTerminal implements Terminal {
 
   private processOutput(text: string): void {
     this.outputBuffer += text;
-    
+
     // Notify listeners
     this.notifyListeners(text);
-    
+
     // Check for command completion marker
     const markerIndex = this.outputBuffer.indexOf(this.commandMarker);
     if (markerIndex !== -1 && this.commandDeferred) {
       // Extract output before marker
       const output = this.outputBuffer.substring(0, markerIndex).trim();
-      
+
       // Include any stderr output
       const fullOutput = this.errorBuffer ? `${output}\n${this.errorBuffer}` : output;
       this.errorBuffer = '';
-      
+
       // Clear buffer up to after marker
-      this.outputBuffer = this.outputBuffer.substring(
-        markerIndex + this.commandMarker.length,
-      ).trim();
-      
+      this.outputBuffer = this.outputBuffer
+        .substring(markerIndex + this.commandMarker.length)
+        .trim();
+
       // Resolve pending command
       this.commandDeferred.resolve(fullOutput);
       this.commandDeferred = undefined;
@@ -322,23 +325,23 @@ class NativeTerminal implements Terminal {
     if (!this.process) return;
 
     this.process.on('exit', (code, signal) => {
-      this.logger.info('Terminal process exited', { 
-        id: this.id, 
+      this.logger.info('Terminal process exited', {
+        id: this.id,
         code,
-        signal,
+        signal
       });
       this.alive = false;
-      
+
       // Reject any pending command
       if (this.commandDeferred) {
         this.commandDeferred.reject(new Error('Terminal process exited'));
       }
     });
 
-    this.process.on('error', (error) => {
+    this.process.on('error', error => {
       this.logger.error('Error monitoring process', { id: this.id, error });
       this.alive = false;
-      
+
       // Reject any pending command
       if (this.commandDeferred) {
         this.commandDeferred.reject(error);
@@ -348,12 +351,10 @@ class NativeTerminal implements Terminal {
 
   private async waitForReady(): Promise<void> {
     // Send a test command to ensure shell is ready
-    const testCommand = this.shell === 'powershell' 
-      ? 'Write-Host "READY"'
-      : 'echo "READY"';
-    
+    const testCommand = this.shell === 'powershell' ? 'Write-Host "READY"' : 'echo "READY"';
+
     await this.write(testCommand + '\n');
-    
+
     const startTime = Date.now();
     while (Date.now() - startTime < 5000) {
       if (this.outputBuffer.includes('READY')) {
@@ -362,7 +363,7 @@ class NativeTerminal implements Terminal {
       }
       await delay(100);
     }
-    
+
     throw new TerminalError('Terminal failed to become ready');
   }
 }
@@ -381,13 +382,13 @@ export class NativeAdapter implements ITerminalAdapter {
 
   async initialize(): Promise<void> {
     this.logger.info('Initializing native terminal adapter', { shell: this.shell });
-    
+
     // Verify shell is available
     try {
       const testConfig = this.getTestCommand();
       const { spawnSync } = require('child_process');
       const result = spawnSync(testConfig.cmd, testConfig.args, { stdio: 'ignore' });
-      
+
       if (result.status !== 0) {
         throw new Error('Shell test failed');
       }
@@ -399,20 +400,20 @@ export class NativeAdapter implements ITerminalAdapter {
 
   async shutdown(): Promise<void> {
     this.logger.info('Shutting down native terminal adapter');
-    
+
     // Kill all terminals
     const terminals = Array.from(this.terminals.values());
     await Promise.all(terminals.map(term => term.kill()));
-    
+
     this.terminals.clear();
   }
 
   async createTerminal(): Promise<Terminal> {
     const terminal = new NativeTerminal(this.shell, this.logger);
-    
+
     await terminal.initialize();
     this.terminals.set(terminal.id, terminal);
-    
+
     return terminal;
   }
 
@@ -423,14 +424,14 @@ export class NativeAdapter implements ITerminalAdapter {
 
   private detectShell(): string {
     const osplatform = platform();
-    
+
     if (osplatform === 'win32') {
       // Windows shell detection
       const comspec = process.env.COMSPEC;
       if (comspec?.toLowerCase().includes('powershell')) {
         return 'powershell';
       }
-      
+
       // Check if PowerShell is available
       try {
         const { spawnSync } = require('child_process');
@@ -441,7 +442,7 @@ export class NativeAdapter implements ITerminalAdapter {
       } catch {
         // PowerShell not available
       }
-      
+
       return 'cmd';
     } else {
       // Unix-like shell detection

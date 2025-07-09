@@ -342,7 +342,7 @@ class SwarmUI {
     });
 
     // Command input
-    this.commandBox.on('submit', (value) => {
+    this.commandBox.on('submit', value => {
       this.executeCommand(value);
       this.commandBox.clearValue();
       this.screen.render();
@@ -429,7 +429,6 @@ class SwarmUI {
         // No swarm runs directory
         this.swarmData.status = 'idle';
       }
-
     } catch (error) {
       this.log(`Error updating swarm data: ${error.message}`, 'error');
     }
@@ -442,20 +441,20 @@ class SwarmUI {
 
     this.statusBox.setContent(
       `Status: ${this.swarmData.status} | ` +
-      `Objectives: ${activeObjectives} | ` +
-      `Agents: ${activeAgents} | ` +
-      `Tasks: ${this.swarmData.tasks.length}`
+        `Objectives: ${activeObjectives} | ` +
+        `Agents: ${activeAgents} | ` +
+        `Tasks: ${this.swarmData.tasks.length}`
     );
 
     // Update objectives list
-    const objectiveItems = this.swarmData.objectives.map(obj =>
-      `${obj.status === 'running' ? '🟢' : '🔴'} ${obj.description.substring(0, 25)}...`
+    const objectiveItems = this.swarmData.objectives.map(
+      obj => `${obj.status === 'running' ? '🟢' : '🔴'} ${obj.description.substring(0, 25)}...`
     );
     this.objectivesList.setItems(objectiveItems.length > 0 ? objectiveItems : ['No objectives']);
 
     // Update agents list
-    const agentItems = this.swarmData.agents.map(agent =>
-      `${agent.status === 'active' ? '🤖' : '💤'} ${agent.id.substring(0, 15)}...`
+    const agentItems = this.swarmData.agents.map(
+      agent => `${agent.status === 'active' ? '🤖' : '💤'} ${agent.id.substring(0, 15)}...`
     );
     this.agentsList.setItems(agentItems.length > 0 ? agentItems : ['No agents']);
 
@@ -468,19 +467,22 @@ class SwarmUI {
   }
 
   updateTasksList() {
-    if (!this.selectedObjective) {return;}
+    if (!this.selectedObjective) {
+      return;
+    }
 
-    const objectiveTasks = this.swarmData.tasks.filter(task =>
-      task.swarmId === this.selectedObjective.id
+    const objectiveTasks = this.swarmData.tasks.filter(
+      task => task.swarmId === this.selectedObjective.id
     );
 
     const taskItems = objectiveTasks.map(task => {
-      const statusIcon = {
-        'active': '🔄',
-        'completed': '✅',
-        'failed': '❌',
-        'pending': '⏳'
-      }[task.status] || '❓';
+      const statusIcon =
+        {
+          active: '🔄',
+          completed: '✅',
+          failed: '❌',
+          pending: '⏳'
+        }[task.status] || '❓';
 
       return `${statusIcon} ${task.task?.type || 'Unknown'}: ${task.task?.description?.substring(0, 20) || 'No description'}...`;
     });
@@ -556,7 +558,6 @@ class SwarmUI {
       setTimeout(() => {
         this.updateSwarmData();
       }, 2000);
-
     } catch (error) {
       this.log(`Error creating objective: ${error.message}`, 'error');
     }
@@ -568,7 +569,7 @@ class SwarmUI {
     try {
       // Kill all swarm processes (simplified)
       const { exec } = require('child_process');
-      exec('pkill -f "claude-flow swarm"', (error) => {
+      exec('pkill -f "claude-flow swarm"', error => {
         if (error) {
           this.log(`Error stopping swarm: ${error.message}`, 'error');
         } else {
@@ -579,7 +580,6 @@ class SwarmUI {
       // Update display
       this.swarmData.status = 'stopped';
       this.updateDisplay();
-
     } catch (error) {
       this.log(`Error stopping swarm: ${error.message}`, 'error');
     }
@@ -594,8 +594,12 @@ class SwarmUI {
         if (error) {
           this.log(`Command error: ${error.message}`, 'error');
         } else {
-          if (stdout) {this.log(`Output: ${stdout.trim()}`);}
-          if (stderr) {this.log(`Error: ${stderr.trim()}`, 'warn');}
+          if (stdout) {
+            this.log(`Output: ${stdout.trim()}`);
+          }
+          if (stderr) {
+            this.log(`Error: ${stderr.trim()}`, 'warn');
+          }
         }
       });
     } catch (error) {
@@ -645,12 +649,12 @@ async function main() {
 }
 
 // Handle uncaught exceptions
-process.on('uncaughtException', (error) => {
+process.on('uncaughtException', error => {
   console.error('Uncaught exception:', error);
   process.exit(1);
 });
 
-process.on('unhandledRejection', (error) => {
+process.on('unhandledRejection', error => {
   console.error('Unhandled rejection:', error);
   process.exit(1);
 });

@@ -13,7 +13,7 @@ import { isInteractive, isRawModeSupported, getEnvironmentType } from './interac
  * @returns {Function} The wrapped function
  */
 export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
-  return async function(...args) {
+  return async function (...args) {
     const flags = args[args.length - 1] || {};
 
     // Check if user explicitly requested non-interactive mode
@@ -66,12 +66,13 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
       return await interactiveFn(...args);
     } catch (error) {
       // Check if it's a raw mode error
-      if (error.message && (
-        error.message.includes('setRawMode') ||
-        error.message.includes('raw mode') ||
-        error.message.includes('stdin') ||
-        error.message.includes('TTY')
-      )) {
+      if (
+        error.message &&
+        (error.message.includes('setRawMode') ||
+          error.message.includes('raw mode') ||
+          error.message.includes('stdin') ||
+          error.message.includes('TTY'))
+      ) {
         console.log(chalk.yellow('\n⚠️  Interactive mode failed'));
         console.log(chalk.gray(error.message));
 
@@ -129,13 +130,13 @@ export function nonInteractiveProgress(message) {
   console.log(chalk.gray(`⏳ ${message}...`));
 
   return {
-    update: (newMessage) => {
+    update: newMessage => {
       console.log(chalk.gray(`   ${newMessage}`));
     },
-    succeed: (finalMessage) => {
+    succeed: finalMessage => {
       console.log(chalk.green(`✅ ${finalMessage || message}`));
     },
-    fail: (errorMessage) => {
+    fail: errorMessage => {
       console.log(chalk.red(`❌ ${errorMessage || 'Failed'}`));
     }
   };

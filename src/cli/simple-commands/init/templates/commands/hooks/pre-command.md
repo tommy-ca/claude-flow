@@ -19,21 +19,25 @@ npx claude-flow hook pre-command [options]
 ## Examples
 
 ### Basic pre-command hook
+
 ```bash
 npx claude-flow hook pre-command --command "npm install express"
 ```
 
 ### Safety validation
+
 ```bash
 npx claude-flow hook pre-command -c "rm -rf node_modules" --validate-safety
 ```
 
 ### Permission check
+
 ```bash
 npx claude-flow hook pre-command -c "sudo apt update" --check-permissions
 ```
 
 ### Dry run preview
+
 ```bash
 npx claude-flow hook pre-command -c "git push origin main" --dry-run
 ```
@@ -41,24 +45,28 @@ npx claude-flow hook pre-command -c "git push origin main" --dry-run
 ## Features
 
 ### Safety Validation
+
 - Detects dangerous commands
 - Warns about destructive operations
 - Checks for sudo/admin usage
 - Validates command syntax
 
 ### Permission Checking
+
 - Verifies execution rights
 - Checks directory access
 - Validates file permissions
 - Ensures proper context
 
 ### Duration Estimation
+
 - Predicts execution time
 - Warns about long operations
 - Suggests timeouts
 - Tracks historical data
 
 ### Dry Run Mode
+
 - Shows command effects
 - Lists files affected
 - Previews changes
@@ -67,12 +75,14 @@ npx claude-flow hook pre-command -c "git push origin main" --dry-run
 ## Integration
 
 This hook is automatically called by Claude Code when:
+
 - Using Bash tool
 - Running shell commands
 - Executing npm/pip/cargo commands
 - System operations
 
 Manual usage in agents:
+
 ```bash
 # Before running commands
 npx claude-flow hook pre-command --command "your command here" --validate-safety
@@ -81,6 +91,7 @@ npx claude-flow hook pre-command --command "your command here" --validate-safety
 ## Output
 
 Returns JSON with:
+
 ```json
 {
   "continue": true,

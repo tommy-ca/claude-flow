@@ -43,7 +43,7 @@ export interface ILoadBalancer {
 enum CircuitBreakerState {
   CLOSED = 'closed',
   OPEN = 'open',
-  HALF_OPEN = 'half_open',
+  HALF_OPEN = 'half_open'
 }
 
 /**
@@ -55,7 +55,7 @@ class RateLimiter {
 
   constructor(
     private maxTokens: number,
-    private refillRate: number, // tokens per second
+    private refillRate: number // tokens per second
   ) {
     this.tokens = maxTokens;
     this.lastRefill = Date.now();
@@ -101,7 +101,7 @@ class CircuitBreaker {
   constructor(
     private failureThreshold: number,
     private recoveryTimeout: number, // milliseconds
-    private halfOpenMaxRequests = 3,
+    private halfOpenMaxRequests = 3
   ) {}
 
   canExecute(): boolean {
@@ -145,7 +145,10 @@ class CircuitBreaker {
 
     if (this.state === CircuitBreakerState.HALF_OPEN) {
       this.state = CircuitBreakerState.OPEN;
-    } else if (this.state === CircuitBreakerState.CLOSED && this.failureCount >= this.failureThreshold) {
+    } else if (
+      this.state === CircuitBreakerState.CLOSED &&
+      this.failureCount >= this.failureThreshold
+    ) {
       this.state = CircuitBreakerState.OPEN;
     }
   }
@@ -158,7 +161,7 @@ class CircuitBreaker {
     return {
       state: this.state,
       failureCount: this.failureCount,
-      successCount: this.successCount,
+      successCount: this.successCount
     };
   }
 }
@@ -177,16 +180,13 @@ export class LoadBalancer implements ILoadBalancer {
 
   constructor(
     private config: MCPLoadBalancerConfig,
-    private logger: ILogger,
+    private logger: ILogger
   ) {
-    this.rateLimiter = new RateLimiter(
-      config.maxRequestsPerSecond,
-      config.maxRequestsPerSecond,
-    );
+    this.rateLimiter = new RateLimiter(config.maxRequestsPerSecond, config.maxRequestsPerSecond);
 
     this.circuitBreaker = new CircuitBreaker(
       config.circuitBreakerThreshold,
-      30000, // 30 second recovery timeout
+      30000 // 30 second recovery timeout
     );
 
     this.metrics = {
@@ -197,7 +197,7 @@ export class LoadBalancer implements ILoadBalancer {
       averageResponseTime: 0,
       requestsPerSecond: 0,
       circuitBreakerTrips: 0,
-      lastReset: new Date(),
+      lastReset: new Date()
     };
 
     // Clean up old session rate limiters periodically
@@ -216,7 +216,7 @@ export class LoadBalancer implements ILoadBalancer {
       this.logger.warn('Request rejected by circuit breaker', {
         sessionId: session.id,
         method: request.method,
-        circuitState: this.circuitBreaker.getState(),
+        circuitState: this.circuitBreaker.getState()
       });
       this.metrics.circuitBreakerTrips++;
       return false;
@@ -227,7 +227,7 @@ export class LoadBalancer implements ILoadBalancer {
       this.logger.warn('Request rejected by global rate limiter', {
         sessionId: session.id,
         method: request.method,
-        remainingTokens: this.rateLimiter.getTokens(),
+        remainingTokens: this.rateLimiter.getTokens()
       });
       this.metrics.rateLimitedRequests++;
       return false;
@@ -239,7 +239,7 @@ export class LoadBalancer implements ILoadBalancer {
       this.logger.warn('Request rejected by session rate limiter', {
         sessionId: session.id,
         method: request.method,
-        remainingTokens: sessionRateLimiter.getTokens(),
+        remainingTokens: sessionRateLimiter.getTokens()
       });
       this.metrics.rateLimitedRequests++;
       return false;
@@ -253,7 +253,7 @@ export class LoadBalancer implements ILoadBalancer {
       requestId: request.id.toString(),
       sessionId: session.id,
       method: request.method,
-      startTime: Date.now(),
+      startTime: Date.now()
     };
 
     this.metrics.totalRequests++;
@@ -262,7 +262,7 @@ export class LoadBalancer implements ILoadBalancer {
     this.logger.debug('Request started', {
       requestId: requestMetrics.requestId,
       sessionId: session.id,
-      method: request.method,
+      method: request.method
     });
 
     return requestMetrics;
@@ -302,7 +302,7 @@ export class LoadBalancer implements ILoadBalancer {
       method: metrics.method,
       duration,
       success,
-      error: metrics.error,
+      error: metrics.error
     });
   }
 
@@ -319,10 +319,10 @@ export class LoadBalancer implements ILoadBalancer {
       averageResponseTime: 0,
       requestsPerSecond: 0,
       circuitBreakerTrips: 0,
-      lastReset: new Date(),
+      lastReset: new Date()
     };
     this.requestTimes = [];
-    
+
     this.logger.info('Load balancer metrics reset');
   }
 
@@ -341,15 +341,15 @@ export class LoadBalancer implements ILoadBalancer {
       circuitBreaker: this.circuitBreaker.getMetrics(),
       rateLimiter: {
         tokens: this.rateLimiter.getTokens(),
-        maxTokens: this.config.maxRequestsPerSecond,
+        maxTokens: this.config.maxRequestsPerSecond
       },
-      sessions: this.sessionRateLimiters.size,
+      sessions: this.sessionRateLimiters.size
     };
   }
 
   private getSessionRateLimiter(sessionId: string): RateLimiter {
     let rateLimiter = this.sessionRateLimiters.get(sessionId);
-    
+
     if (!rateLimiter) {
       // Create a per-session rate limiter (more restrictive than global)
       const sessionLimit = Math.max(1, Math.floor(this.config.maxRequestsPerSecond / 10));
@@ -371,7 +371,7 @@ export class LoadBalancer implements ILoadBalancer {
 
   private updateRequestsPerSecond(): void {
     const now = Math.floor(Date.now() / 1000);
-    
+
     if (now !== this.lastSecondTimestamp) {
       this.metrics.requestsPerSecond = this.requestsInLastSecond;
       this.requestsInLastSecond = 1;
@@ -411,7 +411,7 @@ export class RequestQueue {
     reject: (error: Error) => void;
     timestamp: number;
   }> = [];
-  
+
   private processing = false;
   private maxQueueSize: number;
   private requestTimeout: number;
@@ -419,7 +419,7 @@ export class RequestQueue {
   constructor(
     maxQueueSize = 1000,
     requestTimeout = 30000, // 30 seconds
-    private logger: ILogger,
+    private logger: ILogger
   ) {
     this.maxQueueSize = maxQueueSize;
     this.requestTimeout = requestTimeout;
@@ -433,7 +433,7 @@ export class RequestQueue {
   async enqueue<T>(
     session: MCPSession,
     request: MCPRequest,
-    processor: (session: MCPSession, request: MCPRequest) => Promise<T>,
+    processor: (session: MCPSession, request: MCPRequest) => Promise<T>
   ): Promise<T> {
     if (this.queue.length >= this.maxQueueSize) {
       throw new MCPError('Request queue is full');
@@ -445,7 +445,7 @@ export class RequestQueue {
         request,
         resolve,
         reject,
-        timestamp: Date.now(),
+        timestamp: Date.now()
       });
 
       if (!this.processing) {
@@ -455,7 +455,7 @@ export class RequestQueue {
   }
 
   private async processQueue<T>(
-    processor: (session: MCPSession, request: MCPRequest) => Promise<T>,
+    processor: (session: MCPSession, request: MCPRequest) => Promise<T>
   ): Promise<void> {
     if (this.processing) {
       return;
@@ -487,7 +487,7 @@ export class RequestQueue {
     const now = Date.now();
     let cleaned = 0;
 
-    this.queue = this.queue.filter((item) => {
+    this.queue = this.queue.filter(item => {
       if (now - item.timestamp > this.requestTimeout) {
         item.reject(new MCPError('Request timeout'));
         cleaned++;

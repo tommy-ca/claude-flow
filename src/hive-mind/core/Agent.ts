@@ -1,6 +1,6 @@
 /**
  * Base Agent Class
- * 
+ *
  * Foundation for all agent types in the Hive Mind swarm.
  * Provides core functionality for task execution, communication, and coordination.
  */
@@ -26,18 +26,18 @@ export class Agent extends EventEmitter {
   public readonly swarmId: string;
   public readonly capabilities: AgentCapability[];
   public readonly createdAt: Date;
-  
+
   public status: AgentStatus = 'idle';
   public currentTask: string | null = null;
   public messageCount: number = 0;
-  
+
   private db: DatabaseManager;
   private mcpWrapper: MCPToolWrapper;
   private memory: Map<string, any>;
   private communicationBuffer: Message[];
   private lastHeartbeat: number;
   private isActive: boolean = false;
-  
+
   constructor(config: AgentConfig) {
     super();
     this.id = config.id || uuidv4();
@@ -46,7 +46,7 @@ export class Agent extends EventEmitter {
     this.swarmId = config.swarmId;
     this.capabilities = config.capabilities || [];
     this.createdAt = new Date();
-    
+
     this.memory = new Map();
     this.communicationBuffer = [];
     this.lastHeartbeat = Date.now();
@@ -58,7 +58,7 @@ export class Agent extends EventEmitter {
   async initialize(): Promise<void> {
     this.db = await DatabaseManager.getInstance();
     this.mcpWrapper = new MCPToolWrapper();
-    
+
     // Load agent state from database if exists
     const existingAgent = await this.db.getAgent(this.id);
     if (existingAgent) {
@@ -66,12 +66,12 @@ export class Agent extends EventEmitter {
       this.currentTask = existingAgent.current_task_id;
       this.messageCount = existingAgent.message_count;
     }
-    
+
     // Start agent loops
     this.startHeartbeatLoop();
     this.startCommunicationLoop();
     this.startLearningLoop();
-    
+
     this.isActive = true;
     this.emit('initialized');
   }
@@ -83,24 +83,24 @@ export class Agent extends EventEmitter {
     if (this.currentTask) {
       throw new Error('Agent already has an active task');
     }
-    
+
     this.currentTask = taskId;
     this.status = 'busy';
-    
+
     // Update database
     await this.db.updateAgent(this.id, {
       status: 'busy',
       current_task_id: taskId
     });
-    
+
     // Store task in memory
     this.memory.set('current_task', { taskId, executionPlan, startTime: Date.now() });
-    
+
     // Start task execution
     this.executeTask(taskId, executionPlan).catch(error => {
       this.emit('taskError', { taskId, error });
     });
-    
+
     this.emit('taskAssigned', { taskId });
   }
 
@@ -114,13 +114,13 @@ export class Agent extends EventEmitter {
       if (!task) {
         throw new Error('Task not found');
       }
-      
+
       // Update task status
       await this.db.updateTaskStatus(taskId, 'in_progress');
-      
+
       // Execute based on agent type
       const result = await this.executeByType(task, executionPlan);
-      
+
       // Store result
       await this.db.updateTask(taskId, {
         status: 'completed',
@@ -128,22 +128,21 @@ export class Agent extends EventEmitter {
         progress: 100,
         completed_at: new Date()
       });
-      
+
       // Learn from execution
       await this.learnFromExecution(task, result);
-      
+
       // Clear task
       this.currentTask = null;
       this.status = 'idle';
-      
+
       await this.db.updateAgent(this.id, {
         status: 'idle',
         current_task_id: null,
         success_count: this.db.raw('success_count + 1')
       });
-      
+
       this.emit('taskCompleted', { taskId, result });
-      
     } catch (error) {
       // Handle task failure
       await this.handleTaskFailure(taskId, error);
@@ -156,23 +155,23 @@ export class Agent extends EventEmitter {
   protected async executeByType(task: any, executionPlan: any): Promise<ExecutionResult> {
     // Base implementation - override in specialized agents
     const startTime = Date.now();
-    
+
     // Simulate task execution phases
     const phases = executionPlan.phases || ['analysis', 'execution', 'validation'];
     const results: any[] = [];
-    
+
     for (const phase of phases) {
       const phaseResult = await this.executePhase(phase, task, executionPlan);
       results.push(phaseResult);
-      
+
       // Update progress
-      const progress = Math.round((phases.indexOf(phase) + 1) / phases.length * 100);
+      const progress = Math.round(((phases.indexOf(phase) + 1) / phases.length) * 100);
       await this.updateTaskProgress(task.id, progress);
-      
+
       // Communicate progress
       await this.communicateProgress(task.id, phase, progress);
     }
-    
+
     return {
       success: true,
       data: results,
@@ -193,13 +192,13 @@ export class Agent extends EventEmitter {
     switch (phase) {
       case 'analysis':
         return this.performAnalysis(task);
-      
+
       case 'execution':
         return this.performExecution(task, plan);
-      
+
       case 'validation':
         return this.performValidation(task);
-      
+
       default:
         return { phase, status: 'completed' };
     }
@@ -219,10 +218,10 @@ export class Agent extends EventEmitter {
         capabilities: this.capabilities
       }
     });
-    
+
     // Store analysis in memory
     await this.storeInMemory('task_analysis', analysis);
-    
+
     return {
       phase: 'analysis',
       complexity: analysis.complexity || 'medium',
@@ -236,14 +235,15 @@ export class Agent extends EventEmitter {
    */
   protected async performExecution(task: any, plan: any): Promise<any> {
     // Base execution - specialized agents override this
-    const actions = plan.agentAssignments?.find((a: any) => a.agentId === this.id)?.responsibilities || [];
+    const actions =
+      plan.agentAssignments?.find((a: any) => a.agentId === this.id)?.responsibilities || [];
     const results = [];
-    
+
     for (const action of actions) {
       const actionResult = await this.executeAction(action, task);
       results.push(actionResult);
     }
-    
+
     return {
       phase: 'execution',
       actions: actions,
@@ -261,17 +261,17 @@ export class Agent extends EventEmitter {
       checks: [],
       passed: true
     };
-    
+
     // Basic validation checks
     const checks = [
       { name: 'completeness', passed: true },
       { name: 'quality', passed: true },
       { name: 'performance', passed: true }
     ];
-    
+
     validation.checks = checks;
     validation.passed = checks.every(c => c.passed);
-    
+
     return validation;
   }
 
@@ -301,7 +301,7 @@ export class Agent extends EventEmitter {
       timestamp: new Date(),
       requiresResponse: false
     };
-    
+
     // Store in database
     await this.db.createCommunication({
       from_agent_id: this.id,
@@ -311,7 +311,7 @@ export class Agent extends EventEmitter {
       content: JSON.stringify(content),
       priority: 'normal'
     });
-    
+
     this.messageCount++;
     this.emit('messageSent', message);
   }
@@ -345,7 +345,11 @@ export class Agent extends EventEmitter {
   /**
    * Communicate progress to other agents
    */
-  protected async communicateProgress(taskId: string, phase: string, progress: number): Promise<void> {
+  protected async communicateProgress(
+    taskId: string,
+    phase: string,
+    progress: number
+  ): Promise<void> {
     await this.sendMessage(null, 'progress_update', {
       taskId,
       agentId: this.id,
@@ -360,7 +364,7 @@ export class Agent extends EventEmitter {
    */
   protected async storeInMemory(key: string, value: any): Promise<void> {
     this.memory.set(key, value);
-    
+
     // Also store in persistent memory
     await this.mcpWrapper.storeMemory({
       action: 'store',
@@ -379,14 +383,14 @@ export class Agent extends EventEmitter {
     if (this.memory.has(key)) {
       return this.memory.get(key);
     }
-    
+
     // Check persistent memory
     const result = await this.mcpWrapper.retrieveMemory({
       action: 'retrieve',
       key: `agent/${this.id}/${key}`,
       namespace: 'agent-memory'
     });
-    
+
     return result ? JSON.parse(result) : null;
   }
 
@@ -401,7 +405,7 @@ export class Agent extends EventEmitter {
       executionTime: result.executionTime,
       patterns: this.extractPatterns(task, result)
     };
-    
+
     // Train neural patterns
     await this.mcpWrapper.trainNeural({
       pattern_type: 'optimization',
@@ -420,18 +424,18 @@ export class Agent extends EventEmitter {
       error: error.message,
       completed_at: new Date()
     });
-    
+
     // Update agent stats
     await this.db.updateAgent(this.id, {
       status: 'idle',
       current_task_id: null,
       error_count: this.db.raw('error_count + 1')
     });
-    
+
     // Clear current task
     this.currentTask = null;
     this.status = 'idle';
-    
+
     // Notify swarm of failure
     await this.sendMessage(null, 'task_failed', {
       taskId,
@@ -439,7 +443,7 @@ export class Agent extends EventEmitter {
       error: error.message,
       timestamp: new Date()
     });
-    
+
     this.emit('taskFailed', { taskId, error });
   }
 
@@ -449,14 +453,14 @@ export class Agent extends EventEmitter {
   private startHeartbeatLoop(): void {
     setInterval(async () => {
       if (!this.isActive) return;
-      
+
       this.lastHeartbeat = Date.now();
-      
+
       // Update last active timestamp
       await this.db.updateAgent(this.id, {
         last_active_at: new Date()
       });
-      
+
       this.emit('heartbeat');
     }, 30000); // Every 30 seconds
   }
@@ -467,11 +471,11 @@ export class Agent extends EventEmitter {
   private startCommunicationLoop(): void {
     setInterval(async () => {
       if (!this.isActive || this.communicationBuffer.length === 0) return;
-      
+
       // Process buffered messages
       const messages = [...this.communicationBuffer];
       this.communicationBuffer = [];
-      
+
       for (const message of messages) {
         await this.processMessage(message);
       }
@@ -484,14 +488,13 @@ export class Agent extends EventEmitter {
   private startLearningLoop(): void {
     setInterval(async () => {
       if (!this.isActive) return;
-      
+
       try {
         // Analyze recent patterns
         const patterns = await this.analyzeRecentPatterns();
-        
+
         // Update capabilities if needed
         await this.updateCapabilities(patterns);
-        
       } catch (error) {
         this.emit('learningError', error);
       }
@@ -506,19 +509,19 @@ export class Agent extends EventEmitter {
       case 'task_assignment':
         await this.handleTaskAssignment(message.content);
         break;
-        
+
       case 'consensus':
         await this.handleConsensusRequest(message.content);
         break;
-        
+
       case 'query':
         await this.handleQuery(message);
         break;
-        
+
       case 'coordination':
         await this.handleCoordination(message.content);
         break;
-        
+
       default:
         this.emit('unknownMessage', message);
     }
@@ -554,30 +557,30 @@ export class Agent extends EventEmitter {
    */
   async shutdown(): Promise<void> {
     this.isActive = false;
-    
+
     // Update status in database
     await this.db.updateAgent(this.id, {
       status: 'offline'
     });
-    
+
     // Clear memory
     this.memory.clear();
     this.communicationBuffer = [];
-    
+
     this.emit('shutdown');
   }
 
   // Helper methods
-  
+
   private detectTaskType(description: string): string {
     const lower = description.toLowerCase();
-    
+
     if (lower.includes('research') || lower.includes('investigate')) return 'research';
     if (lower.includes('develop') || lower.includes('implement')) return 'development';
     if (lower.includes('analyze') || lower.includes('review')) return 'analysis';
     if (lower.includes('test') || lower.includes('validate')) return 'testing';
     if (lower.includes('optimize') || lower.includes('improve')) return 'optimization';
-    
+
     return 'general';
   }
 
@@ -608,14 +611,14 @@ export class Agent extends EventEmitter {
       const newCapabilities = patterns.suggestedCapabilities.filter(
         (cap: string) => !this.capabilities.includes(cap)
       );
-      
+
       if (newCapabilities.length > 0) {
         this.capabilities.push(...newCapabilities);
-        
+
         await this.db.updateAgent(this.id, {
           capabilities: JSON.stringify(this.capabilities)
         });
-        
+
         this.emit('capabilitiesUpdated', newCapabilities);
       }
     }
@@ -637,7 +640,7 @@ export class Agent extends EventEmitter {
   private async handleQuery(message: Message): Promise<void> {
     // Respond to query
     const response = await this.processQuery(message.content);
-    
+
     if (message.fromAgentId) {
       await this.sendMessage(message.fromAgentId, 'response', {
         queryId: message.id,

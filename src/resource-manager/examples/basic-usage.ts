@@ -1,6 +1,6 @@
 /**
  * Basic Usage Example for Intelligent Resource Management System
- * 
+ *
  * This example demonstrates how to use the resource management system
  * to monitor resources, manage agents, and prevent pressure issues.
  */
@@ -134,35 +134,37 @@ function setupEventListeners(
   dashboard: ResourceDashboard
 ) {
   // Resource manager events
-  resourceManager.on('resource-allocated', (event) => {
+  resourceManager.on('resource-allocated', event => {
     console.log(`📦 Resource allocated: ${event.agentId} on ${event.serverId}`);
   });
 
-  resourceManager.on('resource-released', (event) => {
+  resourceManager.on('resource-released', event => {
     console.log(`📤 Resource released: ${event.agentId}`);
   });
 
   // Pressure detector events
-  pressureDetector.on('pressure-alert', (alert) => {
+  pressureDetector.on('pressure-alert', alert => {
     console.log(`⚠️ Pressure alert: ${alert.message} (${alert.level})`);
   });
 
   // Agent manager events
-  agentManager.on('agent-scaled-up', (event) => {
+  agentManager.on('agent-scaled-up', event => {
     console.log(`⬆️ Agent scaled up: ${event.agentId} to ${event.toReplicas} replicas`);
   });
 
-  agentManager.on('agent-scaled-down', (event) => {
+  agentManager.on('agent-scaled-down', event => {
     console.log(`⬇️ Agent scaled down: ${event.agentId} to ${event.toReplicas} replicas`);
   });
 
   // Dashboard events
-  dashboard.on('new-alert', (alert) => {
+  dashboard.on('new-alert', alert => {
     console.log(`🚨 Dashboard alert: ${alert.title} - ${alert.message}`);
   });
 
-  dashboard.on('data-updated', (data) => {
-    console.log(`📊 Dashboard updated: ${data.metrics.agents.totalAgents} agents, ${data.metrics.cluster.totalServers} servers`);
+  dashboard.on('data-updated', data => {
+    console.log(
+      `📊 Dashboard updated: ${data.metrics.agents.totalAgents} agents, ${data.metrics.cluster.totalServers} servers`
+    );
   });
 }
 
@@ -176,7 +178,7 @@ async function simulateResourceUpdates(
   // Simulate some metrics updates
   setInterval(async () => {
     const metrics = await detector.getResourceMetrics();
-    
+
     // Update agent metrics
     await agentManager.updateAgentUsage('web-server-01', {
       ...metrics,
@@ -189,13 +191,12 @@ async function simulateResourceUpdates(
       cpu: { ...metrics.cpu, usage: 40 + Math.random() * 30 },
       memory: { ...metrics.memory, usage: 50 + Math.random() * 25 }
     });
-
   }, 5000);
 }
 
 async function displayDashboardInfo(dashboard: ResourceDashboard) {
   console.log('📊 Dashboard Information:');
-  
+
   const metrics = dashboard.getMetrics();
   const stats = dashboard.getStats();
   const alerts = dashboard.getAlerts();
@@ -227,20 +228,25 @@ async function displayDashboardInfo(dashboard: ResourceDashboard) {
   });
 
   if (alerts.length > 0) {
-    console.log('Active Alerts:', alerts.map(a => `${a.level}: ${a.title}`));
+    console.log(
+      'Active Alerts:',
+      alerts.map(a => `${a.level}: ${a.title}`)
+    );
   }
 }
 
 async function generateRecommendations(agentManager: AgentResourceManager) {
   console.log('💡 Generating recommendations...');
-  
+
   try {
     const recommendations = await agentManager.generateRecommendations('web-server-01');
-    
+
     if (recommendations.length > 0) {
       console.log('Recommendations for web-server-01:');
       recommendations.forEach((rec, index) => {
-        console.log(`${index + 1}. ${rec.type}: ${rec.reasoning[0]} (confidence: ${rec.confidence})`);
+        console.log(
+          `${index + 1}. ${rec.type}: ${rec.reasoning[0]} (confidence: ${rec.confidence})`
+        );
       });
     } else {
       console.log('No recommendations needed for web-server-01');
@@ -252,22 +258,22 @@ async function generateRecommendations(agentManager: AgentResourceManager) {
 
 async function performPressureAnalysis(pressureDetector: PressureDetector) {
   console.log('🔍 Performing pressure analysis...');
-  
+
   try {
     const analysis = await pressureDetector.analyzePressure();
-    
+
     console.log('Pressure Analysis Results:');
     console.log('Overall Pressure:', {
       level: analysis.overall.level,
       value: analysis.overall.value.toFixed(1),
       trend: analysis.overall.trend
     });
-    
+
     console.log('Resource Pressure:');
     Object.entries(analysis.resources).forEach(([resource, pressure]) => {
       console.log(`  ${resource}: ${pressure.level} (${pressure.value.toFixed(1)}%)`);
     });
-    
+
     if (analysis.mitigationActions.length > 0) {
       console.log('Mitigation Actions:');
       analysis.mitigationActions.forEach((action, index) => {
@@ -288,7 +294,7 @@ async function cleanup(
   monitor.stopMonitoring();
   pressureDetector.stopMonitoring();
   dashboard.stop();
-  
+
   await agentManager.shutdown();
   await pressureDetector.shutdown();
   await monitor.shutdown();

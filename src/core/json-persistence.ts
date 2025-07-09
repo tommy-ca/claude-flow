@@ -3,8 +3,8 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * JSON-based persistence layer for Claude-Flow
  */
 
-import { join } from "path";
-import { mkdir, access, readFile, writeFile } from "fs/promises";
+import { join } from 'path';
+import { mkdir, access, readFile, writeFile } from 'fs/promises';
 
 export interface PersistedAgent {
   id: string;
@@ -43,27 +43,27 @@ export class JsonPersistenceManager {
   private dataPath: string;
   private data: PersistenceData;
 
-  constructor(dataDir: string = "./memory") {
-    this.dataPath = join(dataDir, "claude-flow-data.json");
+  constructor(dataDir: string = './memory') {
+    this.dataPath = join(dataDir, 'claude-flow-data.json');
     this.data = {
       agents: [],
       tasks: [],
-      lastUpdated: Date.now(),
+      lastUpdated: Date.now()
     };
   }
 
   async initialize(): Promise<void> {
     // Ensure directory exists
-    await mkdir(join(this.dataPath, ".."), { recursive: true });
-    
+    await mkdir(join(this.dataPath, '..'), { recursive: true });
+
     // Load existing data if available
     try {
       await access(this.dataPath);
-      const content = await readFile(this.dataPath, "utf-8");
+      const content = await readFile(this.dataPath, 'utf-8');
       this.data = JSON.parse(content);
     } catch (error) {
       // File doesn't exist or can't be read, keep default empty data
-      console.error("Failed to load persistence data:", error);
+      console.error('Failed to load persistence data:', error);
     }
   }
 
@@ -113,10 +113,8 @@ export class JsonPersistenceManager {
   }
 
   async getActiveTasks(): Promise<PersistedTask[]> {
-    return this.data.tasks.filter(t => 
-      t.status === 'pending' || 
-      t.status === 'in_progress' || 
-      t.status === 'assigned'
+    return this.data.tasks.filter(
+      t => t.status === 'pending' || t.status === 'in_progress' || t.status === 'assigned'
     );
   }
 
@@ -154,26 +152,22 @@ export class JsonPersistenceManager {
     pendingTasks: number;
     completedTasks: number;
   }> {
-    const activeAgents = this.data.agents.filter(a => 
-      a.status === 'active' || a.status === 'idle'
+    const activeAgents = this.data.agents.filter(
+      a => a.status === 'active' || a.status === 'idle'
     ).length;
-    
-    const pendingTasks = this.data.tasks.filter(t => 
-      t.status === 'pending' || 
-      t.status === 'in_progress' || 
-      t.status === 'assigned'
+
+    const pendingTasks = this.data.tasks.filter(
+      t => t.status === 'pending' || t.status === 'in_progress' || t.status === 'assigned'
     ).length;
-    
-    const completedTasks = this.data.tasks.filter(t => 
-      t.status === 'completed'
-    ).length;
-    
+
+    const completedTasks = this.data.tasks.filter(t => t.status === 'completed').length;
+
     return {
       totalAgents: this.data.agents.length,
       activeAgents,
       totalTasks: this.data.tasks.length,
       pendingTasks,
-      completedTasks,
+      completedTasks
     };
   }
 

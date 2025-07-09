@@ -155,7 +155,9 @@ describe('Utils', () => {
       let attempts = 0;
       const fn = jest.fn(async () => {
         attempts++;
-        if (attempts < 3) {throw new Error('Failed');}
+        if (attempts < 3) {
+          throw new Error('Failed');
+        }
         return 'success';
       });
 

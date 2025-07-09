@@ -90,14 +90,18 @@ export class SwarmMemoryManager extends EventEmitter {
     this.agentMemories = new Map();
 
     const eventBus = EventBus.getInstance();
-    this.baseMemory = new MemoryManager({
-      backend: 'sqlite',
-      namespace: this.config.namespace,
-      cacheSizeMB: 50,
-      syncOnExit: true,
-      maxEntries: this.config.maxEntries,
-      ttlMinutes: 60
-    }, eventBus, this.logger);
+    this.baseMemory = new MemoryManager(
+      {
+        backend: 'sqlite',
+        namespace: this.config.namespace,
+        cacheSizeMB: 50,
+        syncOnExit: true,
+        maxEntries: this.config.maxEntries,
+        ttlMinutes: 60
+      },
+      eventBus,
+      this.logger
+    );
   }
 
   async initialize(): Promise<void> {
@@ -219,9 +223,8 @@ export class SwarmMemoryManager extends EventEmitter {
     }
 
     if (query.tags && query.tags.length > 0) {
-      results = results.filter(e => 
-        e.metadata.tags && 
-        query.tags!.some(tag => e.metadata.tags!.includes(tag))
+      results = results.filter(
+        e => e.metadata.tags && query.tags!.some(tag => e.metadata.tags!.includes(tag))
       );
     }
 
@@ -299,8 +302,8 @@ export class SwarmMemoryManager extends EventEmitter {
       throw new Error('Cannot broadcast private memory');
     }
 
-    const targets = agentIds || Array.from(this.agentMemories.keys())
-      .filter(id => id !== entry.agentId);
+    const targets =
+      agentIds || Array.from(this.agentMemories.keys()).filter(id => id !== entry.agentId);
 
     for (const targetId of targets) {
       try {
@@ -345,17 +348,17 @@ export class SwarmMemoryManager extends EventEmitter {
     if (!this.config.enableKnowledgeBase) return;
 
     // Find relevant knowledge bases
-    const relevantKBs = Array.from(this.knowledgeBases.values())
-      .filter(kb => {
-        // Simple matching based on tags and content
-        const tags = entry.metadata.tags || [];
-        return tags.some(tag => 
-          kb.metadata.expertise.some(exp => 
+    const relevantKBs = Array.from(this.knowledgeBases.values()).filter(kb => {
+      // Simple matching based on tags and content
+      const tags = entry.metadata.tags || [];
+      return tags.some(tag =>
+        kb.metadata.expertise.some(
+          exp =>
             exp.toLowerCase().includes(tag.toLowerCase()) ||
             tag.toLowerCase().includes(exp.toLowerCase())
-          )
-        );
-      });
+        )
+      );
+    });
 
     for (const kb of relevantKBs) {
       // Add entry to knowledge base
@@ -381,7 +384,7 @@ export class SwarmMemoryManager extends EventEmitter {
     // Search in knowledge bases
     for (const kb of this.knowledgeBases.values()) {
       if (domain && kb.metadata.domain !== domain) continue;
-      
+
       if (expertise && !expertise.some(exp => kb.metadata.expertise.includes(exp))) {
         continue;
       }
@@ -414,11 +417,11 @@ export class SwarmMemoryManager extends EventEmitter {
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, 10);
 
-    const knowledgeContributions = agentEntries
-      .filter(e => e.type === 'knowledge').length;
+    const knowledgeContributions = agentEntries.filter(e => e.type === 'knowledge').length;
 
-    const sharedEntries = agentEntries
-      .filter(e => e.metadata.shareLevel === 'public' || e.metadata.shareLevel === 'team').length;
+    const sharedEntries = agentEntries.filter(
+      e => e.metadata.shareLevel === 'public' || e.metadata.shareLevel === 'team'
+    ).length;
 
     return {
       totalEntries: agentEntries.length,
@@ -435,7 +438,7 @@ export class SwarmMemoryManager extends EventEmitter {
       try {
         const entriesData = await fs.readFile(entriesFile, 'utf-8');
         const entriesArray = JSON.parse(entriesData);
-        
+
         for (const entry of entriesArray) {
           this.entries.set(entry.id, {
             ...entry,
@@ -459,7 +462,7 @@ export class SwarmMemoryManager extends EventEmitter {
       try {
         const kbData = await fs.readFile(kbFile, 'utf-8');
         const kbArray = JSON.parse(kbData);
-        
+
         for (const kb of kbArray) {
           this.knowledgeBases.set(kb.id, {
             ...kb,
@@ -478,7 +481,6 @@ export class SwarmMemoryManager extends EventEmitter {
       } catch (error) {
         this.logger.warn('No existing knowledge bases found');
       }
-
     } catch (error) {
       this.logger.error('Error loading memory state:', error);
     }
@@ -525,7 +527,7 @@ export class SwarmMemoryManager extends EventEmitter {
 
     for (const entry of toRemove) {
       this.entries.delete(entry.id);
-      
+
       // Remove from agent memory
       const agentEntries = this.agentMemories.get(entry.agentId);
       if (agentEntries) {
@@ -568,14 +570,12 @@ export class SwarmMemoryManager extends EventEmitter {
   }
 
   async exportMemory(agentId?: string): Promise<any> {
-    const entries = agentId 
-      ? await this.recall({ agentId })
-      : Array.from(this.entries.values());
+    const entries = agentId ? await this.recall({ agentId }) : Array.from(this.entries.values());
 
     return {
       entries,
-      knowledgeBases: agentId 
-        ? Array.from(this.knowledgeBases.values()).filter(kb => 
+      knowledgeBases: agentId
+        ? Array.from(this.knowledgeBases.values()).filter(kb =>
             kb.metadata.contributors.includes(agentId)
           )
         : Array.from(this.knowledgeBases.values()),
@@ -608,9 +608,9 @@ export class SwarmMemoryManager extends EventEmitter {
   async store(key: string, value: any): Promise<void> {
     // Extract namespace and actual key from the path
     const parts = key.split('/');
-    const type = parts[0] as SwarmMemoryEntry['type'] || 'state';
+    const type = (parts[0] as SwarmMemoryEntry['type']) || 'state';
     const agentId = parts[1] || 'system';
-    
+
     await this.remember(agentId, type, value, {
       tags: [parts[0], parts[1]].filter(Boolean),
       shareLevel: 'team'
@@ -620,7 +620,7 @@ export class SwarmMemoryManager extends EventEmitter {
   async search(pattern: string, limit: number = 10): Promise<any[]> {
     // Simple pattern matching on stored keys/content
     const results: any[] = [];
-    
+
     for (const entry of this.entries.values()) {
       const entryString = JSON.stringify(entry);
       if (entryString.includes(pattern.replace('*', ''))) {
@@ -628,7 +628,7 @@ export class SwarmMemoryManager extends EventEmitter {
         if (results.length >= limit) break;
       }
     }
-    
+
     return results;
   }
 }

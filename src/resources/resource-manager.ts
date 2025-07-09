@@ -26,11 +26,11 @@ export interface ResourceManagerConfig {
 }
 
 export interface ResourceLimits {
-  cpu: number;        // CPU cores
-  memory: number;     // Bytes
-  disk: number;       // Bytes
-  network: number;    // Bytes per second
-  gpu?: number;       // GPU units
+  cpu: number; // CPU cores
+  memory: number; // Bytes
+  disk: number; // Bytes
+  network: number; // Bytes per second
+  gpu?: number; // GPU units
   custom: Record<string, number>;
 }
 
@@ -298,12 +298,28 @@ export interface FilterCondition {
 }
 
 export type ResourceType = 'compute' | 'storage' | 'network' | 'memory' | 'gpu' | 'custom';
-export type ResourceStatus = 'available' | 'allocated' | 'reserved' | 'maintenance' | 'failed' | 'offline';
+export type ResourceStatus =
+  | 'available'
+  | 'allocated'
+  | 'reserved'
+  | 'maintenance'
+  | 'failed'
+  | 'offline';
 export type ResourcePriority = 'critical' | 'high' | 'normal' | 'low' | 'background';
-export type ReservationStatus = 'pending' | 'confirmed' | 'active' | 'expired' | 'cancelled' | 'failed';
+export type ReservationStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'active'
+  | 'expired'
+  | 'cancelled'
+  | 'failed';
 export type AllocationStatus = 'active' | 'completed' | 'failed' | 'terminated' | 'suspended';
 export type PoolStrategy = 'round-robin' | 'least-loaded' | 'performance-based' | 'cost-optimized';
-export type LoadBalancingStrategy = 'round-robin' | 'weighted' | 'least-connections' | 'resource-based';
+export type LoadBalancingStrategy =
+  | 'round-robin'
+  | 'weighted'
+  | 'least-connections'
+  | 'resource-based';
 export type BillingModel = 'hourly' | 'per-usage' | 'reserved' | 'spot' | 'hybrid';
 
 /**
@@ -333,11 +349,7 @@ export class ResourceManager extends EventEmitter {
   // Performance tracking
   private metrics: ResourceManagerMetrics;
 
-  constructor(
-    config: Partial<ResourceManagerConfig>,
-    logger: ILogger,
-    eventBus: IEventBus
-  ) {
+  constructor(config: Partial<ResourceManagerConfig>, logger: ILogger, eventBus: IEventBus) {
     super();
     this.logger = logger;
     this.eventBus = eventBus;
@@ -378,23 +390,23 @@ export class ResourceManager extends EventEmitter {
   }
 
   private setupEventHandlers(): void {
-    this.eventBus.on('agent:resource-request', (data) => {
+    this.eventBus.on('agent:resource-request', data => {
       this.handleResourceRequest(data);
     });
 
-    this.eventBus.on('agent:resource-release', (data) => {
+    this.eventBus.on('agent:resource-release', data => {
       this.handleResourceRelease(data);
     });
 
-    this.eventBus.on('resource:usage-update', (data) => {
+    this.eventBus.on('resource:usage-update', data => {
       this.updateResourceUsage(data.resourceId, data.usage);
     });
 
-    this.eventBus.on('resource:failure', (data) => {
+    this.eventBus.on('resource:failure', data => {
       this.handleResourceFailure(data);
     });
 
-    this.eventBus.on('scaling:trigger', (data) => {
+    this.eventBus.on('scaling:trigger', data => {
       this.handleScalingTrigger(data);
     });
   }
@@ -454,7 +466,7 @@ export class ResourceManager extends EventEmitter {
     metadata: Partial<ResourceMetadata> = {}
   ): Promise<string> {
     const resourceId = generateId('resource');
-    
+
     const resource: Resource = {
       id: resourceId,
       type,
@@ -531,7 +543,7 @@ export class ResourceManager extends EventEmitter {
   ): Promise<string> {
     const reservationId = generateId('reservation');
     const now = new Date();
-    
+
     const reservation: ResourceReservation = {
       id: reservationId,
       resourceId: '', // Will be set when resource is found
@@ -541,8 +553,9 @@ export class ResourceManager extends EventEmitter {
       status: 'pending',
       priority: options.priority || 'normal',
       createdAt: now,
-      expiresAt: options.timeout ? new Date(now.getTime() + options.timeout) : 
-                 new Date(now.getTime() + this.config.reservationTimeout),
+      expiresAt: options.timeout
+        ? new Date(now.getTime() + options.timeout)
+        : new Date(now.getTime() + this.config.reservationTimeout),
       metadata: {
         preemptible: options.preemptible || false
       }
@@ -553,7 +566,7 @@ export class ResourceManager extends EventEmitter {
     try {
       // Find suitable resource
       const resource = await this.findSuitableResource(requirements, reservation.priority);
-      
+
       if (!resource) {
         reservation.status = 'failed';
         throw new Error('No suitable resource available');
@@ -562,7 +575,7 @@ export class ResourceManager extends EventEmitter {
       // Reserve resource
       reservation.resourceId = resource.id;
       resource.reservations.push(reservation);
-      
+
       // Update availability
       this.updateResourceAvailability(resource);
 
@@ -583,7 +596,6 @@ export class ResourceManager extends EventEmitter {
       }
 
       return reservationId;
-
     } catch (error) {
       reservation.status = 'failed';
       this.logger.error('Resource reservation failed', {
@@ -612,7 +624,7 @@ export class ResourceManager extends EventEmitter {
 
     // Create allocation
     const allocationId = generateId('allocation');
-    
+
     const allocation: ResourceAllocation = {
       id: allocationId,
       reservationId,
@@ -651,10 +663,7 @@ export class ResourceManager extends EventEmitter {
     return allocationId;
   }
 
-  async releaseResources(
-    allocationId: string,
-    reason: string = 'completed'
-  ): Promise<void> {
+  async releaseResources(allocationId: string, reason: string = 'completed'): Promise<void> {
     const allocation = this.allocations.get(allocationId);
     if (!allocation) {
       throw new Error(`Allocation ${allocationId} not found`);
@@ -701,10 +710,7 @@ export class ResourceManager extends EventEmitter {
     this.metrics.recordAllocationReleased(allocation);
   }
 
-  async cancelReservation(
-    reservationId: string,
-    reason: string = 'cancelled'
-  ): Promise<void> {
+  async cancelReservation(reservationId: string, reason: string = 'cancelled'): Promise<void> {
     const reservation = this.reservations.get(reservationId);
     if (!reservation) {
       throw new Error(`Reservation ${reservationId} not found`);
@@ -712,9 +718,10 @@ export class ResourceManager extends EventEmitter {
 
     // If reservation is active, release the allocation first
     if (reservation.status === 'active') {
-      const allocation = Array.from(this.allocations.values())
-        .find(a => a.reservationId === reservationId);
-      
+      const allocation = Array.from(this.allocations.values()).find(
+        a => a.reservationId === reservationId
+      );
+
       if (allocation) {
         await this.releaseResources(allocation.id, reason);
       }
@@ -749,7 +756,7 @@ export class ResourceManager extends EventEmitter {
     strategy: PoolStrategy = 'least-loaded'
   ): Promise<string> {
     const poolId = generateId('pool');
-    
+
     // Validate resources exist and are of correct type
     for (const resourceId of resourceIds) {
       const resource = this.resources.get(resourceId);
@@ -757,7 +764,9 @@ export class ResourceManager extends EventEmitter {
         throw new Error(`Resource ${resourceId} not found`);
       }
       if (resource.type !== type) {
-        throw new Error(`Resource ${resourceId} type mismatch: expected ${type}, got ${resource.type}`);
+        throw new Error(
+          `Resource ${resourceId} type mismatch: expected ${type}, got ${resource.type}`
+        );
       }
     }
 
@@ -820,7 +829,9 @@ export class ResourceManager extends EventEmitter {
     }
 
     if (resource.type !== pool.type) {
-      throw new Error(`Resource type mismatch: pool expects ${pool.type}, resource is ${resource.type}`);
+      throw new Error(
+        `Resource type mismatch: pool expects ${pool.type}, resource is ${resource.type}`
+      );
     }
 
     if (!pool.resources.includes(resourceId)) {
@@ -909,10 +920,7 @@ export class ResourceManager extends EventEmitter {
     return score;
   }
 
-  private canSatisfyRequirements(
-    resource: Resource,
-    requirements: ResourceRequirements
-  ): boolean {
+  private canSatisfyRequirements(resource: Resource, requirements: ResourceRequirements): boolean {
     // Check CPU
     if (requirements.cpu && requirements.cpu.min > resource.available.cpu) {
       return false;
@@ -1071,10 +1079,7 @@ export class ResourceManager extends EventEmitter {
     if (requirements.custom) {
       for (const [name, spec] of Object.entries(requirements.custom)) {
         const available = resource.available.custom[name] || 0;
-        allocation.custom[name] = Math.min(
-          spec.preferred || spec.min,
-          available
-        );
+        allocation.custom[name] = Math.min(spec.preferred || spec.min, available);
       }
     }
 
@@ -1139,7 +1144,6 @@ export class ResourceManager extends EventEmitter {
         pools: this.pools.size,
         allocations: this.allocations.size
       });
-
     } catch (error) {
       this.logger.error('Monitoring failed', error);
     }
@@ -1149,8 +1153,9 @@ export class ResourceManager extends EventEmitter {
     const now = new Date();
 
     // Clean up expired reservations
-    const expiredReservations = Array.from(this.reservations.values())
-      .filter(r => r.expiresAt && r.expiresAt < now && r.status === 'pending');
+    const expiredReservations = Array.from(this.reservations.values()).filter(
+      r => r.expiresAt && r.expiresAt < now && r.status === 'pending'
+    );
 
     for (const reservation of expiredReservations) {
       await this.cancelReservation(reservation.id, 'expired');
@@ -1352,12 +1357,12 @@ export class ResourceManager extends EventEmitter {
     // Store usage history
     const history = this.usageHistory.get(resourceId) || [];
     history.push(usage);
-    
+
     // Keep only last 1000 entries
     if (history.length > 1000) {
       history.shift();
     }
-    
+
     this.usageHistory.set(resourceId, history);
 
     // Update active allocations with actual usage
@@ -1372,30 +1377,35 @@ export class ResourceManager extends EventEmitter {
   private async updateResourceStatistics(resource: Resource): Promise<void> {
     // Update utilization
     const utilization = this.calculateResourceUtilization(resource);
-    
+
     // Update performance metrics based on usage history
     const history = this.usageHistory.get(resource.id) || [];
     if (history.length > 0) {
       const recent = history.slice(-10); // Last 10 measurements
       const avgCpu = recent.reduce((sum, h) => sum + h.cpu, 0) / recent.length;
-      
+
       // Update performance score based on load
-      resource.metadata.performance.cpuScore = Math.max(0.1, 1.0 - (avgCpu / 100));
+      resource.metadata.performance.cpuScore = Math.max(0.1, 1.0 - avgCpu / 100);
     }
 
     resource.metadata.lastUpdated = new Date();
   }
 
   private updatePoolStatistics(pool: ResourcePool): void {
-    const resources = pool.resources.map(id => this.resources.get(id)).filter(Boolean) as Resource[];
-    
+    const resources = pool.resources
+      .map(id => this.resources.get(id))
+      .filter(Boolean) as Resource[];
+
     pool.statistics.totalResources = resources.length;
     pool.statistics.availableResources = resources.filter(r => r.status === 'available').length;
-    
+
     if (resources.length > 0) {
-      const totalUtilization = resources.reduce((sum, r) => sum + this.calculateResourceUtilization(r), 0);
+      const totalUtilization = resources.reduce(
+        (sum, r) => sum + this.calculateResourceUtilization(r),
+        0
+      );
       pool.statistics.utilizationRate = totalUtilization / resources.length;
-      
+
       const totalCost = resources.reduce((sum, r) => sum + r.cost, 0);
       pool.statistics.costPerHour = totalCost;
     }
@@ -1410,8 +1420,7 @@ export class ResourceManager extends EventEmitter {
       if (!resource) continue;
 
       // Find applicable pools
-      const pools = Array.from(this.pools.values())
-        .filter(p => p.resources.includes(resource.id));
+      const pools = Array.from(this.pools.values()).filter(p => p.resources.includes(resource.id));
 
       for (const pool of pools) {
         await this.checkPoolQoS(pool, allocation);
@@ -1465,13 +1474,18 @@ export class ResourceManager extends EventEmitter {
   }
 
   private calculatePoolMetrics(pool: ResourcePool): Record<string, number> {
-    const resources = pool.resources.map(id => this.resources.get(id)).filter(Boolean) as Resource[];
+    const resources = pool.resources
+      .map(id => this.resources.get(id))
+      .filter(Boolean) as Resource[];
     const metrics: Record<string, number> = {};
 
     if (resources.length === 0) return metrics;
 
     // Calculate utilization
-    const totalUtilization = resources.reduce((sum, r) => sum + this.calculateResourceUtilization(r), 0);
+    const totalUtilization = resources.reduce(
+      (sum, r) => sum + this.calculateResourceUtilization(r),
+      0
+    );
     metrics.utilization = totalUtilization / resources.length;
 
     // Calculate queue depth (simplified)
@@ -1481,13 +1495,16 @@ export class ResourceManager extends EventEmitter {
     return metrics;
   }
 
-  private shouldScale(pool: ResourcePool, metrics: Record<string, number>): { action: 'scale-up' | 'scale-down' | 'none'; reason: string } {
+  private shouldScale(
+    pool: ResourcePool,
+    metrics: Record<string, number>
+  ): { action: 'scale-up' | 'scale-down' | 'none'; reason: string } {
     const scaling = pool.scaling;
 
     // Check scale-up conditions
     for (const metric of scaling.metrics) {
       const value = metrics[metric.name] || 0;
-      
+
       if (metric.aggregation === 'avg' && value > metric.threshold) {
         if (pool.resources.length < scaling.maxResources) {
           return { action: 'scale-up', reason: `${metric.name} threshold exceeded` };
@@ -1498,7 +1515,7 @@ export class ResourceManager extends EventEmitter {
     // Check scale-down conditions
     for (const metric of scaling.metrics) {
       const value = metrics[metric.name] || 0;
-      
+
       if (metric.aggregation === 'avg' && value < scaling.scaleDownThreshold) {
         if (pool.resources.length > scaling.minResources) {
           return { action: 'scale-down', reason: `${metric.name} below threshold` };
@@ -1523,34 +1540,50 @@ export class ResourceManager extends EventEmitter {
 
   private getMetricValue(allocation: ResourceAllocation, metric: string): number {
     switch (metric) {
-      case 'cpu': return allocation.actualUsage.cpu;
-      case 'memory': return allocation.actualUsage.memory;
-      case 'efficiency': return allocation.efficiency;
-      default: return 0;
+      case 'cpu':
+        return allocation.actualUsage.cpu;
+      case 'memory':
+        return allocation.actualUsage.memory;
+      case 'efficiency':
+        return allocation.efficiency;
+      default:
+        return 0;
     }
   }
 
   private evaluateQoSCondition(value: number, operator: string, threshold: number): boolean {
     switch (operator) {
-      case 'gt': return value > threshold;
-      case 'lt': return value < threshold;
-      case 'eq': return value === threshold;
-      case 'gte': return value >= threshold;
-      case 'lte': return value <= threshold;
-      default: return false;
+      case 'gt':
+        return value > threshold;
+      case 'lt':
+        return value < threshold;
+      case 'eq':
+        return value === threshold;
+      case 'gte':
+        return value >= threshold;
+      case 'lte':
+        return value <= threshold;
+      default:
+        return false;
     }
   }
 
-  private calculateViolationSeverity(guarantee: QoSGuarantee, actualValue: number): 'low' | 'medium' | 'high' | 'critical' {
+  private calculateViolationSeverity(
+    guarantee: QoSGuarantee,
+    actualValue: number
+  ): 'low' | 'medium' | 'high' | 'critical' {
     const deviation = Math.abs(actualValue - guarantee.threshold) / guarantee.threshold;
-    
+
     if (deviation > 0.5) return 'critical';
     if (deviation > 0.3) return 'high';
     if (deviation > 0.1) return 'medium';
     return 'low';
   }
 
-  private async remediateQoSViolation(allocation: ResourceAllocation, violation: QoSViolation): Promise<void> {
+  private async remediateQoSViolation(
+    allocation: ResourceAllocation,
+    violation: QoSViolation
+  ): Promise<void> {
     this.logger.info('Attempting QoS violation remediation', {
       allocationId: allocation.id,
       metric: violation.metric,
@@ -1574,8 +1607,9 @@ export class ResourceManager extends EventEmitter {
   }
 
   private async releaseAllAllocations(): Promise<void> {
-    const activeAllocations = Array.from(this.allocations.values())
-      .filter(a => a.status === 'active');
+    const activeAllocations = Array.from(this.allocations.values()).filter(
+      a => a.status === 'active'
+    );
 
     for (const allocation of activeAllocations) {
       await this.releaseResources(allocation.id, 'system_shutdown');
@@ -1596,7 +1630,7 @@ export class ResourceManager extends EventEmitter {
     const resource = this.resources.get(data.resourceId);
     if (resource) {
       resource.status = 'failed';
-      
+
       // Record failure
       resource.metadata.reliability.failureHistory.push({
         timestamp: new Date(),
@@ -1676,13 +1710,15 @@ export class ResourceManager extends EventEmitter {
   } {
     const resources = Array.from(this.resources.values());
     const allocations = Array.from(this.allocations.values());
-    
+
     const totalCapacity = resources.reduce((sum, r) => sum + r.capacity.cpu, 0);
     const totalAllocated = resources.reduce((sum, r) => sum + r.allocated.cpu, 0);
-    
+
     const activeAllocations = allocations.filter(a => a.status === 'active');
-    const avgEfficiency = activeAllocations.length > 0 ?
-      activeAllocations.reduce((sum, a) => sum + a.efficiency, 0) / activeAllocations.length : 1.0;
+    const avgEfficiency =
+      activeAllocations.length > 0
+        ? activeAllocations.reduce((sum, a) => sum + a.efficiency, 0) / activeAllocations.length
+        : 1.0;
 
     return {
       resources: this.resources.size,
@@ -1713,7 +1749,10 @@ interface ResourcePrediction {
 }
 
 class ResourceOptimizer {
-  constructor(private config: ResourceManagerConfig, private logger: ILogger) {}
+  constructor(
+    private config: ResourceManagerConfig,
+    private logger: ILogger
+  ) {}
 
   async initialize(): Promise<void> {
     this.logger.debug('Resource optimizer initialized');
@@ -1725,8 +1764,12 @@ class ResourceOptimizer {
 
   async predictUsage(resource: Resource, history: ResourceUsage[]): Promise<ResourcePrediction> {
     // Simple linear trend analysis
-    const predictions: Array<{ timestamp: Date; predictedUsage: ResourceUsage; confidence: number }> = [];
-    
+    const predictions: Array<{
+      timestamp: Date;
+      predictedUsage: ResourceUsage;
+      confidence: number;
+    }> = [];
+
     // Calculate trends
     const cpuTrend = this.calculateTrend(history.map(h => h.cpu));
     const memoryTrend = this.calculateTrend(history.map(h => h.memory));
@@ -1735,7 +1778,7 @@ class ResourceOptimizer {
     // Generate predictions for next 24 hours
     for (let i = 1; i <= 24; i++) {
       const futureTime = new Date(Date.now() + i * 3600000); // i hours from now
-      
+
       predictions.push({
         timestamp: futureTime,
         predictedUsage: {
@@ -1747,7 +1790,7 @@ class ResourceOptimizer {
           timestamp: futureTime,
           duration: 3600000 // 1 hour
         },
-        confidence: Math.max(0.1, 1.0 - (i * 0.05)) // Decreasing confidence over time
+        confidence: Math.max(0.1, 1.0 - i * 0.05) // Decreasing confidence over time
       });
     }
 
@@ -1785,7 +1828,7 @@ class ResourceOptimizer {
       return sum + Math.pow(val - predicted, 2);
     }, 0);
 
-    const r2 = 1 - (ssRes / ssTotal);
+    const r2 = 1 - ssRes / ssTotal;
 
     return { slope, intercept, r2 };
   }
@@ -1803,7 +1846,7 @@ class ResourceOptimizer {
 
   private generateRecommendations(resource: Resource, history: ResourceUsage[]): string[] {
     const recommendations: string[] = [];
-    
+
     if (history.length === 0) {
       return recommendations;
     }
@@ -1859,8 +1902,10 @@ class ResourceManagerMetrics {
       allocationsReleased: this.allocationsReleased,
       reservationsFailed: this.reservationsFailed,
       qosViolations: this.qosViolations,
-      successRate: this.allocationsCreated > 0 ? 
-        ((this.allocationsCreated - this.reservationsFailed) / this.allocationsCreated) * 100 : 100
+      successRate:
+        this.allocationsCreated > 0
+          ? ((this.allocationsCreated - this.reservationsFailed) / this.allocationsCreated) * 100
+          : 100
     };
   }
 }

@@ -64,16 +64,12 @@ export class DiagnosticManager {
   private performanceHistory: Map<string, number[]> = new Map();
   private errorHistory: Map<string, any[]> = new Map();
 
-  constructor(
-    eventBus: EventBus,
-    logger: Logger,
-    healthCheckManager?: HealthCheckManager
-  ) {
+  constructor(eventBus: EventBus, logger: Logger, healthCheckManager?: HealthCheckManager) {
     this.eventBus = eventBus;
     this.logger = logger;
     this.systemIntegration = SystemIntegration.getInstance();
     this.healthCheckManager = healthCheckManager || new HealthCheckManager(eventBus, logger);
-    
+
     this.setupEventHandlers();
   }
 
@@ -82,30 +78,31 @@ export class DiagnosticManager {
    */
   async generateDiagnosticReport(config: DiagnosticConfig = {}): Promise<DiagnosticReport> {
     this.logger.info('Generating comprehensive diagnostic report');
-    
+
     const startTime = Date.now();
-    
+
     try {
       // Get system health
       const systemHealth = await this.systemIntegration.getSystemHealth();
-      
+
       // Get current metrics
       const metrics = this.healthCheckManager.getCurrentMetrics();
-      
+
       // Analyze components
       const components = await this.analyzeComponents(config);
-      
+
       // Analyze performance
       const performance = await this.analyzePerformance(config);
-      
+
       // Generate recommendations
-      const recommendations = config.generateRecommendations !== false 
-        ? this.generateRecommendations(systemHealth, performance, components)
-        : [];
-      
+      const recommendations =
+        config.generateRecommendations !== false
+          ? this.generateRecommendations(systemHealth, performance, components)
+          : [];
+
       // Determine overall severity
       const severity = this.calculateSeverity(systemHealth, components);
-      
+
       const report: DiagnosticReport = {
         timestamp: Date.now(),
         systemHealth,
@@ -115,23 +112,22 @@ export class DiagnosticManager {
         recommendations,
         severity
       };
-      
+
       // Export report if requested
       if (config.outputPath) {
         await this.exportReport(report, config);
       }
-      
+
       const duration = Date.now() - startTime;
       this.logger.info(`Diagnostic report generated in ${duration}ms`);
-      
+
       this.eventBus.emit('diagnostics:report:generated', {
         report,
         duration,
         timestamp: Date.now()
       });
-      
+
       return report;
-      
     } catch (error) {
       this.logger.error('Failed to generate diagnostic report:', getErrorMessage(error));
       throw error;
@@ -144,7 +140,7 @@ export class DiagnosticManager {
   private async analyzeComponents(config: DiagnosticConfig): Promise<ComponentDiagnostic[]> {
     const componentNames = [
       'orchestrator',
-      'configManager', 
+      'configManager',
       'memoryManager',
       'agentManager',
       'swarmCoordinator',
@@ -164,23 +160,25 @@ export class DiagnosticManager {
    * Analyze individual component
    */
   private async analyzeComponent(
-    componentName: string, 
+    componentName: string,
     config: DiagnosticConfig
   ): Promise<ComponentDiagnostic | null> {
     try {
       const component = this.systemIntegration.getComponent(componentName);
-      
+
       if (!component) {
         return {
           name: componentName,
           status: 'unhealthy',
           uptime: 0,
-          issues: [{
-            type: 'missing_component',
-            severity: 'critical',
-            message: 'Component is not available',
-            recommendation: 'Check component initialization'
-          }]
+          issues: [
+            {
+              type: 'missing_component',
+              severity: 'critical',
+              message: 'Component is not available',
+              recommendation: 'Check component initialization'
+            }
+          ]
         };
       }
 
@@ -237,19 +235,20 @@ export class DiagnosticManager {
         metrics: componentMetrics,
         issues
       };
-
     } catch (error) {
       return {
         name: componentName,
         status: 'unhealthy',
         uptime: 0,
         lastError: getErrorMessage(error),
-        issues: [{
-          type: 'analysis_error',
-          severity: 'medium',
-          message: `Failed to analyze component: ${getErrorMessage(error)}`,
-          recommendation: 'Check component accessibility'
-        }]
+        issues: [
+          {
+            type: 'analysis_error',
+            severity: 'medium',
+            message: `Failed to analyze component: ${getErrorMessage(error)}`,
+            recommendation: 'Check component accessibility'
+          }
+        ]
       };
     }
   }
@@ -264,9 +263,10 @@ export class DiagnosticManager {
 
     // Calculate averages from history
     const responseTimeHistory = this.performanceHistory.get('responseTime') || [];
-    const averageResponseTime = responseTimeHistory.length > 0
-      ? responseTimeHistory.reduce((sum, time) => sum + time, 0) / responseTimeHistory.length
-      : 0;
+    const averageResponseTime =
+      responseTimeHistory.length > 0
+        ? responseTimeHistory.reduce((sum, time) => sum + time, 0) / responseTimeHistory.length
+        : 0;
 
     // Calculate throughput
     const throughput = this.calculateThroughput();
@@ -348,10 +348,12 @@ export class DiagnosticManager {
     // Component-specific recommendations
     const unhealthyComponents = components.filter(c => c.status === 'unhealthy');
     if (unhealthyComponents.length > 0) {
-      recommendations.push(`${unhealthyComponents.length} component(s) unhealthy - restart or investigate`);
+      recommendations.push(
+        `${unhealthyComponents.length} component(s) unhealthy - restart or investigate`
+      );
     }
 
-    const highFailureComponents = components.filter(c => 
+    const highFailureComponents = components.filter(c =>
       c.issues.some(issue => issue.type === 'high_failure_rate')
     );
     if (highFailureComponents.length > 0) {
@@ -380,12 +382,16 @@ export class DiagnosticManager {
       return 'critical';
     }
 
-    const criticalIssues = components.reduce((count, component) => 
-      count + component.issues.filter(issue => issue.severity === 'critical').length, 0
+    const criticalIssues = components.reduce(
+      (count, component) =>
+        count + component.issues.filter(issue => issue.severity === 'critical').length,
+      0
     );
 
-    const highIssues = components.reduce((count, component) => 
-      count + component.issues.filter(issue => issue.severity === 'high').length, 0
+    const highIssues = components.reduce(
+      (count, component) =>
+        count + component.issues.filter(issue => issue.severity === 'high').length,
+      0
     );
 
     if (criticalIssues > 0) {
@@ -429,7 +435,6 @@ export class DiagnosticManager {
 
       await fs.writeFile(outputPath, content, 'utf8');
       this.logger.info(`Diagnostic report exported to: ${outputPath}`);
-
     } catch (error) {
       this.logger.error('Failed to export report:', getErrorMessage(error));
       throw error;
@@ -443,7 +448,7 @@ export class DiagnosticManager {
     const timestamp = new Date(report.timestamp).toISOString();
     const severityColor = {
       low: '#28a745',
-      medium: '#ffc107', 
+      medium: '#ffc107',
       high: '#fd7e14',
       critical: '#dc3545'
     }[report.severity];
@@ -487,23 +492,35 @@ export class DiagnosticManager {
 
     <div class="section">
         <h2>Components</h2>
-        ${report.components.map(component => `
+        ${report.components
+          .map(
+            component => `
             <div class="component ${component.status}">
                 <h3>${component.name}</h3>
                 <p><strong>Status:</strong> ${component.status}</p>
                 <p><strong>Uptime:</strong> ${(component.uptime / 1000 / 60).toFixed(1)} minutes</p>
                 ${component.lastError ? `<p><strong>Last Error:</strong> ${component.lastError}</p>` : ''}
-                ${component.issues.length > 0 ? `
+                ${
+                  component.issues.length > 0
+                    ? `
                     <h4>Issues:</h4>
-                    ${component.issues.map(issue => `
+                    ${component.issues
+                      .map(
+                        issue => `
                         <div class="issue ${issue.severity}">
                             <strong>${issue.type}:</strong> ${issue.message}
                             ${issue.recommendation ? `<br><em>Recommendation: ${issue.recommendation}</em>` : ''}
                         </div>
-                    `).join('')}
-                ` : '<p>No issues detected</p>'}
+                    `
+                      )
+                      .join('')}
+                `
+                    : '<p>No issues detected</p>'
+                }
             </div>
-        `).join('')}
+        `
+          )
+          .join('')}
     </div>
 
     <div class="section">
@@ -513,10 +530,14 @@ export class DiagnosticManager {
         <p><strong>Error Rate:</strong> ${(report.performance.errorRate * 100).toFixed(2)}%</p>
         <p><strong>Memory Leaks:</strong> ${report.performance.memoryLeaks ? 'Detected' : 'None detected'}</p>
         
-        ${report.performance.bottlenecks.length > 0 ? `
+        ${
+          report.performance.bottlenecks.length > 0
+            ? `
             <h3>Bottlenecks:</h3>
             <ul>${report.performance.bottlenecks.map(b => `<li>${b}</li>`).join('')}</ul>
-        ` : ''}
+        `
+            : ''
+        }
     </div>
 
     <div class="section">
@@ -534,7 +555,7 @@ export class DiagnosticManager {
    */
   private generateTextReport(report: DiagnosticReport): string {
     const timestamp = new Date(report.timestamp).toISOString();
-    
+
     let text = `
 CLAUDE FLOW v2.0.0 DIAGNOSTIC REPORT
 =====================================
@@ -563,7 +584,7 @@ ${component.name}
       if (component.lastError) {
         text += `  Last Error: ${component.lastError}\n`;
       }
-      
+
       if (component.issues.length > 0) {
         text += `  Issues:\n`;
         component.issues.forEach(issue => {
@@ -640,14 +661,14 @@ RECOMMENDATIONS
 
   private setupEventHandlers(): void {
     // Track performance metrics
-    this.eventBus.on('performance:metric', (metric) => {
+    this.eventBus.on('performance:metric', metric => {
       if (!this.performanceHistory.has(metric.name)) {
         this.performanceHistory.set(metric.name, []);
       }
-      
+
       const history = this.performanceHistory.get(metric.name)!;
       history.push(metric.value);
-      
+
       // Keep only last 100 measurements
       if (history.length > 100) {
         history.shift();
@@ -655,20 +676,20 @@ RECOMMENDATIONS
     });
 
     // Track errors
-    this.eventBus.on('system:error', (error) => {
+    this.eventBus.on('system:error', error => {
       const component = error.component || 'system';
-      
+
       if (!this.errorHistory.has(component)) {
         this.errorHistory.set(component, []);
       }
-      
+
       const history = this.errorHistory.get(component)!;
       history.push({
         message: error.message || error.error,
         timestamp: Date.now(),
         stack: error.stack
       });
-      
+
       // Keep only last 50 errors per component
       if (history.length > 50) {
         history.shift();
@@ -686,16 +707,20 @@ RECOMMENDATIONS
   }> {
     const health = await this.systemIntegration.getSystemHealth();
     const components = await this.analyzeComponents({ enableDetailedAnalysis: false });
-    
+
     const issues = components.reduce((count, comp) => count + comp.issues.length, 0);
-    const recommendations = this.generateRecommendations(health, {
-      averageResponseTime: 0,
-      throughput: 0,
-      errorRate: 0,
-      memoryLeaks: false,
-      bottlenecks: [],
-      optimization: []
-    }, components).slice(0, 3); // Top 3 recommendations
+    const recommendations = this.generateRecommendations(
+      health,
+      {
+        averageResponseTime: 0,
+        throughput: 0,
+        errorRate: 0,
+        memoryLeaks: false,
+        bottlenecks: [],
+        optimization: []
+      },
+      components
+    ).slice(0, 3); // Top 3 recommendations
 
     return {
       status: health.overall,

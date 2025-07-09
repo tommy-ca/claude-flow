@@ -83,8 +83,14 @@ export abstract class BaseStrategy {
 
   // Abstract methods that must be implemented by concrete strategies
   abstract decomposeObjective(objective: SwarmObjective): Promise<DecompositionResult>;
-  abstract selectAgentForTask(task: TaskDefinition, availableAgents: AgentState[]): Promise<string | null>;
-  abstract optimizeTaskSchedule(tasks: TaskDefinition[], agents: AgentState[]): Promise<AgentAllocation[]>;
+  abstract selectAgentForTask(
+    task: TaskDefinition,
+    availableAgents: AgentState[]
+  ): Promise<string | null>;
+  abstract optimizeTaskSchedule(
+    tasks: TaskDefinition[],
+    agents: AgentState[]
+  ): Promise<AgentAllocation[]>;
 
   // Common utility methods
   protected initializeMetrics(): StrategyMetrics {
@@ -162,17 +168,17 @@ export abstract class BaseStrategy {
     // Fallback complexity estimation based on description length and keywords
     let complexity = 1;
     const words = description.split(' ').length;
-    
+
     if (words > 50) complexity += 1;
     if (words > 100) complexity += 1;
-    
+
     const complexKeywords = ['integrate', 'complex', 'advanced', 'multiple', 'system'];
-    const foundKeywords = complexKeywords.filter(keyword => 
+    const foundKeywords = complexKeywords.filter(keyword =>
       description.toLowerCase().includes(keyword)
     ).length;
-    
+
     complexity += foundKeywords;
-    
+
     return Math.min(complexity, 5); // Cap at 5
   }
 
@@ -182,8 +188,7 @@ export abstract class BaseStrategy {
 
   protected updateMetrics(result: DecompositionResult, executionTime: number): void {
     this.metrics.tasksCompleted += result.tasks.length;
-    this.metrics.averageExecutionTime = 
-      (this.metrics.averageExecutionTime + executionTime) / 2;
+    this.metrics.averageExecutionTime = (this.metrics.averageExecutionTime + executionTime) / 2;
   }
 
   public getMetrics(): StrategyMetrics {

@@ -246,45 +246,77 @@ class MemoryInterface {
   setupEventListeners() {
     // Header controls
     this.container.querySelector('.btn-refresh').addEventListener('click', () => this.refresh());
-    this.container.querySelector('.btn-backup').addEventListener('click', () => this.createBackup());
-    this.container.querySelector('.btn-compress').addEventListener('click', () => this.optimizeMemory());
-    this.container.querySelector('.btn-sync').addEventListener('click', () => this.showSyncStatus());
+    this.container
+      .querySelector('.btn-backup')
+      .addEventListener('click', () => this.createBackup());
+    this.container
+      .querySelector('.btn-compress')
+      .addEventListener('click', () => this.optimizeMemory());
+    this.container
+      .querySelector('.btn-sync')
+      .addEventListener('click', () => this.showSyncStatus());
 
     // Namespace controls
-    this.container.querySelector('.btn-add-namespace').addEventListener('click', () => this.addNamespace());
-    this.container.querySelector('.namespace-search-input').addEventListener('input', (e) => this.searchNamespaces(e.target.value));
+    this.container
+      .querySelector('.btn-add-namespace')
+      .addEventListener('click', () => this.addNamespace());
+    this.container
+      .querySelector('.namespace-search-input')
+      .addEventListener('input', e => this.searchNamespaces(e.target.value));
 
     // Editor controls
     this.container.querySelector('.btn-add-key').addEventListener('click', () => this.addKey());
     this.container.querySelector('.btn-bulk-edit').addEventListener('click', () => this.bulkEdit());
-    this.container.querySelector('.btn-export').addEventListener('click', () => this.exportMemory());
+    this.container
+      .querySelector('.btn-export')
+      .addEventListener('click', () => this.exportMemory());
 
     // Search controls
-    this.container.querySelector('.key-search-input').addEventListener('input', (e) => this.searchKeys(e.target.value));
-    this.container.querySelector('.type-filter').addEventListener('change', (e) => this.filterByType(e.target.value));
+    this.container
+      .querySelector('.key-search-input')
+      .addEventListener('input', e => this.searchKeys(e.target.value));
+    this.container
+      .querySelector('.type-filter')
+      .addEventListener('change', e => this.filterByType(e.target.value));
 
     // Analytics controls
-    this.container.querySelector('.analytics-timeframe').addEventListener('change', (e) => this.updateAnalytics(e.target.value));
+    this.container
+      .querySelector('.analytics-timeframe')
+      .addEventListener('change', e => this.updateAnalytics(e.target.value));
 
     // Search interface
-    this.container.querySelector('.btn-add-filter').addEventListener('click', () => this.addSearchFilter());
-    this.container.querySelector('.btn-saved-searches').addEventListener('click', () => this.showSavedSearches());
+    this.container
+      .querySelector('.btn-add-filter')
+      .addEventListener('click', () => this.addSearchFilter());
+    this.container
+      .querySelector('.btn-saved-searches')
+      .addEventListener('click', () => this.showSavedSearches());
 
     // Backup controls
-    this.container.querySelector('.btn-create-backup').addEventListener('click', () => this.createBackup());
-    this.container.querySelector('.btn-restore-backup').addEventListener('click', () => this.restoreBackup());
-    this.container.querySelector('.btn-import-backup').addEventListener('click', () => this.importBackup());
+    this.container
+      .querySelector('.btn-create-backup')
+      .addEventListener('click', () => this.createBackup());
+    this.container
+      .querySelector('.btn-restore-backup')
+      .addEventListener('click', () => this.restoreBackup());
+    this.container
+      .querySelector('.btn-import-backup')
+      .addEventListener('click', () => this.importBackup());
 
     // Modal controls
-    this.container.querySelector('.btn-close-modal').addEventListener('click', () => this.closeModal());
-    this.container.querySelector('.modal-overlay').addEventListener('click', (e) => {
+    this.container
+      .querySelector('.btn-close-modal')
+      .addEventListener('click', () => this.closeModal());
+    this.container.querySelector('.modal-overlay').addEventListener('click', e => {
       if (e.target === this.container.querySelector('.modal-overlay')) {
         this.closeModal();
       }
     });
 
     // Form submission
-    this.container.querySelector('#key-editor-form').addEventListener('submit', (e) => this.saveKeyValue(e));
+    this.container
+      .querySelector('#key-editor-form')
+      .addEventListener('submit', e => this.saveKeyValue(e));
   }
 
   async loadMemoryData() {
@@ -311,7 +343,7 @@ class MemoryInterface {
 
     // Add click handlers for namespace items
     container.querySelectorAll('.namespace-item').forEach(item => {
-      item.addEventListener('click', (e) => {
+      item.addEventListener('click', e => {
         e.stopPropagation();
         this.selectNamespace(item.dataset.namespace);
       });
@@ -353,9 +385,15 @@ class MemoryInterface {
 
     // Add event listeners for key-value items
     container.querySelectorAll('.key-value-item').forEach(item => {
-      item.querySelector('.btn-edit').addEventListener('click', () => this.editKey(item.dataset.key));
-      item.querySelector('.btn-delete').addEventListener('click', () => this.deleteKey(item.dataset.key));
-      item.querySelector('.btn-copy').addEventListener('click', () => this.copyKey(item.dataset.key));
+      item
+        .querySelector('.btn-edit')
+        .addEventListener('click', () => this.editKey(item.dataset.key));
+      item
+        .querySelector('.btn-delete')
+        .addEventListener('click', () => this.deleteKey(item.dataset.key));
+      item
+        .querySelector('.btn-copy')
+        .addEventListener('click', () => this.copyKey(item.dataset.key));
     });
   }
 
@@ -435,22 +473,28 @@ class MemoryInterface {
   }
 
   getValueType(value) {
-    if (value === null) {return 'null';}
-    if (value === undefined) {return 'undefined';}
-    if (Array.isArray(value)) {return 'array';}
+    if (value === null) {
+      return 'null';
+    }
+    if (value === undefined) {
+      return 'undefined';
+    }
+    if (Array.isArray(value)) {
+      return 'array';
+    }
     return typeof value;
   }
 
   formatValueForDisplay(value, type) {
     switch (type) {
-    case 'string':
-      return value.length > 50 ? `${value.substring(0, 50)}...` : value;
-    case 'object':
-      return JSON.stringify(value).substring(0, 100) + '...';
-    case 'array':
-      return `[${value.length} items]`;
-    default:
-      return String(value);
+      case 'string':
+        return value.length > 50 ? `${value.substring(0, 50)}...` : value;
+      case 'object':
+        return JSON.stringify(value).substring(0, 100) + '...';
+      case 'array':
+        return `[${value.length} items]`;
+      default:
+        return String(value);
     }
   }
 
@@ -514,7 +558,9 @@ class MemoryInterface {
   }
 
   formatBytes(bytes) {
-    if (bytes === 0) {return '0 B';}
+    if (bytes === 0) {
+      return '0 B';
+    }
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -626,21 +672,21 @@ class MemoryInterface {
       let value;
 
       switch (type) {
-      case 'string':
-        value = valueText;
-        break;
-      case 'number':
-        value = parseFloat(valueText);
-        break;
-      case 'boolean':
-        value = valueText.toLowerCase() === 'true';
-        break;
-      case 'object':
-      case 'array':
-        value = JSON.parse(valueText);
-        break;
-      default:
-        value = valueText;
+        case 'string':
+          value = valueText;
+          break;
+        case 'number':
+          value = parseFloat(valueText);
+          break;
+        case 'boolean':
+          value = valueText.toLowerCase() === 'true';
+          break;
+        case 'object':
+        case 'array':
+          value = JSON.parse(valueText);
+          break;
+        default:
+          value = valueText;
       }
 
       await this.setMemoryValue(key, value);
@@ -858,7 +904,9 @@ class MemoryVisualizer {
 
   updateUsageChart(data) {
     const canvas = document.getElementById('usage-chart');
-    if (!canvas) {return;}
+    if (!canvas) {
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
 
@@ -893,7 +941,9 @@ class MemoryVisualizer {
 
   updatePatternChart(data) {
     const canvas = document.getElementById('pattern-chart');
-    if (!canvas) {return;}
+    if (!canvas) {
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
 
@@ -908,7 +958,7 @@ class MemoryVisualizer {
       const maxValue = Math.max(...data.map(d => d[1].count || 0));
 
       data.forEach((pattern, index) => {
-        const barHeight = (pattern[1].count || 0) / maxValue * height;
+        const barHeight = ((pattern[1].count || 0) / maxValue) * height;
         const x = index * barWidth;
         const y = height - barHeight;
 

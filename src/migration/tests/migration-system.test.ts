@@ -93,9 +93,7 @@ describe('Migration System', () => {
       const analyzer = new MigrationAnalyzer();
       const analysis = await analyzer.analyze(projectPath);
 
-      expect(analysis.recommendations).toContain(
-        'Use "full" strategy for clean installation'
-      );
+      expect(analysis.recommendations).toContain('Use "full" strategy for clean installation');
     });
   });
 
@@ -132,9 +130,7 @@ describe('Migration System', () => {
       const result = await runner.run();
 
       expect(result.success).toBe(true);
-      expect(result.warnings).toContain(
-        expect.stringContaining('custom-cmd')
-      );
+      expect(result.warnings).toContain(expect.stringContaining('custom-cmd'));
     });
 
     it('should create backup before migration', async () => {
@@ -261,19 +257,19 @@ describe('Migration System', () => {
     it('should export and import backups', async () => {
       // Create backup
       const backup = await rollbackManager.createBackup();
-      
+
       // Export backup
       const exportPath = path.join(testDir, 'exported-backup');
       await rollbackManager.exportBackup(backup.metadata.backupId, exportPath);
-      
+
       // Verify export
       const manifestPath = path.join(exportPath, 'backup-manifest.json');
       expect(await fs.pathExists(manifestPath)).toBe(true);
-      
+
       // Import backup (to different project)
       const newProjectPath = path.join(testDir, 'new-project');
       const newRollbackManager = new RollbackManager(newProjectPath);
-      
+
       const importedBackup = await newRollbackManager.importBackup(exportPath);
       expect(importedBackup.metadata.backupId).toBe(backup.metadata.backupId);
     });
@@ -291,7 +287,7 @@ describe('Migration System', () => {
       const claudePath = path.join(projectPath, '.claude');
       const commandsPath = path.join(claudePath, 'commands');
       await fs.ensureDir(commandsPath);
-      
+
       // Create required files
       await fs.writeFile(path.join(commandsPath, 'sparc.md'), '# SPARC Command');
       await fs.writeFile(path.join(commandsPath, 'claude-flow-help.md'), '# Help');
@@ -320,7 +316,7 @@ describe('Migration System', () => {
       const claudePath = path.join(projectPath, '.claude');
       const commandsPath = path.join(claudePath, 'commands');
       await fs.ensureDir(commandsPath);
-      
+
       await fs.writeFile(path.join(commandsPath, 'sparc.md'), ''); // Empty file
 
       const result = await validator.validate(projectPath);
@@ -396,7 +392,7 @@ describe('Migration System', () => {
       const claudePath = path.join(projectPath, '.claude');
       await fs.ensureDir(claudePath);
       await fs.writeFile(path.join(claudePath, 'original.md'), '# Original');
-      
+
       const backup = await rollbackManager.createBackup();
 
       // Simulate failed migration by creating invalid state
@@ -408,7 +404,7 @@ describe('Migration System', () => {
       // Verify recovery
       const exists = await fs.pathExists(path.join(claudePath, 'original.md'));
       expect(exists).toBe(true);
-      
+
       const brokenExists = await fs.pathExists(path.join(claudePath, 'broken.md'));
       expect(brokenExists).toBe(false);
     });
@@ -443,7 +439,9 @@ describe('Migration System', () => {
       const analyzer = new MigrationAnalyzer();
       const analysis = await analyzer.analyze(projectPath);
 
-      expect(analysis.migrationRisks.some(r => r.description.includes('Invalid .roomodes'))).toBe(true);
+      expect(analysis.migrationRisks.some(r => r.description.includes('Invalid .roomodes'))).toBe(
+        true
+      );
     });
 
     it('should handle missing permissions', async () => {
@@ -474,19 +472,19 @@ describe('Migration System', () => {
     it('should handle concurrent migrations', async () => {
       // This test would need careful setup to avoid race conditions
       // For now, we just ensure the migration system is thread-safe
-      const runners = Array.from({ length: 3 }, () => 
-        new MigrationRunner({
-          projectPath,
-          strategy: 'selective',
-          force: true,
-          dryRun: true
-        })
+      const runners = Array.from(
+        { length: 3 },
+        () =>
+          new MigrationRunner({
+            projectPath,
+            strategy: 'selective',
+            force: true,
+            dryRun: true
+          })
       );
 
       // Run multiple migrations concurrently
-      const results = await Promise.allSettled(
-        runners.map(runner => runner.run())
-      );
+      const results = await Promise.allSettled(runners.map(runner => runner.run()));
 
       // At least one should succeed
       expect(results.some(r => r.status === 'fulfilled')).toBe(true);

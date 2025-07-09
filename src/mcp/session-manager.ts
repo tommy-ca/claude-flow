@@ -9,7 +9,7 @@ import {
   MCPProtocolVersion,
   MCPCapabilities,
   MCPAuthConfig,
-  MCPConfig,
+  MCPConfig
 } from '../utils/types.js';
 import type { ILogger } from '../core/logger.js';
 import { MCPError } from '../utils/errors.js';
@@ -44,7 +44,7 @@ export class SessionManager implements ISessionManager {
 
   constructor(
     private config: MCPConfig,
-    private logger: ILogger,
+    private logger: ILogger
   ) {
     this.authConfig = config.auth || { enabled: false, method: 'token' };
     this.sessionTimeout = config.sessionTimeout || 3600000; // 1 hour default
@@ -61,7 +61,7 @@ export class SessionManager implements ISessionManager {
     if (this.sessions.size >= this.maxSessions) {
       // Try to clean up expired sessions first
       this.cleanupExpiredSessions();
-      
+
       if (this.sessions.size >= this.maxSessions) {
         throw new MCPError('Maximum number of sessions reached');
       }
@@ -79,7 +79,7 @@ export class SessionManager implements ISessionManager {
       createdAt: now,
       lastActivity: now,
       transport,
-      authenticated: !this.authConfig.enabled, // If auth disabled, session is authenticated
+      authenticated: !this.authConfig.enabled // If auth disabled, session is authenticated
     };
 
     this.sessions.set(sessionId, session);
@@ -87,7 +87,7 @@ export class SessionManager implements ISessionManager {
     this.logger.info('Session created', {
       sessionId,
       transport,
-      totalSessions: this.sessions.size,
+      totalSessions: this.sessions.size
     });
 
     return session;
@@ -121,7 +121,7 @@ export class SessionManager implements ISessionManager {
     this.logger.info('Session initialized', {
       sessionId,
       clientInfo: params.clientInfo,
-      protocolVersion: params.protocolVersion,
+      protocolVersion: params.protocolVersion
     });
   }
 
@@ -150,7 +150,7 @@ export class SessionManager implements ISessionManager {
         break;
       default:
         this.logger.warn('Unknown authentication method', {
-          method: this.authConfig.method,
+          method: this.authConfig.method
         });
         return false;
     }
@@ -162,12 +162,12 @@ export class SessionManager implements ISessionManager {
 
       this.logger.info('Session authenticated', {
         sessionId,
-        method: this.authConfig.method,
+        method: this.authConfig.method
       });
     } else {
       this.logger.warn('Session authentication failed', {
         sessionId,
-        method: this.authConfig.method,
+        method: this.authConfig.method
       });
     }
 
@@ -188,7 +188,7 @@ export class SessionManager implements ISessionManager {
       this.logger.info('Session removed', {
         sessionId,
         duration: Date.now() - session.createdAt.getTime(),
-        transport: session.transport,
+        transport: session.transport
       });
     }
   }
@@ -205,7 +205,7 @@ export class SessionManager implements ISessionManager {
 
   cleanupExpiredSessions(): void {
     const expiredSessions: string[] = [];
-    
+
     for (const [sessionId, session] of this.sessions) {
       if (this.isSessionExpired(session)) {
         expiredSessions.push(sessionId);
@@ -219,7 +219,7 @@ export class SessionManager implements ISessionManager {
     if (expiredSessions.length > 0) {
       this.logger.info('Cleaned up expired sessions', {
         count: expiredSessions.length,
-        remainingSessions: this.sessions.size,
+        remainingSessions: this.sessions.size
       });
     }
   }
@@ -249,7 +249,7 @@ export class SessionManager implements ISessionManager {
       total: this.sessions.size,
       active,
       authenticated,
-      expired,
+      expired
     };
   }
 
@@ -274,15 +274,13 @@ export class SessionManager implements ISessionManager {
 
   private validateProtocolVersion(version: MCPProtocolVersion): void {
     // Currently supporting MCP version 2024-11-05
-    const supportedVersions = [
-      { major: 2024, minor: 11, patch: 5 },
-    ];
+    const supportedVersions = [{ major: 2024, minor: 11, patch: 5 }];
 
     const isSupported = supportedVersions.some(
-      (supported) =>
+      supported =>
         supported.major === version.major &&
         supported.minor === version.minor &&
-        supported.patch === version.patch,
+        supported.patch === version.patch
     );
 
     if (!isSupported) {
@@ -304,15 +302,15 @@ export class SessionManager implements ISessionManager {
     }
 
     // Use timing-safe comparison to prevent timing attacks
-    return this.authConfig.tokens.some((validToken) => {
+    return this.authConfig.tokens.some(validToken => {
       const encoder = new TextEncoder();
       const validTokenBytes = encoder.encode(validToken);
       const providedTokenBytes = encoder.encode(token);
-      
+
       if (validTokenBytes.length !== providedTokenBytes.length) {
         return false;
       }
-      
+
       return timingSafeEqual(validTokenBytes, providedTokenBytes);
     });
   }
@@ -327,7 +325,7 @@ export class SessionManager implements ISessionManager {
       return false;
     }
 
-    const user = this.authConfig.users.find((u) => u.username === username);
+    const user = this.authConfig.users.find(u => u.username === username);
     if (!user) {
       return false;
     }
@@ -376,11 +374,11 @@ export class SessionManager implements ISessionManager {
   private extractBasicAuth(credentials: unknown): { username?: string; password?: string } {
     if (typeof credentials === 'object' && credentials !== null) {
       const creds = credentials as Record<string, unknown>;
-      
+
       if (typeof creds.username === 'string' && typeof creds.password === 'string') {
         return {
           username: creds.username,
-          password: creds.password,
+          password: creds.password
         };
       }
 
@@ -407,7 +405,7 @@ export class SessionManager implements ISessionManager {
       return {
         token: this.extractToken(credentials),
         user: creds.username || creds.user,
-        permissions: creds.permissions || [],
+        permissions: creds.permissions || []
       };
     }
     return {};

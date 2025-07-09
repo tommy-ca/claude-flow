@@ -226,11 +226,14 @@ export interface UsageMetrics {
     pagesPerSession: number;
   };
   features: {
-    adoption: Record<string, {
-      users: number;
-      usage: number;
-      retention: number;
-    }>;
+    adoption: Record<
+      string,
+      {
+        users: number;
+        usage: number;
+        retention: number;
+      }
+    >;
     mostUsed: string[];
     leastUsed: string[];
   };
@@ -258,7 +261,7 @@ export interface BusinessMetrics {
     recurring: number;
     growth: number;
     arpu: number; // Average Revenue Per User
-    ltv: number;  // Lifetime Value
+    ltv: number; // Lifetime Value
   };
   customers: {
     total: number;
@@ -364,9 +367,9 @@ export interface AnalyticsConfiguration {
   };
   storage: {
     retention: {
-      raw: string;      // e.g., '7d'
+      raw: string; // e.g., '7d'
       aggregated: string; // e.g., '90d'
-      summary: string;   // e.g., '1y'
+      summary: string; // e.g., '1y'
     };
     compression: boolean;
     encryption: boolean;
@@ -408,11 +411,7 @@ export class AnalyticsManager extends EventEmitter {
   private config: ConfigManager;
   private configuration: AnalyticsConfiguration;
 
-  constructor(
-    analyticsPath: string = './analytics',
-    logger?: Logger,
-    config?: ConfigManager
-  ) {
+  constructor(analyticsPath: string = './analytics', logger?: Logger, config?: ConfigManager) {
     super();
     this.analyticsPath = analyticsPath;
     this.logger = logger || new Logger({ level: 'info', format: 'text', destination: 'console' });
@@ -428,11 +427,11 @@ export class AnalyticsManager extends EventEmitter {
       await mkdir(join(this.analyticsPath, 'insights'), { recursive: true });
       await mkdir(join(this.analyticsPath, 'models'), { recursive: true });
       await mkdir(join(this.analyticsPath, 'reports'), { recursive: true });
-      
+
       await this.loadConfigurations();
       await this.initializeDefaultDashboards();
       await this.startMetricsCollection();
-      
+
       this.logger.info('Analytics Manager initialized successfully');
     } catch (error) {
       this.logger.error('Failed to initialize Analytics Manager', { error });
@@ -481,8 +480,8 @@ export class AnalyticsManager extends EventEmitter {
 
     for (const metricName of query.metrics) {
       const key = metricName.includes('-') ? metricName : `*-${metricName}`;
-      const matchingKeys = Array.from(this.metrics.keys()).filter(k => 
-        key === '*' || k.includes(key.replace('*-', '')) || k === key
+      const matchingKeys = Array.from(this.metrics.keys()).filter(
+        k => key === '*' || k.includes(key.replace('*-', '')) || k === key
       );
 
       let allMetrics: AnalyticsMetric[] = [];
@@ -492,9 +491,8 @@ export class AnalyticsManager extends EventEmitter {
       }
 
       // Filter by time range
-      allMetrics = allMetrics.filter(m => 
-        m.timestamp >= query.timeRange.start && 
-        m.timestamp <= query.timeRange.end
+      allMetrics = allMetrics.filter(
+        m => m.timestamp >= query.timeRange.start && m.timestamp <= query.timeRange.end
       );
 
       // Apply filters
@@ -502,8 +500,8 @@ export class AnalyticsManager extends EventEmitter {
         for (const [field, value] of Object.entries(query.filters)) {
           allMetrics = allMetrics.filter(m => {
             if (field === 'tags') {
-              return Object.entries(value as Record<string, string>).every(([k, v]) => 
-                m.tags[k] === v
+              return Object.entries(value as Record<string, string>).every(
+                ([k, v]) => m.tags[k] === v
               );
             }
             return (m as any)[field] === value;
@@ -658,10 +656,10 @@ export class AnalyticsManager extends EventEmitter {
     try {
       // Collect training data
       const trainingData = await this.collectTrainingData(model);
-      
+
       // Train the model (simplified implementation)
       const trained = await this.executeModelTraining(model, trainingData);
-      
+
       Object.assign(model, trained);
       model.status = 'ready';
 
@@ -669,8 +667,9 @@ export class AnalyticsManager extends EventEmitter {
       await this.saveModel(model);
 
       this.emit('model:trained', model);
-      this.logger.info(`Predictive model trained: ${model.name} (${model.id}) - Accuracy: ${model.accuracy}%`);
-
+      this.logger.info(
+        `Predictive model trained: ${model.name} (${model.id}) - Accuracy: ${model.accuracy}%`
+      );
     } catch (error) {
       model.status = 'error';
       this.logger.error(`Model training failed: ${model.name}`, { error });
@@ -680,10 +679,7 @@ export class AnalyticsManager extends EventEmitter {
     return model;
   }
 
-  async makePrediction(
-    modelId: string,
-    input: Record<string, any>
-  ): Promise<PredictionResult> {
+  async makePrediction(modelId: string, input: Record<string, any>): Promise<PredictionResult> {
     const model = this.models.get(modelId);
     if (!model) {
       throw new Error(`Model not found: ${modelId}`);
@@ -716,9 +712,7 @@ export class AnalyticsManager extends EventEmitter {
     return result;
   }
 
-  async getPerformanceMetrics(
-    timeRange?: { start: Date; end: Date }
-  ): Promise<PerformanceMetrics> {
+  async getPerformanceMetrics(timeRange?: { start: Date; end: Date }): Promise<PerformanceMetrics> {
     const range = timeRange || {
       start: new Date(Date.now() - 60 * 60 * 1000), // Last hour
       end: new Date()
@@ -825,9 +819,7 @@ export class AnalyticsManager extends EventEmitter {
     };
   }
 
-  async getUsageMetrics(
-    timeRange?: { start: Date; end: Date }
-  ): Promise<UsageMetrics> {
+  async getUsageMetrics(timeRange?: { start: Date; end: Date }): Promise<UsageMetrics> {
     const range = timeRange || {
       start: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
       end: new Date()
@@ -858,9 +850,9 @@ export class AnalyticsManager extends EventEmitter {
       },
       features: {
         adoption: {
-          'dashboard': { users: 800, usage: 5000, retention: 85 },
-          'reports': { users: 600, usage: 2000, retention: 70 },
-          'analytics': { users: 400, usage: 1500, retention: 60 }
+          dashboard: { users: 800, usage: 5000, retention: 85 },
+          reports: { users: 600, usage: 2000, retention: 70 },
+          analytics: { users: 400, usage: 1500, retention: 60 }
         },
         mostUsed: ['dashboard', 'reports', 'search'],
         leastUsed: ['advanced-filters', 'export', 'integrations']
@@ -884,9 +876,7 @@ export class AnalyticsManager extends EventEmitter {
     };
   }
 
-  async getBusinessMetrics(
-    timeRange?: { start: Date; end: Date }
-  ): Promise<BusinessMetrics> {
+  async getBusinessMetrics(timeRange?: { start: Date; end: Date }): Promise<BusinessMetrics> {
     // This would integrate with business systems (CRM, billing, etc.)
     return {
       revenue: {
@@ -985,7 +975,9 @@ export class AnalyticsManager extends EventEmitter {
         this.models.set(model.id, model);
       }
 
-      this.logger.info(`Loaded ${this.dashboards.size} dashboards, ${this.insights.size} insights, ${this.models.size} models`);
+      this.logger.info(
+        `Loaded ${this.dashboards.size} dashboards, ${this.insights.size} insights, ${this.models.size} models`
+      );
     } catch (error) {
       this.logger.warn('Failed to load some analytics configurations', { error });
     }
@@ -1192,7 +1184,7 @@ export class AnalyticsManager extends EventEmitter {
   private async persistMetric(metric: AnalyticsMetric): Promise<void> {
     const date = metric.timestamp.toISOString().split('T')[0];
     const filePath = join(this.analyticsPath, 'metrics', `${date}.json`);
-    
+
     try {
       let existingData: AnalyticsMetric[] = [];
       try {
@@ -1201,7 +1193,7 @@ export class AnalyticsManager extends EventEmitter {
       } catch {
         // File doesn't exist yet
       }
-      
+
       existingData.push(metric);
       await writeFile(filePath, JSON.stringify(existingData, null, 2));
     } catch (error) {
@@ -1260,10 +1252,10 @@ export class AnalyticsManager extends EventEmitter {
       await this.saveInsight(insight);
 
       this.emit('anomaly:detected', { metric, insight, deviation });
-      this.logger.warn(`Anomaly detected in ${metric.name}`, { 
-        current: metric.value, 
-        average, 
-        deviation 
+      this.logger.warn(`Anomaly detected in ${metric.name}`, {
+        current: metric.value,
+        average,
+        deviation
       });
     }
   }
@@ -1284,9 +1276,10 @@ export class AnalyticsManager extends EventEmitter {
     return [];
   }
 
-  private async analyzePerformance(
-    timeRange: { start: Date; end: Date }
-  ): Promise<AnalyticsInsight[]> {
+  private async analyzePerformance(timeRange: {
+    start: Date;
+    end: Date;
+  }): Promise<AnalyticsInsight[]> {
     const insights: AnalyticsInsight[] = [];
 
     // Check response time trends
@@ -1319,32 +1312,35 @@ export class AnalyticsManager extends EventEmitter {
             data: {
               metrics: ['response-time'],
               timeRange,
-              values: { recent: recentAvg, earlier: earlierAvg, change },
+              values: { recent: recentAvg, earlier: earlierAvg, change }
             },
-            recommendations: change > 0 ? [
-              {
-                action: 'Investigate performance degradation',
-                effort: 'medium',
-                impact: 'Restore optimal response times',
-                implementation: [
-                  'Check for increased load or traffic',
-                  'Review recent code deployments',
-                  'Analyze database query performance',
-                  'Monitor resource utilization'
-                ]
-              }
-            ] : [
-              {
-                action: 'Document performance improvement',
-                effort: 'low',
-                impact: 'Understand what caused the improvement',
-                implementation: [
-                  'Identify recent optimizations',
-                  'Document best practices',
-                  'Monitor sustainability'
-                ]
-              }
-            ],
+            recommendations:
+              change > 0
+                ? [
+                    {
+                      action: 'Investigate performance degradation',
+                      effort: 'medium',
+                      impact: 'Restore optimal response times',
+                      implementation: [
+                        'Check for increased load or traffic',
+                        'Review recent code deployments',
+                        'Analyze database query performance',
+                        'Monitor resource utilization'
+                      ]
+                    }
+                  ]
+                : [
+                    {
+                      action: 'Document performance improvement',
+                      effort: 'low',
+                      impact: 'Understand what caused the improvement',
+                      implementation: [
+                        'Identify recent optimizations',
+                        'Document best practices',
+                        'Monitor sustainability'
+                      ]
+                    }
+                  ],
             status: 'new',
             createdAt: new Date(),
             updatedAt: new Date()
@@ -1356,16 +1352,15 @@ export class AnalyticsManager extends EventEmitter {
     return insights;
   }
 
-  private async analyzeUsage(
-    timeRange: { start: Date; end: Date }
-  ): Promise<AnalyticsInsight[]> {
+  private async analyzeUsage(timeRange: { start: Date; end: Date }): Promise<AnalyticsInsight[]> {
     // Simplified usage analysis
     return [];
   }
 
-  private async analyzeCostOptimization(
-    timeRange: { start: Date; end: Date }
-  ): Promise<AnalyticsInsight[]> {
+  private async analyzeCostOptimization(timeRange: {
+    start: Date;
+    end: Date;
+  }): Promise<AnalyticsInsight[]> {
     // Simplified cost optimization analysis
     return [];
   }
@@ -1382,7 +1377,10 @@ export class AnalyticsManager extends EventEmitter {
     return Object.values(data).flat();
   }
 
-  private async executeModelTraining(model: PredictiveModel, data: any[]): Promise<Partial<PredictiveModel>> {
+  private async executeModelTraining(
+    model: PredictiveModel,
+    data: any[]
+  ): Promise<Partial<PredictiveModel>> {
     // Simplified model training
     return {
       accuracy: 85 + Math.random() * 10,
@@ -1399,31 +1397,41 @@ export class AnalyticsManager extends EventEmitter {
     };
   }
 
-  private async executePrediction(model: PredictiveModel, input: Record<string, any>): Promise<{ value: any; confidence: number }> {
+  private async executePrediction(
+    model: PredictiveModel,
+    input: Record<string, any>
+  ): Promise<{ value: any; confidence: number }> {
     // Simplified prediction logic
     const value = Math.random() * 100;
     const confidence = 70 + Math.random() * 25;
-    
+
     return { value, confidence };
   }
 
-  private groupMetrics(metrics: AnalyticsMetric[], groupBy: string[]): Record<string, AnalyticsMetric[]> {
+  private groupMetrics(
+    metrics: AnalyticsMetric[],
+    groupBy: string[]
+  ): Record<string, AnalyticsMetric[]> {
     const groups: Record<string, AnalyticsMetric[]> = {};
-    
+
     for (const metric of metrics) {
-      const key = groupBy.map(field => {
-        if (field === 'tags') {
-          return Object.entries(metric.tags).map(([k, v]) => `${k}:${v}`).join(',');
-        }
-        return (metric as any)[field] || 'unknown';
-      }).join('-');
-      
+      const key = groupBy
+        .map(field => {
+          if (field === 'tags') {
+            return Object.entries(metric.tags)
+              .map(([k, v]) => `${k}:${v}`)
+              .join(',');
+          }
+          return (metric as any)[field] || 'unknown';
+        })
+        .join('-');
+
       if (!groups[key]) {
         groups[key] = [];
       }
       groups[key].push(metric);
     }
-    
+
     return groups;
   }
 
@@ -1432,7 +1440,7 @@ export class AnalyticsManager extends EventEmitter {
 
     // Group by time buckets for time series aggregation
     const buckets: Record<string, AnalyticsMetric[]> = {};
-    
+
     for (const metric of metrics) {
       const bucket = new Date(Math.floor(metric.timestamp.getTime() / 60000) * 60000).toISOString();
       if (!buckets[bucket]) {
@@ -1441,42 +1449,44 @@ export class AnalyticsManager extends EventEmitter {
       buckets[bucket].push(metric);
     }
 
-    return Object.entries(buckets).map(([timestamp, bucketMetrics]) => {
-      const values = bucketMetrics.map(m => m.value);
-      let aggregatedValue: number;
+    return Object.entries(buckets)
+      .map(([timestamp, bucketMetrics]) => {
+        const values = bucketMetrics.map(m => m.value);
+        let aggregatedValue: number;
 
-      switch (aggregation) {
-        case 'sum':
-          aggregatedValue = values.reduce((sum, v) => sum + v, 0);
-          break;
-        case 'min':
-          aggregatedValue = Math.min(...values);
-          break;
-        case 'max':
-          aggregatedValue = Math.max(...values);
-          break;
-        case 'count':
-          aggregatedValue = values.length;
-          break;
-        case 'p95':
-          values.sort((a, b) => a - b);
-          aggregatedValue = values[Math.floor(values.length * 0.95)];
-          break;
-        case 'p99':
-          values.sort((a, b) => a - b);
-          aggregatedValue = values[Math.floor(values.length * 0.99)];
-          break;
-        case 'avg':
-        default:
-          aggregatedValue = values.reduce((sum, v) => sum + v, 0) / values.length;
-      }
+        switch (aggregation) {
+          case 'sum':
+            aggregatedValue = values.reduce((sum, v) => sum + v, 0);
+            break;
+          case 'min':
+            aggregatedValue = Math.min(...values);
+            break;
+          case 'max':
+            aggregatedValue = Math.max(...values);
+            break;
+          case 'count':
+            aggregatedValue = values.length;
+            break;
+          case 'p95':
+            values.sort((a, b) => a - b);
+            aggregatedValue = values[Math.floor(values.length * 0.95)];
+            break;
+          case 'p99':
+            values.sort((a, b) => a - b);
+            aggregatedValue = values[Math.floor(values.length * 0.99)];
+            break;
+          case 'avg':
+          default:
+            aggregatedValue = values.reduce((sum, v) => sum + v, 0) / values.length;
+        }
 
-      return {
-        timestamp: new Date(timestamp),
-        value: aggregatedValue,
-        count: values.length
-      };
-    }).sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+        return {
+          timestamp: new Date(timestamp),
+          value: aggregatedValue,
+          count: values.length
+        };
+      })
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   }
 
   private getLatestValue(dataPoints: any[]): number {

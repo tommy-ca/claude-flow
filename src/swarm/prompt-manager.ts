@@ -1,10 +1,15 @@
 import { getErrorMessage } from '../utils/error-handler.js';
 import * as path from 'path';
 import { EventEmitter } from 'events';
-import { copyPrompts, copyPromptsEnhanced, CopyOptions, CopyResult } from './prompt-copier-enhanced.js';
-import { 
-  PromptConfigManager, 
-  PromptPathResolver, 
+import {
+  copyPrompts,
+  copyPromptsEnhanced,
+  CopyOptions,
+  CopyResult
+} from './prompt-copier-enhanced.js';
+import {
+  PromptConfigManager,
+  PromptPathResolver,
   PromptValidator,
   formatDuration,
   formatFileSize
@@ -43,7 +48,7 @@ export class PromptManager extends EventEmitter {
 
   constructor(options: PromptManagerOptions = {}) {
     super();
-    
+
     this.options = {
       configPath: options.configPath || '.prompt-config.json',
       basePath: options.basePath || process.cwd(),
@@ -59,36 +64,38 @@ export class PromptManager extends EventEmitter {
 
   async initialize(): Promise<void> {
     logger.info('Initializing PromptManager...');
-    
+
     // Load configuration
     await this.configManager.loadConfig();
-    
+
     // Auto-discover prompt directories if enabled
     if (this.options.autoDiscovery) {
       const discovered = await this.pathResolver.discoverPromptDirectories();
       if (discovered.length > 0) {
         logger.info(`Auto-discovered ${discovered.length} prompt directories`);
-        
+
         // Update config with discovered directories
         const config = this.configManager.getConfig();
-        const uniqueDirs = Array.from(new Set([
-          ...config.sourceDirectories,
-          ...discovered.map(dir => path.relative(this.options.basePath, dir))
-        ]));
-        
+        const uniqueDirs = Array.from(
+          new Set([
+            ...config.sourceDirectories,
+            ...discovered.map(dir => path.relative(this.options.basePath, dir))
+          ])
+        );
+
         await this.configManager.saveConfig({
           sourceDirectories: uniqueDirs
         });
       }
     }
-    
+
     this.emit('initialized');
   }
 
   async copyPrompts(options: Partial<CopyOptions> = {}): Promise<CopyResult> {
     const config = this.configManager.getConfig();
     const profile = this.options.defaultProfile;
-    
+
     // Resolve paths
     const resolved = this.pathResolver.resolvePaths(
       config.sourceDirectories,
@@ -116,10 +123,9 @@ export class PromptManager extends EventEmitter {
     this.emit('copyStart', copyOptions);
 
     try {
-      const result = await (copyOptions.parallel ? 
-        copyPromptsEnhanced(copyOptions) : 
-        copyPrompts(copyOptions)
-      );
+      const result = await (copyOptions.parallel
+        ? copyPromptsEnhanced(copyOptions)
+        : copyPrompts(copyOptions));
 
       this.emit('copyComplete', result);
       return result;
@@ -137,7 +143,7 @@ export class PromptManager extends EventEmitter {
     );
 
     const results: CopyResult[] = [];
-    
+
     for (const source of resolved.sources) {
       try {
         const copyOptions: CopyOptions = {
@@ -150,12 +156,12 @@ export class PromptManager extends EventEmitter {
         logger.info(`Copying from source: ${source}`);
         const result = await copyPrompts(copyOptions);
         results.push(result);
-        
+
         this.emit('sourceComplete', { source, result });
       } catch (error) {
         logger.error(`Failed to copy from ${source}:`, error);
         this.emit('sourceError', { source, error });
-        
+
         // Add error result
         results.push({
           success: false,
@@ -163,7 +169,13 @@ export class PromptManager extends EventEmitter {
           copiedFiles: 0,
           failedFiles: 0,
           skippedFiles: 0,
-          errors: [{ file: source, error: (error instanceof Error ? error.message : String(error)), phase: 'read' }],
+          errors: [
+            {
+              file: source,
+              error: error instanceof Error ? error.message : String(error),
+              phase: 'read'
+            }
+          ],
           duration: 0
         });
       }
@@ -175,11 +187,8 @@ export class PromptManager extends EventEmitter {
   async validatePrompts(sourcePath?: string): Promise<ValidationReport> {
     const config = this.configManager.getConfig();
     const sources = sourcePath ? [sourcePath] : config.sourceDirectories;
-    
-    const resolved = this.pathResolver.resolvePaths(
-      sources,
-      config.destinationDirectory
-    );
+
+    const resolved = this.pathResolver.resolvePaths(sources, config.destinationDirectory);
 
     let totalFiles = 0;
     let validFiles = 0;
@@ -205,18 +214,21 @@ export class PromptManager extends EventEmitter {
     return report;
   }
 
-  private async validateDirectory(dirPath: string, issues: ValidationReport['issues']): Promise<void> {
+  private async validateDirectory(
+    dirPath: string,
+    issues: ValidationReport['issues']
+  ): Promise<void> {
     const fs = require('fs').promises;
-    
+
     try {
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
-      
+
       for (const entry of entries) {
         const fullPath = path.join(dirPath, entry.name);
-        
+
         if (entry.isFile() && this.isPromptFile(entry.name)) {
           const result = await PromptValidator.validatePromptFile(fullPath);
-          
+
           issues.push({
             file: fullPath,
             issues: result.issues,
@@ -234,7 +246,7 @@ export class PromptManager extends EventEmitter {
   private isPromptFile(fileName: string): boolean {
     const config = this.configManager.getConfig();
     const patterns = config.defaultOptions.includePatterns;
-    
+
     return patterns.some(pattern => {
       const regex = pattern.replace(/\./g, '\\.').replace(/\*/g, '.*');
       return new RegExp(regex).test(fileName);
@@ -321,11 +333,11 @@ export class PromptManager extends EventEmitter {
 
     // Analyze sources
     const sources = await Promise.all(
-      resolved.sources.map(async (sourcePath) => {
+      resolved.sources.map(async sourcePath => {
         try {
           const fs = require('fs').promises;
           const stats = await fs.stat(sourcePath);
-          
+
           if (!stats.isDirectory()) {
             return { path: sourcePath, exists: false };
           }
@@ -336,10 +348,10 @@ export class PromptManager extends EventEmitter {
 
           const scanDir = async (dir: string) => {
             const entries = await fs.readdir(dir, { withFileTypes: true });
-            
+
             for (const entry of entries) {
               const fullPath = path.join(dir, entry.name);
-              
+
               if (entry.isFile() && this.isPromptFile(entry.name)) {
                 const fileStats = await fs.stat(fullPath);
                 fileCount++;

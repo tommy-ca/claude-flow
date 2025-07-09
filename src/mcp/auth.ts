@@ -37,16 +37,19 @@ export interface TokenValidation {
  */
 export class AuthManager implements IAuthManager {
   private revokedTokens = new Set<string>();
-  private tokenStore = new Map<string, {
-    user: string;
-    permissions: string[];
-    createdAt: Date;
-    expiresAt: Date;
-  }>();
+  private tokenStore = new Map<
+    string,
+    {
+      user: string;
+      permissions: string[];
+      createdAt: Date;
+      expiresAt: Date;
+    }
+  >();
 
   constructor(
     private config: MCPAuthConfig,
-    private logger: ILogger,
+    private logger: ILogger
   ) {
     // Start token cleanup timer
     if (config.enabled) {
@@ -61,13 +64,13 @@ export class AuthManager implements IAuthManager {
       return {
         success: true,
         user: 'anonymous',
-        permissions: ['*'],
+        permissions: ['*']
       };
     }
 
     this.logger.debug('Authenticating credentials', {
       method: this.config.method,
-      hasCredentials: !!credentials,
+      hasCredentials: !!credentials
     });
 
     try {
@@ -81,14 +84,19 @@ export class AuthManager implements IAuthManager {
         default:
           return {
             success: false,
-            error: `Unsupported authentication method: ${this.config.method}`,
+            error: `Unsupported authentication method: ${this.config.method}`
           };
       }
     } catch (error) {
       this.logger.error('Authentication error', error);
       return {
         success: false,
-        error: error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Authentication failed',
+        error:
+          error instanceof Error
+            ? error instanceof Error
+              ? error.message
+              : String(error)
+            : 'Authentication failed'
       };
     }
   }
@@ -99,7 +107,7 @@ export class AuthManager implements IAuthManager {
     }
 
     const permissions = session.authData?.permissions || [];
-    
+
     // Check for wildcard permission
     if (permissions.includes('*')) {
       return true;
@@ -121,7 +129,7 @@ export class AuthManager implements IAuthManager {
       sessionId: session.id,
       user: session.authData?.user,
       permission,
-      userPermissions: permissions,
+      userPermissions: permissions
     });
 
     return false;
@@ -131,7 +139,7 @@ export class AuthManager implements IAuthManager {
     if (this.revokedTokens.has(token)) {
       return {
         valid: false,
-        error: 'Token has been revoked',
+        error: 'Token has been revoked'
       };
     }
 
@@ -139,7 +147,7 @@ export class AuthManager implements IAuthManager {
     if (!tokenData) {
       return {
         valid: false,
-        error: 'Invalid token',
+        error: 'Invalid token'
       };
     }
 
@@ -147,7 +155,7 @@ export class AuthManager implements IAuthManager {
       this.tokenStore.delete(token);
       return {
         valid: false,
-        error: 'Token has expired',
+        error: 'Token has expired'
       };
     }
 
@@ -155,7 +163,7 @@ export class AuthManager implements IAuthManager {
       valid: true,
       user: tokenData.user,
       permissions: tokenData.permissions,
-      expiresAt: tokenData.expiresAt,
+      expiresAt: tokenData.expiresAt
     };
   }
 
@@ -168,13 +176,13 @@ export class AuthManager implements IAuthManager {
       user: userId,
       permissions,
       createdAt: now,
-      expiresAt,
+      expiresAt
     });
 
     this.logger.info('Token generated', {
       userId,
       permissions,
-      expiresAt,
+      expiresAt
     });
 
     return token;
@@ -191,7 +199,7 @@ export class AuthManager implements IAuthManager {
     if (!token) {
       return {
         success: false,
-        error: 'Token not provided',
+        error: 'Token not provided'
       };
     }
 
@@ -202,13 +210,13 @@ export class AuthManager implements IAuthManager {
         success: true,
         user: validation.user!,
         permissions: validation.permissions!,
-        token,
+        token
       };
     }
 
     // Check against configured static tokens
     if (this.config.tokens && this.config.tokens.length > 0) {
-      const isValid = this.config.tokens.some((validToken) => {
+      const isValid = this.config.tokens.some(validToken => {
         return this.timingSafeEqual(token, validToken);
       });
 
@@ -217,14 +225,14 @@ export class AuthManager implements IAuthManager {
           success: true,
           user: 'token-user',
           permissions: ['*'], // Static tokens get all permissions
-          token,
+          token
         };
       }
     }
 
     return {
       success: false,
-      error: 'Invalid token',
+      error: 'Invalid token'
     };
   }
 
@@ -233,22 +241,22 @@ export class AuthManager implements IAuthManager {
     if (!username || !password) {
       return {
         success: false,
-        error: 'Username and password required',
+        error: 'Username and password required'
       };
     }
 
     if (!this.config.users || this.config.users.length === 0) {
       return {
         success: false,
-        error: 'No users configured',
+        error: 'No users configured'
       };
     }
 
-    const user = this.config.users.find((u) => u.username === username);
+    const user = this.config.users.find(u => u.username === username);
     if (!user) {
       return {
         success: false,
-        error: 'Invalid username or password',
+        error: 'Invalid username or password'
       };
     }
 
@@ -257,7 +265,7 @@ export class AuthManager implements IAuthManager {
     if (!isValidPassword) {
       return {
         success: false,
-        error: 'Invalid username or password',
+        error: 'Invalid username or password'
       };
     }
 
@@ -268,7 +276,7 @@ export class AuthManager implements IAuthManager {
       success: true,
       user: username,
       permissions: user.permissions,
-      token,
+      token
     };
   }
 
@@ -278,11 +286,11 @@ export class AuthManager implements IAuthManager {
     // 1. Validating JWT tokens
     // 2. Checking token expiration
     // 3. Extracting user info and permissions from token claims
-    
+
     this.logger.warn('OAuth authentication not yet implemented');
     return {
       success: false,
-      error: 'OAuth authentication not implemented',
+      error: 'OAuth authentication not implemented'
     };
   }
 
@@ -293,11 +301,11 @@ export class AuthManager implements IAuthManager {
 
     if (typeof credentials === 'object' && credentials !== null) {
       const creds = credentials as Record<string, unknown>;
-      
+
       if (typeof creds.token === 'string') {
         return creds.token;
       }
-      
+
       if (typeof creds.authorization === 'string') {
         const match = creds.authorization.match(/^Bearer\s+(.+)$/i);
         return match ? match[1] : null;
@@ -310,11 +318,11 @@ export class AuthManager implements IAuthManager {
   private extractBasicAuth(credentials: unknown): { username?: string; password?: string } {
     if (typeof credentials === 'object' && credentials !== null) {
       const creds = credentials as Record<string, unknown>;
-      
+
       if (typeof creds.username === 'string' && typeof creds.password === 'string') {
         return {
           username: creds.username,
-          password: creds.password,
+          password: creds.password
         };
       }
 
@@ -327,7 +335,7 @@ export class AuthManager implements IAuthManager {
             if (colonIndex >= 0) {
               return {
                 username: decoded.substring(0, colonIndex),
-                password: decoded.substring(colonIndex + 1),
+                password: decoded.substring(colonIndex + 1)
               };
             }
           } catch {
@@ -345,7 +353,7 @@ export class AuthManager implements IAuthManager {
     // In production, use proper password hashing like bcrypt
     const hashedProvided = this.hashPassword(providedPassword);
     const hashedStored = this.hashPassword(storedPassword);
-    
+
     return this.timingSafeEqual(hashedProvided, hashedStored);
   }
 
@@ -357,11 +365,11 @@ export class AuthManager implements IAuthManager {
     const encoder = new TextEncoder();
     const bufferA = encoder.encode(a);
     const bufferB = encoder.encode(b);
-    
+
     if (bufferA.length !== bufferB.length) {
       return false;
     }
-    
+
     return timingSafeEqual(bufferA, bufferB);
   }
 
@@ -374,7 +382,7 @@ export class AuthManager implements IAuthManager {
       .update(`${timestamp}${random1}${random2}`)
       .digest('hex')
       .substring(0, 32);
-    
+
     return `mcp_${timestamp}_${hash}`;
   }
 
@@ -433,7 +441,7 @@ export const Permissions = {
   ADMIN_SESSIONS: 'admin.sessions',
 
   // Wildcard permission
-  ALL: '*',
+  ALL: '*'
 } as const;
 
-export type Permission = typeof Permissions[keyof typeof Permissions];
+export type Permission = (typeof Permissions)[keyof typeof Permissions];

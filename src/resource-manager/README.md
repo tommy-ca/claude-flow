@@ -40,6 +40,7 @@ The Resource Manager is a comprehensive system for intelligent resource allocati
 ## Core Components
 
 ### 1. Resource Monitor (`monitors/`)
+
 - **System Monitoring**: CPU, memory, disk, network usage
 - **Process Monitoring**: Per-process resource consumption
 - **Alert System**: Threshold-based notifications
@@ -47,6 +48,7 @@ The Resource Manager is a comprehensive system for intelligent resource allocati
 - **Export Support**: JSON, CSV, Prometheus formats
 
 ### 2. Resource Allocator (`allocators/`)
+
 - **Allocation Strategies**: Priority, fair-share, best-fit, ML-optimized
 - **Resource Pool Management**: Available resource tracking
 - **Optimization**: Automatic resource rebalancing
@@ -54,6 +56,7 @@ The Resource Manager is a comprehensive system for intelligent resource allocati
 - **Persistence**: State export/import capabilities
 
 ### 3. Pressure Detector (`monitors/`)
+
 - **Pressure Levels**: Normal, moderate, high, critical
 - **Trend Analysis**: Resource usage patterns
 - **Predictive Analytics**: Future resource needs
@@ -61,6 +64,7 @@ The Resource Manager is a comprehensive system for intelligent resource allocati
 - **Response Actions**: Automated remediation
 
 ### 4. Agent Resource Manager (`agents/`)
+
 - **Per-Agent Resources**: Isolated resource management
 - **Auto-Scaling**: Dynamic resource adjustment
 - **Health Monitoring**: Agent-specific health checks
@@ -107,30 +111,35 @@ src/resource-manager/
 ## Key Features
 
 ### 1. Intelligent Resource Allocation
+
 - **Multiple Strategies**: Priority, fair-share, best-fit, ML-optimized
 - **Over-provisioning**: Configurable over-allocation for peak loads
 - **Resource Sharing**: Efficient resource utilization across agents
 - **Predictive Allocation**: Future resource needs prediction
 
 ### 2. Comprehensive Monitoring
+
 - **System Metrics**: CPU, memory, disk, network monitoring
 - **Process Tracking**: Per-process resource consumption
 - **Real-time Alerts**: Threshold-based notifications
 - **Historical Analysis**: Time-series data storage and analysis
 
 ### 3. Pressure Detection & Response
+
 - **Multi-level Pressure**: Normal, moderate, high, critical levels
 - **Trend Analysis**: Resource usage pattern recognition
 - **Anomaly Detection**: Statistical and ML-based anomaly detection
 - **Automated Response**: Configurable response actions
 
 ### 4. Agent-Specific Management
+
 - **Resource Isolation**: Per-agent resource boundaries
 - **Auto-scaling**: Dynamic resource adjustment based on load
 - **Health Monitoring**: Agent-specific health checks
 - **Performance Tracking**: SLA compliance monitoring
 
 ### 5. Integration Support
+
 - **MCP Integration**: Model Control Protocol support
 - **Swarm Coordination**: Multi-node resource coordination
 - **Claude Flow**: Native integration with flow engine
@@ -139,6 +148,7 @@ src/resource-manager/
 ## Usage Examples
 
 ### Basic Setup
+
 ```typescript
 import { ResourceManagerFactory } from './factory/resource-manager-factory';
 
@@ -178,6 +188,7 @@ await resourceManager.start();
 ```
 
 ### Agent Management
+
 ```typescript
 // Create agent resource manager
 const agentManager = resourceManager.createAgentManager({
@@ -210,9 +221,10 @@ const allocation = await agentManager.requestResources();
 ```
 
 ### Monitoring & Alerts
+
 ```typescript
 // Subscribe to pressure changes
-resourceManager.pressureDetector.subscribe((status) => {
+resourceManager.pressureDetector.subscribe(status => {
   console.log(`Pressure level: ${status.level}`);
   if (status.level === 'critical') {
     // Take action
@@ -220,7 +232,7 @@ resourceManager.pressureDetector.subscribe((status) => {
 });
 
 // Subscribe to alerts
-resourceManager.monitor.subscribeToAlerts((alert) => {
+resourceManager.monitor.subscribeToAlerts(alert => {
   console.log(`Alert: ${alert.message}`);
   // Handle alert
 });
@@ -233,22 +245,25 @@ console.log(`System health: ${healthReport.overallHealth}`);
 ## Configuration
 
 ### Resource Thresholds
+
 ```typescript
 const thresholds = {
-  cpuUsage: 80,        // CPU usage threshold (%)
-  memoryUsage: 85,     // Memory usage threshold (%)
-  diskUsage: 90,       // Disk usage threshold (%)
-  networkUtilization: 75  // Network utilization threshold (%)
+  cpuUsage: 80, // CPU usage threshold (%)
+  memoryUsage: 85, // Memory usage threshold (%)
+  diskUsage: 90, // Disk usage threshold (%)
+  networkUtilization: 75 // Network utilization threshold (%)
 };
 ```
 
 ### Allocation Strategies
+
 - **Priority**: Allocate based on request priority
 - **Fair Share**: Distribute resources evenly
 - **Best Fit**: Minimize resource fragmentation
 - **ML Optimized**: Machine learning-based allocation
 
 ### QoS Classes
+
 - **Guaranteed**: Reserved resources, never preempted
 - **Burstable**: Can burst beyond requests up to limits
 - **Best Effort**: No guarantees, can be preempted
@@ -256,16 +271,19 @@ const thresholds = {
 ## Integration Points
 
 ### MCP Integration
+
 - Resource metrics reporting to MCP servers
 - Command handling for resource operations
 - Alert forwarding to MCP clients
 
 ### Swarm Coordination
+
 - Multi-node resource coordination
 - Distributed resource allocation
 - Topology-aware resource management
 
 ### Claude Flow Integration
+
 - Flow-aware resource allocation
 - Flow-specific resource monitoring
 - Dynamic scaling based on flow demands
@@ -273,16 +291,19 @@ const thresholds = {
 ## Performance Considerations
 
 ### Monitoring Frequency
+
 - **System Metrics**: 5-10 seconds for responsive monitoring
 - **Process Metrics**: 10-30 seconds for detailed tracking
 - **Pressure Detection**: 10-60 seconds for trend analysis
 
 ### Memory Usage
+
 - **Metric History**: Configurable retention period
 - **Alert History**: Limited to recent alerts
 - **Allocation State**: Minimal memory footprint
 
 ### CPU Overhead
+
 - **Monitoring**: <1% CPU overhead for system monitoring
 - **Allocation**: O(n) complexity for most strategies
 - **Pressure Detection**: Minimal impact with efficient algorithms
@@ -290,16 +311,19 @@ const thresholds = {
 ## Security Considerations
 
 ### Resource Isolation
+
 - Agent resource boundaries enforced
 - No cross-agent resource access
 - Secure resource allocation tracking
 
 ### Access Control
+
 - Role-based access to resource operations
 - Audit logging for resource changes
 - Secure communication with integrations
 
 ### Data Protection
+
 - Encrypted metric storage options
 - Secure export/import capabilities
 - Privacy-aware process monitoring
@@ -307,16 +331,19 @@ const thresholds = {
 ## Future Enhancements
 
 ### Machine Learning
+
 - **Predictive Scaling**: ML-based resource prediction
 - **Anomaly Detection**: Advanced anomaly detection
 - **Optimization**: AI-powered resource optimization
 
 ### Advanced Monitoring
+
 - **Distributed Tracing**: Cross-service resource tracking
 - **Custom Metrics**: User-defined resource metrics
 - **Advanced Visualizations**: Real-time dashboards
 
 ### Integration Expansion
+
 - **Cloud Providers**: AWS, Azure, GCP integration
 - **Container Orchestration**: Kubernetes integration
 - **Monitoring Systems**: Prometheus, Grafana integration

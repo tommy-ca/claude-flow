@@ -17,7 +17,7 @@ export const AGENT_TYPES = {
   SPECIALIST: 'specialist'
 } as const;
 
-export type AgentType = typeof AGENT_TYPES[keyof typeof AGENT_TYPES];
+export type AgentType = (typeof AGENT_TYPES)[keyof typeof AGENT_TYPES];
 
 // Array of all valid agent types for runtime validation
 export const VALID_AGENT_TYPES = Object.values(AGENT_TYPES);
@@ -46,7 +46,7 @@ export const SWARM_STRATEGIES = {
   CUSTOM: 'custom'
 } as const;
 
-export type SwarmStrategy = typeof SWARM_STRATEGIES[keyof typeof SWARM_STRATEGIES];
+export type SwarmStrategy = (typeof SWARM_STRATEGIES)[keyof typeof SWARM_STRATEGIES];
 export const VALID_SWARM_STRATEGIES = Object.values(SWARM_STRATEGIES);
 
 // Task orchestration strategies (different from swarm strategies)
@@ -57,5 +57,6 @@ export const ORCHESTRATION_STRATEGIES = {
   BALANCED: 'balanced'
 } as const;
 
-export type OrchestrationStrategy = typeof ORCHESTRATION_STRATEGIES[keyof typeof ORCHESTRATION_STRATEGIES];
+export type OrchestrationStrategy =
+  (typeof ORCHESTRATION_STRATEGIES)[keyof typeof ORCHESTRATION_STRATEGIES];
 export const VALID_ORCHESTRATION_STRATEGIES = Object.values(ORCHESTRATION_STRATEGIES);

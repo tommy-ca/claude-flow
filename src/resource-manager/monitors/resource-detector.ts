@@ -56,7 +56,7 @@ export class ResourceDetector {
       ]);
 
       const loadAverage = os.loadavg();
-      
+
       return {
         id: `cpu-${nanoid(8)}`,
         type: 'cpu',
@@ -101,12 +101,12 @@ export class ResourceDetector {
   async detectMemory(): Promise<SystemMemoryResource> {
     try {
       const memData = await si.mem();
-      
+
       const totalMemory = memData.total;
       const freeMemory = memData.free;
       const usedMemory = memData.used;
       const usagePercent = (usedMemory / totalMemory) * 100;
-      
+
       return {
         id: `memory-${nanoid(8)}`,
         type: 'memory',
@@ -176,10 +176,12 @@ export class ResourceDetector {
           mount: fs.mount,
           readSpeed: diskStat?.rx_sec || 0,
           writeSpeed: diskStat?.wx_sec || 0,
-          iops: diskStat ? {
-            read: diskStat.rx || 0,
-            write: diskStat.wx || 0
-          } : undefined,
+          iops: diskStat
+            ? {
+                read: diskStat.rx || 0,
+                write: diskStat.wx || 0
+              }
+            : undefined,
           lastUpdated: new Date(),
           metadata: {
             usagePercent,
@@ -216,7 +218,7 @@ export class ResourceDetector {
         }
 
         const stats = networkStats.find(stat => stat.iface === iface.iface);
-        
+
         const networkResource: SystemNetworkResource = {
           id: `network-${nanoid(8)}`,
           type: 'network',
@@ -342,7 +344,6 @@ export class ResourceDetector {
       resources.push(...disks);
       resources.push(...networks);
       resources.push(...gpus);
-
     } catch (error) {
       console.error('Error detecting all resources:', error);
       throw error;

@@ -36,9 +36,7 @@ export {
   type TaskMetadata
 } from './types.js';
 
-export {
-  TaskCoordinator
-} from './coordination.js';
+export { TaskCoordinator } from './coordination.js';
 
 /**
  * Initialize the complete task management system
@@ -63,17 +61,17 @@ export async function initializeTaskManagement(
   // Import required classes dynamically to avoid circular dependencies
   const { TaskEngine } = await import('./engine.js');
   const { TaskCoordinator } = await import('./coordination.js');
-  const { createTaskCreateCommand, createTaskListCommand, createTaskStatusCommand, createTaskCancelCommand, createTaskWorkflowCommand } = await import('./commands.js');
-  
-  const taskEngine = new TaskEngine(
-    config.maxConcurrentTasks || 10,
-    config.memoryManager
-  );
+  const {
+    createTaskCreateCommand,
+    createTaskListCommand,
+    createTaskStatusCommand,
+    createTaskCancelCommand,
+    createTaskWorkflowCommand
+  } = await import('./commands.js');
 
-  const taskCoordinator = new TaskCoordinator(
-    taskEngine,
-    config.memoryManager
-  );
+  const taskEngine = new TaskEngine(config.maxConcurrentTasks || 10, config.memoryManager);
+
+  const taskCoordinator = new TaskCoordinator(taskEngine, config.memoryManager);
 
   const commandContext = {
     taskEngine,

@@ -119,9 +119,7 @@ describe('Agent Command', () => {
 
       await agentCommand(['spawn', 'invalid-type'], {});
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Invalid agent type')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid agent type'));
     });
   });
 
@@ -234,9 +232,7 @@ describe('Agent Command', () => {
   describe('assign subcommand', () => {
     test('should assign task to agent', async () => {
       const mockSwarmData = {
-        agents: [
-          { id: 'agent-1', name: 'Researcher', currentTask: null }
-        ]
+        agents: [{ id: 'agent-1', name: 'Researcher', currentTask: null }]
       };
 
       fs.pathExists.mockResolvedValue(true);
@@ -281,9 +277,7 @@ describe('Agent Command', () => {
 
       await agentCommand(['status'], {});
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('Error:')
-      );
+      expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Error:'));
     });
 
     test('should handle invalid subcommands', async () => {

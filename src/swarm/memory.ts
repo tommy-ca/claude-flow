@@ -10,8 +10,16 @@ import * as crypto from 'node:crypto';
 import { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
 import {
-  MemoryEntry, MemoryPartition, SwarmMemory, AccessLevel, ConsistencyLevel,
-  MemoryType, MemoryPermissions, AgentId, SwarmEvent, SWARM_CONSTANTS
+  MemoryEntry,
+  MemoryPartition,
+  SwarmMemory,
+  AccessLevel,
+  ConsistencyLevel,
+  MemoryType,
+  MemoryPermissions,
+  AgentId,
+  SwarmEvent,
+  SWARM_CONSTANTS
 } from './types.js';
 
 export interface MemoryQuery {
@@ -94,7 +102,7 @@ export class SwarmMemoryManager extends EventEmitter {
   private persistence: MemoryPersistence;
   private encryption: MemoryEncryption;
   private isInitialized = false;
-  
+
   // Background processes
   private syncTimer?: NodeJS.Timeout;
   private backupTimer?: NodeJS.Timeout;
@@ -102,18 +110,18 @@ export class SwarmMemoryManager extends EventEmitter {
 
   constructor(config: Partial<MemoryConfig & { logging?: any }> = {}) {
     super();
-    
+
     // Configure logger based on config or default to quiet mode
     const logLevel = config.logging?.level || 'error';
     const logFormat = config.logging?.format || 'text';
     const logDestination = config.logging?.destination || 'console';
-    
+
     this.logger = new Logger(
       { level: logLevel, format: logFormat, destination: logDestination },
       { component: 'SwarmMemoryManager' }
     );
     this.config = this.mergeWithDefaults(config);
-    
+
     // Initialize memory structure
     this.memory = {
       namespace: this.config.namespace,
@@ -138,7 +146,7 @@ export class SwarmMemoryManager extends EventEmitter {
     this.replication = new MemoryReplication(this.config);
     this.persistence = new MemoryPersistence(this.config);
     this.encryption = new MemoryEncryption(this.config);
-    
+
     this.setupEventHandlers();
   }
 
@@ -155,30 +163,29 @@ export class SwarmMemoryManager extends EventEmitter {
       await this.encryption.initialize();
       await this.replication.initialize();
       await this.index.initialize();
-      
+
       // Load existing data
       await this.loadMemoryState();
-      
+
       // Create default partitions
       await this.createDefaultPartitions();
-      
+
       // Start background processes
       this.startBackgroundProcesses();
-      
+
       this.isInitialized = true;
-      
+
       this.emit('memory:initialized', {
         namespace: this.config.namespace,
         entriesLoaded: this.entries.size,
         partitionsLoaded: this.partitions.size
       });
-      
+
       this.logger.info('Swarm memory manager initialized', {
         namespace: this.config.namespace,
         entries: this.entries.size,
         partitions: this.partitions.size
       });
-
     } catch (error) {
       this.logger.error('Failed to initialize memory manager', { error });
       throw error;
@@ -195,20 +202,19 @@ export class SwarmMemoryManager extends EventEmitter {
     try {
       // Stop background processes
       this.stopBackgroundProcesses();
-      
+
       // Save final state
       await this.saveMemoryState();
-      
+
       // Shutdown subsystems
       await this.replication.shutdown();
       await this.persistence.shutdown();
       await this.encryption.shutdown();
-      
+
       this.isInitialized = false;
-      
+
       this.emit('memory:shutdown');
       this.logger.info('Swarm memory manager shut down');
-
     } catch (error) {
       this.logger.error('Error during memory manager shutdown', { error });
     }
@@ -233,7 +239,7 @@ export class SwarmMemoryManager extends EventEmitter {
 
     const entryId = generateId('mem');
     const now = new Date();
-    
+
     // Validate access permissions
     if (options.owner) {
       await this.validateAccess(options.owner, 'write', options.partition);
@@ -385,7 +391,7 @@ export class SwarmMemoryManager extends EventEmitter {
     if (options.incrementVersion !== false) {
       entry.previousVersions = entry.previousVersions || [];
       entry.previousVersions.push({ ...entry });
-      
+
       // Limit version history
       if (entry.previousVersions.length > 10) {
         entry.previousVersions = entry.previousVersions.slice(-10);
@@ -478,9 +484,7 @@ export class SwarmMemoryManager extends EventEmitter {
     }
 
     if (query.tags && query.tags.length > 0) {
-      results = results.filter(e => 
-        query.tags!.some(tag => e.tags.includes(tag))
-      );
+      results = results.filter(e => query.tags!.some(tag => e.tags.includes(tag)));
     }
 
     if (query.createdAfter) {
@@ -492,9 +496,7 @@ export class SwarmMemoryManager extends EventEmitter {
     }
 
     if (query.expiresAfter) {
-      results = results.filter(e => 
-        e.expiresAt && e.expiresAt >= query.expiresAfter!
-      );
+      results = results.filter(e => e.expiresAt && e.expiresAt >= query.expiresAfter!);
     }
 
     // Filter out expired entries
@@ -504,7 +506,7 @@ export class SwarmMemoryManager extends EventEmitter {
     if (query.sortBy) {
       results.sort((a, b) => {
         let compareValue = 0;
-        
+
         switch (query.sortBy) {
           case 'createdAt':
             compareValue = a.createdAt.getTime() - b.createdAt.getTime();
@@ -518,7 +520,7 @@ export class SwarmMemoryManager extends EventEmitter {
           default:
             compareValue = 0;
         }
-        
+
         return query.sortOrder === 'desc' ? -compareValue : compareValue;
       });
     }
@@ -623,7 +625,7 @@ export class SwarmMemoryManager extends EventEmitter {
         this.logger.warn('Failed to share memory with agent', {
           key,
           targetAgent: targetAgent.id,
-          error: (error instanceof Error ? error.message : String(error))
+          error: error instanceof Error ? error.message : String(error)
         });
       }
     }
@@ -862,7 +864,7 @@ export class SwarmMemoryManager extends EventEmitter {
     for (const entry of validEntries) {
       entriesByType[entry.type]++;
       entriesByAccess[entry.accessLevel]++;
-      
+
       const entrySize = this.calculateEntrySize(entry);
       totalSize += entrySize;
 
@@ -916,15 +918,19 @@ export class SwarmMemoryManager extends EventEmitter {
     if (options.format === 'csv') {
       return this.entriesToCSV(entries);
     } else {
-      return JSON.stringify({
-        exported: new Date().toISOString(),
-        namespace: this.config.namespace,
-        entryCount: entries.length,
-        entries: entries.map(e => ({
-          ...e,
-          value: e.value // Value is already serialized
-        }))
-      }, null, 2);
+      return JSON.stringify(
+        {
+          exported: new Date().toISOString(),
+          namespace: this.config.namespace,
+          entryCount: entries.length,
+          entries: entries.map(e => ({
+            ...e,
+            value: e.value // Value is already serialized
+          }))
+        },
+        null,
+        2
+      );
     }
   }
 
@@ -1008,31 +1014,31 @@ export class SwarmMemoryManager extends EventEmitter {
   private async serializeValue(value: any): Promise<any> {
     // Apply compression and encryption if enabled
     let serialized = JSON.stringify(value);
-    
+
     if (this.config.enableCompression) {
       // Compression would be implemented here
       // For now, just return the serialized value
     }
-    
+
     if (this.config.enableEncryption) {
       serialized = await this.encryption.encrypt(serialized);
     }
-    
+
     return serialized;
   }
 
   private async deserializeValue(value: any): Promise<any> {
     let deserialized = value;
-    
+
     if (this.config.enableEncryption) {
       deserialized = await this.encryption.decrypt(deserialized);
     }
-    
+
     if (this.config.enableCompression) {
       // Decompression would be implemented here
       // For now, just use the deserialized value
     }
-    
+
     return JSON.parse(deserialized);
   }
 
@@ -1043,11 +1049,11 @@ export class SwarmMemoryManager extends EventEmitter {
   private async enforceMemoryLimits(newEntrySize: number): Promise<void> {
     const stats = this.getStatistics();
     const projectedSize = stats.totalSize + newEntrySize;
-    
+
     if (projectedSize > this.config.maxMemorySize) {
       // Remove expired entries first
       await this.cleanupExpiredEntries();
-      
+
       // If still over limit, remove oldest entries
       const updatedStats = this.getStatistics();
       if (updatedStats.totalSize + newEntrySize > this.config.maxMemorySize) {
@@ -1057,13 +1063,12 @@ export class SwarmMemoryManager extends EventEmitter {
   }
 
   private async cleanupExpiredEntries(): Promise<void> {
-    const expiredEntries = Array.from(this.entries.values())
-      .filter(e => this.isExpired(e));
-    
+    const expiredEntries = Array.from(this.entries.values()).filter(e => this.isExpired(e));
+
     for (const entry of expiredEntries) {
       await this.deleteEntry(entry.id);
     }
-    
+
     if (expiredEntries.length > 0) {
       this.logger.info('Cleaned up expired entries', { count: expiredEntries.length });
     }
@@ -1073,23 +1078,24 @@ export class SwarmMemoryManager extends EventEmitter {
     const entries = Array.from(this.entries.values())
       .filter(e => !this.isExpired(e))
       .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-    
+
     let freedSpace = 0;
     let evictedCount = 0;
-    
+
     for (const entry of entries) {
       if (freedSpace >= requiredSpace) {
         break;
       }
-      
-      if (entry.accessLevel !== 'system') { // Don't evict system entries
+
+      if (entry.accessLevel !== 'system') {
+        // Don't evict system entries
         const entrySize = this.calculateEntrySize(entry);
         await this.deleteEntry(entry.id);
         freedSpace += entrySize;
         evictedCount++;
       }
     }
-    
+
     this.logger.warn('Evicted old entries for space', {
       evictedCount,
       freedSpace,
@@ -1117,7 +1123,7 @@ export class SwarmMemoryManager extends EventEmitter {
       entry.owner.id,
       entry.tags.join(';')
     ]);
-    
+
     return [headers, ...rows].map(row => row.join(',')).join('\n');
   }
 
@@ -1130,14 +1136,14 @@ export class SwarmMemoryManager extends EventEmitter {
           this.entries.set(entry.id, entry);
           await this.index.addEntry(entry);
         }
-        
+
         // Load partitions
         for (const partition of state.partitions || []) {
           this.partitions.set(partition.name, partition);
         }
-        
+
         this.memory.partitions = state.partitions || [];
-        
+
         this.logger.info('Loaded memory state', {
           entries: this.entries.size,
           partitions: this.partitions.size
@@ -1156,7 +1162,7 @@ export class SwarmMemoryManager extends EventEmitter {
         entries: Array.from(this.entries.values()),
         partitions: Array.from(this.partitions.values())
       };
-      
+
       await this.persistence.saveState(state);
     } catch (error) {
       this.logger.error('Failed to save memory state', { error });
@@ -1170,7 +1176,7 @@ export class SwarmMemoryManager extends EventEmitter {
       { name: 'cache', type: 'cache' as MemoryType },
       { name: 'logs', type: 'logs' as MemoryType }
     ];
-    
+
     for (const partition of defaultPartitions) {
       if (!this.partitions.has(partition.name)) {
         await this.createPartition(partition.name, { type: partition.type }, true);
@@ -1183,13 +1189,13 @@ export class SwarmMemoryManager extends EventEmitter {
       namespace: 'default',
       persistencePath: './swarm-memory',
       maxMemorySize: 100 * 1024 * 1024, // 100MB
-      maxEntrySize: 10 * 1024 * 1024,   // 10MB
-      defaultTtl: 24 * 60 * 60 * 1000,  // 24 hours
+      maxEntrySize: 10 * 1024 * 1024, // 10MB
+      defaultTtl: 24 * 60 * 60 * 1000, // 24 hours
       enableCompression: false,
       enableEncryption: false,
       consistencyLevel: 'eventual',
-      syncInterval: 60000,      // 1 minute
-      backupInterval: 3600000,  // 1 hour
+      syncInterval: 60000, // 1 minute
+      backupInterval: 3600000, // 1 hour
       maxBackups: 24,
       enableDistribution: false,
       distributionNodes: [],
@@ -1208,7 +1214,7 @@ export class SwarmMemoryManager extends EventEmitter {
         this.performSync();
       }, this.config.syncInterval);
     }
-    
+
     // Backup process
     if (this.config.backupInterval > 0) {
       this.backupTimer = setInterval(() => {
@@ -1217,7 +1223,7 @@ export class SwarmMemoryManager extends EventEmitter {
         });
       }, this.config.backupInterval);
     }
-    
+
     // Cleanup process
     this.cleanupTimer = setInterval(() => {
       this.cleanupExpiredEntries();
@@ -1229,12 +1235,12 @@ export class SwarmMemoryManager extends EventEmitter {
       clearInterval(this.syncTimer);
       this.syncTimer = undefined;
     }
-    
+
     if (this.backupTimer) {
       clearInterval(this.backupTimer);
       this.backupTimer = undefined;
     }
-    
+
     if (this.cleanupTimer) {
       clearInterval(this.cleanupTimer);
       this.cleanupTimer = undefined;
@@ -1244,7 +1250,7 @@ export class SwarmMemoryManager extends EventEmitter {
   private async performSync(): Promise<void> {
     try {
       await this.saveMemoryState();
-      
+
       if (this.config.enableDistribution) {
         await this.replication.sync();
       }
@@ -1259,7 +1265,7 @@ export class SwarmMemoryManager extends EventEmitter {
       const entry = data.entry as MemoryEntry;
       this.entries.set(entry.id, entry);
       await this.index.addEntry(entry);
-      
+
       this.emit('memory:replicated', {
         entryId: entry.id,
         key: entry.key,
@@ -1331,7 +1337,7 @@ class MemoryCache {
       const oldestKey = this.cache.keys().next().value;
       this.cache.delete(oldestKey);
     }
-    
+
     this.cache.set(key, {
       entry,
       expiry: Date.now() + this.ttl
@@ -1343,12 +1349,12 @@ class MemoryCache {
     if (!cached) {
       return null;
     }
-    
+
     if (Date.now() > cached.expiry) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return cached.entry;
   }
 

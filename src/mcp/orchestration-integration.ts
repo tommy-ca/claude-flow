@@ -62,11 +62,11 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private lifecycleManager?: MCPLifecycleManager;
   private performanceMonitor?: MCPPerformanceMonitor;
   private protocolManager?: MCPProtocolManager;
-  
+
   private integrationStatus = new Map<string, IntegrationStatus>();
   private healthCheckTimer?: NodeJS.Timeout;
   private reconnectTimers = new Map<string, NodeJS.Timeout>();
-  
+
   private readonly defaultConfig: MCPOrchestrationConfig = {
     enabledIntegrations: {
       orchestrator: true,
@@ -75,24 +75,24 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       resources: true,
       memory: true,
       monitoring: true,
-      terminals: true,
+      terminals: true
     },
     autoStart: true,
     healthCheckInterval: 30000, // 30 seconds
     reconnectAttempts: 3,
     reconnectDelay: 5000, // 5 seconds
     enableMetrics: true,
-    enableAlerts: true,
+    enableAlerts: true
   };
 
   constructor(
     private mcpConfig: MCPConfig,
     private orchestrationConfig: MCPOrchestrationConfig,
     private components: OrchestrationComponents,
-    private logger: ILogger,
+    private logger: ILogger
   ) {
     super();
-    
+
     this.orchestrationConfig = { ...this.defaultConfig, ...orchestrationConfig };
     this.initializeIntegration();
   }
@@ -123,14 +123,14 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         this.components.agentManager,
         this.components.resourceManager,
         this.components.messageBus,
-        this.components.monitor,
+        this.components.monitor
       );
 
       // Initialize lifecycle manager
       this.lifecycleManager = new MCPLifecycleManager(
         this.mcpConfig,
         this.logger,
-        () => this.server!,
+        () => this.server!
       );
 
       // Setup lifecycle event handlers
@@ -264,7 +264,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
     }
 
     status.enabled = enabled;
-    
+
     if (enabled) {
       await this.connectComponent(component);
     } else {
@@ -283,16 +283,19 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       'resources',
       'memory',
       'monitoring',
-      'terminals',
+      'terminals'
     ];
 
     for (const component of components) {
       this.integrationStatus.set(component, {
         component,
-        enabled: this.orchestrationConfig.enabledIntegrations[component as keyof typeof this.orchestrationConfig.enabledIntegrations],
+        enabled:
+          this.orchestrationConfig.enabledIntegrations[
+            component as keyof typeof this.orchestrationConfig.enabledIntegrations
+          ],
         connected: false,
         healthy: false,
-        lastCheck: new Date(),
+        lastCheck: new Date()
       });
     }
   }
@@ -300,11 +303,11 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private setupLifecycleHandlers(): void {
     if (!this.lifecycleManager) return;
 
-    this.lifecycleManager.on('stateChange', (event) => {
+    this.lifecycleManager.on('stateChange', event => {
       this.logger.info('MCP server state changed', {
         from: event.previousState,
         to: event.state,
-        error: event.error?.message,
+        error: event.error?.message
       });
 
       // Emit to orchestration event bus
@@ -312,7 +315,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         this.components.eventBus.emit(SystemEvents.SYSTEM_HEALTHCHECK, {
           status: event.state === LifecycleState.RUNNING ? 'healthy' : 'unhealthy',
           component: 'mcp-server',
-          timestamp: event.timestamp,
+          timestamp: event.timestamp
         });
       }
 
@@ -323,7 +326,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
   private setupPerformanceMonitoring(): void {
     if (!this.performanceMonitor) return;
 
-    this.performanceMonitor.on('metricsCollected', (metrics) => {
+    this.performanceMonitor.on('metricsCollected', metrics => {
       // Forward metrics to orchestration monitor
       if (this.components.monitor && typeof this.components.monitor.recordMetrics === 'function') {
         this.components.monitor.recordMetrics('mcp', metrics);
@@ -332,12 +335,12 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       this.emit('metricsCollected', metrics);
     });
 
-    this.performanceMonitor.on('alertTriggered', (alert) => {
+    this.performanceMonitor.on('alertTriggered', alert => {
       this.logger.warn('MCP performance alert triggered', {
         alertId: alert.id,
         ruleName: alert.ruleName,
         severity: alert.severity,
-        message: alert.message,
+        message: alert.message
       });
 
       // Forward to orchestration alert system
@@ -347,7 +350,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             source: 'mcp',
             severity: alert.severity,
             message: alert.message,
-            metadata: alert,
+            metadata: alert
           });
         }
       }
@@ -355,11 +358,11 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       this.emit('performanceAlert', alert);
     });
 
-    this.performanceMonitor.on('optimizationSuggestion', (suggestion) => {
+    this.performanceMonitor.on('optimizationSuggestion', suggestion => {
       this.logger.info('MCP optimization suggestion', {
         type: suggestion.type,
         priority: suggestion.priority,
-        title: suggestion.title,
+        title: suggestion.title
       });
 
       this.emit('optimizationSuggestion', suggestion);
@@ -416,7 +419,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.orchestrator.getStatus();
           }
           throw new MCPError('Orchestrator status not available');
-        },
+        }
       },
       {
         name: 'orchestrator/tasks',
@@ -425,16 +428,16 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           type: 'object',
           properties: {
             status: { type: 'string', enum: ['pending', 'running', 'completed', 'failed'] },
-            limit: { type: 'number', minimum: 1, maximum: 100 },
-          },
+            limit: { type: 'number', minimum: 1, maximum: 100 }
+          }
         },
         handler: async (input: any) => {
           if (typeof this.components.orchestrator?.listTasks === 'function') {
             return await this.components.orchestrator.listTasks(input);
           }
           throw new MCPError('Orchestrator task listing not available');
-        },
-      },
+        }
+      }
     ];
 
     for (const tool of tools) {
@@ -453,7 +456,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.swarmCoordinator.getStatus();
           }
           throw new MCPError('Swarm coordinator status not available');
-        },
+        }
       },
       {
         name: 'swarm/agents',
@@ -464,8 +467,8 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.swarmCoordinator.listAgents();
           }
           throw new MCPError('Swarm agent listing not available');
-        },
-      },
+        }
+      }
     ];
 
     for (const tool of tools) {
@@ -484,7 +487,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.agentManager.listAgents();
           }
           throw new MCPError('Agent listing not available');
-        },
+        }
       },
       {
         name: 'agents/spawn',
@@ -493,17 +496,17 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           type: 'object',
           properties: {
             profile: { type: 'object' },
-            config: { type: 'object' },
+            config: { type: 'object' }
           },
-          required: ['profile'],
+          required: ['profile']
         },
         handler: async (input: any) => {
           if (typeof this.components.agentManager?.spawnAgent === 'function') {
             return await this.components.agentManager.spawnAgent(input.profile, input.config);
           }
           throw new MCPError('Agent spawning not available');
-        },
-      },
+        }
+      }
     ];
 
     for (const tool of tools) {
@@ -522,7 +525,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.resourceManager.listResources();
           }
           throw new MCPError('Resource listing not available');
-        },
+        }
       },
       {
         name: 'resources/status',
@@ -533,8 +536,8 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.resourceManager.getStatus();
           }
           throw new MCPError('Resource manager status not available');
-        },
-      },
+        }
+      }
     ];
 
     for (const tool of tools) {
@@ -552,16 +555,16 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           properties: {
             query: { type: 'string' },
             namespace: { type: 'string' },
-            limit: { type: 'number' },
+            limit: { type: 'number' }
           },
-          required: ['query'],
+          required: ['query']
         },
         handler: async (input: any) => {
           if (typeof this.components.memoryManager?.query === 'function') {
             return await this.components.memoryManager.query(input);
           }
           throw new MCPError('Memory query not available');
-        },
+        }
       },
       {
         name: 'memory/store',
@@ -571,17 +574,17 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           properties: {
             data: { type: 'object' },
             namespace: { type: 'string' },
-            tags: { type: 'array', items: { type: 'string' } },
+            tags: { type: 'array', items: { type: 'string' } }
           },
-          required: ['data'],
+          required: ['data']
         },
         handler: async (input: any) => {
           if (typeof this.components.memoryManager?.store === 'function') {
             return await this.components.memoryManager.store(input);
           }
           throw new MCPError('Memory storage not available');
-        },
-      },
+        }
+      }
     ];
 
     for (const tool of tools) {
@@ -600,7 +603,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.monitor.getMetrics();
           }
           throw new MCPError('Monitoring metrics not available');
-        },
+        }
       },
       {
         name: 'monitoring/alerts',
@@ -611,8 +614,8 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.monitor.getAlerts();
           }
           throw new MCPError('Alert listing not available');
-        },
-      },
+        }
+      }
     ];
 
     for (const tool of tools) {
@@ -631,7 +634,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
             return await this.components.terminalManager.listSessions();
           }
           throw new MCPError('Terminal session listing not available');
-        },
+        }
       },
       {
         name: 'terminals/execute',
@@ -640,17 +643,17 @@ export class MCPOrchestrationIntegration extends EventEmitter {
           type: 'object',
           properties: {
             command: { type: 'string' },
-            sessionId: { type: 'string' },
+            sessionId: { type: 'string' }
           },
-          required: ['command'],
+          required: ['command']
         },
         handler: async (input: any) => {
           if (typeof this.components.terminalManager?.execute === 'function') {
             return await this.components.terminalManager.execute(input.command, input.sessionId);
           }
           throw new MCPError('Terminal execution not available');
-        },
-      },
+        }
+      }
     ];
 
     for (const tool of tools) {
@@ -711,7 +714,7 @@ export class MCPOrchestrationIntegration extends EventEmitter {
       status.connected = false;
       status.healthy = false;
       status.error = error instanceof Error ? error.message : 'Unknown error';
-      
+
       this.logger.error('Failed to connect component', { component, error });
       this.scheduleReconnect(component);
     }
@@ -776,7 +779,12 @@ export class MCPOrchestrationIntegration extends EventEmitter {
         status.error = undefined;
       } catch (error) {
         status.healthy = false;
-        status.error = error instanceof Error ? (error instanceof Error ? error.message : String(error)) : 'Health check failed';
+        status.error =
+          error instanceof Error
+            ? error instanceof Error
+              ? error.message
+              : String(error)
+            : 'Health check failed';
         this.logger.warn('Component health check failed', { component, error });
       }
     }
@@ -798,14 +806,22 @@ export class MCPOrchestrationIntegration extends EventEmitter {
 
   private getComponentInstance(component: string): any {
     switch (component) {
-      case 'orchestrator': return this.components.orchestrator;
-      case 'swarm': return this.components.swarmCoordinator;
-      case 'agents': return this.components.agentManager;
-      case 'resources': return this.components.resourceManager;
-      case 'memory': return this.components.memoryManager;
-      case 'monitoring': return this.components.monitor;
-      case 'terminals': return this.components.terminalManager;
-      default: return null;
+      case 'orchestrator':
+        return this.components.orchestrator;
+      case 'swarm':
+        return this.components.swarmCoordinator;
+      case 'agents':
+        return this.components.agentManager;
+      case 'resources':
+        return this.components.resourceManager;
+      case 'memory':
+        return this.components.memoryManager;
+      case 'monitoring':
+        return this.components.monitor;
+      case 'terminals':
+        return this.components.terminalManager;
+      default:
+        return null;
     }
   }
 

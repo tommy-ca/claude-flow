@@ -11,46 +11,50 @@ export class CommandHandler {
 
     // Built-in commands
     this.builtinCommands = {
-      'help': this.showHelp.bind(this),
-      'clear': this.clearConsole.bind(this),
-      'status': this.showStatus.bind(this),
-      'connect': this.connectToServer.bind(this),
-      'disconnect': this.disconnectFromServer.bind(this),
-      'tools': this.listTools.bind(this),
-      'health': this.checkHealth.bind(this),
-      'history': this.showHistory.bind(this),
-      'export': this.exportSession.bind(this),
-      'theme': this.changeTheme.bind(this),
-      'version': this.showVersion.bind(this)
+      help: this.showHelp.bind(this),
+      clear: this.clearConsole.bind(this),
+      status: this.showStatus.bind(this),
+      connect: this.connectToServer.bind(this),
+      disconnect: this.disconnectFromServer.bind(this),
+      tools: this.listTools.bind(this),
+      health: this.checkHealth.bind(this),
+      history: this.showHistory.bind(this),
+      export: this.exportSession.bind(this),
+      theme: this.changeTheme.bind(this),
+      version: this.showVersion.bind(this)
     };
 
     // Claude Flow commands
     this.claudeFlowCommands = {
       'claude-flow': this.executeClaudeFlow.bind(this),
-      'swarm': this.executeSwarm.bind(this),
-      'init': this.initializeProject.bind(this),
-      'config': this.manageConfig.bind(this),
-      'memory': this.manageMemory.bind(this),
-      'agents': this.manageAgents.bind(this),
-      'benchmark': this.runBenchmark.bind(this),
-      'sparc': this.executeSparc.bind(this)
+      swarm: this.executeSwarm.bind(this),
+      init: this.initializeProject.bind(this),
+      config: this.manageConfig.bind(this),
+      memory: this.manageMemory.bind(this),
+      agents: this.manageAgents.bind(this),
+      benchmark: this.runBenchmark.bind(this),
+      sparc: this.executeSparc.bind(this)
     };
 
     // Direct SPARC mode commands
     this.sparcModeCommands = {
-      'coder': this.executeSparcMode.bind(this, 'coder'),
-      'architect': this.executeSparcMode.bind(this, 'architect'),
-      'analyst': this.executeSparcMode.bind(this, 'analyst'),
-      'researcher': this.executeSparcMode.bind(this, 'researcher'),
-      'reviewer': this.executeSparcMode.bind(this, 'reviewer'),
-      'tester': this.executeSparcMode.bind(this, 'tester'),
-      'debugger': this.executeSparcMode.bind(this, 'debugger'),
-      'documenter': this.executeSparcMode.bind(this, 'documenter'),
-      'optimizer': this.executeSparcMode.bind(this, 'optimizer'),
-      'designer': this.executeSparcMode.bind(this, 'designer')
+      coder: this.executeSparcMode.bind(this, 'coder'),
+      architect: this.executeSparcMode.bind(this, 'architect'),
+      analyst: this.executeSparcMode.bind(this, 'analyst'),
+      researcher: this.executeSparcMode.bind(this, 'researcher'),
+      reviewer: this.executeSparcMode.bind(this, 'reviewer'),
+      tester: this.executeSparcMode.bind(this, 'tester'),
+      debugger: this.executeSparcMode.bind(this, 'debugger'),
+      documenter: this.executeSparcMode.bind(this, 'documenter'),
+      optimizer: this.executeSparcMode.bind(this, 'optimizer'),
+      designer: this.executeSparcMode.bind(this, 'designer')
     };
 
-    this.allCommands = { ...this.builtinCommands, ...this.claudeFlowCommands, ...this.sparcModeCommands };
+    this.allCommands = {
+      ...this.builtinCommands,
+      ...this.claudeFlowCommands,
+      ...this.sparcModeCommands
+    };
   }
 
   /**
@@ -124,16 +128,30 @@ export class CommandHandler {
     this.terminal.writeLine('');
     this.terminal.writeInfo('Tool Commands (from tools list):');
     this.terminal.writeLine('  system/health        - Get system health status');
-    this.terminal.writeLine('  memory/manage        - Manage memory (list, store <key> <value>, retrieve <key>)');
-    this.terminal.writeLine('  agents/manage        - Manage agents (list, create <type>, status <id>)');
-    this.terminal.writeLine('  swarm/orchestrate    - Swarm operations (status, create, start, stop)');
-    this.terminal.writeLine('  sparc/execute        - Execute SPARC modes (coder, architect, etc.)');
-    this.terminal.writeLine('  benchmark/run        - Run benchmarks (default, memory, cpu, network)');
+    this.terminal.writeLine(
+      '  memory/manage        - Manage memory (list, store <key> <value>, retrieve <key>)'
+    );
+    this.terminal.writeLine(
+      '  agents/manage        - Manage agents (list, create <type>, status <id>)'
+    );
+    this.terminal.writeLine(
+      '  swarm/orchestrate    - Swarm operations (status, create, start, stop)'
+    );
+    this.terminal.writeLine(
+      '  sparc/execute        - Execute SPARC modes (coder, architect, etc.)'
+    );
+    this.terminal.writeLine(
+      '  benchmark/run        - Run benchmarks (default, memory, cpu, network)'
+    );
     this.terminal.writeLine('  claude-flow/execute  - Execute Claude Flow commands');
 
     this.terminal.writeLine('');
-    this.terminal.writeInfo('Use "help <command>" for detailed information about a specific command.');
-    this.terminal.writeInfo('Use Ctrl+L to clear console, Ctrl+C to interrupt, Tab for autocomplete.');
+    this.terminal.writeInfo(
+      'Use "help <command>" for detailed information about a specific command.'
+    );
+    this.terminal.writeInfo(
+      'Use Ctrl+L to clear console, Ctrl+C to interrupt, Tab for autocomplete.'
+    );
   }
 
   /**
@@ -141,25 +159,25 @@ export class CommandHandler {
    */
   getCommandDescription(command) {
     const descriptions = {
-      'help': 'Show help information',
-      'clear': 'Clear console output',
-      'status': 'Show connection and system status',
-      'connect': 'Connect to Claude Code server',
-      'disconnect': 'Disconnect from server',
-      'tools': 'List available tools',
-      'health': 'Check server health',
-      'history': 'Show command history',
-      'export': 'Export session data',
-      'theme': 'Change console theme',
-      'version': 'Show version information',
+      help: 'Show help information',
+      clear: 'Clear console output',
+      status: 'Show connection and system status',
+      connect: 'Connect to Claude Code server',
+      disconnect: 'Disconnect from server',
+      tools: 'List available tools',
+      health: 'Check server health',
+      history: 'Show command history',
+      export: 'Export session data',
+      theme: 'Change console theme',
+      version: 'Show version information',
       'claude-flow': 'Execute Claude Flow commands',
-      'swarm': 'Manage and execute swarms',
-      'init': 'Initialize new project',
-      'config': 'Manage configuration',
-      'memory': 'Manage memory and data',
-      'agents': 'Manage agents',
-      'benchmark': 'Run benchmarks',
-      'sparc': 'Execute SPARC mode commands'
+      swarm: 'Manage and execute swarms',
+      init: 'Initialize new project',
+      config: 'Manage configuration',
+      memory: 'Manage memory and data',
+      agents: 'Manage agents',
+      benchmark: 'Run benchmarks',
+      sparc: 'Execute SPARC mode commands'
     };
 
     return descriptions[command] || 'No description available';
@@ -170,7 +188,7 @@ export class CommandHandler {
    */
   showCommandHelp(command) {
     const helpText = {
-      'help': `
+      help: `
 Usage: help [command]
 Show help information for all commands or a specific command.
 
@@ -178,11 +196,11 @@ Examples:
   help              - Show all commands
   help claude-flow  - Show help for claude-flow command`,
 
-      'clear': `
+      clear: `
 Usage: clear
 Clear the console output. You can also use Ctrl+L.`,
 
-      'connect': `
+      connect: `
 Usage: connect [url] [token]
 Connect to Claude Code server.
 
@@ -210,7 +228,7 @@ Examples:
   claude-flow status
   claude-flow modes`,
 
-      'swarm': `
+      swarm: `
 Usage: swarm <action> [options]
 Manage and execute swarms.
 
@@ -332,7 +350,9 @@ Examples:
 
       if (tools && tools.length > 0) {
         tools.forEach(tool => {
-          this.terminal.writeLine(`  ${tool.name.padEnd(20)} - ${tool.description || 'No description'}`);
+          this.terminal.writeLine(
+            `  ${tool.name.padEnd(20)} - ${tool.description || 'No description'}`
+          );
         });
       } else {
         this.terminal.writeWarning('No tools available');
@@ -624,8 +644,18 @@ Examples:
 
     if (args.length === 0) {
       this.terminal.writeInfo('Available SPARC modes:');
-      const modes = ['coder', 'architect', 'analyst', 'researcher', 'reviewer',
-        'tester', 'debugger', 'documenter', 'optimizer', 'designer'];
+      const modes = [
+        'coder',
+        'architect',
+        'analyst',
+        'researcher',
+        'reviewer',
+        'tester',
+        'debugger',
+        'documenter',
+        'optimizer',
+        'designer'
+      ];
       modes.forEach(mode => {
         this.terminal.writeLine(`  ${mode}`);
       });
@@ -724,57 +754,57 @@ Examples:
       let toolArgs = {};
 
       switch (toolName) {
-      case 'system/health':
-        toolArgs = { detailed: args.includes('--detailed') };
-        break;
+        case 'system/health':
+          toolArgs = { detailed: args.includes('--detailed') };
+          break;
 
-      case 'memory/manage':
-        toolArgs = {
-          operation: args[0] || 'list',
-          key: args[1],
-          value: args.slice(2).join(' ')
-        };
-        break;
+        case 'memory/manage':
+          toolArgs = {
+            operation: args[0] || 'list',
+            key: args[1],
+            value: args.slice(2).join(' ')
+          };
+          break;
 
-      case 'agents/manage':
-        toolArgs = {
-          action: args[0] || 'list',
-          agentType: args[1],
-          agentId: args[1]
-        };
-        break;
+        case 'agents/manage':
+          toolArgs = {
+            action: args[0] || 'list',
+            agentType: args[1],
+            agentId: args[1]
+          };
+          break;
 
-      case 'swarm/orchestrate':
-        toolArgs = {
-          action: args[0] || 'status',
-          args: args.slice(1)
-        };
-        break;
+        case 'swarm/orchestrate':
+          toolArgs = {
+            action: args[0] || 'status',
+            args: args.slice(1)
+          };
+          break;
 
-      case 'sparc/execute':
-        toolArgs = {
-          mode: args[0] || 'coder',
-          task: args.slice(1).join(' ') || 'General task execution',
-          options: {}
-        };
-        break;
+        case 'sparc/execute':
+          toolArgs = {
+            mode: args[0] || 'coder',
+            task: args.slice(1).join(' ') || 'General task execution',
+            options: {}
+          };
+          break;
 
-      case 'benchmark/run':
-        toolArgs = {
-          suite: args[0] || 'default',
-          iterations: parseInt(args[1]) || 10
-        };
-        break;
+        case 'benchmark/run':
+          toolArgs = {
+            suite: args[0] || 'default',
+            iterations: parseInt(args[1]) || 10
+          };
+          break;
 
-      case 'claude-flow/execute':
-        toolArgs = {
-          command: args[0] || 'status',
-          args: args.slice(1)
-        };
-        break;
+        case 'claude-flow/execute':
+          toolArgs = {
+            command: args[0] || 'status',
+            args: args.slice(1)
+          };
+          break;
 
-      default:
-        toolArgs = { args };
+        default:
+          toolArgs = { args };
       }
 
       const result = await this.wsClient.sendRequest('tools/call', {

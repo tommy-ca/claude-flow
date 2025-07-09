@@ -6,12 +6,7 @@ import { getErrorMessage, hasAgentId } from '../utils/type-guards.js';
 import { EventEmitter } from 'node:events';
 import type { ILogger } from '../core/logger.js';
 import type { IEventBus } from '../core/event-bus.js';
-import type { 
-  SwarmEvent, 
-  EventType, 
-  AgentId, 
-  CommunicationStrategy 
-} from '../swarm/types.js';
+import type { SwarmEvent, EventType, AgentId, CommunicationStrategy } from '../swarm/types.js';
 import { generateId } from '../utils/helpers.js';
 
 export interface MessageBusConfig {
@@ -242,11 +237,7 @@ export class MessageBus extends EventEmitter {
   private metrics: MessageBusMetrics;
   private metricsInterval?: NodeJS.Timeout;
 
-  constructor(
-    config: Partial<MessageBusConfig>,
-    logger: ILogger,
-    eventBus: IEventBus
-  ) {
+  constructor(config: Partial<MessageBusConfig>, logger: ILogger, eventBus: IEventBus) {
     super();
     this.logger = logger;
     this.eventBus = eventBus;
@@ -279,27 +270,27 @@ export class MessageBus extends EventEmitter {
   }
 
   private setupEventHandlers(): void {
-    this.eventBus.on('agent:connected', (data) => {
+    this.eventBus.on('agent:connected', data => {
       if (hasAgentId(data)) {
         this.handleAgentConnected(data.agentId);
       }
     });
 
-    this.eventBus.on('agent:disconnected', (data) => {
+    this.eventBus.on('agent:disconnected', data => {
       if (hasAgentId(data)) {
         this.handleAgentDisconnected(data.agentId);
       }
     });
 
-    this.deliveryManager.on('delivery:success', (data) => {
+    this.deliveryManager.on('delivery:success', data => {
       this.handleDeliverySuccess(data);
     });
 
-    this.deliveryManager.on('delivery:failure', (data) => {
+    this.deliveryManager.on('delivery:failure', data => {
       this.handleDeliveryFailure(data);
     });
 
-    this.retryManager.on('retry:exhausted', (data) => {
+    this.retryManager.on('retry:exhausted', data => {
       this.handleRetryExhausted(data);
     });
   }
@@ -366,9 +357,9 @@ export class MessageBus extends EventEmitter {
   ): Promise<string> {
     const messageId = generateId('msg');
     const now = new Date();
-    
+
     const receiversArray = Array.isArray(receivers) ? receivers : [receivers];
-    
+
     const message: Message = {
       id: messageId,
       type,
@@ -429,9 +420,9 @@ export class MessageBus extends EventEmitter {
       ttl?: number;
     } = {}
   ): Promise<string> {
-    const channel = options.channel ? 
-      this.channels.get(options.channel) : 
-      this.getDefaultBroadcastChannel();
+    const channel = options.channel
+      ? this.channels.get(options.channel)
+      : this.getDefaultBroadcastChannel();
 
     if (!channel) {
       throw new Error('No broadcast channel available');
@@ -462,7 +453,7 @@ export class MessageBus extends EventEmitter {
     } = {}
   ): Promise<string> {
     const subscriptionId = generateId('sub');
-    
+
     const subscription: TopicSubscription = {
       id: subscriptionId,
       topic,
@@ -538,7 +529,7 @@ export class MessageBus extends EventEmitter {
     config: Partial<ChannelConfig> = {}
   ): Promise<string> {
     const channelId = generateId('channel');
-    
+
     const channel: MessageChannel = {
       id: channelId,
       name,
@@ -639,7 +630,7 @@ export class MessageBus extends EventEmitter {
     config: Partial<QueueConfig> = {}
   ): Promise<string> {
     const queueId = generateId('queue');
-    
+
     const queue: MessageQueue = {
       id: queueId,
       name,
@@ -729,7 +720,7 @@ export class MessageBus extends EventEmitter {
 
     for (let i = 0; i < queue.messages.length; i++) {
       const msg = queue.messages[i];
-      
+
       // Check if message matches subscriber filter
       if (subscriber.filter && !this.matchesFilter(msg, subscriber.filter)) {
         continue;
@@ -770,7 +761,7 @@ export class MessageBus extends EventEmitter {
   private async routeMessage(message: Message, preferredChannel?: string): Promise<void> {
     // Apply routing rules
     const route = await this.router.calculateRoute(message, preferredChannel);
-    
+
     // Update message route
     message.metadata.route = [...(message.metadata.route || []), ...route.hops];
 
@@ -784,10 +775,9 @@ export class MessageBus extends EventEmitter {
     try {
       await this.deliveryManager.deliver(message, target);
       this.metrics.recordDeliverySuccess(message);
-      
     } catch (error) {
       this.metrics.recordDeliveryFailure(message);
-      
+
       // Handle delivery failure based on reliability level
       if (message.reliability !== 'best-effort') {
         await this.retryManager.scheduleRetry(message, target, error);
@@ -799,7 +789,9 @@ export class MessageBus extends EventEmitter {
 
   private validateMessage(message: Message): void {
     if (message.metadata.size > this.config.maxMessageSize) {
-      throw new Error(`Message size ${message.metadata.size} exceeds limit ${this.config.maxMessageSize}`);
+      throw new Error(
+        `Message size ${message.metadata.size} exceeds limit ${this.config.maxMessageSize}`
+      );
     }
 
     if (message.expiresAt && message.expiresAt <= new Date()) {
@@ -849,7 +841,7 @@ export class MessageBus extends EventEmitter {
 
   private canJoinChannel(channel: MessageChannel, agentId: AgentId): boolean {
     const acl = channel.config.accessControl;
-    
+
     // Check banned list
     if (acl.bannedAgents.some(banned => banned.id === agentId.id)) {
       return false;
@@ -873,24 +865,32 @@ export class MessageBus extends EventEmitter {
   private getFieldValue(message: Message, field: string): any {
     const parts = field.split('.');
     let value: any = message;
-    
+
     for (const part of parts) {
       value = value?.[part];
     }
-    
+
     return value;
   }
 
   private evaluateCondition(fieldValue: any, operator: string, compareValue: any): boolean {
     switch (operator) {
-      case 'eq': return fieldValue === compareValue;
-      case 'ne': return fieldValue !== compareValue;
-      case 'gt': return fieldValue > compareValue;
-      case 'lt': return fieldValue < compareValue;
-      case 'contains': return String(fieldValue).includes(String(compareValue));
-      case 'matches': return new RegExp(compareValue).test(String(fieldValue));
-      case 'in': return Array.isArray(compareValue) && compareValue.includes(fieldValue);
-      default: return false;
+      case 'eq':
+        return fieldValue === compareValue;
+      case 'ne':
+        return fieldValue !== compareValue;
+      case 'gt':
+        return fieldValue > compareValue;
+      case 'lt':
+        return fieldValue < compareValue;
+      case 'contains':
+        return String(fieldValue).includes(String(compareValue));
+      case 'matches':
+        return new RegExp(compareValue).test(String(fieldValue));
+      case 'in':
+        return Array.isArray(compareValue) && compareValue.includes(fieldValue);
+      default:
+        return false;
     }
   }
 
@@ -914,9 +914,9 @@ export class MessageBus extends EventEmitter {
   }
 
   private insertByPriority(messages: Message[], message: Message): void {
-    const priorityOrder = { 'critical': 0, 'high': 1, 'normal': 2, 'low': 3 };
+    const priorityOrder = { critical: 0, high: 1, normal: 2, low: 3 };
     const messagePriority = priorityOrder[message.priority];
-    
+
     let insertIndex = messages.length;
     for (let i = 0; i < messages.length; i++) {
       const currentPriority = priorityOrder[messages[i].priority];
@@ -925,13 +925,13 @@ export class MessageBus extends EventEmitter {
         break;
       }
     }
-    
+
     messages.splice(insertIndex, 0, message);
   }
 
   private insertByTimestamp(messages: Message[], message: Message): void {
     const targetTime = message.expiresAt || message.timestamp;
-    
+
     let insertIndex = messages.length;
     for (let i = 0; i < messages.length; i++) {
       const currentTime = messages[i].expiresAt || messages[i].timestamp;
@@ -940,7 +940,7 @@ export class MessageBus extends EventEmitter {
         break;
       }
     }
-    
+
     messages.splice(insertIndex, 0, message);
   }
 
@@ -952,14 +952,17 @@ export class MessageBus extends EventEmitter {
         for (let i = 0; i < subscriber.prefetchCount; i++) {
           const message = await this.dequeueMessage(queue.id, subscriber.id);
           if (!message) break;
-          
+
           await this.deliverMessageToSubscriber(message, subscriber);
         }
       }
     }
   }
 
-  private async deliverMessageToSubscriber(message: Message, subscriber: QueueSubscriber): Promise<void> {
+  private async deliverMessageToSubscriber(
+    message: Message,
+    subscriber: QueueSubscriber
+  ): Promise<void> {
     try {
       // Deliver message to subscriber
       this.emit('message:delivered', {
@@ -971,7 +974,6 @@ export class MessageBus extends EventEmitter {
       if (subscriber.ackMode === 'auto') {
         await this.acknowledgeMessage(message.id, subscriber.agent);
       }
-
     } catch (error) {
       this.logger.error('Failed to deliver message to subscriber', {
         messageId: message.id,
@@ -989,7 +991,7 @@ export class MessageBus extends EventEmitter {
 
     if (receivedAcks === requiredAcks) {
       this.emit('message:fully-acknowledged', { message });
-      
+
       // Clean up acknowledgments
       message.receivers.forEach(receiver => {
         this.acknowledgments.delete(`${message.id}:${receiver.id}`);
@@ -1020,8 +1022,7 @@ export class MessageBus extends EventEmitter {
   }
 
   private getDefaultBroadcastChannel(): MessageChannel | undefined {
-    return Array.from(this.channels.values())
-      .find(channel => channel.type === 'broadcast');
+    return Array.from(this.channels.values()).find(channel => channel.type === 'broadcast');
   }
 
   private createChannelStatistics(): ChannelStatistics {
@@ -1089,7 +1090,7 @@ export class MessageBus extends EventEmitter {
 
   private handleAgentDisconnected(agentId: AgentId): void {
     this.logger.info('Agent disconnected from message bus', { agentId: agentId.id });
-    
+
     // Remove from all channels
     for (const channel of this.channels.values()) {
       channel.participants = channel.participants.filter(p => p.id !== agentId.id);
@@ -1123,13 +1124,16 @@ export class MessageBus extends EventEmitter {
     this.sendToDeadLetterQueue('system-dlq', data.message, 'retry_exhausted');
   }
 
-  private async sendToDeadLetterQueue(queueId: string, message: Message, reason: string): Promise<void> {
+  private async sendToDeadLetterQueue(
+    queueId: string,
+    message: Message,
+    reason: string
+  ): Promise<void> {
     try {
       message.metadata.deadLetterReason = reason;
       message.metadata.deadLetterTimestamp = new Date();
-      
+
       await this.enqueueMessage(queueId, message);
-      
     } catch (error) {
       this.logger.error('Failed to send message to dead letter queue', {
         messageId: message.id,
@@ -1249,7 +1253,10 @@ interface RouteResult {
 }
 
 class MessageRouter {
-  constructor(private config: MessageBusConfig, private logger: ILogger) {}
+  constructor(
+    private config: MessageBusConfig,
+    private logger: ILogger
+  ) {}
 
   async initialize(): Promise<void> {
     this.logger.debug('Message router initialized');
@@ -1281,7 +1288,10 @@ class MessageRouter {
 }
 
 class DeliveryManager extends EventEmitter {
-  constructor(private config: MessageBusConfig, private logger: ILogger) {
+  constructor(
+    private config: MessageBusConfig,
+    private logger: ILogger
+  ) {
     super();
   }
 
@@ -1310,7 +1320,10 @@ class RetryManager extends EventEmitter {
   private retryQueue: Array<{ message: Message; target: DeliveryTarget; attempts: number }> = [];
   private retryInterval?: NodeJS.Timeout;
 
-  constructor(private config: MessageBusConfig, private logger: ILogger) {
+  constructor(
+    private config: MessageBusConfig,
+    private logger: ILogger
+  ) {
     super();
   }
 
@@ -1327,8 +1340,8 @@ class RetryManager extends EventEmitter {
   }
 
   async scheduleRetry(message: Message, target: DeliveryTarget, error: any): Promise<void> {
-    const existingEntry = this.retryQueue.find(entry =>
-      entry.message.id === message.id && entry.target.id === target.id
+    const existingEntry = this.retryQueue.find(
+      entry => entry.message.id === message.id && entry.target.id === target.id
     );
 
     if (existingEntry) {
@@ -1340,7 +1353,7 @@ class RetryManager extends EventEmitter {
     this.logger.debug('Retry scheduled', {
       messageId: message.id,
       target: target.id,
-      error: (error instanceof Error ? error.message : String(error))
+      error: error instanceof Error ? error.message : String(error)
     });
   }
 
@@ -1370,16 +1383,15 @@ class RetryManager extends EventEmitter {
             messageId: entry.message.id,
             attempt: entry.attempts
           });
-          
+
           // Remove from retry queue on success
           this.retryQueue = this.retryQueue.filter(r => r !== entry);
-          
         } catch (error) {
           // Keep in retry queue for next attempt
           this.logger.warn('Retry attempt failed', {
             messageId: entry.message.id,
             attempt: entry.attempts,
-            error: (error instanceof Error ? error.message : String(error))
+            error: error instanceof Error ? error.message : String(error)
           });
         }
       }
@@ -1411,7 +1423,7 @@ class MessageBusMetrics {
     this.messagesDelivered++;
     const latency = Date.now() - message.timestamp.getTime();
     this.deliveryLatencies.push(latency);
-    
+
     // Keep only last 1000 latencies
     if (this.deliveryLatencies.length > 1000) {
       this.deliveryLatencies.shift();
@@ -1423,8 +1435,10 @@ class MessageBusMetrics {
   }
 
   getMetrics(): any {
-    const avgLatency = this.deliveryLatencies.length > 0 ?
-      this.deliveryLatencies.reduce((sum, lat) => sum + lat, 0) / this.deliveryLatencies.length : 0;
+    const avgLatency =
+      this.deliveryLatencies.length > 0
+        ? this.deliveryLatencies.reduce((sum, lat) => sum + lat, 0) / this.deliveryLatencies.length
+        : 0;
 
     return {
       messagesSent: this.messagesSent,

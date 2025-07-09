@@ -9,29 +9,25 @@ export { ResourceManager } from './resources.js';
 export { MessageRouter } from './messaging.js';
 
 // Advanced scheduling
-export { 
+export {
   AdvancedTaskScheduler,
   type SchedulingStrategy,
   type SchedulingContext,
   CapabilitySchedulingStrategy,
   RoundRobinSchedulingStrategy,
   LeastLoadedSchedulingStrategy,
-  AffinitySchedulingStrategy,
+  AffinitySchedulingStrategy
 } from './advanced-scheduler.js';
 
 // Work stealing
 export {
   WorkStealingCoordinator,
   type WorkStealingConfig,
-  type AgentWorkload,
+  type AgentWorkload
 } from './work-stealing.js';
 
 // Dependency management
-export {
-  DependencyGraph,
-  type DependencyNode,
-  type DependencyPath,
-} from './dependency-graph.js';
+export { DependencyGraph, type DependencyNode, type DependencyPath } from './dependency-graph.js';
 
 // Circuit breakers
 export {
@@ -39,7 +35,7 @@ export {
   CircuitBreakerManager,
   CircuitState,
   type CircuitBreakerConfig,
-  type CircuitBreakerMetrics,
+  type CircuitBreakerMetrics
 } from './circuit-breaker.js';
 
 // Conflict resolution
@@ -52,12 +48,12 @@ export {
   type ResourceConflict,
   type TaskConflict,
   type ConflictResolution,
-  type ConflictResolutionStrategy,
+  type ConflictResolutionStrategy
 } from './conflict-resolution.js';
 
 // Metrics and monitoring
 export {
   CoordinationMetricsCollector,
   type CoordinationMetrics,
-  type MetricsSample,
+  type MetricsSample
 } from './metrics.js';

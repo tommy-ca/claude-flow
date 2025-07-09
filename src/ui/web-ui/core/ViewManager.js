@@ -35,7 +35,6 @@ export class ViewManager {
       this.eventBus.emit('view-manager:initialized');
 
       console.log('🖼️ View Manager initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize View Manager:', error);
       throw error;
@@ -47,8 +46,8 @@ export class ViewManager {
    */
   setupDOMContainer() {
     // Create main container
-    this.containerElement = document.getElementById('claude-flow-ui') ||
-                           document.createElement('div');
+    this.containerElement =
+      document.getElementById('claude-flow-ui') || document.createElement('div');
 
     if (!this.containerElement.id) {
       this.containerElement.id = 'claude-flow-ui';
@@ -64,7 +63,9 @@ export class ViewManager {
    * Add CSS styles for view transitions
    */
   addTransitionStyles() {
-    if (document.getElementById('claude-flow-styles')) {return;}
+    if (document.getElementById('claude-flow-styles')) {
+      return;
+    }
 
     const styles = document.createElement('style');
     styles.id = 'claude-flow-styles';
@@ -246,7 +247,6 @@ export class ViewManager {
       this.eventBus.emit('view:loaded', { viewId, params });
 
       console.log(`🖼️ Loaded view: ${viewConfig.name}`);
-
     } catch (error) {
       this.eventBus.emit('view:error', { viewId, error: error.message, params });
       throw error;
@@ -276,7 +276,6 @@ export class ViewManager {
         instance: ViewComponent.instance || null,
         loadTime: Date.now()
       });
-
     } catch (error) {
       console.error(`❌ Failed to load view component ${viewId}:`, error);
       throw error;
@@ -331,7 +330,7 @@ export class ViewManager {
     return {
       element,
       instance,
-      render: (params) => instance.render(params),
+      render: params => instance.render(params),
       destroy: () => instance.destroy?.()
     };
   }
@@ -352,7 +351,7 @@ export class ViewManager {
     return {
       element: null,
       instance,
-      render: (params) => instance.render(params),
+      render: params => instance.render(params),
       destroy: () => instance.destroy?.()
     };
   }
@@ -375,7 +374,7 @@ export class ViewManager {
    */
   createBasicView(container, viewConfig) {
     return {
-      render: (params) => {
+      render: params => {
         container.innerHTML = `
           <div class="claude-flow-loading">
             <div>
@@ -399,7 +398,7 @@ export class ViewManager {
    */
   createBasicTerminalView(viewConfig) {
     return {
-      render: (params) => {
+      render: params => {
         console.log(`\n📄 ${viewConfig.name}`);
         console.log(`   ${viewConfig.description}`);
         if (viewConfig.toolCount) {
@@ -444,7 +443,9 @@ export class ViewManager {
    * Hide current view with transition
    */
   async hideCurrentView() {
-    if (!this.currentView) {return;}
+    if (!this.currentView) {
+      return;
+    }
 
     const loadedView = this.loadedViews.get(this.currentView);
     if (loadedView?.element) {
@@ -505,7 +506,9 @@ export class ViewManager {
    */
   async unloadView(viewId) {
     const loadedView = this.loadedViews.get(viewId);
-    if (!loadedView) {return;}
+    if (!loadedView) {
+      return;
+    }
 
     // Call destroy method if available
     if (loadedView.component.destroy) {
@@ -574,15 +577,15 @@ export class ViewManager {
    * Setup event handlers
    */
   setupEventHandlers() {
-    this.eventBus.on('view:reload', async (data) => {
+    this.eventBus.on('view:reload', async data => {
       await this.refreshView(data.viewId);
     });
 
-    this.eventBus.on('view:unload', async (data) => {
+    this.eventBus.on('view:unload', async data => {
       await this.unloadView(data.viewId);
     });
 
-    this.eventBus.on('view:preload', async (data) => {
+    this.eventBus.on('view:preload', async data => {
       await this.preloadView(data.viewId);
     });
   }

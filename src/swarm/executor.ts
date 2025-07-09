@@ -11,7 +11,11 @@ import * as os from 'node:os';
 import { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';
 import {
-  TaskDefinition, AgentState, TaskResult, SwarmEvent, EventType,
+  TaskDefinition,
+  AgentState,
+  TaskResult,
+  SwarmEvent,
+  EventType,
   SWARM_CONSTANTS
 } from './types.js';
 
@@ -74,7 +78,7 @@ export class TaskExecutor extends EventEmitter {
 
   constructor(config: Partial<ExecutionConfig> = {}) {
     super();
-    
+
     this.config = this.mergeWithDefaults(config);
     this.logger = new Logger(
       { level: this.config.logLevel || 'info', format: 'text', destination: 'console' },
@@ -82,31 +86,32 @@ export class TaskExecutor extends EventEmitter {
     );
     this.resourceMonitor = new ResourceMonitor();
     this.processPool = new ProcessPool(this.config);
-    
+
     this.setupEventHandlers();
   }
 
   async initialize(): Promise<void> {
     this.logger.info('Initializing task executor...');
-    
+
     await this.resourceMonitor.initialize();
     await this.processPool.initialize();
-    
+
     this.logger.info('Task executor initialized');
   }
 
   async shutdown(): Promise<void> {
     this.logger.info('Shutting down task executor...');
-    
+
     // Stop all active executions
-    const stopPromises = Array.from(this.activeExecutions.values())
-      .map(session => this.stopExecution(session.id, 'Executor shutdown'));
-    
+    const stopPromises = Array.from(this.activeExecutions.values()).map(session =>
+      this.stopExecution(session.id, 'Executor shutdown')
+    );
+
     await Promise.allSettled(stopPromises);
-    
+
     await this.processPool.shutdown();
     await this.resourceMonitor.shutdown();
-    
+
     this.logger.info('Task executor shut down');
   }
 
@@ -118,7 +123,7 @@ export class TaskExecutor extends EventEmitter {
     const sessionId = generateId('execution');
     const context = await this.createExecutionContext(task, agent);
     const config = { ...this.config, ...options };
-    
+
     this.logger.info('Starting task execution', {
       sessionId,
       taskId: task.id.id,
@@ -126,27 +131,20 @@ export class TaskExecutor extends EventEmitter {
       timeout: config.timeoutMs
     });
 
-    const session = new ExecutionSession(
-      sessionId,
-      task,
-      agent,
-      context,
-      config,
-      this.logger
-    );
+    const session = new ExecutionSession(sessionId, task, agent, context, config, this.logger);
 
     this.activeExecutions.set(sessionId, session);
 
     try {
       // Setup monitoring
       this.resourceMonitor.startMonitoring(sessionId, context.resources);
-      
+
       // Execute with timeout protection
       const result = await this.executeWithTimeout(session);
-      
+
       // Cleanup
       await this.cleanupExecution(session);
-      
+
       this.logger.info('Task execution completed', {
         sessionId,
         success: result.success,
@@ -154,17 +152,15 @@ export class TaskExecutor extends EventEmitter {
       });
 
       return result;
-
     } catch (error) {
       this.logger.error('Task execution failed', {
         sessionId,
-        error: (error instanceof Error ? error.message : String(error)),
+        error: error instanceof Error ? error.message : String(error),
         stack: error.stack
       });
 
       await this.cleanupExecution(session);
       throw error;
-
     } finally {
       this.activeExecutions.delete(sessionId);
       this.resourceMonitor.stopMonitoring(sessionId);
@@ -178,7 +174,7 @@ export class TaskExecutor extends EventEmitter {
     }
 
     this.logger.info('Stopping execution', { sessionId, reason });
-    
+
     try {
       await session.stop(reason);
     } catch (error) {
@@ -193,7 +189,7 @@ export class TaskExecutor extends EventEmitter {
   ): Promise<ExecutionResult> {
     const sessionId = generateId('claude-execution');
     const context = await this.createExecutionContext(task, agent);
-    
+
     this.logger.info('Starting Claude task execution', {
       sessionId,
       taskId: task.id.id,
@@ -201,17 +197,11 @@ export class TaskExecutor extends EventEmitter {
     });
 
     try {
-      return await this.executeClaudeWithTimeout(
-        sessionId,
-        task,
-        agent,
-        context,
-        claudeOptions
-      );
+      return await this.executeClaudeWithTimeout(sessionId, task, agent, context, claudeOptions);
     } catch (error) {
       this.logger.error('Claude task execution failed', {
         sessionId,
-        error: (error instanceof Error ? error.message : String(error))
+        error: error instanceof Error ? error.message : String(error)
       });
       throw error;
     }
@@ -239,13 +229,14 @@ export class TaskExecutor extends EventEmitter {
           sessionId: session.id,
           timeout: session.config.timeoutMs
         });
-        
+
         session.stop('Timeout').then(() => {
           reject(new Error(`Execution timed out after ${session.config.timeoutMs}ms`));
         });
       }, session.config.timeoutMs);
 
-      session.execute()
+      session
+        .execute()
         .then(result => {
           clearTimeout(timeout);
           resolve(result);
@@ -269,7 +260,7 @@ export class TaskExecutor extends EventEmitter {
 
     // Build Claude command
     const command = this.buildClaudeCommand(task, agent, options);
-    
+
     // Create execution environment
     const env = {
       ...process.env,
@@ -302,10 +293,10 @@ export class TaskExecutor extends EventEmitter {
             pid: process.pid,
             timeout
           });
-          
+
           // Graceful shutdown first
           process.kill('SIGTERM');
-          
+
           // Force kill after grace period
           setTimeout(() => {
             if (process && !process.killed) {
@@ -341,7 +332,7 @@ export class TaskExecutor extends EventEmitter {
           process.stdout.on('data', (data: Buffer) => {
             const chunk = data.toString();
             outputBuffer += chunk;
-            
+
             if (this.config.streamOutput) {
               this.emit('output', {
                 sessionId,
@@ -356,7 +347,7 @@ export class TaskExecutor extends EventEmitter {
           process.stderr.on('data', (data: Buffer) => {
             const chunk = data.toString();
             errorBuffer += chunk;
-            
+
             if (this.config.streamOutput) {
               this.emit('output', {
                 sessionId,
@@ -370,10 +361,10 @@ export class TaskExecutor extends EventEmitter {
         // Handle process completion
         process.on('close', async (code: number | null, signal: string | null) => {
           clearTimeout(timeoutHandle);
-          
+
           const duration = Date.now() - startTime;
           const exitCode = code || 0;
-          
+
           this.logger.info('Claude process completed', {
             sessionId,
             exitCode,
@@ -385,10 +376,10 @@ export class TaskExecutor extends EventEmitter {
           try {
             // Collect resource usage
             const resourceUsage = await this.collectResourceUsage(sessionId);
-            
+
             // Collect artifacts
             const artifacts = await this.collectArtifacts(context);
-            
+
             const result: ExecutionResult = {
               success: !isTimeout && exitCode === 0,
               output: outputBuffer,
@@ -409,11 +400,12 @@ export class TaskExecutor extends EventEmitter {
             if (isTimeout) {
               reject(new Error(`Claude execution timed out after ${timeout}ms`));
             } else if (exitCode !== 0) {
-              reject(new Error(`Claude execution failed with exit code ${exitCode}: ${errorBuffer}`));
+              reject(
+                new Error(`Claude execution failed with exit code ${exitCode}: ${errorBuffer}`)
+              );
             } else {
               resolve(result);
             }
-
           } catch (error) {
             reject(error);
           }
@@ -424,7 +416,7 @@ export class TaskExecutor extends EventEmitter {
           clearTimeout(timeoutHandle);
           this.logger.error('Claude process error', {
             sessionId,
-            error: (error instanceof Error ? error.message : String(error))
+            error: error instanceof Error ? error.message : String(error)
           });
           reject(error);
         });
@@ -439,7 +431,6 @@ export class TaskExecutor extends EventEmitter {
         if (options.detached) {
           process.unref();
         }
-
       } catch (error) {
         clearTimeout(timeoutHandle);
         reject(error);
@@ -457,7 +448,7 @@ export class TaskExecutor extends EventEmitter {
 
     // Build prompt
     const prompt = this.buildClaudePrompt(task, agent);
-    
+
     if (options.useStdin) {
       // Send prompt via stdin
       input = prompt;
@@ -586,8 +577,12 @@ export class TaskExecutor extends EventEmitter {
     sections.push('');
 
     sections.push('CONSTRAINTS:');
-    sections.push(`- Maximum execution time: ${task.constraints.timeoutAfter || SWARM_CONSTANTS.DEFAULT_TASK_TIMEOUT}ms`);
-    sections.push(`- Maximum retries: ${task.constraints.maxRetries || SWARM_CONSTANTS.MAX_RETRIES}`);
+    sections.push(
+      `- Maximum execution time: ${task.constraints.timeoutAfter || SWARM_CONSTANTS.DEFAULT_TASK_TIMEOUT}ms`
+    );
+    sections.push(
+      `- Maximum retries: ${task.constraints.maxRetries || SWARM_CONSTANTS.MAX_RETRIES}`
+    );
     if (task.constraints.deadline) {
       sections.push(`- Deadline: ${task.constraints.deadline.toISOString()}`);
     }
@@ -653,7 +648,7 @@ export class TaskExecutor extends EventEmitter {
     } catch (error) {
       this.logger.warn('Error during execution cleanup', {
         sessionId: session.id,
-        error: (error instanceof Error ? error.message : String(error))
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   }
@@ -673,11 +668,10 @@ export class TaskExecutor extends EventEmitter {
       // Check for specific artifact types
       artifacts.logs = await this.collectLogs(context.logDirectory);
       artifacts.outputs = await this.collectOutputs(context.workingDirectory);
-
     } catch (error) {
       this.logger.warn('Error collecting artifacts', {
         workingDir: context.workingDirectory,
-        error: (error instanceof Error ? error.message : String(error))
+        error: error instanceof Error ? error.message : String(error)
       });
     }
 
@@ -730,7 +724,7 @@ export class TaskExecutor extends EventEmitter {
     try {
       // Look for common output files
       const outputFiles = ['output.json', 'result.json', 'response.json'];
-      
+
       for (const fileName of outputFiles) {
         const filePath = path.join(workingDir, fileName);
         try {
@@ -740,7 +734,6 @@ export class TaskExecutor extends EventEmitter {
           // File doesn't exist or isn't valid JSON
         }
       }
-
     } catch (error) {
       // Working directory might not exist
     }
@@ -750,12 +743,18 @@ export class TaskExecutor extends EventEmitter {
 
   private getPriorityNumber(priority: string): number {
     switch (priority) {
-      case 'critical': return 0;
-      case 'high': return 1;
-      case 'normal': return 2;
-      case 'low': return 3;
-      case 'background': return 4;
-      default: return 2;
+      case 'critical':
+        return 0;
+      case 'high':
+        return 1;
+      case 'normal':
+        return 2;
+      case 'low':
+        return 3;
+      case 'background':
+        return 4;
+      default:
+        return 2;
     }
   }
 
@@ -785,7 +784,7 @@ export class TaskExecutor extends EventEmitter {
     // Handle resource limit violations
     this.resourceMonitor.on('limit-violation', (data: any) => {
       this.logger.warn('Resource limit violation', data);
-      
+
       const session = this.activeExecutions.get(data.sessionId);
       if (session) {
         session.stop('Resource limit violation').catch(error => {
@@ -835,14 +834,14 @@ class ExecutionSession {
 
   async execute(): Promise<ExecutionResult> {
     this.startTime = new Date();
-    
+
     // Implementation would go here for actual task execution
     // This is a placeholder that simulates execution
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     this.endTime = new Date();
-    
+
     return {
       success: true,
       output: 'Task completed successfully',
@@ -866,10 +865,10 @@ class ExecutionSession {
 
   async stop(reason: string): Promise<void> {
     this.logger.info('Stopping execution session', { sessionId: this.id, reason });
-    
+
     if (this.process) {
       this.process.kill('SIGTERM');
-      
+
       // Force kill after timeout
       setTimeout(() => {
         if (this.process && !this.process.killed) {
@@ -909,7 +908,7 @@ class ResourceMonitor extends EventEmitter {
     const timer = setInterval(() => {
       this.checkResources(sessionId, limits);
     }, 1000);
-    
+
     this.activeMonitors.set(sessionId, timer);
   }
 
@@ -922,13 +921,15 @@ class ResourceMonitor extends EventEmitter {
   }
 
   getUsage(sessionId: string): ResourceUsage {
-    return this.usage.get(sessionId) || {
-      cpuTime: 0,
-      maxMemory: 0,
-      diskIO: 0,
-      networkIO: 0,
-      fileHandles: 0
-    };
+    return (
+      this.usage.get(sessionId) || {
+        cpuTime: 0,
+        maxMemory: 0,
+        diskIO: 0,
+        networkIO: 0,
+        fileHandles: 0
+      }
+    );
   }
 
   getUtilization(): Record<string, number> {

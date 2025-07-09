@@ -1,4 +1,12 @@
-import { printSuccess, printError, printWarning, trainNeuralModel, updateNeuralPattern, callRuvSwarmMCP, checkRuvSwarmAvailable } from '../utils.js';
+import {
+  printSuccess,
+  printError,
+  printWarning,
+  trainNeuralModel,
+  updateNeuralPattern,
+  callRuvSwarmMCP,
+  checkRuvSwarmAvailable
+} from '../utils.js';
 
 export async function trainingAction(subArgs, flags) {
   const subcommand = subArgs[0];
@@ -11,18 +19,18 @@ export async function trainingAction(subArgs, flags) {
 
   try {
     switch (subcommand) {
-    case 'neural-train':
-      await neuralTrainCommand(subArgs, flags);
-      break;
-    case 'pattern-learn':
-      await patternLearnCommand(subArgs, flags);
-      break;
-    case 'model-update':
-      await modelUpdateCommand(subArgs, flags);
-      break;
-    default:
-      printError(`Unknown training command: ${subcommand}`);
-      showTrainingHelp();
+      case 'neural-train':
+        await neuralTrainCommand(subArgs, flags);
+        break;
+      case 'pattern-learn':
+        await patternLearnCommand(subArgs, flags);
+        break;
+      case 'model-update':
+        await modelUpdateCommand(subArgs, flags);
+        break;
+      default:
+        printError(`Unknown training command: ${subcommand}`);
+        showTrainingHelp();
     }
   } catch (err) {
     printError(`Training command failed: ${err.message}`);
@@ -58,7 +66,9 @@ async function neuralTrainCommand(subArgs, flags) {
     if (trainingResult.success) {
       if (trainingResult.real_training) {
         printSuccess('✅ REAL neural training completed successfully with ruv-swarm WASM!');
-        console.log(`🧠 WASM-accelerated training: ${trainingResult.wasm_accelerated ? 'ENABLED' : 'DISABLED'}`);
+        console.log(
+          `🧠 WASM-accelerated training: ${trainingResult.wasm_accelerated ? 'ENABLED' : 'DISABLED'}`
+        );
       } else {
         printSuccess('✅ Neural training completed successfully');
       }
@@ -68,7 +78,8 @@ async function neuralTrainCommand(subArgs, flags) {
       console.log(`  • Epochs completed: ${trainingResult.epochs || epochs}`);
 
       // Use real accuracy from ruv-swarm
-      const accuracy = trainingResult.accuracy || (0.65 + (Math.min(epochs/100, 1) * 0.3) + Math.random() * 0.05);
+      const accuracy =
+        trainingResult.accuracy || 0.65 + Math.min(epochs / 100, 1) * 0.3 + Math.random() * 0.05;
       console.log(`  • Final accuracy: ${(accuracy * 100).toFixed(1)}%`);
 
       // Use real training time from ruv-swarm
@@ -76,7 +87,9 @@ async function neuralTrainCommand(subArgs, flags) {
       console.log(`  • Training time: ${trainingTime.toFixed(1)}s`);
 
       console.log(`  • Model ID: ${trainingResult.modelId || `${model}_${Date.now()}`}`);
-      console.log(`  • Improvement rate: ${trainingResult.improvement_rate || (epochs > 100 ? 'converged' : 'improving')}`);
+      console.log(
+        `  • Improvement rate: ${trainingResult.improvement_rate || (epochs > 100 ? 'converged' : 'improving')}`
+      );
 
       if (trainingResult.real_training) {
         console.log('  • WASM acceleration: ✅ ENABLED');
@@ -86,7 +99,9 @@ async function neuralTrainCommand(subArgs, flags) {
         }
       }
 
-      console.log(`💾 Training results saved: ${trainingResult.outputPath || 'Neural memory updated'}`);
+      console.log(
+        `💾 Training results saved: ${trainingResult.outputPath || 'Neural memory updated'}`
+      );
     } else {
       printError(`Neural training failed: ${trainingResult.error || 'Unknown error'}`);
     }
@@ -136,8 +151,12 @@ async function patternLearnCommand(subArgs, flags) {
       console.log(`🧠 Updated neural patterns for operation: ${operation}`);
       console.log(`📈 Outcome '${outcome}' integrated into prediction model`);
       console.log('🔍 Pattern insights:');
-      console.log(`  • Confidence: ${patternResult.confidence || patternResult.pattern_confidence || '87.3%'}`);
-      console.log(`  • Similar patterns: ${patternResult.similarPatterns || patternResult.patterns_detected?.coordination_patterns || '5'}`);
+      console.log(
+        `  • Confidence: ${patternResult.confidence || patternResult.pattern_confidence || '87.3%'}`
+      );
+      console.log(
+        `  • Similar patterns: ${patternResult.similarPatterns || patternResult.patterns_detected?.coordination_patterns || '5'}`
+      );
       console.log(`  • Prediction improvement: ${patternResult.improvement || '+12.5%'}`);
       console.log(`  • Processing time: ${patternResult.processing_time_ms || '85'}ms`);
     } else {
@@ -185,9 +204,15 @@ async function modelUpdateCommand(subArgs, flags) {
       console.log('📊 Update metrics:');
 
       const adaptationResults = updateResult.adaptation_results || {};
-      console.log(`  • Model version: ${adaptationResults.model_version || updateResult.modelVersion || 'v1.0'}`);
-      console.log(`  • Performance delta: ${adaptationResults.performance_delta || updateResult.performanceDelta || '+5%'}`);
-      console.log(`  • Training samples: ${adaptationResults.training_samples || updateResult.trainingSamples || '250'}`);
+      console.log(
+        `  • Model version: ${adaptationResults.model_version || updateResult.modelVersion || 'v1.0'}`
+      );
+      console.log(
+        `  • Performance delta: ${adaptationResults.performance_delta || updateResult.performanceDelta || '+5%'}`
+      );
+      console.log(
+        `  • Training samples: ${adaptationResults.training_samples || updateResult.trainingSamples || '250'}`
+      );
       console.log(`  • Accuracy improvement: ${adaptationResults.accuracy_improvement || '+3%'}`);
       console.log(`  • Confidence increase: ${adaptationResults.confidence_increase || '+8%'}`);
 

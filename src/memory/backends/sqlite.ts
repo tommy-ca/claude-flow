@@ -19,7 +19,7 @@ export class SQLiteBackend implements IMemoryBackend {
 
   constructor(
     private dbPath: string,
-    private logger: ILogger,
+    private logger: ILogger
   ) {}
 
   async initialize(): Promise<void> {
@@ -83,7 +83,7 @@ export class SQLiteBackend implements IMemoryBackend {
       JSON.stringify(entry.tags),
       entry.version,
       entry.parentId || null,
-      entry.metadata ? JSON.stringify(entry.metadata) : null,
+      entry.metadata ? JSON.stringify(entry.metadata) : null
     ];
 
     try {
@@ -100,11 +100,11 @@ export class SQLiteBackend implements IMemoryBackend {
     }
 
     const sql = 'SELECT * FROM memory_entries WHERE id = ?';
-    
+
     try {
       const stmt = this.db.prepare(sql);
       const row = stmt.get(id);
-      
+
       if (!row) {
         return undefined;
       }
@@ -126,7 +126,7 @@ export class SQLiteBackend implements IMemoryBackend {
     }
 
     const sql = 'DELETE FROM memory_entries WHERE id = ?';
-    
+
     try {
       const stmt = this.db.prepare(sql);
       stmt.run(id);
@@ -194,7 +194,7 @@ export class SQLiteBackend implements IMemoryBackend {
     if (query.offset) {
       // SQLite requires LIMIT when using OFFSET
       if (!query.limit) {
-        sql += ' LIMIT -1';  // -1 means no limit in SQLite
+        sql += ' LIMIT -1'; // -1 means no limit in SQLite
       }
       sql += ' OFFSET ?';
       params.push(query.offset);
@@ -215,7 +215,7 @@ export class SQLiteBackend implements IMemoryBackend {
     }
 
     const sql = 'SELECT * FROM memory_entries ORDER BY timestamp DESC';
-    
+
     try {
       const stmt = this.db.prepare(sql);
       const rows = stmt.all();
@@ -225,15 +225,15 @@ export class SQLiteBackend implements IMemoryBackend {
     }
   }
 
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     if (!this.db) {
       return {
         healthy: false,
-        error: 'Database not initialized',
+        error: 'Database not initialized'
       };
     }
 
@@ -242,23 +242,29 @@ export class SQLiteBackend implements IMemoryBackend {
       this.db.prepare('SELECT 1').get();
 
       // Get metrics
-      const countResult = this.db.prepare('SELECT COUNT(*) as count FROM memory_entries').get() as any;
+      const countResult = this.db
+        .prepare('SELECT COUNT(*) as count FROM memory_entries')
+        .get() as any;
       const entryCount = countResult.count;
 
-      const sizeResult = this.db.prepare('SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()').get() as any;
+      const sizeResult = this.db
+        .prepare(
+          'SELECT page_count * page_size as size FROM pragma_page_count(), pragma_page_size()'
+        )
+        .get() as any;
       const dbSize = sizeResult.size;
 
       return {
         healthy: true,
         metrics: {
           entryCount,
-          dbSizeBytes: dbSize,
-        },
+          dbSizeBytes: dbSize
+        }
       };
     } catch (error) {
       return {
         healthy: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -291,7 +297,7 @@ export class SQLiteBackend implements IMemoryBackend {
       'CREATE INDEX IF NOT EXISTS idx_session_id ON memory_entries(session_id)',
       'CREATE INDEX IF NOT EXISTS idx_type ON memory_entries(type)',
       'CREATE INDEX IF NOT EXISTS idx_timestamp ON memory_entries(timestamp)',
-      'CREATE INDEX IF NOT EXISTS idx_parent_id ON memory_entries(parent_id)',
+      'CREATE INDEX IF NOT EXISTS idx_parent_id ON memory_entries(parent_id)'
     ];
 
     for (const sql of indexes) {
@@ -309,18 +315,17 @@ export class SQLiteBackend implements IMemoryBackend {
       context: JSON.parse(row.context as string),
       timestamp: new Date(row.timestamp as string),
       tags: JSON.parse(row.tags as string),
-      version: row.version as number,
+      version: row.version as number
     };
-    
+
     if (row.parent_id) {
       entry.parentId = row.parent_id as string;
     }
-    
+
     if (row.metadata) {
       entry.metadata = JSON.parse(row.metadata as string);
     }
-    
+
     return entry;
   }
 }
-

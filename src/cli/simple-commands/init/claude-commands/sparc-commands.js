@@ -3,9 +3,10 @@
 // Create SPARC mode slash command
 export function createSparcSlashCommand(mode) {
   // Extract the full description without truncation
-  const fullDescription = mode.roleDefinition.length > 100
-    ? `${mode.roleDefinition.substring(0, 97)}...`
-    : mode.roleDefinition;
+  const fullDescription =
+    mode.roleDefinition.length > 100
+      ? `${mode.roleDefinition.substring(0, 97)}...`
+      : mode.roleDefinition;
 
   return `---
 name: sparc-${mode.slug}
@@ -21,14 +22,20 @@ ${mode.roleDefinition}
 ${mode.customInstructions}
 
 ## Available Tools
-${Array.isArray(mode.groups) ? mode.groups.map(g => {
-    if (typeof g === 'string') {
-      return `- **${g}**: ${getToolDescription(g)}`;
-    } else if (Array.isArray(g)) {
-      return `- **${g[0]}**: ${g[1]?.description || getToolDescription(g[0])} ${g[1]?.fileRegex ? `(Files matching: ${g[1].fileRegex})` : ''}`;
-    }
-    return `- ${JSON.stringify(g)}`;
-  }).join('\n') : 'None'}
+${
+  Array.isArray(mode.groups)
+    ? mode.groups
+        .map(g => {
+          if (typeof g === 'string') {
+            return `- **${g}**: ${getToolDescription(g)}`;
+          } else if (Array.isArray(g)) {
+            return `- **${g[0]}**: ${g[1]?.description || getToolDescription(g[0])} ${g[1]?.fileRegex ? `(Files matching: ${g[1].fileRegex})` : ''}`;
+          }
+          return `- ${JSON.stringify(g)}`;
+        })
+        .join('\n')
+    : 'None'
+}
 
 ## Usage
 
@@ -67,11 +74,11 @@ To use this SPARC mode, you can:
 // Helper function to get tool descriptions
 function getToolDescription(tool) {
   const toolDescriptions = {
-    'read': 'File reading and viewing',
-    'edit': 'File modification and creation',
-    'browser': 'Web browsing capabilities',
-    'mcp': 'Model Context Protocol tools',
-    'command': 'Command execution'
+    read: 'File reading and viewing',
+    edit: 'File modification and creation',
+    browser: 'Web browsing capabilities',
+    mcp: 'Model Context Protocol tools',
+    command: 'Command execution'
   };
   return toolDescriptions[tool] || 'Tool access';
 }
@@ -79,23 +86,23 @@ function getToolDescription(tool) {
 // Helper function to get example tasks
 function getExampleTask(slug) {
   const examples = {
-    'architect': 'design microservices architecture',
-    'code': 'implement REST API endpoints',
-    'tdd': 'create user authentication tests',
-    'debug': 'fix memory leak in service',
+    architect: 'design microservices architecture',
+    code: 'implement REST API endpoints',
+    tdd: 'create user authentication tests',
+    debug: 'fix memory leak in service',
     'security-review': 'audit API security',
     'docs-writer': 'create API documentation',
-    'integration': 'connect payment service',
+    integration: 'connect payment service',
     'post-deployment-monitoring-mode': 'monitor production metrics',
     'refinement-optimization-mode': 'optimize database queries',
-    'devops': 'deploy to AWS Lambda',
+    devops: 'deploy to AWS Lambda',
     'supabase-admin': 'create user authentication schema',
     'spec-pseudocode': 'define payment flow requirements',
-    'mcp': 'integrate with external API',
-    'swarm': 'build complete feature with tests',
-    'sparc': 'orchestrate authentication system',
-    'ask': 'help me choose the right mode',
-    'tutorial': 'guide me through SPARC methodology'
+    mcp: 'integrate with external API',
+    swarm: 'build complete feature with tests',
+    sparc: 'orchestrate authentication system',
+    ask: 'help me choose the right mode',
+    tutorial: 'guide me through SPARC methodology'
   };
   return examples[slug] || 'implement feature';
 }
@@ -106,7 +113,9 @@ export function createMainSparcCommand(modes) {
 
   // Find the sparc orchestrator mode for its full description
   const sparcMode = modes.find(m => m.slug === 'sparc');
-  const sparcDescription = sparcMode ? sparcMode.roleDefinition : 'SPARC orchestrator for complex workflows';
+  const sparcDescription = sparcMode
+    ? sparcMode.roleDefinition
+    : 'SPARC orchestrator for complex workflows';
   const sparcInstructions = sparcMode ? sparcMode.customInstructions : '';
 
   return `---

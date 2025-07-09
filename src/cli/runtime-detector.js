@@ -62,7 +62,7 @@ export class UnifiedTerminalIO {
     if (runtime === 'deno') {
       await stdout.write(data);
     } else {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         stdout.write(data, resolve);
       });
     }
@@ -75,9 +75,9 @@ export class UnifiedTerminalIO {
     if (runtime === 'deno') {
       return await stdin.read(buffer);
     } else {
-      return new Promise((resolve) => {
+      return new Promise(resolve => {
         let data = '';
-        const onData = (chunk) => {
+        const onData = chunk => {
           data += chunk;
           if (data.includes('\n')) {
             stdin.removeListener('data', onData);
@@ -183,9 +183,14 @@ export const RuntimeDetector = {
       };
     } else {
       return {
-        os: process.platform === 'win32' ? 'windows' :
-          process.platform === 'darwin' ? 'darwin' :
-            process.platform === 'linux' ? 'linux' : process.platform,
+        os:
+          process.platform === 'win32'
+            ? 'windows'
+            : process.platform === 'darwin'
+              ? 'darwin'
+              : process.platform === 'linux'
+                ? 'linux'
+                : process.platform,
         arch: process.arch,
         target: `${process.arch}-${process.platform}`
       };
@@ -195,25 +200,25 @@ export const RuntimeDetector = {
   /**
    * Check if API is available
    */
-  hasAPI: (apiName) => {
+  hasAPI: apiName => {
     switch (apiName) {
-    case 'deno':
-      return isDeno;
-    case 'node':
-      return isNode;
-    case 'fs':
-      return runtime === 'node' || (runtime === 'deno' && typeof Deno.readFile !== 'undefined');
-    case 'process':
-      return runtime === 'node' || (runtime === 'deno' && typeof Deno.run !== 'undefined');
-    default:
-      return false;
+      case 'deno':
+        return isDeno;
+      case 'node':
+        return isNode;
+      case 'fs':
+        return runtime === 'node' || (runtime === 'deno' && typeof Deno.readFile !== 'undefined');
+      case 'process':
+        return runtime === 'node' || (runtime === 'deno' && typeof Deno.run !== 'undefined');
+      default:
+        return false;
     }
   },
 
   /**
    * Get environment variables
    */
-  getEnv: (key) => {
+  getEnv: key => {
     if (runtime === 'deno') {
       return Deno.env.get(key);
     } else {
@@ -268,7 +273,7 @@ export const createCompatibilityLayer = () => {
     },
 
     // Feature detection
-    hasFeature: (feature) => {
+    hasFeature: feature => {
       return RuntimeDetector.hasAPI(feature);
     }
   };

@@ -39,7 +39,6 @@ export class SwarmWebUIIntegration {
 
       // Update UI with swarm status
       this.updateSwarmStatus();
-
     } catch (err) {
       this.ui.addLog('error', `Failed to initialize swarm: ${err.message}`);
     }
@@ -82,10 +81,22 @@ export class SwarmWebUIIntegration {
 
     // Create mock tasks
     const mockTasks = [
-      { description: 'Analyze system requirements', priority: 'high', assignedTo: 'agent-researcher-0' },
-      { description: 'Implement authentication module', priority: 'high', assignedTo: 'agent-coder-1' },
+      {
+        description: 'Analyze system requirements',
+        priority: 'high',
+        assignedTo: 'agent-researcher-0'
+      },
+      {
+        description: 'Implement authentication module',
+        priority: 'high',
+        assignedTo: 'agent-coder-1'
+      },
       { description: 'Performance analysis', priority: 'medium', assignedTo: 'agent-analyst-2' },
-      { description: 'Coordinate deployment', priority: 'medium', assignedTo: 'agent-coordinator-3' },
+      {
+        description: 'Coordinate deployment',
+        priority: 'medium',
+        assignedTo: 'agent-coordinator-3'
+      },
       { description: 'Run integration tests', priority: 'low', assignedTo: 'agent-tester-4' }
     ];
 
@@ -121,7 +132,9 @@ export class SwarmWebUIIntegration {
    * Update swarm status in UI
    */
   updateSwarmStatus() {
-    if (!this.swarmActive) {return;}
+    if (!this.swarmActive) {
+      return;
+    }
 
     // Update UI agents with swarm data
     this.ui.agents = Array.from(this.agents.values());
@@ -246,13 +259,19 @@ export class SwarmWebUIIntegration {
     }
 
     const totalAgents = this.agents.size;
-    const activeAgents = Array.from(this.agents.values()).filter(a => a.status === 'working').length;
+    const activeAgents = Array.from(this.agents.values()).filter(
+      a => a.status === 'working'
+    ).length;
     const idleAgents = totalAgents - activeAgents;
 
     const totalTasks = this.tasks.size;
-    const completedTasks = Array.from(this.tasks.values()).filter(t => t.status === 'completed').length;
+    const completedTasks = Array.from(this.tasks.values()).filter(
+      t => t.status === 'completed'
+    ).length;
     const pendingTasks = Array.from(this.tasks.values()).filter(t => t.status === 'pending').length;
-    const inProgressTasks = Array.from(this.tasks.values()).filter(t => t.status === 'in_progress').length;
+    const inProgressTasks = Array.from(this.tasks.values()).filter(
+      t => t.status === 'in_progress'
+    ).length;
 
     return {
       swarmId: this.swarmId,
@@ -275,7 +294,9 @@ export class SwarmWebUIIntegration {
    * Stop swarm
    */
   async stopSwarm() {
-    if (!this.swarmActive) {return;}
+    if (!this.swarmActive) {
+      return;
+    }
 
     this.swarmActive = false;
     this.agents.clear();

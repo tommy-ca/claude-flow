@@ -26,14 +26,14 @@ export class CircularBufferImpl<T> implements CircularBuffer<T> {
 
   push(item: T): void {
     this.buffer[this.tail] = item;
-    
+
     if (this.count < this.capacity) {
       this.count++;
     } else {
       // Buffer is full, move head forward
       this.head = (this.head + 1) % this.capacity;
     }
-    
+
     this.tail = (this.tail + 1) % this.capacity;
   }
 
@@ -41,21 +41,21 @@ export class CircularBufferImpl<T> implements CircularBuffer<T> {
     if (index < 0 || index >= this.count) {
       return undefined;
     }
-    
+
     const actualIndex = (this.head + index) % this.capacity;
     return this.buffer[actualIndex];
   }
 
   toArray(): T[] {
     const result: T[] = [];
-    
+
     for (let i = 0; i < this.count; i++) {
       const item = this.get(i);
       if (item !== undefined) {
         result.push(item);
       }
     }
-    
+
     return result;
   }
 
@@ -71,7 +71,7 @@ export class CircularBufferImpl<T> implements CircularBuffer<T> {
   }
 
   // Additional utility methods
-  
+
   /**
    * Get the most recent item
    */
@@ -150,7 +150,7 @@ export class CircularBufferImpl<T> implements CircularBuffer<T> {
    */
   every(predicate: (item: T) => boolean): boolean {
     if (this.count === 0) return true;
-    
+
     for (const item of this) {
       if (!predicate(item)) {
         return false;

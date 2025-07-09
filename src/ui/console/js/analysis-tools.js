@@ -38,7 +38,7 @@ class AnalysisTools {
         this.updateConnectionStatus('connected');
       };
 
-      this.ws.onmessage = (event) => {
+      this.ws.onmessage = event => {
         const data = JSON.parse(event.data);
         this.handleWebSocketData(data);
       };
@@ -50,7 +50,7 @@ class AnalysisTools {
         setTimeout(() => this.setupWebSocket(), 5000);
       };
 
-      this.ws.onerror = (error) => {
+      this.ws.onerror = error => {
         console.error('Analysis WebSocket error:', error);
         this.updateConnectionStatus('error');
       };
@@ -63,14 +63,14 @@ class AnalysisTools {
   setupEventListeners() {
     // Tab switching
     document.querySelectorAll('.analysis-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
+      tab.addEventListener('click', e => {
         this.switchTab(e.target.dataset.tab);
       });
     });
 
     // Export buttons
     document.querySelectorAll('.export-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         const format = e.target.dataset.format;
         const type = e.target.dataset.type;
         this.exportData(type, format);
@@ -79,7 +79,7 @@ class AnalysisTools {
 
     // Tool buttons
     document.querySelectorAll('.tool-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         const tool = e.target.dataset.tool;
         this.executeTool(tool);
       });
@@ -87,7 +87,7 @@ class AnalysisTools {
 
     // Refresh buttons
     document.querySelectorAll('.refresh-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         const section = e.target.dataset.section;
         this.refreshSection(section);
       });
@@ -100,19 +100,22 @@ class AnalysisTools {
       type: 'line',
       data: {
         labels: [],
-        datasets: [{
-          label: 'Response Time (ms)',
-          data: [],
-          borderColor: '#3b82f6',
-          backgroundColor: 'rgba(59, 130, 246, 0.1)',
-          tension: 0.4
-        }, {
-          label: 'Throughput (req/s)',
-          data: [],
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.1)',
-          tension: 0.4
-        }]
+        datasets: [
+          {
+            label: 'Response Time (ms)',
+            data: [],
+            borderColor: '#3b82f6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4
+          },
+          {
+            label: 'Throughput (req/s)',
+            data: [],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            tension: 0.4
+          }
+        ]
       },
       options: {
         responsive: true,
@@ -146,11 +149,13 @@ class AnalysisTools {
       type: 'doughnut',
       data: {
         labels: ['Input Tokens', 'Output Tokens', 'Cached Tokens'],
-        datasets: [{
-          data: [0, 0, 0],
-          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
-          borderWidth: 2
-        }]
+        datasets: [
+          {
+            data: [0, 0, 0],
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b'],
+            borderWidth: 2
+          }
+        ]
       },
       options: {
         responsive: true,
@@ -168,16 +173,18 @@ class AnalysisTools {
       type: 'radar',
       data: {
         labels: ['CPU', 'Memory', 'Disk', 'Network', 'API', 'Database'],
-        datasets: [{
-          label: 'Health Score',
-          data: [100, 100, 100, 100, 100, 100],
-          borderColor: '#10b981',
-          backgroundColor: 'rgba(16, 185, 129, 0.2)',
-          pointBackgroundColor: '#10b981',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: '#10b981'
-        }]
+        datasets: [
+          {
+            label: 'Health Score',
+            data: [100, 100, 100, 100, 100, 100],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+            pointBackgroundColor: '#10b981',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: '#10b981'
+          }
+        ]
       },
       options: {
         responsive: true,
@@ -196,13 +203,15 @@ class AnalysisTools {
       type: 'bar',
       data: {
         labels: ['1m', '5m', '15m', '30m', '1h', '24h'],
-        datasets: [{
-          label: 'Average Load',
-          data: [0, 0, 0, 0, 0, 0],
-          backgroundColor: 'rgba(59, 130, 246, 0.7)',
-          borderColor: '#3b82f6',
-          borderWidth: 1
-        }]
+        datasets: [
+          {
+            label: 'Average Load',
+            data: [0, 0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(59, 130, 246, 0.7)',
+            borderColor: '#3b82f6',
+            borderWidth: 1
+          }
+        ]
       },
       options: {
         responsive: true,
@@ -231,26 +240,28 @@ class AnalysisTools {
 
   requestMetricsUpdate() {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(JSON.stringify({
-        type: 'request_metrics',
-        timestamp: Date.now()
-      }));
+      this.ws.send(
+        JSON.stringify({
+          type: 'request_metrics',
+          timestamp: Date.now()
+        })
+      );
     }
   }
 
   handleWebSocketData(data) {
     switch (data.type) {
-    case 'metrics_update':
-      this.updateMetrics(data.payload);
-      break;
-    case 'alert':
-      this.handleAlert(data.payload);
-      break;
-    case 'health_status':
-      this.updateHealthStatus(data.payload);
-      break;
-    default:
-      console.log('Unknown WebSocket message type:', data.type);
+      case 'metrics_update':
+        this.updateMetrics(data.payload);
+        break;
+      case 'alert':
+        this.handleAlert(data.payload);
+        break;
+      case 'health_status':
+        this.updateHealthStatus(data.payload);
+        break;
+      default:
+        console.log('Unknown WebSocket message type:', data.type);
     }
   }
 
@@ -371,8 +382,13 @@ class AnalysisTools {
     const healthSection = document.getElementById('health-status');
     if (healthSection && metrics.health) {
       const overallHealth = Math.round(
-        (metrics.health.cpu + metrics.health.memory + metrics.health.disk +
-                 metrics.health.network + metrics.health.api + metrics.health.database) / 6
+        (metrics.health.cpu +
+          metrics.health.memory +
+          metrics.health.disk +
+          metrics.health.network +
+          metrics.health.api +
+          metrics.health.database) /
+          6
       );
 
       healthSection.innerHTML = `
@@ -413,9 +429,15 @@ class AnalysisTools {
   }
 
   getHealthClass(score) {
-    if (score >= 90) {return 'health-excellent';}
-    if (score >= 70) {return 'health-good';}
-    if (score >= 50) {return 'health-warning';}
+    if (score >= 90) {
+      return 'health-excellent';
+    }
+    if (score >= 70) {
+      return 'health-good';
+    }
+    if (score >= 50) {
+      return 'health-warning';
+    }
     return 'health-critical';
   }
 
@@ -480,47 +502,47 @@ class AnalysisTools {
 
     try {
       switch (toolName) {
-      case 'performance_report':
-        await this.performanceReport();
-        break;
-      case 'bottleneck_analyze':
-        await this.bottleneckAnalyze();
-        break;
-      case 'token_usage':
-        await this.tokenUsage();
-        break;
-      case 'benchmark_run':
-        await this.benchmarkRun();
-        break;
-      case 'metrics_collect':
-        await this.metricsCollect();
-        break;
-      case 'trend_analysis':
-        await this.trendAnalysis();
-        break;
-      case 'cost_analysis':
-        await this.costAnalysis();
-        break;
-      case 'quality_assess':
-        await this.qualityAssess();
-        break;
-      case 'error_analysis':
-        await this.errorAnalysis();
-        break;
-      case 'usage_stats':
-        await this.usageStats();
-        break;
-      case 'health_check':
-        await this.healthCheck();
-        break;
-      case 'load_monitor':
-        await this.loadMonitor();
-        break;
-      case 'capacity_plan':
-        await this.capacityPlan();
-        break;
-      default:
-        console.warn('Unknown tool:', toolName);
+        case 'performance_report':
+          await this.performanceReport();
+          break;
+        case 'bottleneck_analyze':
+          await this.bottleneckAnalyze();
+          break;
+        case 'token_usage':
+          await this.tokenUsage();
+          break;
+        case 'benchmark_run':
+          await this.benchmarkRun();
+          break;
+        case 'metrics_collect':
+          await this.metricsCollect();
+          break;
+        case 'trend_analysis':
+          await this.trendAnalysis();
+          break;
+        case 'cost_analysis':
+          await this.costAnalysis();
+          break;
+        case 'quality_assess':
+          await this.qualityAssess();
+          break;
+        case 'error_analysis':
+          await this.errorAnalysis();
+          break;
+        case 'usage_stats':
+          await this.usageStats();
+          break;
+        case 'health_check':
+          await this.healthCheck();
+          break;
+        case 'load_monitor':
+          await this.loadMonitor();
+          break;
+        case 'capacity_plan':
+          await this.capacityPlan();
+          break;
+        default:
+          console.warn('Unknown tool:', toolName);
       }
     } catch (error) {
       console.error(`Error executing tool ${toolName}:`, error);
@@ -658,7 +680,7 @@ class AnalysisTools {
         inputTokens: 1200000,
         outputTokens: 950000,
         cachedTokens: 300000,
-        cost: 245.50,
+        cost: 245.5,
         efficiency: 85.2
       }
     };
@@ -667,7 +689,9 @@ class AnalysisTools {
 
   displayReport(containerId, report) {
     const container = document.getElementById(containerId);
-    if (!container) {return;}
+    if (!container) {
+      return;
+    }
 
     container.innerHTML = `
             <div class="report-summary">
@@ -705,19 +729,25 @@ class AnalysisTools {
 
   displayAnalysis(containerId, analysis) {
     const container = document.getElementById(containerId);
-    if (!container) {return;}
+    if (!container) {
+      return;
+    }
 
     container.innerHTML = `
             <div class="analysis-results">
                 <h3>Bottleneck Analysis</h3>
                 <div class="bottleneck-list">
-                    ${analysis.bottlenecks.map(bottleneck => `
+                    ${analysis.bottlenecks
+                      .map(
+                        bottleneck => `
                         <div class="bottleneck-item severity-${bottleneck.severity}">
                             <div class="bottleneck-component">${bottleneck.component}</div>
                             <div class="bottleneck-severity">${bottleneck.severity}</div>
                             <div class="bottleneck-impact">${bottleneck.impact}</div>
                         </div>
-                    `).join('')}
+                    `
+                      )
+                      .join('')}
                 </div>
                 <div class="analysis-recommendations">
                     <h4>Recommendations</h4>
@@ -731,7 +761,9 @@ class AnalysisTools {
 
   displayUsage(containerId, usage) {
     const container = document.getElementById(containerId);
-    if (!container) {return;}
+    if (!container) {
+      return;
+    }
 
     container.innerHTML = `
             <div class="usage-overview">
@@ -821,21 +853,21 @@ class AnalysisTools {
 
   refreshSection(section) {
     switch (section) {
-    case 'metrics':
-      this.requestMetricsUpdate();
-      break;
-    case 'charts':
-      Object.values(this.charts).forEach(chart => {
-        if (chart && chart.update) {
-          chart.update();
-        }
-      });
-      break;
-    case 'alerts':
-      document.getElementById('alerts-container').innerHTML = '';
-      break;
-    default:
-      console.warn('Unknown section:', section);
+      case 'metrics':
+        this.requestMetricsUpdate();
+        break;
+      case 'charts':
+        Object.values(this.charts).forEach(chart => {
+          if (chart && chart.update) {
+            chart.update();
+          }
+        });
+        break;
+      case 'alerts':
+        document.getElementById('alerts-container').innerHTML = '';
+        break;
+      default:
+        console.warn('Unknown section:', section);
     }
   }
 

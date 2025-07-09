@@ -59,7 +59,9 @@ class HookExecutionTracker {
     this.executions.set(key, count + 1);
 
     // Auto-reset after timeout
-    if (this.resetTimeout) {clearTimeout(this.resetTimeout);}
+    if (this.resetTimeout) {
+      clearTimeout(this.resetTimeout);
+    }
     this.resetTimeout = setTimeout(() => {
       this.executions.clear();
     }, HOOK_SAFETY_CONFIG.CIRCUIT_BREAKER_TIMEOUT);
@@ -144,11 +146,12 @@ export class HookCommandValidator {
     if (hookType === 'Stop' && this.isClaudeCommand(command)) {
       errors.push({
         type: 'CRITICAL_RECURSION_RISK',
-        message: '🚨 CRITICAL ERROR: Claude command detected in Stop hook!\n' +
-                'This creates an INFINITE LOOP that can cost THOUSANDS OF DOLLARS.\n' +
-                'Stop hooks that call "claude" commands bypass rate limits and\n' +
-                'can result in massive unexpected API charges.\n\n' +
-                'BLOCKED FOR SAFETY - Use alternative patterns instead.'
+        message:
+          '🚨 CRITICAL ERROR: Claude command detected in Stop hook!\n' +
+          'This creates an INFINITE LOOP that can cost THOUSANDS OF DOLLARS.\n' +
+          'Stop hooks that call "claude" commands bypass rate limits and\n' +
+          'can result in massive unexpected API charges.\n\n' +
+          'BLOCKED FOR SAFETY - Use alternative patterns instead.'
       });
     }
 
@@ -159,15 +162,17 @@ export class HookCommandValidator {
       if (depth >= HOOK_SAFETY_CONFIG.MAX_HOOK_DEPTH) {
         errors.push({
           type: 'HOOK_RECURSION_LIMIT',
-          message: `🚨 Hook recursion limit exceeded! (Depth: ${depth})\n` +
-                  `Hook type: ${context.type}\n` +
-                  'Blocking execution to prevent infinite loop.'
+          message:
+            `🚨 Hook recursion limit exceeded! (Depth: ${depth})\n` +
+            `Hook type: ${context.type}\n` +
+            'Blocking execution to prevent infinite loop.'
         });
       } else {
         warnings.push({
           type: 'POTENTIAL_RECURSION',
-          message: `⚠️  WARNING: Claude command in ${context.type} hook (depth: ${depth})\n` +
-                  'This could create recursion. Consider using --skip-hooks flag.'
+          message:
+            `⚠️  WARNING: Claude command in ${context.type} hook (depth: ${depth})\n` +
+            'This could create recursion. Consider using --skip-hooks flag.'
         });
       }
     }
@@ -176,8 +181,9 @@ export class HookCommandValidator {
     if (this.isDangerousPattern(command, hookType)) {
       warnings.push({
         type: 'DANGEROUS_PATTERN',
-        message: '⚠️  WARNING: Potentially dangerous hook pattern detected.\n' +
-                'Review the command and consider safer alternatives.'
+        message:
+          '⚠️  WARNING: Potentially dangerous hook pattern detected.\n' +
+          'Review the command and consider safer alternatives.'
       });
     }
 
@@ -187,11 +193,11 @@ export class HookCommandValidator {
   static isClaudeCommand(command) {
     // Match various forms of claude command invocation
     const claudePatterns = [
-      /\bclaude\b/,           // Direct claude command
-      /claude-code\b/,        // claude-code command
-      /npx\s+claude\b/,      // NPX claude
-      /\.\/claude\b/,        // Local claude wrapper
-      /claude\.exe\b/        // Windows executable
+      /\bclaude\b/, // Direct claude command
+      /claude-code\b/, // claude-code command
+      /npx\s+claude\b/, // NPX claude
+      /\.\/claude\b/, // Local claude wrapper
+      /claude\.exe\b/ // Windows executable
     ];
 
     return claudePatterns.some(pattern => pattern.test(command));
@@ -228,10 +234,10 @@ export class HookCircuitBreaker {
     if (hookType === 'Stop' && executionCount > HOOK_SAFETY_CONFIG.MAX_STOP_HOOK_EXECUTIONS) {
       throw new Error(
         '🚨 CIRCUIT BREAKER ACTIVATED!\n' +
-        `Stop hook has executed ${executionCount} times in this session.\n` +
-        'This indicates a potential infinite loop that could cost thousands of dollars.\n' +
-        'Execution blocked for financial protection.\n\n' +
-        'To reset: Use --reset-circuit-breaker flag or restart your session.'
+          `Stop hook has executed ${executionCount} times in this session.\n` +
+          'This indicates a potential infinite loop that could cost thousands of dollars.\n' +
+          'Execution blocked for financial protection.\n\n' +
+          'To reset: Use --reset-circuit-breaker flag or restart your session.'
       );
     }
 
@@ -239,8 +245,8 @@ export class HookCircuitBreaker {
     if (executionCount > 20) {
       throw new Error(
         `🚨 CIRCUIT BREAKER: ${hookType} hook executed ${executionCount} times!\n` +
-        'This is highly unusual and indicates a potential problem.\n' +
-        'Execution blocked to prevent system overload.'
+          'This is highly unusual and indicates a potential problem.\n' +
+          'Execution blocked to prevent system overload.'
       );
     }
 
@@ -442,7 +448,6 @@ export class SafeHookExecutor {
       const result = await this.executeCommand(command, options);
 
       return { success: true, result };
-
     } catch (err) {
       printError(`Hook execution failed: ${err.message}`);
       return { success: false, error: err.message };
@@ -471,16 +476,16 @@ export async function hookSafetyCommand(subArgs, flags) {
   const subcommand = subArgs[0];
 
   switch (subcommand) {
-  case 'validate':
-    return await validateConfigCommand(subArgs, flags);
-  case 'status':
-    return await statusCommand(subArgs, flags);
-  case 'reset':
-    return await resetCommand(subArgs, flags);
-  case 'safe-mode':
-    return await safeModeCommand(subArgs, flags);
-  default:
-    showHookSafetyHelp();
+    case 'validate':
+      return await validateConfigCommand(subArgs, flags);
+    case 'status':
+      return await statusCommand(subArgs, flags);
+    case 'reset':
+      return await resetCommand(subArgs, flags);
+    case 'safe-mode':
+      return await safeModeCommand(subArgs, flags);
+    default:
+      showHookSafetyHelp();
   }
 }
 

@@ -32,11 +32,20 @@ if (!fs.existsSync(TARGET_PROJECT)) {
 }
 
 // Check if it's a valid project (has package.json or similar)
-const projectFiles = ['package.json', 'tsconfig.json', 'deno.json', 'go.mod', 'Cargo.toml', 'setup.py'];
+const projectFiles = [
+  'package.json',
+  'tsconfig.json',
+  'deno.json',
+  'go.mod',
+  'Cargo.toml',
+  'setup.py'
+];
 const hasProjectFile = projectFiles.some(file => fs.existsSync(path.join(TARGET_PROJECT, file)));
 
 if (!hasProjectFile) {
-  console.warn('Warning: Target directory does not appear to be a project root (no package.json, etc.)');
+  console.warn(
+    'Warning: Target directory does not appear to be a project root (no package.json, etc.)'
+  );
   console.log('Continue anyway? (y/n)');
   // For automation, we'll continue
 }
@@ -65,7 +74,10 @@ for (const [dirName, dirInfo] of Object.entries(manifest.directories)) {
   if (dirInfo.createEmpty) {
     const readmePath = path.join(targetPath, 'README.md');
     if (!fs.existsSync(readmePath)) {
-      fs.writeFileSync(readmePath, `# ${dirName}\n\nThis directory will be populated during usage.\n`);
+      fs.writeFileSync(
+        readmePath,
+        `# ${dirName}\n\nThis directory will be populated during usage.\n`
+      );
     }
   }
 }

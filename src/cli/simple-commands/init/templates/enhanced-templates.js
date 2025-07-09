@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Load template files
-const loadTemplate = (filename) => {
+const loadTemplate = filename => {
   try {
     return readFileSync(join(__dirname, filename), 'utf8');
   } catch (error) {
@@ -42,9 +42,8 @@ export function createWrapperScript(type = 'unix') {
     }
   }
 
-  const filename = type === 'unix' ? 'claude-flow' :
-    type === 'windows' ? 'claude-flow.bat' :
-      'claude-flow.ps1';
+  const filename =
+    type === 'unix' ? 'claude-flow' : type === 'windows' ? 'claude-flow.bat' : 'claude-flow.ps1';
 
   const template = loadTemplate(filename);
   if (!template) {
@@ -972,7 +971,10 @@ npx claude-flow workflow export --name "deploy-api" --include-history
     }
   };
 
-  return docs[category]?.[command] || `# ${command}\n\nCommand documentation for ${command} in category ${category}.\n\nUsage:\n\`\`\`bash\nnpx claude-flow ${category} ${command} [options]\n\`\`\`\n`;
+  return (
+    docs[category]?.[command] ||
+    `# ${command}\n\nCommand documentation for ${command} in category ${category}.\n\nUsage:\n\`\`\`bash\nnpx claude-flow ${category} ${command} [options]\n\`\`\`\n`
+  );
 }
 
 // Command categories and their commands
@@ -1224,103 +1226,154 @@ See full documentation in \`.claude/commands/\`
 }
 
 function createEnhancedSettingsJsonFallback() {
-  return JSON.stringify({
-    env: {
-      CLAUDE_FLOW_AUTO_COMMIT: 'false',
-      CLAUDE_FLOW_AUTO_PUSH: 'false',
-      CLAUDE_FLOW_HOOKS_ENABLED: 'true',
-      CLAUDE_FLOW_TELEMETRY_ENABLED: 'true',
-      CLAUDE_FLOW_REMOTE_EXECUTION: 'true',
-      CLAUDE_FLOW_GITHUB_INTEGRATION: 'true'
-    },
-    permissions: {
-      allow: [
-        'Bash(npx claude-flow *)',
-        'Bash(npm run lint)',
-        'Bash(npm run test:*)',
-        'Bash(npm test *)',
-        'Bash(git status)',
-        'Bash(git diff *)',
-        'Bash(git log *)',
-        'Bash(git add *)',
-        'Bash(git commit *)',
-        'Bash(git push)',
-        'Bash(git config *)',
-        'Bash(gh *)',
-        'Bash(node *)',
-        'Bash(which *)',
-        'Bash(pwd)',
-        'Bash(ls *)'
-      ],
-      deny: [
-        'Bash(rm -rf /)',
-        'Bash(curl * | bash)',
-        'Bash(wget * | sh)',
-        'Bash(eval *)'
-      ]
-    },
-    hooks: {
-      preEditHook: {
-        command: 'npx',
-        args: ['claude-flow', 'hook', 'pre-edit', '--file', '${file}', '--auto-assign-agents', 'true', '--load-context', 'true'],
-        alwaysRun: false,
-        outputFormat: 'json'
+  return JSON.stringify(
+    {
+      env: {
+        CLAUDE_FLOW_AUTO_COMMIT: 'false',
+        CLAUDE_FLOW_AUTO_PUSH: 'false',
+        CLAUDE_FLOW_HOOKS_ENABLED: 'true',
+        CLAUDE_FLOW_TELEMETRY_ENABLED: 'true',
+        CLAUDE_FLOW_REMOTE_EXECUTION: 'true',
+        CLAUDE_FLOW_GITHUB_INTEGRATION: 'true'
       },
-      postEditHook: {
-        command: 'npx',
-        args: ['claude-flow', 'hook', 'post-edit', '--file', '${file}', '--format', 'true', '--update-memory', 'true', '--train-neural', 'true'],
-        alwaysRun: true,
-        outputFormat: 'json'
+      permissions: {
+        allow: [
+          'Bash(npx claude-flow *)',
+          'Bash(npm run lint)',
+          'Bash(npm run test:*)',
+          'Bash(npm test *)',
+          'Bash(git status)',
+          'Bash(git diff *)',
+          'Bash(git log *)',
+          'Bash(git add *)',
+          'Bash(git commit *)',
+          'Bash(git push)',
+          'Bash(git config *)',
+          'Bash(gh *)',
+          'Bash(node *)',
+          'Bash(which *)',
+          'Bash(pwd)',
+          'Bash(ls *)'
+        ],
+        deny: ['Bash(rm -rf /)', 'Bash(curl * | bash)', 'Bash(wget * | sh)', 'Bash(eval *)']
       },
-      preCommandHook: {
-        command: 'npx',
-        args: ['claude-flow', 'hook', 'pre-command', '--command', '${command}', '--validate-safety', 'true', '--prepare-resources', 'true'],
-        alwaysRun: false,
-        outputFormat: 'json'
-      },
-      postCommandHook: {
-        command: 'npx',
-        args: ['claude-flow', 'hook', 'post-command', '--command', '${command}', '--track-metrics', 'true', '--store-results', 'true'],
-        alwaysRun: false,
-        outputFormat: 'json'
-      },
-      sessionEndHook: {
-        command: 'npx',
-        args: ['claude-flow', 'hook', 'session-end', '--generate-summary', 'true', '--persist-state', 'true', '--export-metrics', 'true'],
-        alwaysRun: true,
-        outputFormat: 'json'
-      }
-    },
-    mcpServers: {
-      'claude-flow': {
-        command: 'npx',
-        args: ['claude-flow', 'mcp', 'start'],
-        env: {
-          CLAUDE_FLOW_HOOKS_ENABLED: 'true',
-          CLAUDE_FLOW_TELEMETRY_ENABLED: 'true',
-          CLAUDE_FLOW_REMOTE_READY: 'true',
-          CLAUDE_FLOW_GITHUB_INTEGRATION: 'true'
+      hooks: {
+        preEditHook: {
+          command: 'npx',
+          args: [
+            'claude-flow',
+            'hook',
+            'pre-edit',
+            '--file',
+            '${file}',
+            '--auto-assign-agents',
+            'true',
+            '--load-context',
+            'true'
+          ],
+          alwaysRun: false,
+          outputFormat: 'json'
+        },
+        postEditHook: {
+          command: 'npx',
+          args: [
+            'claude-flow',
+            'hook',
+            'post-edit',
+            '--file',
+            '${file}',
+            '--format',
+            'true',
+            '--update-memory',
+            'true',
+            '--train-neural',
+            'true'
+          ],
+          alwaysRun: true,
+          outputFormat: 'json'
+        },
+        preCommandHook: {
+          command: 'npx',
+          args: [
+            'claude-flow',
+            'hook',
+            'pre-command',
+            '--command',
+            '${command}',
+            '--validate-safety',
+            'true',
+            '--prepare-resources',
+            'true'
+          ],
+          alwaysRun: false,
+          outputFormat: 'json'
+        },
+        postCommandHook: {
+          command: 'npx',
+          args: [
+            'claude-flow',
+            'hook',
+            'post-command',
+            '--command',
+            '${command}',
+            '--track-metrics',
+            'true',
+            '--store-results',
+            'true'
+          ],
+          alwaysRun: false,
+          outputFormat: 'json'
+        },
+        sessionEndHook: {
+          command: 'npx',
+          args: [
+            'claude-flow',
+            'hook',
+            'session-end',
+            '--generate-summary',
+            'true',
+            '--persist-state',
+            'true',
+            '--export-metrics',
+            'true'
+          ],
+          alwaysRun: true,
+          outputFormat: 'json'
         }
+      },
+      mcpServers: {
+        'claude-flow': {
+          command: 'npx',
+          args: ['claude-flow', 'mcp', 'start'],
+          env: {
+            CLAUDE_FLOW_HOOKS_ENABLED: 'true',
+            CLAUDE_FLOW_TELEMETRY_ENABLED: 'true',
+            CLAUDE_FLOW_REMOTE_READY: 'true',
+            CLAUDE_FLOW_GITHUB_INTEGRATION: 'true'
+          }
+        }
+      },
+      includeCoAuthoredBy: true,
+      features: {
+        autoTopologySelection: true,
+        parallelExecution: true,
+        neuralTraining: true,
+        bottleneckAnalysis: true,
+        smartAutoSpawning: true,
+        selfHealingWorkflows: true,
+        crossSessionMemory: true,
+        githubIntegration: true
+      },
+      performance: {
+        maxAgents: 10,
+        defaultTopology: 'hierarchical',
+        executionStrategy: 'parallel',
+        tokenOptimization: true,
+        cacheEnabled: true,
+        telemetryLevel: 'detailed'
       }
     },
-    includeCoAuthoredBy: true,
-    features: {
-      autoTopologySelection: true,
-      parallelExecution: true,
-      neuralTraining: true,
-      bottleneckAnalysis: true,
-      smartAutoSpawning: true,
-      selfHealingWorkflows: true,
-      crossSessionMemory: true,
-      githubIntegration: true
-    },
-    performance: {
-      maxAgents: 10,
-      defaultTopology: 'hierarchical',
-      executionStrategy: 'parallel',
-      tokenOptimization: true,
-      cacheEnabled: true,
-      telemetryLevel: 'detailed'
-    }
-  }, null, 2);
+    null,
+    2
+  );
 }

@@ -27,10 +27,12 @@ export default class DAAView {
    * Initialize the DAA view
    */
   async initialize() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     // Get component library from event bus
-    this.eventBus.emit('component-library:get', (library) => {
+    this.eventBus.emit('component-library:get', library => {
       this.componentLibrary = library;
     });
 
@@ -792,34 +794,33 @@ Example:
 
       // Handle specific tool actions
       switch (toolName) {
-      case 'daa_agent_create':
-        await this.handleAgentCreate(params);
-        break;
-      case 'daa_capability_match':
-        await this.handleCapabilityMatch(params);
-        break;
-      case 'daa_resource_alloc':
-        await this.handleResourceAllocation(params);
-        break;
-      case 'daa_lifecycle_manage':
-        await this.handleLifecycleManagement(params);
-        break;
-      case 'daa_communication':
-        await this.handleCommunication(params);
-        break;
-      case 'daa_consensus':
-        await this.handleConsensus(params);
-        break;
-      case 'daa_fault_tolerance':
-        await this.handleFaultTolerance(params);
-        break;
-      case 'daa_optimization':
-        await this.handleOptimization(params);
-        break;
-      default:
-        console.log(`Tool ${toolName} executed`);
+        case 'daa_agent_create':
+          await this.handleAgentCreate(params);
+          break;
+        case 'daa_capability_match':
+          await this.handleCapabilityMatch(params);
+          break;
+        case 'daa_resource_alloc':
+          await this.handleResourceAllocation(params);
+          break;
+        case 'daa_lifecycle_manage':
+          await this.handleLifecycleManagement(params);
+          break;
+        case 'daa_communication':
+          await this.handleCommunication(params);
+          break;
+        case 'daa_consensus':
+          await this.handleConsensus(params);
+          break;
+        case 'daa_fault_tolerance':
+          await this.handleFaultTolerance(params);
+          break;
+        case 'daa_optimization':
+          await this.handleOptimization(params);
+          break;
+        default:
+          console.log(`Tool ${toolName} executed`);
       }
-
     } catch (error) {
       console.error(`❌ Error executing ${toolName}:`, error);
     }
@@ -984,7 +985,9 @@ Example:
    */
   updateAgentsList(agent) {
     const agentsListEl = document.getElementById('agents-list');
-    if (!agentsListEl) {return;}
+    if (!agentsListEl) {
+      return;
+    }
 
     const agentCard = document.createElement('div');
     agentCard.className = 'agent-card';
@@ -1010,7 +1013,9 @@ Example:
     const agentsStat = document.getElementById('agents-stat');
     if (agentsStat) {
       const valueEl = agentsStat.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.agents.size;}
+      if (valueEl) {
+        valueEl.textContent = this.agents.size;
+      }
     }
   }
 
@@ -1019,27 +1024,33 @@ Example:
    */
   displayCapabilityMatches(matches) {
     const matchesEl = document.getElementById('capability-matches');
-    if (!matchesEl) {return;}
+    if (!matchesEl) {
+      return;
+    }
 
     if (matches.length === 0) {
       matchesEl.innerHTML = '<div class="no-matches">No matching agents found</div>';
       return;
     }
 
-    matchesEl.innerHTML = matches.map(match => `
+    matchesEl.innerHTML = matches
+      .map(
+        match => `
       <div class="match-card">
         <div class="match-agent">${match.agent.id}</div>
         <div class="match-score">Match Score: ${match.score}%</div>
         <div class="match-capabilities">
-          ${match.matchedCapabilities.map(cap =>
-    `<span class="capability-tag">${cap}</span>`
-  ).join('')}
+          ${match.matchedCapabilities
+            .map(cap => `<span class="capability-tag">${cap}</span>`)
+            .join('')}
         </div>
         <button onclick="this.assignToAgent('${match.agent.id}')" class="mini-btn primary">
           Assign Task
         </button>
       </div>
-    `).join('');
+    `
+      )
+      .join('');
   }
 
   /**
@@ -1049,9 +1060,7 @@ Example:
     const matches = [];
 
     for (const [agentId, agent] of this.agents) {
-      const matchedCaps = requirements.filter(req =>
-        agent.capabilities.includes(req)
-      );
+      const matchedCaps = requirements.filter(req => agent.capabilities.includes(req));
 
       if (matchedCaps.length > 0) {
         matches.push({
@@ -1091,7 +1100,9 @@ Example:
    */
   updateLifecycleStatus(agentId, action) {
     const eventsEl = document.getElementById('lifecycle-events-list');
-    if (!eventsEl) {return;}
+    if (!eventsEl) {
+      return;
+    }
 
     const event = document.createElement('div');
     event.className = 'lifecycle-event';
@@ -1109,7 +1120,9 @@ Example:
    */
   updateCommunicationLog(commParams) {
     const logEl = document.getElementById('communication-log-list');
-    if (!logEl) {return;}
+    if (!logEl) {
+      return;
+    }
 
     const message = document.createElement('div');
     message.className = `comm-message ${commParams.message.type}`;
@@ -1134,7 +1147,9 @@ Example:
    */
   createConsensusProposal(consensusParams) {
     const proposalsEl = document.getElementById('proposals-list');
-    if (!proposalsEl) {return;}
+    if (!proposalsEl) {
+      return;
+    }
 
     const proposal = document.createElement('div');
     proposal.className = 'proposal-card active';
@@ -1166,7 +1181,9 @@ Example:
    */
   updateFaultEvents(faultParams) {
     const eventsEl = document.getElementById('fault-events-list');
-    if (!eventsEl) {return;}
+    if (!eventsEl) {
+      return;
+    }
 
     const event = document.createElement('div');
     event.className = 'fault-event';
@@ -1189,7 +1206,9 @@ Example:
    */
   updateOptimizationResults(optimizationParams) {
     const historyEl = document.getElementById('optimization-history-list');
-    if (!historyEl) {return;}
+    if (!historyEl) {
+      return;
+    }
 
     const result = document.createElement('div');
     result.className = 'optimization-result';
@@ -1214,7 +1233,7 @@ Example:
    */
   setupEventHandlers() {
     // Listen for tool results
-    this.eventBus.on('tool:executed', (data) => {
+    this.eventBus.on('tool:executed', data => {
       if (data.source === 'daa-view') {
         this.handleToolResult(data);
       }
@@ -1226,12 +1245,12 @@ Example:
     });
 
     // Listen for theme changes
-    this.eventBus.on('ui:theme:changed', (theme) => {
+    this.eventBus.on('ui:theme:changed', theme => {
       this.updateTheme(theme);
     });
 
     // Listen for agent updates
-    this.eventBus.on('daa:agent:created', (agent) => {
+    this.eventBus.on('daa:agent:created', agent => {
       this.agents.set(agent.id, agent);
       if (this.container) {
         this.updateAgentsList(agent);
@@ -1239,7 +1258,7 @@ Example:
     });
 
     // Listen for resource updates
-    this.eventBus.on('daa:resource:allocated', (allocation) => {
+    this.eventBus.on('daa:resource:allocated', allocation => {
       this.resources.set(allocation.id, allocation);
       if (this.container) {
         this.updateResourceMeters(allocation);
@@ -1284,7 +1303,9 @@ Example:
     const agentsStat = document.getElementById('agents-stat');
     if (agentsStat) {
       const valueEl = agentsStat.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.agents.size;}
+      if (valueEl) {
+        valueEl.textContent = this.agents.size;
+      }
     }
 
     // Update resource usage
@@ -1292,8 +1313,10 @@ Example:
     if (resourcesStat) {
       const valueEl = resourcesStat.querySelector('.stat-value');
       if (valueEl) {
-        const totalUsage = Array.from(this.resources.values())
-          .reduce((sum, res) => sum + (res.usage || 0), 0);
+        const totalUsage = Array.from(this.resources.values()).reduce(
+          (sum, res) => sum + (res.usage || 0),
+          0
+        );
         valueEl.textContent = `${Math.round(totalUsage)}%`;
       }
     }
@@ -1303,8 +1326,8 @@ Example:
     if (commStat) {
       const valueEl = commStat.querySelector('.stat-value');
       if (valueEl) {
-        const recentComms = this.communications.filter(c =>
-          Date.now() - c.timestamp < 60000
+        const recentComms = this.communications.filter(
+          c => Date.now() - c.timestamp < 60000
         ).length;
         valueEl.textContent = recentComms;
       }
@@ -1326,7 +1349,9 @@ Example:
    */
   drawAgentNetwork() {
     const canvas = document.getElementById('agent-canvas');
-    if (!canvas) {return;}
+    if (!canvas) {
+      return;
+    }
 
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);

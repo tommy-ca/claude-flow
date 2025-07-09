@@ -27,7 +27,7 @@ export class TerminalPool {
     private maxSize: number,
     private recycleAfter: number,
     private adapter: ITerminalAdapter,
-    private logger: ILogger,
+    private logger: ILogger
   ) {}
 
   async initialize(): Promise<void> {
@@ -40,9 +40,9 @@ export class TerminalPool {
   }
 
   private async doInitialize(): Promise<void> {
-    this.logger.info('Initializing terminal pool', { 
+    this.logger.info('Initializing terminal pool', {
       maxSize: this.maxSize,
-      recycleAfter: this.recycleAfter,
+      recycleAfter: this.recycleAfter
     });
 
     // Pre-create some terminals
@@ -54,9 +54,9 @@ export class TerminalPool {
     }
 
     await Promise.all(promises);
-    
-    this.logger.info('Terminal pool initialized', { 
-      created: preCreateCount,
+
+    this.logger.info('Terminal pool initialized', {
+      created: preCreateCount
     });
   }
 
@@ -65,9 +65,7 @@ export class TerminalPool {
 
     // Destroy all terminals
     const terminals = Array.from(this.terminals.values());
-    await Promise.all(
-      terminals.map(({ terminal }) => this.adapter.destroyTerminal(terminal)),
-    );
+    await Promise.all(terminals.map(({ terminal }) => this.adapter.destroyTerminal(terminal)));
 
     this.terminals.clear();
     this.availableQueue = [];
@@ -82,10 +80,10 @@ export class TerminalPool {
       if (pooled && pooled.terminal.isAlive()) {
         pooled.inUse = true;
         pooled.lastUsed = new Date();
-        
-        this.logger.debug('Terminal acquired from pool', { 
+
+        this.logger.debug('Terminal acquired from pool', {
           terminalId,
-          useCount: pooled.useCount,
+          useCount: pooled.useCount
         });
 
         return pooled.terminal;
@@ -105,7 +103,7 @@ export class TerminalPool {
 
     // Pool is full, wait for a terminal to become available
     this.logger.info('Terminal pool full, waiting for available terminal');
-    
+
     const startTime = Date.now();
     const timeout = 30000; // 30 seconds
 
@@ -114,7 +112,7 @@ export class TerminalPool {
 
       // Check if any terminal became available
       const available = Array.from(this.terminals.values()).find(
-        (pooled) => !pooled.inUse && pooled.terminal.isAlive(),
+        pooled => !pooled.inUse && pooled.terminal.isAlive()
       );
 
       if (available) {
@@ -130,8 +128,8 @@ export class TerminalPool {
   async release(terminal: Terminal): Promise<void> {
     const pooled = this.terminals.get(terminal.id);
     if (!pooled) {
-      this.logger.warn('Attempted to release unknown terminal', { 
-        terminalId: terminal.id,
+      this.logger.warn('Attempted to release unknown terminal', {
+        terminalId: terminal.id
       });
       return;
     }
@@ -141,9 +139,9 @@ export class TerminalPool {
 
     // Check if terminal should be recycled
     if (pooled.useCount >= this.recycleAfter || !terminal.isAlive()) {
-      this.logger.info('Recycling terminal', { 
+      this.logger.info('Recycling terminal', {
         terminalId: terminal.id,
-        useCount: pooled.useCount,
+        useCount: pooled.useCount
       });
 
       // Destroy old terminal
@@ -157,10 +155,10 @@ export class TerminalPool {
     } else {
       // Return to available queue
       this.availableQueue.push(terminal.id);
-      
-      this.logger.debug('Terminal returned to pool', { 
+
+      this.logger.debug('Terminal returned to pool', {
         terminalId: terminal.id,
-        useCount: pooled.useCount,
+        useCount: pooled.useCount
       });
     }
   }
@@ -171,20 +169,20 @@ export class TerminalPool {
     available: number;
     recycled: number;
   }> {
-    const aliveTerminals = Array.from(this.terminals.values()).filter(
-      (pooled) => pooled.terminal.isAlive(),
+    const aliveTerminals = Array.from(this.terminals.values()).filter(pooled =>
+      pooled.terminal.isAlive()
     );
 
-    const available = aliveTerminals.filter((pooled) => !pooled.inUse).length;
+    const available = aliveTerminals.filter(pooled => !pooled.inUse).length;
     const recycled = Array.from(this.terminals.values()).filter(
-      (pooled) => pooled.useCount >= this.recycleAfter,
+      pooled => pooled.useCount >= this.recycleAfter
     ).length;
 
     return {
       healthy: aliveTerminals.length > 0,
       size: this.terminals.size,
       available,
-      recycled,
+      recycled
     };
   }
 
@@ -212,36 +210,36 @@ export class TerminalPool {
     // Ensure minimum pool size
     const currentSize = this.terminals.size;
     const minSize = Math.min(2, this.maxSize);
-    
+
     if (currentSize < minSize) {
       const toCreate = minSize - currentSize;
-      this.logger.info('Replenishing terminal pool', { 
-        currentSize, 
-        minSize, 
-        creating: toCreate,
+      this.logger.info('Replenishing terminal pool', {
+        currentSize,
+        minSize,
+        creating: toCreate
       });
 
       const promises: Promise<void>[] = [];
       for (let i = 0; i < toCreate; i++) {
         promises.push(this.createPooledTerminal());
       }
-      
+
       await Promise.all(promises);
     }
 
     // Check for stale terminals that should be recycled
     const now = Date.now();
     const staleTimeout = 300000; // 5 minutes
-    
+
     for (const [id, pooled] of this.terminals.entries()) {
       if (!pooled.inUse && pooled.terminal.isAlive()) {
         const idleTime = now - pooled.lastUsed.getTime();
         if (idleTime > staleTimeout) {
-          this.logger.info('Recycling stale terminal', { 
-            terminalId: id, 
-            idleTime,
+          this.logger.info('Recycling stale terminal', {
+            terminalId: id,
+            idleTime
           });
-          
+
           // Mark for recycling
           pooled.useCount = this.recycleAfter;
         }
@@ -252,12 +250,12 @@ export class TerminalPool {
   private async createPooledTerminal(): Promise<void> {
     try {
       const terminal = await this.adapter.createTerminal();
-      
+
       const pooled: PooledTerminal = {
         terminal,
         useCount: 0,
         lastUsed: new Date(),
-        inUse: false,
+        inUse: false
       };
 
       this.terminals.set(terminal.id, pooled);

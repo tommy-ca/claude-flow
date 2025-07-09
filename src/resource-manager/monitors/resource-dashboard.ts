@@ -6,7 +6,11 @@
 import { EventEmitter } from 'events';
 import { ResourceManager } from '../core/resource-manager';
 import { PressureDetector, PressureAnalysis } from './pressure-detector';
-import { AgentResourceManager, AgentResourceUsage, AgentHealthStatus } from '../agents/agent-resource-manager';
+import {
+  AgentResourceManager,
+  AgentResourceUsage,
+  AgentHealthStatus
+} from '../agents/agent-resource-manager';
 import { IResourceMetrics } from '../types';
 import { logger } from '../../utils/logger';
 
@@ -119,7 +123,7 @@ export class ResourceDashboard extends EventEmitter {
     config?: Partial<DashboardConfig>
   ) {
     super();
-    
+
     this.resourceManager = resourceManager;
     this.pressureDetector = pressureDetector;
     this.agentManager = agentManager;
@@ -130,7 +134,7 @@ export class ResourceDashboard extends EventEmitter {
 
     this.metrics = this.initializeMetrics();
     this.stats = this.initializeStats();
-    
+
     // Set up event listeners
     this.setupEventListeners();
   }
@@ -140,13 +144,13 @@ export class ResourceDashboard extends EventEmitter {
    */
   async initialize(): Promise<void> {
     this.isActive = true;
-    
+
     // Start data collection
     this.startDataCollection();
-    
+
     // Initialize chart data
     await this.initializeChartData();
-    
+
     logger.info('Resource Dashboard initialized');
   }
 
@@ -157,11 +161,11 @@ export class ResourceDashboard extends EventEmitter {
     if (!this.isActive) {
       await this.initialize();
     }
-    
+
     this.refreshInterval = setInterval(async () => {
       await this.refreshData();
     }, this.config.refreshInterval);
-    
+
     logger.info(`Resource Dashboard started (refresh: ${this.config.refreshInterval}ms)`);
   }
 
@@ -173,7 +177,7 @@ export class ResourceDashboard extends EventEmitter {
       clearInterval(this.refreshInterval);
       this.refreshInterval = undefined;
     }
-    
+
     this.isActive = false;
     logger.info('Resource Dashboard stopped');
   }
@@ -253,7 +257,7 @@ export class ResourceDashboard extends EventEmitter {
    */
   getAgentOverview(): any {
     const agentUsages = this.agentManager.getAllAgentsUsage();
-    
+
     return {
       timestamp: Date.now(),
       summary: {
@@ -277,7 +281,7 @@ export class ResourceDashboard extends EventEmitter {
   getPressureOverview(): any {
     const currentPressure = this.pressureDetector.getCurrentPressure();
     const alertHistory = this.pressureDetector.getAlertHistory(10);
-    
+
     return {
       timestamp: Date.now(),
       current: currentPressure,
@@ -320,13 +324,13 @@ export class ResourceDashboard extends EventEmitter {
    */
   updateConfig(newConfig: Partial<DashboardConfig>): void {
     this.config = this.mergeConfig(newConfig);
-    
+
     // Restart if refresh interval changed
     if (this.refreshInterval) {
       this.stop();
       this.start();
     }
-    
+
     this.emit('config-updated', this.config);
   }
 
@@ -337,23 +341,22 @@ export class ResourceDashboard extends EventEmitter {
     try {
       // Update metrics
       await this.updateMetrics();
-      
+
       // Update stats
       await this.updateStats();
-      
+
       // Update chart data
       await this.updateChartData();
-      
+
       // Check for new alerts
       await this.checkForAlerts();
-      
+
       // Emit update event
       this.emit('data-updated', {
         metrics: this.metrics,
         stats: this.stats,
         timestamp: Date.now()
       });
-      
     } catch (error) {
       logger.error('Dashboard data refresh failed:', error);
     }
@@ -400,11 +403,15 @@ export class ResourceDashboard extends EventEmitter {
         level: pressureAnalysis?.overall.level || 'normal',
         score: pressureAnalysis?.overall.value || 0,
         alerts: this.pressureDetector.getAlertHistory(100).length,
-        predictions: pressureAnalysis?.predictions.nextAlert ? [{
-          type: pressureAnalysis.predictions.nextAlert.type,
-          timeToAlert: pressureAnalysis.predictions.nextAlert.timeToAlert,
-          confidence: pressureAnalysis.predictions.nextAlert.confidence
-        }] : []
+        predictions: pressureAnalysis?.predictions.nextAlert
+          ? [
+              {
+                type: pressureAnalysis.predictions.nextAlert.type,
+                timeToAlert: pressureAnalysis.predictions.nextAlert.timeToAlert,
+                confidence: pressureAnalysis.predictions.nextAlert.confidence
+              }
+            ]
+          : []
       }
     };
   }
@@ -438,13 +445,13 @@ export class ResourceDashboard extends EventEmitter {
 
     // CPU utilization chart
     this.updateChart('cpu-utilization', timeLabel, this.metrics.system.cpu);
-    
+
     // Memory utilization chart
     this.updateChart('memory-utilization', timeLabel, this.metrics.system.memory);
-    
+
     // Agent health chart
     this.updateChart('agent-health', timeLabel, this.metrics.agents.healthyAgents);
-    
+
     // Pressure level chart
     this.updateChart('pressure-level', timeLabel, this.metrics.pressure.score);
   }
@@ -457,17 +464,17 @@ export class ResourceDashboard extends EventEmitter {
     if (!chart) return;
 
     const maxPoints = 50; // Keep last 50 data points
-    
+
     // Add new data point
     chart.labels.push(label);
     chart.datasets[0].data.push(value);
-    
+
     // Remove old data points
     if (chart.labels.length > maxPoints) {
       chart.labels.shift();
       chart.datasets[0].data.shift();
     }
-    
+
     this.chartData.set(chartType, chart);
   }
 
@@ -477,33 +484,54 @@ export class ResourceDashboard extends EventEmitter {
   private async checkForAlerts(): Promise<void> {
     // Check system alerts
     if (this.metrics.system.cpu > this.config.alertThresholds.cpu) {
-      this.addAlert('critical', 'High CPU Usage', 
-        `System CPU usage is ${this.metrics.system.cpu.toFixed(1)}%`, 'system');
+      this.addAlert(
+        'critical',
+        'High CPU Usage',
+        `System CPU usage is ${this.metrics.system.cpu.toFixed(1)}%`,
+        'system'
+      );
     }
-    
+
     if (this.metrics.system.memory > this.config.alertThresholds.memory) {
-      this.addAlert('critical', 'High Memory Usage', 
-        `System memory usage is ${this.metrics.system.memory.toFixed(1)}%`, 'system');
+      this.addAlert(
+        'critical',
+        'High Memory Usage',
+        `System memory usage is ${this.metrics.system.memory.toFixed(1)}%`,
+        'system'
+      );
     }
-    
+
     // Check agent alerts
     const unhealthyAgents = this.metrics.agents.unhealthyAgents;
     if (unhealthyAgents > 0) {
-      this.addAlert('warning', 'Unhealthy Agents', 
-        `${unhealthyAgents} agents are unhealthy`, 'agent');
+      this.addAlert(
+        'warning',
+        'Unhealthy Agents',
+        `${unhealthyAgents} agents are unhealthy`,
+        'agent'
+      );
     }
-    
+
     // Check pressure alerts
     if (this.metrics.pressure.level === 'critical' || this.metrics.pressure.level === 'emergency') {
-      this.addAlert('critical', 'System Pressure', 
-        `System pressure level is ${this.metrics.pressure.level}`, 'pressure');
+      this.addAlert(
+        'critical',
+        'System Pressure',
+        `System pressure level is ${this.metrics.pressure.level}`,
+        'pressure'
+      );
     }
   }
 
   /**
    * Add alert
    */
-  private addAlert(level: DashboardAlert['level'], title: string, message: string, source: DashboardAlert['source']): void {
+  private addAlert(
+    level: DashboardAlert['level'],
+    title: string,
+    message: string,
+    source: DashboardAlert['source']
+  ): void {
     const alert: DashboardAlert = {
       id: `alert-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: Date.now(),
@@ -518,7 +546,7 @@ export class ResourceDashboard extends EventEmitter {
 
     this.alerts.push(alert);
     this.emit('new-alert', alert);
-    
+
     // Keep only last 1000 alerts
     if (this.alerts.length > 1000) {
       this.alerts = this.alerts.slice(-1000);
@@ -530,30 +558,36 @@ export class ResourceDashboard extends EventEmitter {
    */
   private setupEventListeners(): void {
     // Listen to pressure alerts
-    this.pressureDetector.on('pressure-alert', (alert) => {
+    this.pressureDetector.on('pressure-alert', alert => {
       this.addAlert('warning', 'Pressure Alert', alert.message, 'pressure');
     });
 
     // Listen to agent scaling events
-    this.agentManager.on('agent-scaled-up', (event) => {
-      this.addAlert('info', 'Agent Scaled Up', 
-        `Agent ${event.agentId} scaled up to ${event.toReplicas} replicas`, 'agent');
+    this.agentManager.on('agent-scaled-up', event => {
+      this.addAlert(
+        'info',
+        'Agent Scaled Up',
+        `Agent ${event.agentId} scaled up to ${event.toReplicas} replicas`,
+        'agent'
+      );
     });
 
-    this.agentManager.on('agent-scaled-down', (event) => {
-      this.addAlert('info', 'Agent Scaled Down', 
-        `Agent ${event.agentId} scaled down to ${event.toReplicas} replicas`, 'agent');
+    this.agentManager.on('agent-scaled-down', event => {
+      this.addAlert(
+        'info',
+        'Agent Scaled Down',
+        `Agent ${event.agentId} scaled down to ${event.toReplicas} replicas`,
+        'agent'
+      );
     });
 
     // Listen to resource manager events
-    this.resourceManager.on('server-offline', (server) => {
-      this.addAlert('error', 'Server Offline', 
-        `Server ${server.serverId} went offline`, 'system');
+    this.resourceManager.on('server-offline', server => {
+      this.addAlert('error', 'Server Offline', `Server ${server.serverId} went offline`, 'system');
     });
 
-    this.resourceManager.on('server-recovery', (server) => {
-      this.addAlert('info', 'Server Recovery', 
-        `Server ${server.serverId} recovered`, 'system');
+    this.resourceManager.on('server-recovery', server => {
+      this.addAlert('info', 'Server Recovery', `Server ${server.serverId} recovered`, 'system');
     });
   }
 
@@ -564,8 +598,21 @@ export class ResourceDashboard extends EventEmitter {
     return {
       timestamp: Date.now(),
       system: { cpu: 0, memory: 0, disk: 0, network: 0, uptime: 0 },
-      cluster: { totalServers: 0, healthyServers: 0, degradedServers: 0, offlineServers: 0, averageUtilization: { cpu: 0, memory: 0 } },
-      agents: { totalAgents: 0, healthyAgents: 0, degradedAgents: 0, unhealthyAgents: 0, scalingEvents: 0, averageResponseTime: 0 },
+      cluster: {
+        totalServers: 0,
+        healthyServers: 0,
+        degradedServers: 0,
+        offlineServers: 0,
+        averageUtilization: { cpu: 0, memory: 0 }
+      },
+      agents: {
+        totalAgents: 0,
+        healthyAgents: 0,
+        degradedAgents: 0,
+        unhealthyAgents: 0,
+        scalingEvents: 0,
+        averageResponseTime: 0
+      },
       pressure: { level: 'normal', score: 0, alerts: 0, predictions: [] }
     };
   }
@@ -599,17 +646,19 @@ export class ResourceDashboard extends EventEmitter {
    */
   private async initializeChartData(): Promise<void> {
     const charts = ['cpu-utilization', 'memory-utilization', 'agent-health', 'pressure-level'];
-    
+
     for (const chartType of charts) {
       this.chartData.set(chartType, {
         labels: [],
-        datasets: [{
-          label: this.getChartLabel(chartType),
-          data: [],
-          borderColor: this.getChartColor(chartType),
-          backgroundColor: this.getChartColor(chartType, 0.1),
-          tension: 0.4
-        }]
+        datasets: [
+          {
+            label: this.getChartLabel(chartType),
+            data: [],
+            borderColor: this.getChartColor(chartType),
+            backgroundColor: this.getChartColor(chartType, 0.1),
+            tension: 0.4
+          }
+        ]
       });
     }
   }
@@ -646,8 +695,9 @@ export class ResourceDashboard extends EventEmitter {
   private calculateSystemHealth(): number {
     const cpuHealth = Math.max(0, 100 - this.metrics.system.cpu);
     const memoryHealth = Math.max(0, 100 - this.metrics.system.memory);
-    const agentHealth = (this.metrics.agents.healthyAgents / Math.max(1, this.metrics.agents.totalAgents)) * 100;
-    
+    const agentHealth =
+      (this.metrics.agents.healthyAgents / Math.max(1, this.metrics.agents.totalAgents)) * 100;
+
     return (cpuHealth + memoryHealth + agentHealth) / 3;
   }
 
@@ -664,7 +714,7 @@ export class ResourceDashboard extends EventEmitter {
    * Calculate system capacity
    */
   private calculateSystemCapacity(): number {
-    const freeCapacity = 100 - ((this.metrics.system.cpu + this.metrics.system.memory) / 2);
+    const freeCapacity = 100 - (this.metrics.system.cpu + this.metrics.system.memory) / 2;
     return Math.max(0, freeCapacity);
   }
 
@@ -686,30 +736,33 @@ export class ResourceDashboard extends EventEmitter {
    */
   private getSystemRecommendations(): string[] {
     const recommendations: string[] = [];
-    
+
     if (this.metrics.system.cpu > 80) {
       recommendations.push('Consider adding more CPU capacity');
     }
-    
+
     if (this.metrics.system.memory > 80) {
       recommendations.push('Consider adding more memory capacity');
     }
-    
+
     if (this.metrics.agents.unhealthyAgents > 0) {
       recommendations.push('Review unhealthy agents and their resource allocation');
     }
-    
+
     return recommendations;
   }
 
   /**
    * Calculate agent resource usage
    */
-  private calculateAgentResourceUsage(agentUsages: AgentResourceUsage[], type: 'cpu' | 'memory'): any {
+  private calculateAgentResourceUsage(
+    agentUsages: AgentResourceUsage[],
+    type: 'cpu' | 'memory'
+  ): any {
     if (agentUsages.length === 0) return { average: 0, max: 0, min: 0 };
-    
+
     const values = agentUsages.map(a => a[type].utilization);
-    
+
     return {
       average: values.reduce((sum, val) => sum + val, 0) / values.length,
       max: Math.max(...values),
@@ -722,7 +775,10 @@ export class ResourceDashboard extends EventEmitter {
    */
   private getTopResourceConsumers(agentUsages: AgentResourceUsage[], limit: number): any[] {
     return agentUsages
-      .sort((a, b) => (b.cpu.utilization + b.memory.utilization) - (a.cpu.utilization + a.memory.utilization))
+      .sort(
+        (a, b) =>
+          b.cpu.utilization + b.memory.utilization - (a.cpu.utilization + a.memory.utilization)
+      )
       .slice(0, limit)
       .map(agent => ({
         agentId: agent.agentId,
@@ -738,7 +794,7 @@ export class ResourceDashboard extends EventEmitter {
   private calculateResourceEfficiency(): number {
     const totalUtilization = this.metrics.system.cpu + this.metrics.system.memory;
     const maxUtilization = 200; // 100% CPU + 100% Memory
-    
+
     return (totalUtilization / maxUtilization) * 100;
   }
 
@@ -748,10 +804,10 @@ export class ResourceDashboard extends EventEmitter {
   private convertToCSV(data: any): string {
     // Simple CSV conversion - would be more sophisticated in production
     const headers = Object.keys(data).join(',');
-    const values = Object.values(data).map(val => 
-      typeof val === 'object' ? JSON.stringify(val) : val
-    ).join(',');
-    
+    const values = Object.values(data)
+      .map(val => (typeof val === 'object' ? JSON.stringify(val) : val))
+      .join(',');
+
     return `${headers}\n${values}`;
   }
 

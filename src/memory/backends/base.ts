@@ -14,9 +14,9 @@ export interface IMemoryBackend {
   delete(id: string): Promise<void>;
   query(query: MemoryQuery): Promise<MemoryEntry[]>;
   getAllEntries(): Promise<MemoryEntry[]>;
-  getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }>;
   performMaintenance?(): Promise<void>;

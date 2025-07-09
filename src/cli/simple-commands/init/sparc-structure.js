@@ -60,7 +60,6 @@ export async function createSparcStructureManually() {
     await createClaudeSlashCommands(workingDir);
 
     console.log('  ✅ Basic SPARC structure created successfully');
-
   } catch (err) {
     console.log(`  ❌ Failed to create SPARC structure: ${err.message}`);
   }

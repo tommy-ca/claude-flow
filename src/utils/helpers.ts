@@ -24,7 +24,7 @@ export function add(a: number, b: number): number {
  * Simple hello world function
  */
 export function helloWorld(): string {
-  return "Hello, World!";
+  return 'Hello, World!';
 }
 
 /**
@@ -42,7 +42,7 @@ export function generateId(prefix?: string): string {
 export function timeout<T>(promise: Promise<T>, ms: number, message?: string): Promise<T> {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
   let completed = false;
-  
+
   const timeoutPromise = new Promise<never>((_, reject) => {
     timeoutId = setTimeout(() => {
       if (!completed) {
@@ -52,31 +52,31 @@ export function timeout<T>(promise: Promise<T>, ms: number, message?: string): P
     }, ms);
   });
 
-  const wrappedPromise = promise.then((result) => {
-    completed = true;
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
+  const wrappedPromise = promise.then(
+    result => {
+      completed = true;
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+      return result;
+    },
+    error => {
+      completed = true;
+      if (timeoutId !== undefined) {
+        clearTimeout(timeoutId);
+      }
+      throw error;
     }
-    return result;
-  }, (error) => {
-    completed = true;
-    if (timeoutId !== undefined) {
-      clearTimeout(timeoutId);
-    }
-    throw error;
-  });
+  );
 
-  return Promise.race([
-    wrappedPromise,
-    timeoutPromise,
-  ]);
+  return Promise.race([wrappedPromise, timeoutPromise]);
 }
 
 /**
  * Delays execution for specified milliseconds
  */
 export function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 /**
@@ -90,15 +90,9 @@ export async function retry<T>(
     maxDelay?: number;
     factor?: number;
     onRetry?: (attempt: number, error: Error) => void;
-  } = {},
+  } = {}
 ): Promise<T> {
-  const {
-    maxAttempts = 3,
-    initialDelay = 1000,
-    maxDelay = 30000,
-    factor = 2,
-    onRetry,
-  } = options;
+  const { maxAttempts = 3, initialDelay = 1000, maxDelay = 30000, factor = 2, onRetry } = options;
 
   let lastError: Error;
   let delayMs = initialDelay;
@@ -130,7 +124,7 @@ export async function retry<T>(
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  delayMs: number,
+  delayMs: number
 ): (...args: Parameters<T>) => void {
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
@@ -151,7 +145,7 @@ export function debounce<T extends (...args: unknown[]) => unknown>(
  */
 export function throttle<T extends (...args: unknown[]) => unknown>(
   fn: T,
-  limitMs: number,
+  limitMs: number
 ): (...args: Parameters<T>) => void {
   let inThrottle = false;
   let lastArgs: Parameters<T> | null = null;
@@ -187,7 +181,7 @@ export function deepClone<T>(obj: T): T {
   }
 
   if (obj instanceof Array) {
-    return obj.map((item) => deepClone(item)) as T;
+    return obj.map(item => deepClone(item)) as T;
   }
 
   if (obj instanceof Map) {
@@ -200,7 +194,7 @@ export function deepClone<T>(obj: T): T {
 
   if (obj instanceof Set) {
     const set = new Set();
-    obj.forEach((value) => {
+    obj.forEach(value => {
       set.add(deepClone(value));
     });
     return set as T;
@@ -225,7 +219,7 @@ export function deepMerge<T extends Record<string, unknown>>(
 ): T {
   // Create a deep clone of the target to avoid mutation
   const result = deepClone(target);
-  
+
   if (!sources.length) return result;
 
   const source = sources.shift();
@@ -239,7 +233,7 @@ export function deepMerge<T extends Record<string, unknown>>(
       if (isObject(resultValue) && isObject(sourceValue)) {
         result[key] = deepMerge(
           resultValue as Record<string, unknown>,
-          sourceValue as Record<string, unknown>,
+          sourceValue as Record<string, unknown>
         ) as T[Extract<keyof T, string>];
       } else {
         result[key] = sourceValue as T[Extract<keyof T, string>];
@@ -280,7 +274,7 @@ export class TypedEventEmitter<T extends Record<string, unknown>> {
   emit<K extends keyof T>(event: K, data: T[K]): void {
     const handlers = this.listeners.get(event);
     if (handlers) {
-      handlers.forEach((handler) => handler(data));
+      handlers.forEach(handler => handler(data));
     }
   }
 
@@ -317,7 +311,7 @@ export function formatBytes(bytes: number, decimals = 2): string {
 
   const value = parseFloat((absBytes / Math.pow(k, i)).toFixed(dm));
   const sign = bytes < 0 ? '-' : '';
-  
+
   return sign + value + ' ' + sizes[i];
 }
 
@@ -361,16 +355,19 @@ export function ensureArray<T>(value: T | T[]): T[] {
  */
 export function groupBy<T, K extends string | number | symbol>(
   items: T[],
-  keyFn: (item: T) => K,
+  keyFn: (item: T) => K
 ): Record<K, T[]> {
-  return items.reduce((groups, item) => {
-    const key = keyFn(item);
-    if (!groups[key]) {
-      groups[key] = [];
-    }
-    groups[key].push(item);
-    return groups;
-  }, {} as Record<K, T[]>);
+  return items.reduce(
+    (groups, item) => {
+      const key = keyFn(item);
+      if (!groups[key]) {
+        groups[key] = [];
+      }
+      groups[key].push(item);
+      return groups;
+    },
+    {} as Record<K, T[]>
+  );
 }
 
 /**
@@ -403,7 +400,6 @@ export function safeParseJSON<T>(json: string, fallback?: T): T | undefined {
   }
 }
 
-
 /**
  * Circuit breaker state
  */
@@ -434,7 +430,11 @@ export interface CircuitBreaker {
 /**
  * Simple calculator function with basic operations
  */
-export function calculator(a: number, b: number, operation: '+' | '-' | '*' | '/' | '^' | '%'): number {
+export function calculator(
+  a: number,
+  b: number,
+  operation: '+' | '-' | '*' | '/' | '^' | '%'
+): number {
   switch (operation) {
     case '+':
       return a + b;
@@ -462,14 +462,11 @@ export function calculator(a: number, b: number, operation: '+' | '-' | '*' | '/
 /**
  * Creates a circuit breaker
  */
-export function circuitBreaker(
-  name: string,
-  options: CircuitBreakerOptions,
-): CircuitBreaker {
+export function circuitBreaker(name: string, options: CircuitBreakerOptions): CircuitBreaker {
   const state: CircuitBreakerState = {
     failureCount: 0,
     lastFailureTime: 0,
-    state: 'closed',
+    state: 'closed'
   };
 
   const isOpen = (): boolean => {
@@ -492,7 +489,7 @@ export function circuitBreaker(
   const recordFailure = (): void => {
     state.failureCount++;
     state.lastFailureTime = Date.now();
-    
+
     if (state.failureCount >= options.threshold) {
       state.state = 'open';
     }
@@ -522,18 +519,21 @@ export function circuitBreaker(
       state.failureCount = 0;
       state.lastFailureTime = 0;
       state.state = 'closed';
-    },
+    }
   };
 }
 
 /**
  * Greeting function that returns a personalized greeting
  */
-export function greeting(name?: string, options?: {
-  timeOfDay?: boolean;
-  formal?: boolean;
-  locale?: 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ja' | 'zh';
-}): string {
+export function greeting(
+  name?: string,
+  options?: {
+    timeOfDay?: boolean;
+    formal?: boolean;
+    locale?: 'en' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ja' | 'zh';
+  }
+): string {
   const opts = {
     timeOfDay: false,
     formal: false,
@@ -569,13 +569,12 @@ export function greeting(name?: string, options?: {
 
   // Build the greeting
   let greetingText = opts.timeOfDay ? getTimeGreeting() : getLocaleGreeting();
-  
+
   if (name) {
     greetingText += `, ${name}`;
   }
-  
+
   greetingText += '!';
-  
+
   return greetingText;
 }
-

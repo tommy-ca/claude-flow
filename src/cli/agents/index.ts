@@ -18,11 +18,7 @@ export { AgentRegistry } from '../../agents/agent-registry.js';
 
 // Types
 export type { AgentState } from './base-agent.js';
-export type {
-  CapabilityMatch,
-  TaskRequirements,
-  CapabilityRegistry
-} from './capabilities.js';
+export type { CapabilityMatch, TaskRequirements, CapabilityRegistry } from './capabilities.js';
 
 // Agent Factory
 import type { AgentType, AgentConfig, AgentEnvironment } from '../../swarm/types.js';
@@ -69,7 +65,7 @@ export class AgentFactory {
     customId?: string
   ): BaseAgent {
     const id = customId || this.generateAgentId(type);
-    
+
     this.logger.info('Creating agent', {
       id,
       type,
@@ -78,23 +74,44 @@ export class AgentFactory {
 
     switch (type) {
       case 'researcher':
-        return createResearcherAgent(id, config, environment, this.logger, this.eventBus, this.memory);
-      
+        return createResearcherAgent(
+          id,
+          config,
+          environment,
+          this.logger,
+          this.eventBus,
+          this.memory
+        );
+
       case 'coder':
         return createCoderAgent(id, config, environment, this.logger, this.eventBus, this.memory);
-      
+
       case 'analyst':
         return createAnalystAgent(id, config, environment, this.logger, this.eventBus, this.memory);
-      
+
       case 'architect':
-        return createArchitectAgent(id, config, environment, this.logger, this.eventBus, this.memory);
-      
+        return createArchitectAgent(
+          id,
+          config,
+          environment,
+          this.logger,
+          this.eventBus,
+          this.memory
+        );
+
       case 'tester':
         return createTesterAgent(id, config, environment, this.logger, this.eventBus, this.memory);
-      
+
       case 'coordinator':
-        return createCoordinatorAgent(id, config, environment, this.logger, this.eventBus, this.memory);
-      
+        return createCoordinatorAgent(
+          id,
+          config,
+          environment,
+          this.logger,
+          this.eventBus,
+          this.memory
+        );
+
       default:
         throw new Error(`Unknown agent type: ${type}`);
     }
@@ -103,22 +120,20 @@ export class AgentFactory {
   /**
    * Create multiple agents of different types
    */
-  createAgents(specs: Array<{
-    type: AgentType;
-    count?: number;
-    config?: Partial<AgentConfig>;
-    environment?: Partial<AgentEnvironment>;
-  }>): BaseAgent[] {
+  createAgents(
+    specs: Array<{
+      type: AgentType;
+      count?: number;
+      config?: Partial<AgentConfig>;
+      environment?: Partial<AgentEnvironment>;
+    }>
+  ): BaseAgent[] {
     const agents: BaseAgent[] = [];
 
     for (const spec of specs) {
       const count = spec.count || 1;
       for (let i = 0; i < count; i++) {
-        const agent = this.createAgent(
-          spec.type,
-          spec.config,
-          spec.environment
-        );
+        const agent = this.createAgent(spec.type, spec.config, spec.environment);
         agents.push(agent);
       }
     }
@@ -267,7 +282,7 @@ export class AgentLifecycle {
    * Initialize all registered agents
    */
   async initializeAll(): Promise<void> {
-    const initPromises = Array.from(this.agents.values()).map(agent => 
+    const initPromises = Array.from(this.agents.values()).map(agent =>
       agent.initialize().catch(error => {
         const info = agent.getAgentInfo();
         this.logger.error('Agent initialization failed', {
@@ -347,18 +362,18 @@ export class AgentLifecycle {
 
     for (const agent of this.agents.values()) {
       const info = agent.getAgentInfo();
-      
+
       // Count by type
       stats.byType[info.type] = (stats.byType[info.type] || 0) + 1;
-      
+
       // Count by status
       stats.byStatus[info.status] = (stats.byStatus[info.status] || 0) + 1;
-      
+
       // Count healthy agents (health > 0.7)
       if (info.health > 0.7) {
         stats.healthy++;
       }
-      
+
       // Count active agents
       if (info.status === 'idle' || info.status === 'busy') {
         stats.active++;

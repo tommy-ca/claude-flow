@@ -46,7 +46,7 @@ export class RealtimeUpdateSystem {
    */
   setupSystemEvents() {
     // Listen for tool execution events
-    this.subscribe('tool_start', (data) => {
+    this.subscribe('tool_start', data => {
       this.broadcastUpdate('tools', {
         type: 'execution_start',
         toolName: data.toolName,
@@ -55,7 +55,7 @@ export class RealtimeUpdateSystem {
       });
     });
 
-    this.subscribe('tool_complete', (data) => {
+    this.subscribe('tool_complete', data => {
       this.broadcastUpdate('tools', {
         type: 'execution_complete',
         toolName: data.toolName,
@@ -68,7 +68,7 @@ export class RealtimeUpdateSystem {
       this.updateRelatedViews(data.toolName, data.result);
     });
 
-    this.subscribe('tool_error', (data) => {
+    this.subscribe('tool_error', data => {
       this.broadcastUpdate('tools', {
         type: 'execution_error',
         toolName: data.toolName,
@@ -79,7 +79,7 @@ export class RealtimeUpdateSystem {
     });
 
     // Listen for swarm events
-    this.subscribe('swarm_status_change', (data) => {
+    this.subscribe('swarm_status_change', data => {
       this.broadcastUpdate('orchestration', {
         type: 'swarm_update',
         swarmId: data.swarmId,
@@ -89,7 +89,7 @@ export class RealtimeUpdateSystem {
     });
 
     // Listen for memory events
-    this.subscribe('memory_change', (data) => {
+    this.subscribe('memory_change', data => {
       this.broadcastUpdate('memory', {
         type: 'memory_update',
         namespace: data.namespace,
@@ -103,7 +103,17 @@ export class RealtimeUpdateSystem {
    * Initialize update queues for all views
    */
   initializeUpdateQueues() {
-    const views = ['neural', 'analysis', 'workflow', 'github', 'daa', 'system', 'tools', 'orchestration', 'memory'];
+    const views = [
+      'neural',
+      'analysis',
+      'workflow',
+      'github',
+      'daa',
+      'system',
+      'tools',
+      'orchestration',
+      'memory'
+    ];
     views.forEach(view => {
       this.updateQueues.set(view, []);
     });
@@ -163,7 +173,9 @@ export class RealtimeUpdateSystem {
    */
   broadcastUpdate(viewName, updateData) {
     const queue = this.updateQueues.get(viewName);
-    if (!queue) {return;}
+    if (!queue) {
+      return;
+    }
 
     // Add update to queue
     queue.push({
@@ -200,7 +212,9 @@ export class RealtimeUpdateSystem {
    */
   processBatchedUpdates(viewName) {
     const queue = this.updateQueues.get(viewName);
-    if (!queue || queue.length === 0) {return;}
+    if (!queue || queue.length === 0) {
+      return;
+    }
 
     const startTime = Date.now();
 
@@ -250,33 +264,32 @@ export class RealtimeUpdateSystem {
     try {
       // Different views handle updates differently
       switch (viewName) {
-      case 'neural':
-        this.applyNeuralUpdates(groupedUpdates);
-        break;
-      case 'analysis':
-        this.applyAnalysisUpdates(groupedUpdates);
-        break;
-      case 'workflow':
-        this.applyWorkflowUpdates(groupedUpdates);
-        break;
-      case 'tools':
-        this.applyToolsUpdates(groupedUpdates);
-        break;
-      case 'orchestration':
-        this.applyOrchestrationUpdates(groupedUpdates);
-        break;
-      case 'memory':
-        this.applyMemoryUpdates(groupedUpdates);
-        break;
-      default:
-        this.applyGenericUpdates(viewName, groupedUpdates);
+        case 'neural':
+          this.applyNeuralUpdates(groupedUpdates);
+          break;
+        case 'analysis':
+          this.applyAnalysisUpdates(groupedUpdates);
+          break;
+        case 'workflow':
+          this.applyWorkflowUpdates(groupedUpdates);
+          break;
+        case 'tools':
+          this.applyToolsUpdates(groupedUpdates);
+          break;
+        case 'orchestration':
+          this.applyOrchestrationUpdates(groupedUpdates);
+          break;
+        case 'memory':
+          this.applyMemoryUpdates(groupedUpdates);
+          break;
+        default:
+          this.applyGenericUpdates(viewName, groupedUpdates);
       }
 
       // Trigger UI refresh if this is the current view
       if (this.ui.currentView === viewName) {
         this.requestUIRefresh();
       }
-
     } catch (error) {
       console.error(`Error applying updates to ${viewName}:`, error);
       this.updateMetrics.droppedUpdates++;
@@ -288,7 +301,9 @@ export class RealtimeUpdateSystem {
    */
   applyNeuralUpdates(groupedUpdates) {
     const neuralData = this.ui.enhancedViews?.viewData?.get('neural');
-    if (!neuralData) {return;}
+    if (!neuralData) {
+      return;
+    }
 
     // Handle training job updates
     const trainingUpdates = groupedUpdates.get('training_progress');
@@ -330,7 +345,9 @@ export class RealtimeUpdateSystem {
    */
   applyAnalysisUpdates(groupedUpdates) {
     const analysisData = this.ui.enhancedViews?.viewData?.get('analysis');
-    if (!analysisData) {return;}
+    if (!analysisData) {
+      return;
+    }
 
     // Handle performance report updates
     const reportUpdates = groupedUpdates.get('performance_report');
@@ -461,27 +478,27 @@ export class RealtimeUpdateSystem {
     // Map tool names to affected views
     const toolViewMap = {
       // Neural tools affect neural view
-      'neural_train': ['neural'],
-      'neural_predict': ['neural'],
-      'neural_status': ['neural'],
-      'model_save': ['neural'],
-      'model_load': ['neural'],
+      neural_train: ['neural'],
+      neural_predict: ['neural'],
+      neural_status: ['neural'],
+      model_save: ['neural'],
+      model_load: ['neural'],
 
       // Analysis tools affect analysis view
-      'performance_report': ['analysis'],
-      'bottleneck_analyze': ['analysis'],
-      'token_usage': ['analysis'],
-      'benchmark_run': ['analysis'],
+      performance_report: ['analysis'],
+      bottleneck_analyze: ['analysis'],
+      token_usage: ['analysis'],
+      benchmark_run: ['analysis'],
 
       // Swarm tools affect orchestration view
-      'swarm_init': ['orchestration'],
-      'agent_spawn': ['orchestration'],
-      'task_orchestrate': ['orchestration'],
+      swarm_init: ['orchestration'],
+      agent_spawn: ['orchestration'],
+      task_orchestrate: ['orchestration'],
 
       // Memory tools affect memory view
-      'memory_usage': ['memory'],
-      'memory_search': ['memory'],
-      'memory_backup': ['memory']
+      memory_usage: ['memory'],
+      memory_search: ['memory'],
+      memory_backup: ['memory']
     };
 
     const affectedViews = toolViewMap[toolName] || [];
@@ -500,7 +517,9 @@ export class RealtimeUpdateSystem {
    * Request UI refresh (throttled)
    */
   requestUIRefresh() {
-    if (this.refreshThrottle) {return;}
+    if (this.refreshThrottle) {
+      return;
+    }
 
     this.refreshThrottle = setTimeout(() => {
       if (this.ui && typeof this.ui.render === 'function') {
@@ -523,9 +542,11 @@ export class RealtimeUpdateSystem {
    * Report performance metrics
    */
   reportPerformanceMetrics() {
-    const avgLatency = this.updateMetrics.updateLatency.length > 0
-      ? this.updateMetrics.updateLatency.reduce((a, b) => a + b, 0) / this.updateMetrics.updateLatency.length
-      : 0;
+    const avgLatency =
+      this.updateMetrics.updateLatency.length > 0
+        ? this.updateMetrics.updateLatency.reduce((a, b) => a + b, 0) /
+          this.updateMetrics.updateLatency.length
+        : 0;
 
     const queueSizes = Array.from(this.updateQueues.values()).map(q => q.length);
     const totalQueueSize = queueSizes.reduce((a, b) => a + b, 0);
@@ -562,12 +583,7 @@ export class RealtimeUpdateSystem {
    * Create progressive loading handler
    */
   createProgressiveLoader(viewName, dataLoader, options = {}) {
-    const {
-      chunkSize = 10,
-      delay = 100,
-      onProgress = null,
-      onComplete = null
-    } = options;
+    const { chunkSize = 10, delay = 100, onProgress = null, onComplete = null } = options;
 
     return async () => {
       try {
@@ -581,7 +597,9 @@ export class RealtimeUpdateSystem {
             timestamp: Date.now()
           });
 
-          if (onComplete) {onComplete(data);}
+          if (onComplete) {
+            onComplete(data);
+          }
           return;
         }
 
@@ -614,8 +632,9 @@ export class RealtimeUpdateSystem {
           }
         }
 
-        if (onComplete) {onComplete(data);}
-
+        if (onComplete) {
+          onComplete(data);
+        }
       } catch (error) {
         this.broadcastUpdate(viewName, {
           type: 'data_error',

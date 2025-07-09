@@ -19,10 +19,12 @@ export default class NeuralNetworkView {
    * Initialize the neural network view
    */
   async initialize() {
-    if (this.isInitialized) {return;}
+    if (this.isInitialized) {
+      return;
+    }
 
     // Get component library from event bus
-    this.eventBus.emit('component-library:get', (library) => {
+    this.eventBus.emit('component-library:get', library => {
       this.componentLibrary = library;
     });
 
@@ -530,19 +532,18 @@ export default class NeuralNetworkView {
 
       // Handle specific tool actions
       switch (toolName) {
-      case 'neural_train':
-        await this.handleTraining(params);
-        break;
-      case 'neural_predict':
-        await this.handlePrediction(params);
-        break;
-      case 'neural_patterns':
-        await this.handlePatternAnalysis(params);
-        break;
-      default:
-        console.log(`Tool ${toolName} executed`);
+        case 'neural_train':
+          await this.handleTraining(params);
+          break;
+        case 'neural_predict':
+          await this.handlePrediction(params);
+          break;
+        case 'neural_patterns':
+          await this.handlePatternAnalysis(params);
+          break;
+        default:
+          console.log(`Tool ${toolName} executed`);
       }
-
     } catch (error) {
       console.error(`❌ Error executing ${toolName}:`, error);
     }
@@ -615,7 +616,7 @@ export default class NeuralNetworkView {
    */
   setupEventHandlers() {
     // Listen for tool results
-    this.eventBus.on('tool:executed', (data) => {
+    this.eventBus.on('tool:executed', data => {
       if (data.source === 'neural-view') {
         this.handleToolResult(data);
       }
@@ -627,7 +628,7 @@ export default class NeuralNetworkView {
     });
 
     // Listen for theme changes
-    this.eventBus.on('ui:theme:changed', (theme) => {
+    this.eventBus.on('ui:theme:changed', theme => {
       this.updateTheme(theme);
     });
   }
@@ -650,15 +651,15 @@ export default class NeuralNetworkView {
   updateUIWithResult(toolName, result) {
     // Update based on specific tool
     switch (toolName) {
-    case 'neural_train':
-      this.updateTrainingResults(result);
-      break;
-    case 'neural_predict':
-      this.updatePredictionResults(result);
-      break;
-    case 'neural_patterns':
-      this.updatePatternResults(result);
-      break;
+      case 'neural_train':
+        this.updateTrainingResults(result);
+        break;
+      case 'neural_predict':
+        this.updatePredictionResults(result);
+        break;
+      case 'neural_patterns':
+        this.updatePatternResults(result);
+        break;
     }
   }
 
@@ -731,14 +732,18 @@ export default class NeuralNetworkView {
     const modelsStatEl = document.getElementById('models-stat');
     if (modelsStatEl) {
       const valueEl = modelsStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.models.size;}
+      if (valueEl) {
+        valueEl.textContent = this.models.size;
+      }
     }
 
     // Update training jobs count
     const trainingStatEl = document.getElementById('training-stat');
     if (trainingStatEl) {
       const valueEl = trainingStatEl.querySelector('.stat-value');
-      if (valueEl) {valueEl.textContent = this.trainingJobs.size;}
+      if (valueEl) {
+        valueEl.textContent = this.trainingJobs.size;
+      }
     }
   }
 

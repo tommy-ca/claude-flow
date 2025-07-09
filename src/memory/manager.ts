@@ -23,7 +23,11 @@ export interface IMemoryManager {
   query(query: MemoryQuery): Promise<MemoryEntry[]>;
   update(id: string, updates: Partial<MemoryEntry>): Promise<void>;
   delete(id: string): Promise<void>;
-  getHealthStatus(): Promise<{ healthy: boolean; error?: string; metrics?: Record<string, number> }>;
+  getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
+    metrics?: Record<string, number>;
+  }>;
   performMaintenance(): Promise<void>;
 }
 
@@ -52,15 +56,15 @@ export class MemoryManager implements IMemoryManager {
   constructor(
     private config: MemoryConfig,
     private eventBus: IEventBus,
-    private logger: ILogger,
+    private logger: ILogger
   ) {
     // Initialize backend based on configuration
     this.backend = this.createBackend();
-    
+
     // Initialize cache
     this.cache = new MemoryCache(
       this.config.cacheSizeMB * 1024 * 1024, // Convert MB to bytes
-      this.logger,
+      this.logger
     );
 
     // Initialize indexer
@@ -134,13 +138,13 @@ export class MemoryManager implements IMemoryManager {
       agentId,
       createdAt: new Date(),
       lastAccessed: new Date(),
-      entryCount: 0,
+      entryCount: 0
     };
 
     this.banks.set(bank.id, bank);
-    
+
     this.logger.info('Memory bank created', { bankId: bank.id, agentId });
-    
+
     return bank.id;
   }
 
@@ -157,7 +161,7 @@ export class MemoryManager implements IMemoryManager {
     }
 
     this.banks.delete(bankId);
-    
+
     this.logger.info('Memory bank closed', { bankId });
   }
 
@@ -166,10 +170,10 @@ export class MemoryManager implements IMemoryManager {
       throw new MemoryError('Memory manager not initialized');
     }
 
-    this.logger.debug('Storing memory entry', { 
+    this.logger.debug('Storing memory entry', {
       id: entry.id,
       type: entry.type,
-      agentId: entry.agentId,
+      agentId: entry.agentId
     });
 
     try {
@@ -181,9 +185,9 @@ export class MemoryManager implements IMemoryManager {
 
       // Store in backend (async, don't wait)
       this.backend.store(entry).catch(error => {
-        this.logger.error('Failed to store entry in backend', { 
+        this.logger.error('Failed to store entry in backend', {
           id: entry.id,
-          error,
+          error
         });
       });
 
@@ -236,9 +240,10 @@ export class MemoryManager implements IMemoryManager {
 
       // Apply additional filters if needed
       if (query.search) {
-        results = results.filter(entry => 
-          entry.content.toLowerCase().includes(query.search!.toLowerCase()) ||
-          entry.tags.some(tag => tag.toLowerCase().includes(query.search!.toLowerCase())),
+        results = results.filter(
+          entry =>
+            entry.content.toLowerCase().includes(query.search!.toLowerCase()) ||
+            entry.tags.some(tag => tag.toLowerCase().includes(query.search!.toLowerCase()))
         );
       }
 
@@ -284,7 +289,7 @@ export class MemoryManager implements IMemoryManager {
       ...updates,
       id: existing.id, // Ensure ID doesn't change
       version: existing.version + 1,
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     // Update in cache
@@ -297,9 +302,9 @@ export class MemoryManager implements IMemoryManager {
     await this.backend.update(id, updated);
 
     // Emit event
-    this.eventBus.emit('memory:updated', { 
+    this.eventBus.emit('memory:updated', {
       entry: updated,
-      previousVersion: existing.version,
+      previousVersion: existing.version
     });
   }
 
@@ -321,9 +326,9 @@ export class MemoryManager implements IMemoryManager {
     this.eventBus.emit('memory:deleted', { entryId: id });
   }
 
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     try {
@@ -336,18 +341,18 @@ export class MemoryManager implements IMemoryManager {
         cacheSize: cacheMetrics.size,
         cacheHitRate: cacheMetrics.hitRate,
         activeBanks: this.banks.size,
-        ...backendHealth.metrics,
+        ...backendHealth.metrics
       };
 
       return {
         healthy: backendHealth.healthy,
         metrics,
-        ...(backendHealth.error && { error: backendHealth.error }),
+        ...(backendHealth.error && { error: backendHealth.error })
       };
     } catch (error) {
       return {
         healthy: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: error instanceof Error ? error.message : 'Unknown error'
       };
     }
   }
@@ -364,15 +369,15 @@ export class MemoryManager implements IMemoryManager {
       if (this.config.retentionDays > 0) {
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - this.config.retentionDays);
-        
+
         const oldEntries = await this.query({
-          endTime: cutoffDate,
+          endTime: cutoffDate
         });
 
         for (const entry of oldEntries) {
           await this.delete(entry.id);
         }
-        
+
         this.logger.info(`Cleaned up ${oldEntries.length} old memory entries`);
       }
 
@@ -400,27 +405,15 @@ export class MemoryManager implements IMemoryManager {
   private createBackend(): IMemoryBackend {
     switch (this.config.backend) {
       case 'sqlite':
-        return new SQLiteBackend(
-          this.config.sqlitePath || './claude-flow.db',
-          this.logger,
-        );
+        return new SQLiteBackend(this.config.sqlitePath || './claude-flow.db', this.logger);
       case 'markdown':
-        return new MarkdownBackend(
-          this.config.markdownDir || './memory',
-          this.logger,
-        );
+        return new MarkdownBackend(this.config.markdownDir || './memory', this.logger);
       case 'hybrid':
         // Use SQLite for structured data and Markdown for human-readable backup
         return new HybridBackend(
-          new SQLiteBackend(
-            this.config.sqlitePath || './claude-flow.db',
-            this.logger,
-          ),
-          new MarkdownBackend(
-            this.config.markdownDir || './memory',
-            this.logger,
-          ),
-          this.logger,
+          new SQLiteBackend(this.config.sqlitePath || './claude-flow.db', this.logger),
+          new MarkdownBackend(this.config.markdownDir || './memory', this.logger),
+          this.logger
         );
       default:
         throw new MemoryError(`Unknown memory backend: ${this.config.backend}`);
@@ -439,17 +432,17 @@ export class MemoryManager implements IMemoryManager {
 
   private async syncCache(): Promise<void> {
     const dirtyEntries = this.cache.getDirtyEntries();
-    
+
     if (dirtyEntries.length === 0) {
       return;
     }
 
     this.logger.debug('Syncing cache to backend', { count: dirtyEntries.length });
 
-    const promises = dirtyEntries.map(entry => 
+    const promises = dirtyEntries.map(entry =>
       this.backend.store(entry).catch(error => {
         this.logger.error('Failed to sync entry', { id: entry.id, error });
-      }),
+      })
     );
 
     await Promise.all(promises);
@@ -461,17 +454,17 @@ export class MemoryManager implements IMemoryManager {
 
   private async flushCache(): Promise<void> {
     const allEntries = this.cache.getAllEntries();
-    
+
     if (allEntries.length === 0) {
       return;
     }
 
     this.logger.info('Flushing cache to backend', { count: allEntries.length });
 
-    const promises = allEntries.map(entry => 
+    const promises = allEntries.map(entry =>
       this.backend.store(entry).catch(error => {
         this.logger.error('Failed to flush entry', { id: entry.id, error });
-      }),
+      })
     );
 
     await Promise.all(promises);
@@ -485,21 +478,15 @@ class HybridBackend implements IMemoryBackend {
   constructor(
     private primary: IMemoryBackend,
     private secondary: IMemoryBackend,
-    private logger: ILogger,
+    private logger: ILogger
   ) {}
 
   async initialize(): Promise<void> {
-    await Promise.all([
-      this.primary.initialize(),
-      this.secondary.initialize(),
-    ]);
+    await Promise.all([this.primary.initialize(), this.secondary.initialize()]);
   }
 
   async shutdown(): Promise<void> {
-    await Promise.all([
-      this.primary.shutdown(),
-      this.secondary.shutdown(),
-    ]);
+    await Promise.all([this.primary.shutdown(), this.secondary.shutdown()]);
   }
 
   async store(entry: MemoryEntry): Promise<void> {
@@ -508,7 +495,7 @@ class HybridBackend implements IMemoryBackend {
       this.primary.store(entry),
       this.secondary.store(entry).catch(error => {
         this.logger.warn('Failed to store in secondary backend', { error });
-      }),
+      })
     ]);
   }
 
@@ -528,7 +515,7 @@ class HybridBackend implements IMemoryBackend {
       this.primary.update(id, entry),
       this.secondary.update(id, entry).catch(error => {
         this.logger.warn('Failed to update in secondary backend', { error });
-      }),
+      })
     ]);
   }
 
@@ -537,7 +524,7 @@ class HybridBackend implements IMemoryBackend {
       this.primary.delete(id),
       this.secondary.delete(id).catch(error => {
         this.logger.warn('Failed to delete from secondary backend', { error });
-      }),
+      })
     ]);
   }
 
@@ -550,14 +537,14 @@ class HybridBackend implements IMemoryBackend {
     return await this.primary.getAllEntries();
   }
 
-  async getHealthStatus(): Promise<{ 
-    healthy: boolean; 
-    error?: string; 
+  async getHealthStatus(): Promise<{
+    healthy: boolean;
+    error?: string;
     metrics?: Record<string, number>;
   }> {
     const [primaryHealth, secondaryHealth] = await Promise.all([
       this.primary.getHealthStatus(),
-      this.secondary.getHealthStatus(),
+      this.secondary.getHealthStatus()
     ]);
 
     const error = primaryHealth.error || secondaryHealth.error;
@@ -566,8 +553,8 @@ class HybridBackend implements IMemoryBackend {
       ...(error && { error }),
       metrics: {
         ...primaryHealth.metrics,
-        ...secondaryHealth.metrics,
-      },
+        ...secondaryHealth.metrics
+      }
     };
   }
 }

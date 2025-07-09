@@ -19,21 +19,25 @@ npx claude-flow hook pre-search [options]
 ## Examples
 
 ### Basic pre-search hook
+
 ```bash
 npx claude-flow hook pre-search --query "authentication implementation"
 ```
 
 ### With caching
+
 ```bash
 npx claude-flow hook pre-search -q "React hooks usage" --cache-results
 ```
 
 ### Memory check first
+
 ```bash
 npx claude-flow hook pre-search -q "previous bug fixes" --check-memory
 ```
 
 ### Query expansion
+
 ```bash
 npx claude-flow hook pre-search -q "auth" --expand-query --suggest-filters
 ```
@@ -41,24 +45,28 @@ npx claude-flow hook pre-search -q "auth" --expand-query --suggest-filters
 ## Features
 
 ### Result Caching
+
 - Stores search results
 - Enables instant retrieval
 - Reduces redundant searches
 - Updates intelligently
 
 ### Filter Suggestions
+
 - File type filters
 - Directory scoping
 - Time-based filtering
 - Pattern matching
 
 ### Memory Checking
+
 - Searches stored knowledge
 - Finds previous results
 - Avoids repetition
 - Speeds up retrieval
 
 ### Query Expansion
+
 - Adds synonyms
 - Includes related terms
 - Handles abbreviations
@@ -67,12 +75,14 @@ npx claude-flow hook pre-search -q "auth" --expand-query --suggest-filters
 ## Integration
 
 This hook is automatically called by Claude Code when:
+
 - Using Grep tool
 - Using Glob tool
 - Searching codebase
 - Finding patterns
 
 Manual usage in agents:
+
 ```bash
 # Before searching
 npx claude-flow hook pre-search --query "your search" --cache-results --check-memory
@@ -81,6 +91,7 @@ npx claude-flow hook pre-search --query "your search" --cache-results --check-me
 ## Output
 
 Returns JSON with:
+
 ```json
 {
   "query": "authentication implementation",
@@ -88,11 +99,7 @@ Returns JSON with:
   "cacheHit": false,
   "memoryResults": 3,
   "expandedQuery": "(auth|authentication|login|oauth) (impl|implementation|code)",
-  "suggestedFilters": [
-    "*.js",
-    "*.ts",
-    "src/**"
-  ],
+  "suggestedFilters": ["*.js", "*.ts", "src/**"],
   "estimatedFiles": 45
 }
 ```

@@ -105,23 +105,29 @@ export class SparcPhase {
    * Store data in swarm memory
    */
   async storeInSwarmMemory(key, data) {
-    if (!this.options.swarmEnabled) {return;}
+    if (!this.options.swarmEnabled) {
+      return;
+    }
 
     try {
       // Use ruv-swarm memory hooks
       const { spawn } = await import('child_process');
 
       return new Promise((resolve, reject) => {
-        const process = spawn('npx', ['ruv-swarm', 'hook', 'memory-store', '--key', key, '--data', data], {
-          stdio: 'pipe'
-        });
+        const process = spawn(
+          'npx',
+          ['ruv-swarm', 'hook', 'memory-store', '--key', key, '--data', data],
+          {
+            stdio: 'pipe'
+          }
+        );
 
         let output = '';
-        process.stdout.on('data', (data) => {
+        process.stdout.on('data', data => {
           output += data.toString();
         });
 
-        process.on('close', (code) => {
+        process.on('close', code => {
           if (code === 0) {
             resolve(output);
           } else {
@@ -138,7 +144,9 @@ export class SparcPhase {
    * Retrieve data from swarm memory
    */
   async retrieveFromSwarmMemory(key) {
-    if (!this.options.swarmEnabled) {return null;}
+    if (!this.options.swarmEnabled) {
+      return null;
+    }
 
     try {
       const { spawn } = await import('child_process');
@@ -149,11 +157,11 @@ export class SparcPhase {
         });
 
         let output = '';
-        process.stdout.on('data', (data) => {
+        process.stdout.on('data', data => {
           output += data.toString();
         });
 
-        process.on('close', (code) => {
+        process.on('close', code => {
           if (code === 0) {
             try {
               const data = JSON.parse(output);
@@ -177,7 +185,9 @@ export class SparcPhase {
    */
   async loadSwarmContext() {
     try {
-      this.swarmContext = await this.retrieveFromSwarmMemory(`${this.options.namespace}_swarm_context`);
+      this.swarmContext = await this.retrieveFromSwarmMemory(
+        `${this.options.namespace}_swarm_context`
+      );
       if (this.swarmContext) {
         console.log(`🐝 Loaded swarm context for ${this.phaseName}`);
       }
@@ -199,7 +209,10 @@ export class SparcPhase {
         status: 'completed'
       };
 
-      await this.storeInSwarmMemory(`${this.options.namespace}_swarm_context`, JSON.stringify(contextUpdate));
+      await this.storeInSwarmMemory(
+        `${this.options.namespace}_swarm_context`,
+        JSON.stringify(contextUpdate)
+      );
       console.log(`🐝 Updated swarm context for ${this.phaseName}`);
     } catch (error) {
       console.warn(`⚠️ Failed to update swarm context: ${error.message}`);
@@ -258,7 +271,9 @@ export class SparcPhase {
    */
   setRemediationContext(qualityGate) {
     this.remediationContext = qualityGate;
-    console.log(`🔧 Set remediation context for ${this.phaseName}: ${qualityGate.reasons.join(', ')}`);
+    console.log(
+      `🔧 Set remediation context for ${this.phaseName}: ${qualityGate.reasons.join(', ')}`
+    );
   }
 
   /**
@@ -309,7 +324,9 @@ export class SparcPhase {
    * Neural learning hook
    */
   async recordLearning(learningData) {
-    if (!this.options.neuralLearning) {return;}
+    if (!this.options.neuralLearning) {
+      return;
+    }
 
     try {
       const learningRecord = {
@@ -327,7 +344,10 @@ export class SparcPhase {
 
       // Store in neural learning system if available
       if (this.options.swarmEnabled) {
-        await this.storeInSwarmMemory(`neural_learning_${this.phaseName}`, JSON.stringify(learningRecord));
+        await this.storeInSwarmMemory(
+          `neural_learning_${this.phaseName}`,
+          JSON.stringify(learningRecord)
+        );
       }
 
       console.log(`🧠 Recorded learning for ${this.phaseName}`);
@@ -340,7 +360,9 @@ export class SparcPhase {
    * Get learning insights
    */
   async getLearningInsights() {
-    if (!this.options.neuralLearning) {return [];}
+    if (!this.options.neuralLearning) {
+      return [];
+    }
 
     try {
       const insights = [];

@@ -12,6 +12,7 @@ You implement Test-Driven Development (TDD, London School) with parallel test cr
 Optimize TDD workflow using batchtools for parallel test development and execution:
 
 ### Parallel Test Development (Red Phase)
+
 1. **Batch Test Creation**: Write multiple failing tests simultaneously:
    - Create unit tests for all methods in parallel
    - Generate integration tests concurrently
@@ -29,6 +30,7 @@ Optimize TDD workflow using batchtools for parallel test development and executi
    ```
 
 ### Efficient Implementation (Green Phase)
+
 1. **Parallel Minimal Implementation**:
    - Implement multiple functions to pass tests concurrently
    - Create stubs and mocks in parallel
@@ -46,6 +48,7 @@ Optimize TDD workflow using batchtools for parallel test development and executi
    ```
 
 ### Concurrent Refactoring (Refactor Phase)
+
 1. **Parallel Code Improvements**:
    - Refactor multiple components simultaneously
    - Optimize algorithms across files concurrently
@@ -63,6 +66,7 @@ Optimize TDD workflow using batchtools for parallel test development and executi
    ```
 
 ### TDD Workflow Optimization
+
 ```
 1. Red Phase (Parallel):
    ├── Write unit tests for all components
@@ -84,11 +88,13 @@ Optimize TDD workflow using batchtools for parallel test development and executi
 ```
 
 ### Batchtools Test Patterns
+
 - **Parallel Test Generation**:
+
   ```javascript
   // Generate tests for multiple methods at once
   const methods = ['create', 'read', 'update', 'delete'];
-  await batchtools.forEach(methods, async (method) => {
+  await batchtools.forEach(methods, async method => {
     await generateTestSuite(service, method);
   });
   ```
@@ -105,6 +111,7 @@ Optimize TDD workflow using batchtools for parallel test development and executi
   ```
 
 ### Test Organization
+
 ```
 /tests/
   ├── unit/          # Created in parallel batches
@@ -116,6 +123,7 @@ Optimize TDD workflow using batchtools for parallel test development and executi
 Write failing tests first. Implement only enough code to pass. Refactor after green. Ensure tests do not hardcode secrets. Keep files < 500 lines. Validate modularity, test coverage, and clarity before using `attempt_completion`.
 
 ## Groups/Permissions
+
 - read
 - edit
 - browser
@@ -139,6 +147,7 @@ npx claude-flow sparc run tdd "implement user authentication"
 ## Batchtools TDD Examples
 
 ### Parallel Test Suite Creation
+
 ```javascript
 // Create complete test suite for a feature
 await batchtools.createTestSuite({
@@ -152,6 +161,7 @@ await batchtools.createTestSuite({
 ```
 
 ### Concurrent Test-Code Cycle
+
 ```javascript
 // Run Red-Green cycle in parallel for multiple components
 await batchtools.parallel([
@@ -162,6 +172,7 @@ await batchtools.parallel([
 ```
 
 ### Batch Test Coverage Analysis
+
 ```javascript
 // Analyze coverage across all modules simultaneously
 const coverage = await batchtools.analyzeCoverage([

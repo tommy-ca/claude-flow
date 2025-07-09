@@ -3,6 +3,7 @@
 ## Implemented Integration Points
 
 ### 1. MCP Server Integration (`src/mcp/resource-protocol.ts`)
+
 - **Status**: ✅ Complete
 - **Description**: New protocol extension for resource reporting between MCP servers and resource manager
 - **Key Features**:
@@ -13,6 +14,7 @@
   - Integration helper functions
 
 ### 2. Swarm Coordination Integration (`src/swarm/resource-aware-coordinator.ts`)
+
 - **Status**: ✅ Complete
 - **Description**: Enhanced swarm coordinator with intelligent resource-aware agent deployment
 - **Key Features**:
@@ -24,6 +26,7 @@
   - Performance metrics and monitoring
 
 ### 3. CLI Commands (`src/cli/simple-commands/resource.js`)
+
 - **Status**: ✅ Complete
 - **Description**: Comprehensive CLI commands for resource management
 - **Commands**:
@@ -38,6 +41,7 @@
   - Multiple output formats
 
 ### 4. Resource Manager Agent (`src/cli/agents/resource-manager.ts`)
+
 - **Status**: ✅ Complete
 - **Description**: Specialized agent for resource management tasks
 - **Capabilities**:
@@ -49,6 +53,7 @@
   - Alert management
 
 ### 5. Configuration Integration (`src/config/resource-manager-config.ts`)
+
 - **Status**: ✅ Complete
 - **Description**: Centralized configuration system for resource manager
 - **Features**:
@@ -60,6 +65,7 @@
   - Import/export functionality
 
 ### 6. Memory Bank Integration (`src/memory/resource-memory.ts`)
+
 - **Status**: ✅ Complete
 - **Description**: Persistent storage for resource metrics and history
 - **Features**:
@@ -71,6 +77,7 @@
   - Data retention management
 
 ### 7. Core Resource Manager (`src/resource-manager/core/resource-manager.ts`)
+
 - **Status**: ✅ Complete
 - **Description**: Main orchestrator for resource management system
 - **Features**:
@@ -84,6 +91,7 @@
 ## Required Modifications to Existing Code
 
 ### 1. MCP Server Extensions (`src/mcp/server.ts`)
+
 ```typescript
 // Add to existing MCP server initialization
 import { addResourceProtocol } from './resource-protocol';
@@ -103,6 +111,7 @@ server.setRequestHandler({
 ```
 
 ### 2. Swarm Coordinator Updates (`src/swarm/coordinator.ts`)
+
 ```typescript
 // Import resource-aware coordinator
 import { ResourceAwareCoordinator } from './resource-aware-coordinator';
@@ -117,6 +126,7 @@ export class EnhancedSwarmCoordinator extends ResourceAwareCoordinator {
 ```
 
 ### 3. CLI Command Registry (`src/cli/command-registry.js`)
+
 ```javascript
 // Add resource commands
 const resourceCommands = require('./simple-commands/resource');
@@ -129,6 +139,7 @@ registry.register({
 ```
 
 ### 4. Configuration Manager Integration (`src/config/config-manager.ts`)
+
 ```typescript
 // Add resource manager configuration
 import { ResourceManagerConfigManager } from './resource-manager-config';
@@ -143,6 +154,7 @@ async initialize() {
 ```
 
 ### 5. Memory Manager Integration (`src/memory/advanced-memory-manager.ts`)
+
 ```typescript
 // Add resource memory support
 import { ResourceMemoryManager } from './resource-memory';
@@ -157,19 +169,21 @@ async initialize() {
 ```
 
 ### 6. Agent Registry Updates (`src/cli/agents/index.ts`)
+
 ```typescript
 // Add resource manager agent
 import { ResourceManagerAgent } from './resource-manager';
 
 export const agentTypes = {
   // ... existing agents
-  'resource-manager': ResourceManagerAgent,
+  'resource-manager': ResourceManagerAgent
 };
 ```
 
 ## Integration Testing Requirements
 
 ### 1. Unit Tests
+
 - Resource protocol validation
 - Resource allocation logic
 - Configuration schema validation
@@ -177,6 +191,7 @@ export const agentTypes = {
 - CLI command functionality
 
 ### 2. Integration Tests
+
 - MCP server resource reporting
 - Swarm coordinator with resource awareness
 - CLI command execution
@@ -184,6 +199,7 @@ export const agentTypes = {
 - Memory persistence
 
 ### 3. Performance Tests
+
 - Resource monitoring overhead
 - Allocation decision latency
 - Memory query performance
@@ -192,6 +208,7 @@ export const agentTypes = {
 ## Usage Examples
 
 ### 1. Basic Resource Monitoring
+
 ```bash
 # Check resource status
 claude resource status
@@ -204,6 +221,7 @@ claude resource history --duration 24h
 ```
 
 ### 2. Resource Optimization
+
 ```bash
 # Generate optimization plan
 claude resource optimize --strategy balanced --dry-run
@@ -213,6 +231,7 @@ claude resource optimize --strategy performance
 ```
 
 ### 3. Programmatic Usage
+
 ```javascript
 // Initialize resource manager
 const resourceManager = new ResourceManager(configManager, memoryManager);
@@ -230,18 +249,21 @@ const results = await resourceManager.applyOptimizationPlan(plan);
 ## Deployment Considerations
 
 ### 1. Configuration
+
 - Set up resource thresholds based on environment
 - Configure monitoring intervals
 - Enable/disable experimental features
 - Set up alerting channels
 
 ### 2. Monitoring
+
 - Monitor resource manager performance
 - Track optimization effectiveness
 - Set up alerts for critical issues
 - Monitor memory usage
 
 ### 3. Scaling
+
 - Configure cluster-wide resource management
 - Set up distributed monitoring
 - Plan for multi-region deployments
@@ -250,18 +272,21 @@ const results = await resourceManager.applyOptimizationPlan(plan);
 ## Future Enhancements
 
 ### 1. Machine Learning Integration
+
 - Predictive resource allocation
 - Anomaly detection improvements
 - Workload pattern recognition
 - Auto-tuning thresholds
 
 ### 2. Advanced Features
+
 - Cost optimization algorithms
 - Multi-cloud resource management
 - Automated remediation
 - Advanced scheduling
 
 ### 3. UI/Dashboard
+
 - Real-time resource dashboards
 - Historical analytics
 - Optimization recommendations

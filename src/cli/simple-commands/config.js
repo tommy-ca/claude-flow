@@ -1,36 +1,43 @@
 // config.js - Configuration management commands
-import { printSuccess, printError, printWarning, readJsonFile, writeJsonFile, fileExists } from '../utils.js';
+import {
+  printSuccess,
+  printError,
+  printWarning,
+  readJsonFile,
+  writeJsonFile,
+  fileExists
+} from '../utils.js';
 
 export async function configCommand(subArgs, flags) {
   const configCmd = subArgs[0];
 
   switch (configCmd) {
-  case 'init':
-    await initConfig(subArgs, flags);
-    break;
+    case 'init':
+      await initConfig(subArgs, flags);
+      break;
 
-  case 'show':
-    await showConfig(subArgs, flags);
-    break;
+    case 'show':
+      await showConfig(subArgs, flags);
+      break;
 
-  case 'get':
-    await getConfigValue(subArgs, flags);
-    break;
+    case 'get':
+      await getConfigValue(subArgs, flags);
+      break;
 
-  case 'set':
-    await setConfigValue(subArgs, flags);
-    break;
+    case 'set':
+      await setConfigValue(subArgs, flags);
+      break;
 
-  case 'validate':
-    await validateConfig(subArgs, flags);
-    break;
+    case 'validate':
+      await validateConfig(subArgs, flags);
+      break;
 
-  case 'reset':
-    await resetConfig(subArgs, flags);
-    break;
+    case 'reset':
+      await resetConfig(subArgs, flags);
+      break;
 
-  default:
-    showConfigHelp();
+    default:
+      showConfigHelp();
   }
 }
 
@@ -97,7 +104,6 @@ async function initConfig(subArgs, flags) {
     console.log('1. Review settings: claude-flow config show');
     console.log('2. Customize values: claude-flow config set <key> <value>');
     console.log('3. Validate config: claude-flow config validate');
-
   } catch (err) {
     printError(`Failed to initialize configuration: ${err.message}`);
   }
@@ -132,7 +138,6 @@ async function showConfig(subArgs, flags) {
       console.log(`   Max Agents: ${config.agents?.maxAgents || 20}`);
       console.log(`   Resource Limits: ${JSON.stringify(config.agents?.resourceLimits || {})}`);
     }
-
   } catch (err) {
     printError('Configuration file not found');
     console.log('Run "claude-flow config init" to create default configuration');
@@ -160,7 +165,6 @@ async function getConfigValue(subArgs, flags) {
     } else {
       printWarning(`Configuration key '${key}' not found`);
     }
-
   } catch (err) {
     printError('Configuration file not found');
     console.log('Run "claude-flow config init" to create configuration');
@@ -185,16 +189,19 @@ async function setConfigValue(subArgs, flags) {
 
     // Parse value appropriately
     let parsedValue = value;
-    if (value === 'true') {parsedValue = true;}
-    else if (value === 'false') {parsedValue = false;}
-    else if (!isNaN(value) && value.trim() !== '') {parsedValue = Number(value);}
+    if (value === 'true') {
+      parsedValue = true;
+    } else if (value === 'false') {
+      parsedValue = false;
+    } else if (!isNaN(value) && value.trim() !== '') {
+      parsedValue = Number(value);
+    }
 
     // Set nested value
     setNestedValue(config, key, parsedValue);
 
     await writeJsonFile(configFile, config);
     printSuccess(`Set ${key} = ${JSON.stringify(parsedValue)}`);
-
   } catch (err) {
     printError(`Failed to set configuration: ${err.message}`);
   }
@@ -220,7 +227,10 @@ async function validateConfig(subArgs, flags) {
     }
 
     // Validate specific values
-    if (config.terminal?.poolSize && (config.terminal.poolSize < 1 || config.terminal.poolSize > 100)) {
+    if (
+      config.terminal?.poolSize &&
+      (config.terminal.poolSize < 1 || config.terminal.poolSize > 100)
+    ) {
       warnings.push('Terminal pool size should be between 1 and 100');
     }
 
@@ -246,7 +256,6 @@ async function validateConfig(subArgs, flags) {
         warnings.forEach(warning => console.log(`  ⚠️  ${warning}`));
       }
     }
-
   } catch (err) {
     printError('Configuration file not found or invalid');
     console.log('Run "claude-flow config init" to create valid configuration');
@@ -275,7 +284,9 @@ function setNestedValue(obj, path, value) {
   const keys = path.split('.');
   const last = keys.pop();
   const target = keys.reduce((current, key) => {
-    if (!current[key]) {current[key] = {};}
+    if (!current[key]) {
+      current[key] = {};
+    }
     return current[key];
   }, obj);
   target[last] = value;

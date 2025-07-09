@@ -23,9 +23,18 @@ export class HealthChecker {
     try {
       // Get expected modes
       const expectedModes = [
-        'architect', 'code', 'tdd', 'spec-pseudocode', 'integration',
-        'debug', 'security-review', 'refinement-optimization-mode',
-        'docs-writer', 'devops', 'mcp', 'swarm'
+        'architect',
+        'code',
+        'tdd',
+        'spec-pseudocode',
+        'integration',
+        'debug',
+        'security-review',
+        'refinement-optimization-mode',
+        'docs-writer',
+        'devops',
+        'mcp',
+        'swarm'
       ];
 
       result.modes.total = expectedModes.length;
@@ -45,9 +54,10 @@ export class HealthChecker {
         result.success = false;
         result.errors.push('No SPARC modes are available');
       } else if (result.modes.unavailable.length > 0) {
-        result.warnings.push(`${result.modes.unavailable.length} modes unavailable: ${result.modes.unavailable.join(', ')}`);
+        result.warnings.push(
+          `${result.modes.unavailable.length} modes unavailable: ${result.modes.unavailable.join(', ')}`
+        );
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Mode availability check failed: ${error.message}`);
@@ -73,10 +83,7 @@ export class HealthChecker {
 
     try {
       // Check for template directories
-      const templateDirs = [
-        '.roo/templates',
-        '.claude/commands'
-      ];
+      const templateDirs = ['.roo/templates', '.claude/commands'];
 
       for (const dir of templateDirs) {
         const dirPath = `${this.workingDir}/${dir}`;
@@ -95,11 +102,7 @@ export class HealthChecker {
       }
 
       // Check core template files
-      const coreTemplates = [
-        'CLAUDE.md',
-        'memory-bank.md',
-        'coordination.md'
-      ];
+      const coreTemplates = ['CLAUDE.md', 'memory-bank.md', 'coordination.md'];
 
       for (const template of coreTemplates) {
         const templatePath = `${this.workingDir}/${template}`;
@@ -125,7 +128,6 @@ export class HealthChecker {
       if (result.templates.missing.length > 0) {
         result.warnings.push(`Missing templates: ${result.templates.missing.join(', ')}`);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Template integrity check failed: ${error.message}`);
@@ -166,7 +168,6 @@ export class HealthChecker {
       if (!memoryCheck.consistent) {
         result.warnings.push('Memory configuration inconsistency detected');
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Configuration consistency check failed: ${error.message}`);
@@ -214,7 +215,6 @@ export class HealthChecker {
       if (!processCheck.adequate) {
         result.warnings.push('Process limits may affect operation');
       }
-
     } catch (error) {
       result.warnings.push(`System resource check failed: ${error.message}`);
     }
@@ -263,7 +263,6 @@ export class HealthChecker {
       if (!integrationHealth.healthy) {
         result.warnings.push(...integrationHealth.warnings);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Health diagnostics failed: ${error.message}`);
@@ -353,7 +352,6 @@ export class HealthChecker {
           result.issues.push('Cannot access commands directory');
         }
       }
-
     } catch {
       result.consistent = false;
       result.issues.push('Cannot read .roomodes file');
@@ -373,11 +371,7 @@ export class HealthChecker {
       const content = await Deno.readTextFile(claudePath);
 
       // Check if mentioned commands exist
-      const mentionedCommands = [
-        'claude-flow sparc',
-        'npm run build',
-        'npm run test'
-      ];
+      const mentionedCommands = ['claude-flow sparc', 'npm run build', 'npm run test'];
 
       for (const command of mentionedCommands) {
         if (content.includes(command)) {
@@ -394,7 +388,6 @@ export class HealthChecker {
           }
         }
       }
-
     } catch {
       result.consistent = false;
       result.issues.push('Cannot read CLAUDE.md');
@@ -430,7 +423,6 @@ export class HealthChecker {
           result.issues.push(`Memory directory missing: ${dir}`);
         }
       }
-
     } catch {
       result.consistent = false;
       result.issues.push('Cannot validate memory structure');

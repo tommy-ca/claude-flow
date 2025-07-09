@@ -49,7 +49,7 @@ export class RuvSwarmWrapper {
           crlfDelay: Infinity
         });
 
-        rlOut.on('line', (line) => {
+        rlOut.on('line', line => {
           try {
             const message = JSON.parse(line);
 
@@ -77,7 +77,7 @@ export class RuvSwarmWrapper {
           crlfDelay: Infinity
         });
 
-        rlErr.on('line', (line) => {
+        rlErr.on('line', line => {
           // Filter out known harmless errors
           if (line.includes('logger.logMemoryUsage is not a function')) {
             // This is a known issue in ruv-swarm v1.0.8
@@ -102,7 +102,7 @@ export class RuvSwarmWrapper {
         });
 
         // Handle process errors
-        this.process.on('error', (error) => {
+        this.process.on('error', error => {
           if (!initialized) {
             clearTimeout(initTimeout);
             reject(new Error(`Failed to start ruv-swarm: ${error.message}`));
@@ -116,7 +116,9 @@ export class RuvSwarmWrapper {
         this.process.on('exit', (code, signal) => {
           if (!initialized) {
             clearTimeout(initTimeout);
-            reject(new Error(`RuvSwarm exited before initialization: code ${code}, signal ${signal}`));
+            reject(
+              new Error(`RuvSwarm exited before initialization: code ${code}, signal ${signal}`)
+            );
           } else {
             this.handleProcessExit(code || 0);
           }
@@ -129,7 +131,6 @@ export class RuvSwarmWrapper {
             reject(new Error('RuvSwarm initialization timeout'));
           }
         }, 30000); // 30 second timeout
-
       } catch (error) {
         reject(error);
       }
@@ -148,7 +149,9 @@ export class RuvSwarmWrapper {
     // Auto-restart if enabled and under limit
     if (this.options.autoRestart && this.restartCount < this.options.maxRestarts) {
       this.restartCount++;
-      console.log(`Attempting to restart RuvSwarm (attempt ${this.restartCount}/${this.options.maxRestarts})...`);
+      console.log(
+        `Attempting to restart RuvSwarm (attempt ${this.restartCount}/${this.options.maxRestarts})...`
+      );
 
       setTimeout(() => {
         this.start().catch(err => {
@@ -165,7 +168,7 @@ export class RuvSwarmWrapper {
       return;
     }
 
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
       const killTimeout = setTimeout(() => {
         console.warn('RuvSwarm did not exit gracefully, forcing kill...');
         this.process.kill('SIGKILL');

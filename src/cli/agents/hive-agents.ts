@@ -37,24 +37,24 @@ export class QueenAgent extends BaseAgent {
       documentation: true,
       research: true,
       analysis: true,
-      
+
       // Communication capabilities
       webSearch: true,
       apiIntegration: true,
       fileSystem: true,
       terminalAccess: false,
-      
+
       // Specialized capabilities
       languages: ['javascript', 'typescript'],
       frameworks: ['node.js'],
       domains: ['orchestration', 'coordination'],
       tools: ['consensus', 'delegation'],
-      
+
       // Resource limits
       maxConcurrentTasks: 5,
       maxMemoryUsage: 512,
       maxExecutionTime: 300000,
-      
+
       // Performance characteristics
       reliability: 0.95,
       speed: 0.8,
@@ -153,24 +153,24 @@ export class WorkerAgent extends BaseAgent {
       documentation: false,
       research: false,
       analysis: false,
-      
+
       // Communication capabilities
       webSearch: false,
       apiIntegration: true,
       fileSystem: true,
       terminalAccess: true,
-      
+
       // Specialized capabilities
       languages: ['javascript', 'typescript', 'python'],
       frameworks: ['node.js', 'react', 'express'],
       domains: ['backend', 'frontend', 'fullstack'],
       tools: ['git', 'npm', 'docker'],
-      
+
       // Resource limits
       maxConcurrentTasks: 3,
       maxMemoryUsage: 1024,
       maxExecutionTime: 600000,
-      
+
       // Performance characteristics
       reliability: 0.9,
       speed: 0.9,
@@ -265,24 +265,24 @@ export class ScoutAgent extends BaseAgent {
       documentation: true,
       research: true,
       analysis: true,
-      
+
       // Communication capabilities
       webSearch: true,
       apiIntegration: true,
       fileSystem: false,
       terminalAccess: false,
-      
+
       // Specialized capabilities
       languages: [],
       frameworks: [],
       domains: ['research', 'analysis', 'discovery'],
       tools: ['web-search', 'data-analysis'],
-      
+
       // Resource limits
       maxConcurrentTasks: 4,
       maxMemoryUsage: 768,
       maxExecutionTime: 300000,
-      
+
       // Performance characteristics
       reliability: 0.85,
       speed: 0.95,
@@ -377,24 +377,24 @@ export class GuardianAgent extends BaseAgent {
       documentation: false,
       research: false,
       analysis: true,
-      
+
       // Communication capabilities
       webSearch: false,
       apiIntegration: false,
       fileSystem: true,
       terminalAccess: false,
-      
+
       // Specialized capabilities
       languages: ['javascript', 'typescript'],
       frameworks: ['jest', 'eslint'],
       domains: ['quality-assurance', 'security', 'review'],
       tools: ['linting', 'testing', 'security-scan'],
-      
+
       // Resource limits
       maxConcurrentTasks: 2,
       maxMemoryUsage: 512,
       maxExecutionTime: 180000,
-      
+
       // Performance characteristics
       reliability: 0.98,
       speed: 0.7,
@@ -490,24 +490,24 @@ export class ArchitectAgent extends BaseAgent {
       documentation: true,
       research: true,
       analysis: true,
-      
+
       // Communication capabilities
       webSearch: true,
       apiIntegration: false,
       fileSystem: true,
       terminalAccess: false,
-      
+
       // Specialized capabilities
       languages: ['javascript', 'typescript'],
       frameworks: ['architecture-patterns'],
       domains: ['system-design', 'architecture', 'planning'],
       tools: ['design-patterns', 'documentation'],
-      
+
       // Resource limits
       maxConcurrentTasks: 2,
       maxMemoryUsage: 1024,
       maxExecutionTime: 240000,
-      
+
       // Performance characteristics
       reliability: 0.92,
       speed: 0.75,
@@ -594,19 +594,27 @@ export class HiveAgentFactory {
     switch (config.type) {
       case 'queen':
         return new QueenAgent(config.name, agentConfig, environment, logger, eventBus, memory);
-      
+
       case 'worker':
-        return new WorkerAgent(config.name, agentConfig, environment, logger, eventBus, memory, config.specialization);
-      
+        return new WorkerAgent(
+          config.name,
+          agentConfig,
+          environment,
+          logger,
+          eventBus,
+          memory,
+          config.specialization
+        );
+
       case 'scout':
         return new ScoutAgent(config.name, agentConfig, environment, logger, eventBus, memory);
-      
+
       case 'guardian':
         return new GuardianAgent(config.name, agentConfig, environment, logger, eventBus, memory);
-      
+
       case 'architect':
         return new ArchitectAgent(config.name, agentConfig, environment, logger, eventBus, memory);
-      
+
       default:
         throw new Error(`Unknown Hive agent type: ${config.type}`);
     }
@@ -625,37 +633,47 @@ export class HiveAgentFactory {
     memory: any
   ): BaseAgent[] {
     const agents: BaseAgent[] = [];
-    
+
     // Always include a Queen
-    agents.push(new QueenAgent('Queen-Genesis', agentConfig, environment, logger, eventBus, memory));
-    
+    agents.push(
+      new QueenAgent('Queen-Genesis', agentConfig, environment, logger, eventBus, memory)
+    );
+
     // Determine agent composition based on objective
-    const needsDesign = objective.toLowerCase().includes('build') || 
-                       objective.toLowerCase().includes('create');
-    const needsResearch = objective.toLowerCase().includes('research') || 
-                         objective.toLowerCase().includes('analyze');
-    
+    const needsDesign =
+      objective.toLowerCase().includes('build') || objective.toLowerCase().includes('create');
+    const needsResearch =
+      objective.toLowerCase().includes('research') || objective.toLowerCase().includes('analyze');
+
     if (needsDesign && agents.length < maxAgents) {
-      agents.push(new ArchitectAgent('Architect-Prime', agentConfig, environment, logger, eventBus, memory));
+      agents.push(
+        new ArchitectAgent('Architect-Prime', agentConfig, environment, logger, eventBus, memory)
+      );
     }
-    
+
     if (needsResearch && agents.length < maxAgents) {
-      agents.push(new ScoutAgent('Scout-Alpha', agentConfig, environment, logger, eventBus, memory));
+      agents.push(
+        new ScoutAgent('Scout-Alpha', agentConfig, environment, logger, eventBus, memory)
+      );
     }
-    
+
     // Add workers based on remaining slots
     const workerCount = Math.min(3, maxAgents - agents.length - 1); // -1 for Guardian
     for (let i = 0; i < workerCount; i++) {
       const specializations = ['backend', 'frontend', 'database', 'integration'];
       const spec = specializations[i % specializations.length];
-      agents.push(new WorkerAgent(`Worker-${i + 1}`, agentConfig, environment, logger, eventBus, memory, spec));
+      agents.push(
+        new WorkerAgent(`Worker-${i + 1}`, agentConfig, environment, logger, eventBus, memory, spec)
+      );
     }
-    
+
     // Always include a Guardian if space
     if (agents.length < maxAgents) {
-      agents.push(new GuardianAgent('Guardian-Omega', agentConfig, environment, logger, eventBus, memory));
+      agents.push(
+        new GuardianAgent('Guardian-Omega', agentConfig, environment, logger, eventBus, memory)
+      );
     }
-    
+
     return agents;
   }
 

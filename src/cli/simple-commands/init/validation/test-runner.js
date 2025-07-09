@@ -53,7 +53,6 @@ export class ValidationTestRunner {
             result.errors.forEach(error => console.error(`  - ${error}`));
           }
         }
-
       } catch (error) {
         this.testResults.push({
           name: testCase.name,
@@ -88,7 +87,6 @@ export class ValidationTestRunner {
       result.details.force = forceValidation;
 
       result.success = true; // Pre-init validation tested successfully
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Pre-init validation test failed: ${error.message}`);
@@ -114,7 +112,6 @@ export class ValidationTestRunner {
       await this.cleanupTestFiles();
 
       result.success = true;
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Post-init validation test failed: ${error.message}`);
@@ -140,7 +137,6 @@ export class ValidationTestRunner {
       await this.cleanupTestConfigs();
 
       result.success = true;
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Config validation test failed: ${error.message}`);
@@ -166,7 +162,6 @@ export class ValidationTestRunner {
       await this.cleanupTestSparcConfig();
 
       result.success = true;
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Mode functionality test failed: ${error.message}`);
@@ -186,7 +181,6 @@ export class ValidationTestRunner {
       result.details.healthChecks = healthChecks;
 
       result.success = true;
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Health checks test failed: ${error.message}`);
@@ -203,7 +197,10 @@ export class ValidationTestRunner {
 
     try {
       // Test backup creation
-      const backupResult = await this.rollbackSystem.backupManager.createBackup('test', 'Test backup');
+      const backupResult = await this.rollbackSystem.backupManager.createBackup(
+        'test',
+        'Test backup'
+      );
       result.details.backupCreation = backupResult;
 
       if (!backupResult.success) {
@@ -225,7 +222,6 @@ export class ValidationTestRunner {
           result.errors.push('Backup deletion failed');
         }
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Backup system test failed: ${error.message}`);
@@ -255,7 +251,6 @@ export class ValidationTestRunner {
         count: rollbackPoints.rollbackPoints.length,
         checkpoints: rollbackPoints.checkpoints.length
       };
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Rollback system test failed: ${error.message}`);
@@ -296,7 +291,6 @@ export class ValidationTestRunner {
       if (!stateValidation.success) {
         result.errors.push(...stateValidation.errors);
       }
-
     } catch (error) {
       result.success = false;
       result.errors.push(`State tracking test failed: ${error.message}`);
@@ -325,7 +319,6 @@ export class ValidationTestRunner {
       // Test generic recovery
       const genericRecovery = await recoveryManager.performRecovery('test-failure', { test: true });
       result.details.genericRecovery = genericRecovery;
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Recovery procedures test failed: ${error.message}`);
@@ -358,7 +351,6 @@ export class ValidationTestRunner {
       // Test commit
       await atomicOp.commit();
       result.details.atomicCommit = { success: true };
-
     } catch (error) {
       result.success = false;
       result.errors.push(`Atomic operations test failed: ${error.message}`);

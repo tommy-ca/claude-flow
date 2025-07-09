@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Hive Mind CLI Commands Index
- * 
+ *
  * Main entry point for all Hive Mind CLI commands
  */
 
@@ -21,10 +21,4 @@ export const hiveMindCommand = new Command('hive-mind')
   .addCommand(wizardCommand);
 
 // Export individual commands for testing
-export {
-  initCommand,
-  spawnCommand,
-  statusCommand,
-  taskCommand,
-  wizardCommand
-};
+export { initCommand, spawnCommand, statusCommand, taskCommand, wizardCommand };

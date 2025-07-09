@@ -23,7 +23,7 @@ describe('Batch Error Handling Tests', () => {
         { id: 5, shouldFail: false }
       ];
 
-      const results = await harness.executeBatch(operations, async (op) => {
+      const results = await harness.executeBatch(operations, async op => {
         if (op.shouldFail) {
           throw new Error(op.error);
         }
@@ -47,17 +47,23 @@ describe('Batch Error Handling Tests', () => {
     it('should handle mixed synchronous and asynchronous errors', async () => {
       const tasks = [
         async () => 'success1',
-        () => { throw new Error('Sync error'); },
-        async () => { throw new Error('Async error'); },
+        () => {
+          throw new Error('Sync error');
+        },
+        async () => {
+          throw new Error('Async error');
+        },
         async () => 'success2',
-        () => { throw new TypeError('Type mismatch'); }
+        () => {
+          throw new TypeError('Type mismatch');
+        }
       ];
 
-      const results = await harness.executeBatch(tasks, async (task) => await task());
+      const results = await harness.executeBatch(tasks, async task => await task());
 
       assert.strictEqual(results.successful.length, 2);
       assert.strictEqual(results.failed.length, 3);
-      
+
       // Check error types preserved
       const errorTypes = results.failed.map(f => f.error.constructor.name);
       assert(errorTypes.includes('Error'));
@@ -74,15 +80,15 @@ describe('Batch Error Handling Tests', () => {
           sharedResource.available = false;
           throw new Error('Resource corruption');
         }
-        
+
         if (!sharedResource.available) {
           throw new Error('Resource unavailable due to previous failure');
         }
-        
+
         return { operation: i, status: 'completed' };
       });
 
-      const results = await harness.executeBatch(operations, async (op) => await op());
+      const results = await harness.executeBatch(operations, async op => await op());
 
       // First 3 operations should succeed
       const successfulOps = results.successful.map(r => r.operation);
@@ -90,9 +96,9 @@ describe('Batch Error Handling Tests', () => {
 
       // Remaining operations should fail
       assert.strictEqual(results.failed.length, 7);
-      
+
       // Check cascade error messages
-      const cascadeErrors = results.failed.filter(f => 
+      const cascadeErrors = results.failed.filter(f =>
         f.error.message.includes('Resource unavailable')
       );
       assert(cascadeErrors.length >= 6);
@@ -107,12 +113,12 @@ describe('Batch Error Handling Tests', () => {
           id: i,
           operation: async () => {
             attempts++;
-            
+
             // Fail first 2 attempts for some operations
             if (i % 2 === 0 && attempts < 3) {
               throw new Error(`Transient error attempt ${attempts}`);
             }
-            
+
             return { id: i, attempts, success: true };
           }
         };
@@ -121,7 +127,7 @@ describe('Batch Error Handling Tests', () => {
       // Implement retry wrapper
       const retryWrapper = async (operation, maxRetries = 3) => {
         let lastError;
-        
+
         for (let attempt = 0; attempt < maxRetries; attempt++) {
           try {
             return await operation();
@@ -132,17 +138,18 @@ describe('Batch Error Handling Tests', () => {
             }
           }
         }
-        
+
         throw lastError;
       };
 
-      const results = await harness.executeBatch(operations, async (op) => 
-        await retryWrapper(op.operation)
+      const results = await harness.executeBatch(
+        operations,
+        async op => await retryWrapper(op.operation)
       );
 
       assert.strictEqual(results.successful.length, 5);
       assert.strictEqual(results.failed.length, 0);
-      
+
       // Verify retry attempts
       const evenResults = results.successful.filter(r => r.id % 2 === 0);
       assert(evenResults.every(r => r.attempts === 3));
@@ -150,13 +157,13 @@ describe('Batch Error Handling Tests', () => {
 
     it('should handle timeout errors appropriately', async () => {
       const timeoutMs = 100;
-      
+
       const operations = [
-        { id: 1, duration: 50 },   // Should complete
-        { id: 2, duration: 150 },  // Should timeout
-        { id: 3, duration: 80 },   // Should complete
-        { id: 4, duration: 200 },  // Should timeout
-        { id: 5, duration: 30 }    // Should complete
+        { id: 1, duration: 50 }, // Should complete
+        { id: 2, duration: 150 }, // Should timeout
+        { id: 3, duration: 80 }, // Should complete
+        { id: 4, duration: 200 }, // Should timeout
+        { id: 5, duration: 30 } // Should complete
       ];
 
       const withTimeout = async (promise, ms) => {
@@ -164,7 +171,7 @@ describe('Batch Error Handling Tests', () => {
         const timeout = new Promise((_, reject) => {
           timeoutId = setTimeout(() => reject(new Error('Operation timeout')), ms);
         });
-        
+
         try {
           return await Promise.race([promise, timeout]);
         } finally {
@@ -172,22 +179,20 @@ describe('Batch Error Handling Tests', () => {
         }
       };
 
-      const results = await harness.executeBatch(operations, async (op) => {
+      const results = await harness.executeBatch(operations, async op => {
         const operation = harness.simulateDelay(op.duration).then(() => ({
           id: op.id,
           completed: true
         }));
-        
+
         return await withTimeout(operation, timeoutMs);
       });
 
       assert.strictEqual(results.successful.length, 3);
       assert.strictEqual(results.failed.length, 2);
-      
+
       // Verify timeout errors
-      const timeoutErrors = results.failed.filter(f => 
-        f.error.message === 'Operation timeout'
-      );
+      const timeoutErrors = results.failed.filter(f => f.error.message === 'Operation timeout');
       assert.strictEqual(timeoutErrors.length, 2);
     });
 
@@ -207,7 +212,7 @@ describe('Batch Error Handling Tests', () => {
         shouldFail: i >= 2 && i <= 4
       }));
 
-      const executeWithCircuitBreaker = async (operation) => {
+      const executeWithCircuitBreaker = async operation => {
         // Check if circuit is open
         if (circuitBreaker.state === 'open') {
           const now = Date.now();
@@ -223,22 +228,22 @@ describe('Batch Error Handling Tests', () => {
           if (operation.shouldFail) {
             throw new Error('Operation failed');
           }
-          
+
           // Success - reset circuit if needed
           if (circuitBreaker.state === 'half-open') {
             circuitBreaker.state = 'closed';
             circuitBreaker.failures = 0;
           }
-          
+
           return { id: operation.id, status: 'success' };
         } catch (error) {
           circuitBreaker.failures++;
           circuitBreaker.lastFailureTime = Date.now();
-          
+
           if (circuitBreaker.failures >= circuitBreaker.failureThreshold) {
             circuitBreaker.state = 'open';
           }
-          
+
           throw error;
         }
       };
@@ -248,10 +253,10 @@ describe('Batch Error Handling Tests', () => {
       // First 2 operations should succeed
       assert(results.successful.some(r => r.id === 0));
       assert(results.successful.some(r => r.id === 1));
-      
+
       // Circuit should open after 3 failures
-      const circuitBreakerErrors = results.failed.filter(f => 
-        f.error.message === 'Circuit breaker is open'
+      const circuitBreakerErrors = results.failed.filter(
+        f => f.error.message === 'Circuit breaker is open'
       );
       assert(circuitBreakerErrors.length > 0);
     });
@@ -269,7 +274,7 @@ describe('Batch Error Handling Tests', () => {
         { id: 7, error: new Error('Network error'), severity: 'high' }
       ];
 
-      const results = await harness.executeBatch(operations, async (op) => {
+      const results = await harness.executeBatch(operations, async op => {
         if (op.error) {
           op.error.severity = op.severity;
           throw op.error;
@@ -281,23 +286,25 @@ describe('Batch Error Handling Tests', () => {
       const errorAggregation = results.failed.reduce((acc, failure) => {
         const errorType = failure.error.constructor.name;
         const severity = failure.error.severity || 'unknown';
-        
+
         if (!acc[errorType]) {
           acc[errorType] = { count: 0, severities: {} };
         }
-        
+
         acc[errorType].count++;
         acc[errorType].severities[severity] = (acc[errorType].severities[severity] || 0) + 1;
-        
+
         return acc;
       }, {});
 
       console.log('\n=== Error Aggregation Report ===');
       console.log('Error Type   | Count | High | Medium | Low');
       console.log('-------------|-------|------|--------|-----');
-      
+
       Object.entries(errorAggregation).forEach(([type, data]) => {
-        console.log(`${type.padEnd(12)} | ${data.count.toString().padEnd(5)} | ${(data.severities.high || 0).toString().padEnd(4)} | ${(data.severities.medium || 0).toString().padEnd(6)} | ${(data.severities.low || 0)}`);
+        console.log(
+          `${type.padEnd(12)} | ${data.count.toString().padEnd(5)} | ${(data.severities.high || 0).toString().padEnd(4)} | ${(data.severities.medium || 0).toString().padEnd(6)} | ${data.severities.low || 0}`
+        );
       });
 
       assert.strictEqual(errorAggregation.Error.count, 3);
@@ -306,12 +313,7 @@ describe('Batch Error Handling Tests', () => {
     });
 
     it('should provide detailed error context', async () => {
-      const files = [
-        'src/valid.js',
-        'src/missing.js',
-        'src/corrupt.js',
-        'src/locked.js'
-      ];
+      const files = ['src/valid.js', 'src/missing.js', 'src/corrupt.js', 'src/locked.js'];
 
       // Set up test files
       harness.mockFS.set('src/valid.js', 'console.log("valid");');
@@ -327,7 +329,7 @@ describe('Batch Error Handling Tests', () => {
             error.syscall = 'open';
             throw error;
           }
-          
+
           if (file.includes('locked')) {
             const error = new Error('Permission denied');
             error.code = 'EACCES';
@@ -335,9 +337,9 @@ describe('Batch Error Handling Tests', () => {
             error.syscall = 'open';
             throw error;
           }
-          
+
           const content = await harness.mockReadFile(file);
-          
+
           if (file.includes('corrupt') && content.length === 0) {
             const error = new Error('File appears to be corrupted');
             error.code = 'CORRUPT';
@@ -345,14 +347,12 @@ describe('Batch Error Handling Tests', () => {
             error.details = { size: 0, expected: '>0' };
             throw error;
           }
-          
+
           return { file, content, size: content.length };
         }
       }));
 
-      const results = await harness.executeBatch(fileOperations, async (op) => 
-        await op.operation()
-      );
+      const results = await harness.executeBatch(fileOperations, async op => await op.operation());
 
       // Generate detailed error report
       const errorReport = results.failed.map(failure => ({
@@ -408,15 +408,17 @@ describe('Batch Error Handling Tests', () => {
       ];
 
       let systemStable = true;
-      
+
       try {
-        const results = await harness.executeBatch(operations, async (op) => {
+        const results = await harness.executeBatch(operations, async op => {
           try {
             return await op();
           } catch (error) {
             // Log catastrophic errors
-            if (error.message.includes('Stack overflow') || 
-                error.message.includes('Memory allocation')) {
+            if (
+              error.message.includes('Stack overflow') ||
+              error.message.includes('Memory allocation')
+            ) {
               console.log(`Catastrophic error caught: ${error.message}`);
             }
             throw error;
@@ -434,33 +436,33 @@ describe('Batch Error Handling Tests', () => {
 
     it('should isolate errors between parallel operations', async () => {
       const sharedState = { counter: 0 };
-      
+
       const operations = Array.from({ length: 10 }, (_, i) => async () => {
         // Each operation tries to modify shared state
         const localCounter = sharedState.counter;
-        
+
         if (i === 5) {
           // Operation 5 tries to corrupt shared state
           throw new Error('Attempting to corrupt shared state');
         }
-        
+
         // Increment counter
         sharedState.counter = localCounter + 1;
-        
-        return { 
-          operation: i, 
+
+        return {
+          operation: i,
           counterBefore: localCounter,
           counterAfter: sharedState.counter
         };
       });
 
       harness.concurrencyLimit = 5;
-      const results = await harness.executeBatch(operations, async (op) => await op());
+      const results = await harness.executeBatch(operations, async op => await op());
 
       // Despite the error, other operations should complete
       assert(results.successful.length >= 9);
       assert.strictEqual(results.failed.length, 1);
-      
+
       // Shared state should reflect successful operations
       assert(sharedState.counter >= 9);
     });
@@ -476,14 +478,14 @@ describe('Batch Error Handling Tests', () => {
           }
           throw error;
         },
-        
+
         fallback: async (operation, error) => {
           if (error.code === 'SERVICE_UNAVAILABLE') {
             return { source: 'fallback', data: 'cached_value' };
           }
           throw error;
         },
-        
+
         skip: async (operation, error) => {
           if (error.code === 'OPTIONAL') {
             return { skipped: true, reason: error.message };
@@ -500,7 +502,7 @@ describe('Batch Error Handling Tests', () => {
         { id: 5, errorCode: null } // No error
       ];
 
-      const executeWithRecovery = async (op) => {
+      const executeWithRecovery = async op => {
         const operation = async () => {
           if (op.errorCode === 'TEMPORARY' && op.attempts === 0) {
             op.attempts++;
@@ -508,13 +510,13 @@ describe('Batch Error Handling Tests', () => {
             error.code = op.errorCode;
             throw error;
           }
-          
+
           if (op.errorCode && op.errorCode !== 'TEMPORARY') {
             const error = new Error(`${op.errorCode} error`);
             error.code = op.errorCode;
             throw error;
           }
-          
+
           return { id: op.id, success: true };
         };
 
@@ -537,12 +539,12 @@ describe('Batch Error Handling Tests', () => {
 
       // Verify recovery strategies worked
       assert(results.successful.length >= 4); // All except FATAL
-      
+
       const recovered = results.successful;
       assert(recovered.some(r => r.success && r.id === 1)); // Retry worked
       assert(recovered.some(r => r.source === 'fallback')); // Fallback worked
       assert(recovered.some(r => r.skipped === true)); // Skip worked
-      
+
       // FATAL error should not recover
       assert(results.failed.some(f => f.error.code === 'FATAL'));
     });

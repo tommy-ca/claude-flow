@@ -37,7 +37,6 @@ export class StateManager {
       this.eventBus.emit('state-manager:initialized');
 
       console.log('💾 State Manager initialized');
-
     } catch (error) {
       console.error('❌ Failed to initialize State Manager:', error);
       throw error;
@@ -81,7 +80,6 @@ export class StateManager {
       } else {
         this.initializeDefaultState();
       }
-
     } catch (error) {
       console.warn('Could not load persisted state:', error);
       this.initializeDefaultState();
@@ -180,7 +178,6 @@ export class StateManager {
       }
 
       this.eventBus.emit('state:persisted', { timestamp: Date.now() });
-
     } catch (error) {
       console.error('Failed to persist state:', error);
       this.eventBus.emit('state:error', { error: error.message });
@@ -480,17 +477,17 @@ export class StateManager {
     });
 
     // Listen for preference changes from UI
-    this.eventBus.on('ui:preference:set', (data) => {
+    this.eventBus.on('ui:preference:set', data => {
       this.setPreference(data.key, data.value);
     });
 
     // Listen for state changes from UI
-    this.eventBus.on('ui:state:set', (data) => {
+    this.eventBus.on('ui:state:set', data => {
       this.setState(data.key, data.value);
     });
 
     // Listen for tool results
-    this.eventBus.on('tool:executed', (data) => {
+    this.eventBus.on('tool:executed', data => {
       this.setToolResult(data.tool, data.result);
     });
   }

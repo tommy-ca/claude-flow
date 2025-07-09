@@ -30,7 +30,7 @@ export const createOptimizedSwarmStack = (config?: {
     connectionPool: config?.connectionPool,
     fileOperations: config?.fileManager
   });
-  
+
   return {
     connectionPool,
     fileManager,

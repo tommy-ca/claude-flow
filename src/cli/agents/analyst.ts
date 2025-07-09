@@ -3,7 +3,12 @@
  */
 
 import { BaseAgent } from './base-agent.js';
-import type { AgentCapabilities, AgentConfig, AgentEnvironment, TaskDefinition } from '../../swarm/types.js';
+import type {
+  AgentCapabilities,
+  AgentConfig,
+  AgentEnvironment,
+  TaskDefinition
+} from '../../swarm/types.js';
 import type { ILogger } from '../../core/logger.js';
 import type { IEventBus } from '../../core/event-bus.js';
 import type { DistributedMemorySystem } from '../../memory/distributed-memory.js';
@@ -277,16 +282,7 @@ export class AnalystAgent extends BaseAgent {
       apiIntegration: true,
       fileSystem: true,
       terminalAccess: false,
-      languages: [
-        'python',
-        'r',
-        'sql',
-        'typescript',
-        'javascript',
-        'julia',
-        'scala',
-        'matlab'
-      ],
+      languages: ['python', 'r', 'sql', 'typescript', 'javascript', 'julia', 'scala', 'matlab'],
       frameworks: [
         'pandas',
         'numpy',
@@ -330,8 +326,8 @@ export class AnalystAgent extends BaseAgent {
       maxConcurrentTasks: 4,
       maxMemoryUsage: 2048 * 1024 * 1024, // 2GB
       maxExecutionTime: 1200000, // 20 minutes
-      reliability: 0.90,
-      speed: 0.80,
+      reliability: 0.9,
+      speed: 0.8,
       quality: 0.95
     };
   }
@@ -346,19 +342,13 @@ export class AnalystAgent extends BaseAgent {
       timeoutThreshold: 1200000,
       reportingInterval: 45000,
       heartbeatInterval: 12000,
-      permissions: [
-        'file-read',
-        'file-write',
-        'data-access',
-        'database-read',
-        'api-access'
-      ],
+      permissions: ['file-read', 'file-write', 'data-access', 'database-read', 'api-access'],
       trustedAgents: [],
       expertise: {
         'data-analysis': 0.95,
         'statistical-analysis': 0.92,
-        'visualization': 0.88,
-        'performance-analysis': 0.90,
+        visualization: 0.88,
+        'performance-analysis': 0.9,
         'predictive-modeling': 0.85,
         'business-intelligence': 0.83
       },
@@ -451,19 +441,23 @@ export class AnalystAgent extends BaseAgent {
     };
 
     // Store analysis progress
-    await this.memory.store(`analysis:${task.id}:progress`, {
-      status: 'analyzing',
-      startTime: new Date(),
-      analysisType
-    }, {
-      type: 'analysis-progress',
-      tags: ['analysis', this.id, analysisType],
-      partition: 'tasks'
-    });
+    await this.memory.store(
+      `analysis:${task.id}:progress`,
+      {
+        status: 'analyzing',
+        startTime: new Date(),
+        analysisType
+      },
+      {
+        type: 'analysis-progress',
+        tags: ['analysis', this.id, analysisType],
+        partition: 'tasks'
+      }
+    );
 
     // Simulate data analysis
     await this.delay(3000);
-    
+
     analysis.summary = {
       rowCount: 10000,
       columnCount: 15,
@@ -471,21 +465,21 @@ export class AnalystAgent extends BaseAgent {
       duplicateRows: 23,
       outliers: 47
     };
-    
+
     analysis.insights = [
       'Strong positive correlation between variables A and B (r=0.85)',
       'Variable C shows seasonal patterns with 3-month cycles',
       'Data quality is high with only 1.25% missing values',
       'Outliers concentrated in Q4 periods, likely due to seasonal effects'
     ];
-    
+
     analysis.recommendations = [
       'Consider log transformation for skewed variables',
       'Implement imputation strategy for missing values',
       'Investigate Q4 outliers for business context',
       'Add more recent data to improve model accuracy'
     ];
-    
+
     analysis.confidence = 0.88;
 
     // Store final results
@@ -549,7 +543,7 @@ export class AnalystAgent extends BaseAgent {
       errorRate: 0.03, // 3%
       availability: 99.85 // %
     };
-    
+
     performance.bottlenecks = [
       {
         component: 'Database queries',
@@ -564,7 +558,7 @@ export class AnalystAgent extends BaseAgent {
         recommendation: 'Use object pooling or lazy initialization'
       }
     ];
-    
+
     performance.slaCompliance = {
       availability: 99.85,
       responseTime: 92.3,
@@ -624,10 +618,10 @@ export class AnalystAgent extends BaseAgent {
         interpretation: 'Strong positive correlation detected'
       }
     };
-    
+
     statistics.conclusions.push(
       'Null hypothesis rejected at α = 0.05 level',
-      'Effect size is large (Cohen\'s d = 0.8)',
+      "Effect size is large (Cohen's d = 0.8)",
       'Results are statistically and practically significant'
     );
 
@@ -682,7 +676,7 @@ export class AnalystAgent extends BaseAgent {
         interactive: false
       }
     );
-    
+
     visualization.insights.push(
       'Clear upward trend visible in Q3-Q4',
       'Seasonal patterns repeat every 3 months',
@@ -752,12 +746,12 @@ export class AnalystAgent extends BaseAgent {
       auc: 0.92,
       rmse: 2.34
     };
-    
+
     model.featureImportance = {
-      'feature_1': 0.35,
-      'feature_2': 0.28,
-      'feature_3': 0.22,
-      'feature_4': 0.15
+      feature_1: 0.35,
+      feature_2: 0.28,
+      feature_3: 0.22,
+      feature_4: 0.15
     };
 
     return model;
@@ -778,7 +772,7 @@ export class AnalystAgent extends BaseAgent {
       method,
       sensitivity,
       threshold: threshold || 'auto',
-      detected: ([] as any) as any[],
+      detected: [] as any as any[],
       summary: {
         total: 0,
         severity: {
@@ -788,8 +782,8 @@ export class AnalystAgent extends BaseAgent {
           critical: 0
         }
       },
-      patterns: ([] as any) as string[],
-      recommendations: ([] as any) as string[],
+      patterns: [] as any as string[],
+      recommendations: [] as any as string[],
       falsePositiveRate: 0,
       confidence: 0,
       timestamp: new Date()
@@ -816,7 +810,7 @@ export class AnalystAgent extends BaseAgent {
         features: ['response_time', 'request_size']
       }
     );
-    
+
     anomalies.summary = {
       total: 15,
       severity: {
@@ -826,7 +820,7 @@ export class AnalystAgent extends BaseAgent {
         critical: 1
       }
     };
-    
+
     anomalies.confidence = 0.83;
 
     return anomalies;
@@ -846,8 +840,8 @@ export class AnalystAgent extends BaseAgent {
 
     const trends: TrendAnalysisResult = {
       timeframe,
-      metrics: ([] as any) as string[],
-      trends: ([] as any) as any[],
+      metrics: [] as any as string[],
+      trends: [] as any as any[],
       correlations: {},
       patterns: {
         seasonal: false,
@@ -855,8 +849,8 @@ export class AnalystAgent extends BaseAgent {
         trending: false
       },
       forecasts: forecast ? ([] as any) : [],
-      insights: ([] as any) as string[],
-      recommendations: ([] as any) as string[],
+      insights: [] as any as string[],
+      recommendations: [] as any as string[],
       confidence: 0,
       timestamp: new Date()
     };
@@ -880,19 +874,21 @@ export class AnalystAgent extends BaseAgent {
         period: 'Q4-2023'
       }
     );
-    
+
     trends.patterns = {
       seasonal: true,
       cyclical: false,
       trending: true
     };
-    
+
     trends.confidence = 0.89;
 
     return trends;
   }
 
-  private async generateBusinessIntelligence(task: TaskDefinition): Promise<BusinessIntelligenceResult> {
+  private async generateBusinessIntelligence(
+    task: TaskDefinition
+  ): Promise<BusinessIntelligenceResult> {
     const domain = task.context?.domain || 'general';
     const metrics = task.context?.metrics || ['revenue', 'growth', 'efficiency'];
     const timeframe = task.context?.timeframe || 'quarterly';
@@ -935,24 +931,24 @@ export class AnalystAgent extends BaseAgent {
 
     intelligence.kpis = {
       revenue_growth: 12.5,
-      customer_acquisition_cost: 45.30,
-      lifetime_value: 1250.00,
+      customer_acquisition_cost: 45.3,
+      lifetime_value: 1250.0,
       churn_rate: 5.2,
       market_share: 15.7
     };
-    
+
     intelligence.insights = [
       'Customer acquisition costs decreased by 18% due to improved targeting',
       'Premium tier adoption increased 35% following feature updates',
       'Seasonal patterns show consistent Q4 revenue spikes'
     ];
-    
+
     intelligence.recommendations = [
       'Increase marketing budget allocation to high-performing channels',
       'Develop retention strategies for at-risk customer segments',
       'Accelerate premium feature development to capture market demand'
     ];
-    
+
     intelligence.confidence = 0.91;
 
     return intelligence;
@@ -977,10 +973,10 @@ export class AnalystAgent extends BaseAgent {
         testCoverage: 0,
         technicalDebt: 0
       },
-      issues: ([] as any) as QualityIssue[],
-      patterns: ([] as any) as string[],
-      recommendations: ([] as any) as string[],
-      visualizations: ([] as any) as AnalysisVisualization[],
+      issues: [] as any as QualityIssue[],
+      patterns: [] as any as string[],
+      recommendations: [] as any as string[],
+      visualizations: [] as any as AnalysisVisualization[],
       overallScore: 0,
       confidence: 0,
       timestamp: new Date()
@@ -995,16 +991,16 @@ export class AnalystAgent extends BaseAgent {
       testCoverage: 0.91,
       technicalDebt: 0.23
     };
-    
+
     quality.overallScore = 0.91;
-    
+
     (quality.issues as any).push({
       category: 'completeness',
       severity: 'medium',
       description: 'Missing values in 13% of records',
       impact: 'Affects downstream analysis accuracy'
     });
-    
+
     (quality.patterns as any).push('High complexity in authentication module');
     (quality.recommendations as any).push('Implement automated testing coverage');
     quality.confidence = 0.89;
@@ -1055,7 +1051,14 @@ export const createAnalystAgent = (
   eventBus: IEventBus,
   memory: DistributedMemorySystem
 ): AnalystAgent => {
-  const tempAgent = new AnalystAgent(id, {} as AgentConfig, {} as AgentEnvironment, logger, eventBus, memory);
+  const tempAgent = new AnalystAgent(
+    id,
+    {} as AgentConfig,
+    {} as AgentEnvironment,
+    logger,
+    eventBus,
+    memory
+  );
   const defaultConfig = (tempAgent as any).getDefaultConfig();
   const defaultEnv = {
     runtime: 'deno' as const,
@@ -1065,12 +1068,7 @@ export const createAnalystAgent = (
     logDirectory: './logs/analyst',
     apiEndpoints: {},
     credentials: {},
-    availableTools: [
-      'data-processor',
-      'statistical-analyzer',
-      'chart-generator',
-      'report-builder'
-    ],
+    availableTools: ['data-processor', 'statistical-analyzer', 'chart-generator', 'report-builder'],
     toolConfigs: {
       dataProcessor: { chunkSize: 10000, parallel: true },
       chartGenerator: { style: 'professional', dpi: 300 },

@@ -84,7 +84,6 @@ export class SparcMethodology {
         await this.coordinator.postPhase(phaseName, result);
 
         console.log(`✅ ${phaseName} completed successfully`);
-
       } catch (error) {
         console.error(`❌ Error in ${phaseName}: ${error.message}`);
 
@@ -131,60 +130,60 @@ export class SparcMethodology {
     };
 
     switch (phaseName) {
-    case 'specification':
-      if (!result.requirements || result.requirements.length === 0) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('No requirements defined');
-      }
-      if (!result.acceptanceCriteria || result.acceptanceCriteria.length === 0) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('No acceptance criteria defined');
-      }
-      break;
+      case 'specification':
+        if (!result.requirements || result.requirements.length === 0) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('No requirements defined');
+        }
+        if (!result.acceptanceCriteria || result.acceptanceCriteria.length === 0) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('No acceptance criteria defined');
+        }
+        break;
 
-    case 'pseudocode':
-      if (!result.flowDiagram) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('No flow diagram created');
-      }
-      if (!result.pseudocode || result.pseudocode.length < 10) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('Insufficient pseudocode detail');
-      }
-      break;
+      case 'pseudocode':
+        if (!result.flowDiagram) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('No flow diagram created');
+        }
+        if (!result.pseudocode || result.pseudocode.length < 10) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('Insufficient pseudocode detail');
+        }
+        break;
 
-    case 'architecture':
-      if (!result.components || result.components.length === 0) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('No components defined');
-      }
-      if (!result.designPatterns || result.designPatterns.length === 0) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('No design patterns specified');
-      }
-      break;
+      case 'architecture':
+        if (!result.components || result.components.length === 0) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('No components defined');
+        }
+        if (!result.designPatterns || result.designPatterns.length === 0) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('No design patterns specified');
+        }
+        break;
 
-    case 'refinement':
-      if (!result.testResults || result.testResults.passed === 0) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('No passing tests');
-      }
-      if (result.codeQuality && result.codeQuality.score < 0.8) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('Code quality below threshold');
-      }
-      break;
+      case 'refinement':
+        if (!result.testResults || result.testResults.passed === 0) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('No passing tests');
+        }
+        if (result.codeQuality && result.codeQuality.score < 0.8) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('Code quality below threshold');
+        }
+        break;
 
-    case 'completion':
-      if (!result.validated) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('Final validation failed');
-      }
-      if (!result.documented) {
-        qualityGate.passed = false;
-        qualityGate.reasons.push('Documentation incomplete');
-      }
-      break;
+      case 'completion':
+        if (!result.validated) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('Final validation failed');
+        }
+        if (!result.documented) {
+          qualityGate.passed = false;
+          qualityGate.reasons.push('Documentation incomplete');
+        }
+        break;
     }
 
     return qualityGate;
@@ -198,7 +197,10 @@ export class SparcMethodology {
 
     // Neural learning can inform remediation strategies
     if (this.options.neuralLearning) {
-      await this.learnFromFailure(phaseName, new Error(`Quality gate failed: ${qualityGate.reasons.join(', ')}`));
+      await this.learnFromFailure(
+        phaseName,
+        new Error(`Quality gate failed: ${qualityGate.reasons.join(', ')}`)
+      );
     }
 
     // Re-execute the phase with enhanced context
@@ -213,7 +215,9 @@ export class SparcMethodology {
     this.qualityGates[phaseName] = newQualityGate;
 
     if (!newQualityGate.passed) {
-      throw new Error(`Auto-remediation failed for ${phaseName}: ${newQualityGate.reasons.join(', ')}`);
+      throw new Error(
+        `Auto-remediation failed for ${phaseName}: ${newQualityGate.reasons.join(', ')}`
+      );
     }
 
     console.log(`✅ Auto-remediation successful for ${phaseName}`);

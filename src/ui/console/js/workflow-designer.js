@@ -178,19 +178,35 @@ class WorkflowDesigner {
     // Toolbar events
     document.getElementById('saveWorkflow').addEventListener('click', this.saveWorkflow.bind(this));
     document.getElementById('loadWorkflow').addEventListener('click', this.loadWorkflow.bind(this));
-    document.getElementById('exportWorkflow').addEventListener('click', this.exportWorkflow.bind(this));
-    document.getElementById('importWorkflow').addEventListener('click', this.importWorkflow.bind(this));
-    document.getElementById('importFile').addEventListener('change', this.handleFileImport.bind(this));
-    document.getElementById('validateWorkflow').addEventListener('click', this.validateWorkflow.bind(this));
-    document.getElementById('executeWorkflow').addEventListener('click', this.executeWorkflow.bind(this));
+    document
+      .getElementById('exportWorkflow')
+      .addEventListener('click', this.exportWorkflow.bind(this));
+    document
+      .getElementById('importWorkflow')
+      .addEventListener('click', this.importWorkflow.bind(this));
+    document
+      .getElementById('importFile')
+      .addEventListener('change', this.handleFileImport.bind(this));
+    document
+      .getElementById('validateWorkflow')
+      .addEventListener('click', this.validateWorkflow.bind(this));
+    document
+      .getElementById('executeWorkflow')
+      .addEventListener('click', this.executeWorkflow.bind(this));
     document.getElementById('stopWorkflow').addEventListener('click', this.stopWorkflow.bind(this));
-    document.getElementById('zoomIn').addEventListener('click', () => this.setZoom(this.zoom * 1.2));
-    document.getElementById('zoomOut').addEventListener('click', () => this.setZoom(this.zoom / 1.2));
+    document
+      .getElementById('zoomIn')
+      .addEventListener('click', () => this.setZoom(this.zoom * 1.2));
+    document
+      .getElementById('zoomOut')
+      .addEventListener('click', () => this.setZoom(this.zoom / 1.2));
     document.getElementById('zoomReset').addEventListener('click', () => this.setZoom(1));
     document.getElementById('clearCanvas').addEventListener('click', this.clearCanvas.bind(this));
 
     // Palette search
-    document.getElementById('paletteSearch').addEventListener('input', this.filterPalette.bind(this));
+    document
+      .getElementById('paletteSearch')
+      .addEventListener('input', this.filterPalette.bind(this));
 
     // Tab switching
     document.querySelectorAll('.tab-button').forEach(button => {
@@ -247,7 +263,7 @@ class WorkflowDesigner {
                     <span>${node.name}</span>
                 `;
 
-        item.addEventListener('dragstart', (e) => {
+        item.addEventListener('dragstart', e => {
           e.dataTransfer.setData('text/plain', node.type);
           e.dataTransfer.effectAllowed = 'copy';
         });
@@ -257,12 +273,12 @@ class WorkflowDesigner {
     });
 
     // Canvas drop support
-    this.canvas.addEventListener('dragover', (e) => {
+    this.canvas.addEventListener('dragover', e => {
       e.preventDefault();
       e.dataTransfer.dropEffect = 'copy';
     });
 
-    this.canvas.addEventListener('drop', (e) => {
+    this.canvas.addEventListener('drop', e => {
       e.preventDefault();
       const nodeType = e.dataTransfer.getData('text/plain');
       const rect = this.canvas.getBoundingClientRect();
@@ -300,18 +316,21 @@ class WorkflowDesigner {
       'text-input': [],
       'url-input': [],
       'api-input': [],
-      'transform': [{ name: 'data', type: 'any' }],
-      'filter': [{ name: 'data', type: 'any' }],
-      'aggregate': [{ name: 'data', type: 'array' }],
-      'sort': [{ name: 'data', type: 'array' }],
+      transform: [{ name: 'data', type: 'any' }],
+      filter: [{ name: 'data', type: 'any' }],
+      aggregate: [{ name: 'data', type: 'array' }],
+      sort: [{ name: 'data', type: 'array' }],
       'file-output': [{ name: 'data', type: 'any' }],
-      'display': [{ name: 'data', type: 'any' }],
+      display: [{ name: 'data', type: 'any' }],
       'api-output': [{ name: 'data', type: 'any' }],
-      'notification': [{ name: 'message', type: 'string' }],
-      'condition': [{ name: 'condition', type: 'boolean' }, { name: 'data', type: 'any' }],
-      'loop': [{ name: 'data', type: 'array' }],
-      'delay': [{ name: 'data', type: 'any' }],
-      'parallel': [{ name: 'data', type: 'array' }],
+      notification: [{ name: 'message', type: 'string' }],
+      condition: [
+        { name: 'condition', type: 'boolean' },
+        { name: 'data', type: 'any' }
+      ],
+      loop: [{ name: 'data', type: 'array' }],
+      delay: [{ name: 'data', type: 'any' }],
+      parallel: [{ name: 'data', type: 'array' }],
       'ai-analyze': [{ name: 'data', type: 'any' }],
       'ai-generate': [{ name: 'prompt', type: 'string' }],
       'ai-classify': [{ name: 'data', type: 'any' }],
@@ -326,18 +345,21 @@ class WorkflowDesigner {
       'text-input': [{ name: 'text', type: 'string' }],
       'url-input': [{ name: 'data', type: 'any' }],
       'api-input': [{ name: 'data', type: 'any' }],
-      'transform': [{ name: 'result', type: 'any' }],
-      'filter': [{ name: 'result', type: 'any' }],
-      'aggregate': [{ name: 'result', type: 'any' }],
-      'sort': [{ name: 'result', type: 'array' }],
+      transform: [{ name: 'result', type: 'any' }],
+      filter: [{ name: 'result', type: 'any' }],
+      aggregate: [{ name: 'result', type: 'any' }],
+      sort: [{ name: 'result', type: 'array' }],
       'file-output': [],
-      'display': [],
+      display: [],
       'api-output': [{ name: 'response', type: 'any' }],
-      'notification': [],
-      'condition': [{ name: 'true', type: 'any' }, { name: 'false', type: 'any' }],
-      'loop': [{ name: 'result', type: 'array' }],
-      'delay': [{ name: 'data', type: 'any' }],
-      'parallel': [{ name: 'results', type: 'array' }],
+      notification: [],
+      condition: [
+        { name: 'true', type: 'any' },
+        { name: 'false', type: 'any' }
+      ],
+      loop: [{ name: 'result', type: 'array' }],
+      delay: [{ name: 'data', type: 'any' }],
+      parallel: [{ name: 'results', type: 'array' }],
       'ai-analyze': [{ name: 'analysis', type: 'object' }],
       'ai-generate': [{ name: 'generated', type: 'string' }],
       'ai-classify': [{ name: 'categories', type: 'array' }],
@@ -352,18 +374,18 @@ class WorkflowDesigner {
       'text-input': { value: '', multiline: false },
       'url-input': { url: '', method: 'GET', headers: {} },
       'api-input': { endpoint: '', method: 'GET', headers: {}, body: '' },
-      'transform': { expression: '', language: 'javascript' },
-      'filter': { condition: '', language: 'javascript' },
-      'aggregate': { operation: 'sum', field: '' },
-      'sort': { field: '', order: 'asc' },
+      transform: { expression: '', language: 'javascript' },
+      filter: { condition: '', language: 'javascript' },
+      aggregate: { operation: 'sum', field: '' },
+      sort: { field: '', order: 'asc' },
       'file-output': { path: '', format: 'auto' },
-      'display': { format: 'table', title: '' },
+      display: { format: 'table', title: '' },
       'api-output': { endpoint: '', method: 'POST', headers: {} },
-      'notification': { type: 'info', title: '' },
-      'condition': { expression: '', language: 'javascript' },
-      'loop': { type: 'forEach', condition: '' },
-      'delay': { duration: 1000, unit: 'ms' },
-      'parallel': { maxConcurrency: 5 },
+      notification: { type: 'info', title: '' },
+      condition: { expression: '', language: 'javascript' },
+      loop: { type: 'forEach', condition: '' },
+      delay: { duration: 1000, unit: 'ms' },
+      parallel: { maxConcurrency: 5 },
       'ai-analyze': { model: 'gpt-4', temperature: 0.7 },
       'ai-generate': { model: 'gpt-4', temperature: 0.7, maxTokens: 1000 },
       'ai-classify': { model: 'gpt-4', categories: [] },
@@ -463,8 +485,7 @@ class WorkflowDesigner {
 
   getNodeAt(x, y) {
     for (const node of this.nodes.values()) {
-      if (x >= node.x && x <= node.x + node.width &&
-                y >= node.y && y <= node.y + node.height) {
+      if (x >= node.x && x <= node.x + node.width && y >= node.y && y <= node.y + node.height) {
         return node;
       }
     }
@@ -591,7 +612,7 @@ class WorkflowDesigner {
 
     // Node body
     this.ctx.fillStyle = isSelected ? '#e3f2fd' : '#ffffff';
-    this.ctx.strokeStyle = isSelected ? '#2196f3' : (hasError ? '#f44336' : '#cccccc');
+    this.ctx.strokeStyle = isSelected ? '#2196f3' : hasError ? '#f44336' : '#cccccc';
     this.ctx.lineWidth = isSelected ? 2 : 1;
 
     this.ctx.fillRect(node.x, node.y, node.width, node.height);
@@ -601,11 +622,7 @@ class WorkflowDesigner {
     this.ctx.fillStyle = '#333333';
     this.ctx.font = '12px Arial';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText(
-      this.getNodeTitle(node.type),
-      node.x + node.width / 2,
-      node.y + 20
-    );
+    this.ctx.fillText(this.getNodeTitle(node.type), node.x + node.width / 2, node.y + 20);
 
     // Status indicator
     if (isExecuting) {
@@ -637,11 +654,7 @@ class WorkflowDesigner {
       this.ctx.fillStyle = '#666666';
       this.ctx.font = '10px Arial';
       this.ctx.textAlign = 'right';
-      this.ctx.fillText(
-        node.inputs[index].name,
-        point.x - 8,
-        point.y + 3
-      );
+      this.ctx.fillText(node.inputs[index].name, point.x - 8, point.y + 3);
     });
 
     // Output points
@@ -656,11 +669,7 @@ class WorkflowDesigner {
       this.ctx.fillStyle = '#666666';
       this.ctx.font = '10px Arial';
       this.ctx.textAlign = 'left';
-      this.ctx.fillText(
-        node.outputs[index].name,
-        point.x + 8,
-        point.y + 3
-      );
+      this.ctx.fillText(node.outputs[index].name, point.x + 8, point.y + 3);
     });
   }
 
@@ -709,9 +718,10 @@ class WorkflowDesigner {
   }
 
   drawTempConnection() {
-    const startPoint = this.connectionStart.type === 'output' ?
-      this.getOutputPoints(this.connectionStart.node)[this.connectionStart.index] :
-      this.getInputPoints(this.connectionStart.node)[this.connectionStart.index];
+    const startPoint =
+      this.connectionStart.type === 'output'
+        ? this.getOutputPoints(this.connectionStart.node)[this.connectionStart.index]
+        : this.getInputPoints(this.connectionStart.node)[this.connectionStart.index];
 
     this.ctx.strokeStyle = '#2196f3';
     this.ctx.lineWidth = 2;
@@ -729,18 +739,18 @@ class WorkflowDesigner {
       'text-input': 'Text Input',
       'url-input': 'URL Input',
       'api-input': 'API Input',
-      'transform': 'Transform',
-      'filter': 'Filter',
-      'aggregate': 'Aggregate',
-      'sort': 'Sort',
+      transform: 'Transform',
+      filter: 'Filter',
+      aggregate: 'Aggregate',
+      sort: 'Sort',
       'file-output': 'File Output',
-      'display': 'Display',
+      display: 'Display',
       'api-output': 'API Output',
-      'notification': 'Notification',
-      'condition': 'Condition',
-      'loop': 'Loop',
-      'delay': 'Delay',
-      'parallel': 'Parallel',
+      notification: 'Notification',
+      condition: 'Condition',
+      loop: 'Loop',
+      delay: 'Delay',
+      parallel: 'Parallel',
       'ai-analyze': 'AI Analyze',
       'ai-generate': 'AI Generate',
       'ai-classify': 'AI Classify',
@@ -777,7 +787,7 @@ class WorkflowDesigner {
 
     // Attach event listeners
     panel.querySelectorAll('input, select, textarea').forEach(input => {
-      input.addEventListener('change', (e) => {
+      input.addEventListener('change', e => {
         const propertyKey = e.target.dataset.property;
         node.properties[propertyKey] = e.target.value;
       });
@@ -845,7 +855,9 @@ class WorkflowDesigner {
       const required = this.getRequiredProperties(node.type);
       for (const prop of required) {
         if (!node.properties[prop] || node.properties[prop] === '') {
-          results.errors.push(`Node "${this.getNodeTitle(node.type)}" missing required property: ${prop}`);
+          results.errors.push(
+            `Node "${this.getNodeTitle(node.type)}" missing required property: ${prop}`
+          );
         }
       }
     }
@@ -858,15 +870,21 @@ class WorkflowDesigner {
     const visited = new Set();
     const visiting = new Set();
 
-    const visit = (nodeId) => {
-      if (visiting.has(nodeId)) {return true;}
-      if (visited.has(nodeId)) {return false;}
+    const visit = nodeId => {
+      if (visiting.has(nodeId)) {
+        return true;
+      }
+      if (visited.has(nodeId)) {
+        return false;
+      }
 
       visiting.add(nodeId);
 
       for (const connection of this.connections.values()) {
         if (connection.from === nodeId) {
-          if (visit(connection.to)) {return true;}
+          if (visit(connection.to)) {
+            return true;
+          }
         }
       }
 
@@ -876,7 +894,9 @@ class WorkflowDesigner {
     };
 
     for (const nodeId of this.nodes.keys()) {
-      if (visit(nodeId)) {return true;}
+      if (visit(nodeId)) {
+        return true;
+      }
     }
 
     return false;
@@ -887,11 +907,11 @@ class WorkflowDesigner {
       'file-input': ['path'],
       'url-input': ['url'],
       'api-input': ['endpoint'],
-      'transform': ['expression'],
-      'filter': ['condition'],
+      transform: ['expression'],
+      filter: ['condition'],
       'file-output': ['path'],
       'api-output': ['endpoint'],
-      'condition': ['expression']
+      condition: ['expression']
     };
     return required[type] || [];
   }
@@ -946,7 +966,7 @@ class WorkflowDesigner {
   }
 
   async executeWorkflow() {
-    if (!await this.validateWorkflow()) {
+    if (!(await this.validateWorkflow())) {
       alert('Workflow validation failed. Please fix errors before executing.');
       return;
     }
@@ -987,7 +1007,9 @@ class WorkflowDesigner {
   }
 
   async executeNode(node) {
-    if (!this.isExecuting) {return;}
+    if (!this.isExecuting) {
+      return;
+    }
 
     node.status = 'executing';
     this.draw();
@@ -1018,16 +1040,16 @@ class WorkflowDesigner {
     await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
 
     switch (node.type) {
-    case 'file-input':
-      return { type: 'file', path: node.properties.path };
-    case 'text-input':
-      return { type: 'text', value: node.properties.value };
-    case 'transform':
-      return { type: 'transformed', data: 'transformed_data' };
-    case 'ai-analyze':
-      return { type: 'analysis', confidence: 0.95, insights: [] };
-    default:
-      return { type: 'generic', processed: true };
+      case 'file-input':
+        return { type: 'file', path: node.properties.path };
+      case 'text-input':
+        return { type: 'text', value: node.properties.value };
+      case 'transform':
+        return { type: 'transformed', data: 'transformed_data' };
+      case 'ai-analyze':
+        return { type: 'analysis', confidence: 0.95, insights: [] };
+      default:
+        return { type: 'generic', processed: true };
     }
   }
 
@@ -1036,7 +1058,9 @@ class WorkflowDesigner {
     for (const connection of this.connections.values()) {
       if (connection.from === nodeId) {
         const node = this.nodes.get(connection.to);
-        if (node) {connected.push(node);}
+        if (node) {
+          connected.push(node);
+        }
       }
     }
     return connected;
@@ -1145,10 +1169,12 @@ class WorkflowDesigner {
 
   handleFileImport(e) {
     const file = e.target.files[0];
-    if (!file) {return;}
+    if (!file) {
+      return;
+    }
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = event => {
       try {
         const workflow = JSON.parse(event.target.result);
         this.loadWorkflowData(workflow);
@@ -1195,17 +1221,21 @@ class WorkflowDesigner {
     ];
 
     const gallery = document.querySelector('.template-gallery');
-    gallery.innerHTML = templates.map(template => `
+    gallery.innerHTML = templates
+      .map(
+        template => `
             <div class="template-card" data-template="${template.name}">
                 <h4>${template.name}</h4>
                 <p>${template.description}</p>
                 <button class="btn btn-primary load-template">Load Template</button>
             </div>
-        `).join('');
+        `
+      )
+      .join('');
 
     // Add event listeners
     gallery.querySelectorAll('.load-template').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         const templateName = e.target.closest('.template-card').dataset.template;
         const template = templates.find(t => t.name === templateName);
         if (template) {
@@ -1314,18 +1344,18 @@ class WorkflowDesigner {
 
     document.body.appendChild(menu);
 
-    menu.addEventListener('click', (e) => {
+    menu.addEventListener('click', e => {
       const action = e.target.dataset.action;
       switch (action) {
-      case 'duplicate':
-        this.duplicateNode(node);
-        break;
-      case 'delete':
-        this.deleteNode(node);
-        break;
-      case 'properties':
-        this.showProperties(node);
-        break;
+        case 'duplicate':
+          this.duplicateNode(node);
+          break;
+        case 'delete':
+          this.deleteNode(node);
+          break;
+        case 'properties':
+          this.showProperties(node);
+          break;
       }
       document.body.removeChild(menu);
     });

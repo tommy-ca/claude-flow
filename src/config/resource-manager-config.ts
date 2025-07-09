@@ -11,24 +11,26 @@ const MetricTypeSchema = z.enum(['cpu', 'memory', 'gpu', 'network', 'disk', 'cus
 
 const ThresholdSchema = z.object({
   warning: z.number().min(0).max(100),
-  critical: z.number().min(0).max(100),
+  critical: z.number().min(0).max(100)
 });
 
 const ResourceThresholdsSchema = z.object({
   cpu: ThresholdSchema,
   memory: ThresholdSchema,
   gpu: ThresholdSchema.optional(),
-  network: z.object({
-    latency: z.object({
-      warning: z.number().positive(),
-      critical: z.number().positive(),
-    }),
-    bandwidth: z.object({
-      warning: z.number().positive(),
-      critical: z.number().positive(),
-    }),
-  }).optional(),
-  disk: ThresholdSchema.optional(),
+  network: z
+    .object({
+      latency: z.object({
+        warning: z.number().positive(),
+        critical: z.number().positive()
+      }),
+      bandwidth: z.object({
+        warning: z.number().positive(),
+        critical: z.number().positive()
+      })
+    })
+    .optional(),
+  disk: ThresholdSchema.optional()
 });
 
 const MonitoringConfigSchema = z.object({
@@ -36,16 +38,20 @@ const MonitoringConfigSchema = z.object({
   interval: z.number().positive().default(30000), // 30 seconds
   retention: z.number().positive().default(604800000), // 7 days in ms
   metrics: z.array(MetricTypeSchema).default(['cpu', 'memory', 'network']),
-  alerting: z.object({
-    enabled: z.boolean().default(true),
-    channels: z.array(z.enum(['console', 'file', 'webhook', 'email'])).default(['console']),
-    cooldown: z.number().positive().default(300000), // 5 minutes
-  }).default({}),
-  persistence: z.object({
-    enabled: z.boolean().default(true),
-    backend: z.enum(['memory', 'file', 'database']).default('file'),
-    path: z.string().default('./data/resource-metrics'),
-  }).default({}),
+  alerting: z
+    .object({
+      enabled: z.boolean().default(true),
+      channels: z.array(z.enum(['console', 'file', 'webhook', 'email'])).default(['console']),
+      cooldown: z.number().positive().default(300000) // 5 minutes
+    })
+    .default({}),
+  persistence: z
+    .object({
+      enabled: z.boolean().default(true),
+      backend: z.enum(['memory', 'file', 'database']).default('file'),
+      path: z.string().default('./data/resource-metrics')
+    })
+    .default({})
 });
 
 const DeploymentConstraintsSchema = z.object({
@@ -54,55 +60,75 @@ const DeploymentConstraintsSchema = z.object({
   requireGPU: z.boolean().default(false),
   networkLatencyMax: z.number().positive().default(100), // ms
   memoryReservation: z.number().min(0).max(100).default(10), // % to keep free
-  cpuReservation: z.number().min(0).max(100).default(20), // % to keep free
+  cpuReservation: z.number().min(0).max(100).default(20) // % to keep free
 });
 
 const OptimizationConfigSchema = z.object({
   enabled: z.boolean().default(true),
   strategy: z.enum(['balanced', 'performance', 'efficiency', 'cost']).default('balanced'),
   autoApply: z.boolean().default(false),
-  schedule: z.object({
-    enabled: z.boolean().default(false),
-    cron: z.string().default('0 */6 * * *'), // Every 6 hours
-  }).default({}),
-  constraints: DeploymentConstraintsSchema.default({}),
+  schedule: z
+    .object({
+      enabled: z.boolean().default(false),
+      cron: z.string().default('0 */6 * * *') // Every 6 hours
+    })
+    .default({}),
+  constraints: DeploymentConstraintsSchema.default({})
 });
 
 const PredictionConfigSchema = z.object({
   enabled: z.boolean().default(true),
-  horizon: z.object({
-    shortTerm: z.number().positive().default(3600000), // 1 hour
-    mediumTerm: z.number().positive().default(86400000), // 24 hours
-    longTerm: z.number().positive().default(604800000), // 7 days
-  }).default({}),
+  horizon: z
+    .object({
+      shortTerm: z.number().positive().default(3600000), // 1 hour
+      mediumTerm: z.number().positive().default(86400000), // 24 hours
+      longTerm: z.number().positive().default(604800000) // 7 days
+    })
+    .default({}),
   algorithms: z.array(z.enum(['linear', 'exponential', 'seasonal', 'ml'])).default(['linear']),
-  confidence: z.object({
-    minimum: z.number().min(0).max(1).default(0.6),
-    target: z.number().min(0).max(1).default(0.8),
-  }).default({}),
+  confidence: z
+    .object({
+      minimum: z.number().min(0).max(1).default(0.6),
+      target: z.number().min(0).max(1).default(0.8)
+    })
+    .default({})
 });
 
 const AlertingConfigSchema = z.object({
   enabled: z.boolean().default(true),
-  channels: z.array(z.object({
-    type: z.enum(['console', 'file', 'webhook', 'email', 'slack']),
-    config: z.record(z.any()),
-    enabled: z.boolean().default(true),
-  })).default([]),
-  rules: z.array(z.object({
-    name: z.string(),
-    condition: z.string(), // Expression to evaluate
-    severity: z.enum(['low', 'medium', 'high', 'critical']),
-    cooldown: z.number().positive().default(300000),
-    enabled: z.boolean().default(true),
-  })).default([]),
-  escalation: z.object({
-    enabled: z.boolean().default(false),
-    levels: z.array(z.object({
-      delay: z.number().positive(),
-      channels: z.array(z.string()),
-    })).default([]),
-  }).default({}),
+  channels: z
+    .array(
+      z.object({
+        type: z.enum(['console', 'file', 'webhook', 'email', 'slack']),
+        config: z.record(z.any()),
+        enabled: z.boolean().default(true)
+      })
+    )
+    .default([]),
+  rules: z
+    .array(
+      z.object({
+        name: z.string(),
+        condition: z.string(), // Expression to evaluate
+        severity: z.enum(['low', 'medium', 'high', 'critical']),
+        cooldown: z.number().positive().default(300000),
+        enabled: z.boolean().default(true)
+      })
+    )
+    .default([]),
+  escalation: z
+    .object({
+      enabled: z.boolean().default(false),
+      levels: z
+        .array(
+          z.object({
+            delay: z.number().positive(),
+            channels: z.array(z.string())
+          })
+        )
+        .default([])
+    })
+    .default({})
 });
 
 const ResourceManagerConfigSchema = z.object({
@@ -112,28 +138,38 @@ const ResourceManagerConfigSchema = z.object({
   optimization: OptimizationConfigSchema.default({}),
   prediction: PredictionConfigSchema.default({}),
   alerting: AlertingConfigSchema.default({}),
-  integrations: z.object({
-    mcp: z.object({
-      enabled: z.boolean().default(true),
-      reportInterval: z.number().positive().default(30000),
-      servers: z.array(z.string()).default([]),
-    }).default({}),
-    swarm: z.object({
-      enabled: z.boolean().default(true),
-      coordinatorIntegration: z.boolean().default(true),
-      autoDeployment: z.boolean().default(true),
-    }).default({}),
-    memory: z.object({
-      enabled: z.boolean().default(true),
-      backend: z.enum(['memory', 'file', 'database']).default('file'),
-      retention: z.number().positive().default(2592000000), // 30 days
-    }).default({}),
-  }).default({}),
-  experimental: z.object({
-    enableMLPredictions: z.boolean().default(false),
-    enableAutoScaling: z.boolean().default(false),
-    enableCostOptimization: z.boolean().default(false),
-  }).default({}),
+  integrations: z
+    .object({
+      mcp: z
+        .object({
+          enabled: z.boolean().default(true),
+          reportInterval: z.number().positive().default(30000),
+          servers: z.array(z.string()).default([])
+        })
+        .default({}),
+      swarm: z
+        .object({
+          enabled: z.boolean().default(true),
+          coordinatorIntegration: z.boolean().default(true),
+          autoDeployment: z.boolean().default(true)
+        })
+        .default({}),
+      memory: z
+        .object({
+          enabled: z.boolean().default(true),
+          backend: z.enum(['memory', 'file', 'database']).default('file'),
+          retention: z.number().positive().default(2592000000) // 30 days
+        })
+        .default({})
+    })
+    .default({}),
+  experimental: z
+    .object({
+      enableMLPredictions: z.boolean().default(false),
+      enableAutoScaling: z.boolean().default(false),
+      enableCostOptimization: z.boolean().default(false)
+    })
+    .default({})
 });
 
 export type ResourceManagerConfig = z.infer<typeof ResourceManagerConfigSchema>;
@@ -174,7 +210,7 @@ export class ResourceManagerConfigManager {
   async loadConfig(): Promise<void> {
     try {
       const rawConfig = await this.configManager.get(this.configPath);
-      
+
       if (rawConfig) {
         this.config = ResourceManagerConfigSchema.parse(rawConfig);
       } else {
@@ -183,7 +219,9 @@ export class ResourceManagerConfigManager {
         await this.saveConfig();
       }
     } catch (error) {
-      throw new Error(`Failed to load resource manager configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to load resource manager configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -194,7 +232,9 @@ export class ResourceManagerConfigManager {
     try {
       await this.configManager.set(this.configPath, this.config);
     } catch (error) {
-      throw new Error(`Failed to save resource manager configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to save resource manager configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -205,7 +245,9 @@ export class ResourceManagerConfigManager {
     try {
       ResourceManagerConfigSchema.parse(this.config);
     } catch (error) {
-      throw new Error(`Invalid resource manager configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Invalid resource manager configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -221,9 +263,9 @@ export class ResourceManagerConfigManager {
         gpu: { warning: 85, critical: 95 },
         network: {
           latency: { warning: 50, critical: 100 },
-          bandwidth: { warning: 100, critical: 10 }, // Mbps
+          bandwidth: { warning: 100, critical: 10 } // Mbps
         },
-        disk: { warning: 80, critical: 95 },
+        disk: { warning: 80, critical: 95 }
       },
       monitoring: {
         enabled: true,
@@ -233,13 +275,13 @@ export class ResourceManagerConfigManager {
         alerting: {
           enabled: true,
           channels: ['console'],
-          cooldown: 300000,
+          cooldown: 300000
         },
         persistence: {
           enabled: true,
           backend: 'file',
-          path: './data/resource-metrics',
-        },
+          path: './data/resource-metrics'
+        }
       },
       optimization: {
         enabled: true,
@@ -247,7 +289,7 @@ export class ResourceManagerConfigManager {
         autoApply: false,
         schedule: {
           enabled: false,
-          cron: '0 */6 * * *',
+          cron: '0 */6 * * *'
         },
         constraints: {
           maxAgentsPerServer: 10,
@@ -255,21 +297,21 @@ export class ResourceManagerConfigManager {
           requireGPU: false,
           networkLatencyMax: 100,
           memoryReservation: 10,
-          cpuReservation: 20,
-        },
+          cpuReservation: 20
+        }
       },
       prediction: {
         enabled: true,
         horizon: {
           shortTerm: 3600000,
           mediumTerm: 86400000,
-          longTerm: 604800000,
+          longTerm: 604800000
         },
         algorithms: ['linear'],
         confidence: {
           minimum: 0.6,
-          target: 0.8,
-        },
+          target: 0.8
+        }
       },
       alerting: {
         enabled: true,
@@ -277,16 +319,16 @@ export class ResourceManagerConfigManager {
           {
             type: 'console',
             config: { level: 'info' },
-            enabled: true,
+            enabled: true
           },
           {
             type: 'file',
-            config: { 
+            config: {
               path: './logs/resource-alerts.log',
-              level: 'warn',
+              level: 'warn'
             },
-            enabled: true,
-          },
+            enabled: true
+          }
         ],
         rules: [
           {
@@ -294,50 +336,50 @@ export class ResourceManagerConfigManager {
             condition: 'cpu.usage > thresholds.cpu.warning',
             severity: 'high',
             cooldown: 300000,
-            enabled: true,
+            enabled: true
           },
           {
             name: 'Critical Memory Usage',
             condition: 'memory.usage > thresholds.memory.critical',
             severity: 'critical',
             cooldown: 180000,
-            enabled: true,
+            enabled: true
           },
           {
             name: 'Server Offline',
             condition: 'server.status == "offline"',
             severity: 'critical',
             cooldown: 60000,
-            enabled: true,
-          },
+            enabled: true
+          }
         ],
         escalation: {
           enabled: false,
-          levels: [],
-        },
+          levels: []
+        }
       },
       integrations: {
         mcp: {
           enabled: true,
           reportInterval: 30000,
-          servers: [],
+          servers: []
         },
         swarm: {
           enabled: true,
           coordinatorIntegration: true,
-          autoDeployment: true,
+          autoDeployment: true
         },
         memory: {
           enabled: true,
           backend: 'file',
-          retention: 2592000000,
-        },
+          retention: 2592000000
+        }
       },
       experimental: {
         enableMLPredictions: false,
         enableAutoScaling: false,
-        enableCostOptimization: false,
-      },
+        enableCostOptimization: false
+      }
     };
   }
 
@@ -372,7 +414,7 @@ export class ResourceManagerConfigManager {
    */
   getThreshold(metric: MetricType): { warning: number; critical: number } | null {
     const thresholds = this.config.thresholds;
-    
+
     switch (metric) {
       case 'cpu':
         return thresholds.cpu;
@@ -395,7 +437,7 @@ export class ResourceManagerConfigManager {
     threshold: { warning: number; critical: number }
   ): Promise<void> {
     const thresholds = { ...this.config.thresholds };
-    
+
     switch (metric) {
       case 'cpu':
         thresholds.cpu = threshold;
@@ -412,7 +454,7 @@ export class ResourceManagerConfigManager {
       default:
         throw new Error(`Invalid metric type: ${metric}`);
     }
-    
+
     await this.updateSection('thresholds', thresholds);
   }
 
@@ -430,7 +472,7 @@ export class ResourceManagerConfigManager {
     if (interval < 1000) {
       throw new Error('Monitoring interval must be at least 1000ms');
     }
-    
+
     await this.updateSection('monitoring', { interval });
   }
 
@@ -471,9 +513,9 @@ export class ResourceManagerConfigManager {
     alerting.rules.push({
       cooldown: 300000,
       enabled: true,
-      ...rule,
+      ...rule
     });
-    
+
     await this.updateSection('alerting', alerting);
   }
 
@@ -483,7 +525,7 @@ export class ResourceManagerConfigManager {
   async removeAlertRule(name: string): Promise<void> {
     const alerting = { ...this.config.alerting };
     alerting.rules = alerting.rules.filter(rule => rule.name !== name);
-    
+
     await this.updateSection('alerting', alerting);
   }
 
@@ -496,7 +538,7 @@ export class ResourceManagerConfigManager {
   ): Promise<void> {
     const experimental = { ...this.config.experimental };
     experimental[feature] = enabled;
-    
+
     await this.updateSection('experimental', experimental);
   }
 
@@ -510,12 +552,10 @@ export class ResourceManagerConfigManager {
   /**
    * Update deployment constraints
    */
-  async updateDeploymentConstraints(
-    constraints: Partial<DeploymentConstraints>
-  ): Promise<void> {
+  async updateDeploymentConstraints(constraints: Partial<DeploymentConstraints>): Promise<void> {
     const optimization = { ...this.config.optimization };
     optimization.constraints = { ...optimization.constraints, ...constraints };
-    
+
     await this.updateSection('optimization', optimization);
   }
 
@@ -564,7 +604,9 @@ export class ResourceManagerConfigManager {
       this.config = ResourceManagerConfigSchema.parse(importedConfig);
       await this.saveConfig();
     } catch (error) {
-      throw new Error(`Failed to import configuration: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to import configuration: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 }

@@ -98,7 +98,7 @@ export class SystemMonitor {
       this.addEvent({
         type: 'process_error',
         timestamp: Date.now(),
-        data: { processId, error: (error instanceof Error ? error.message : String(error)) },
+        data: { processId, error: error instanceof Error ? error.message : String(error) },
         level: 'error'
       });
     });
@@ -127,7 +127,7 @@ export class SystemMonitor {
   private collectMetrics(): void {
     // Collect system metrics
     const processes = this.processManager.getAllProcesses();
-    
+
     for (const process of processes) {
       if (process.status === 'running') {
         // Simulate metrics collection (would integrate with actual monitoring)
@@ -148,19 +148,15 @@ export class SystemMonitor {
   printEventLog(count: number = 20): void {
     console.log(chalk.cyan.bold('📊 Recent System Events'));
     console.log(chalk.gray('─'.repeat(80)));
-    
+
     const events = this.getRecentEvents(count);
-    
+
     for (const event of events) {
       const timestamp = new Date(event.timestamp).toLocaleTimeString();
       const icon = this.getEventIcon(event.type);
       const color = this.getEventColor(event.level);
-      
-      console.log(
-        chalk.gray(timestamp),
-        icon,
-        color(this.formatEventMessage(event))
-      );
+
+      console.log(chalk.gray(timestamp), icon, color(this.formatEventMessage(event)));
     }
   }
 
@@ -176,7 +172,7 @@ export class SystemMonitor {
       process_stopped: '⏹️',
       process_error: '🚨'
     };
-    
+
     return icons[type] || '•';
   }
 
@@ -223,47 +219,46 @@ export class SystemMonitor {
   printSystemHealth(): void {
     const stats = this.processManager.getSystemStats();
     const processes = this.processManager.getAllProcesses();
-    
+
     console.log(chalk.cyan.bold('🏥 System Health'));
     console.log(chalk.gray('─'.repeat(60)));
-    
+
     // Overall status
-    const healthStatus = stats.errorProcesses === 0 ? 
-      chalk.green('● Healthy') : 
-      chalk.red(`● Unhealthy (${stats.errorProcesses} errors)`);
-    
+    const healthStatus =
+      stats.errorProcesses === 0
+        ? chalk.green('● Healthy')
+        : chalk.red(`● Unhealthy (${stats.errorProcesses} errors)`);
+
     console.log('Status:', healthStatus);
     console.log('Uptime:', this.formatUptime(stats.systemUptime));
     console.log();
-    
+
     // Process status
     console.log(chalk.white.bold('Process Status:'));
     for (const process of processes) {
       const status = this.getProcessStatusIcon(process.status);
       const metrics = process.metrics;
-      
+
       let line = `  ${status} ${process.name.padEnd(20)}`;
-      
+
       if (metrics && process.status === 'running') {
         line += chalk.gray(` CPU: ${metrics.cpu?.toFixed(1)}% `);
         line += chalk.gray(` MEM: ${metrics.memory?.toFixed(0)}MB`);
       }
-      
+
       console.log(line);
     }
-    
+
     console.log();
-    
+
     // System metrics
     console.log(chalk.white.bold('System Metrics:'));
     console.log(`  Active Processes: ${stats.runningProcesses}/${stats.totalProcesses}`);
     console.log(`  Recent Events: ${this.events.length}`);
-    
+
     // Recent errors
-    const recentErrors = this.events
-      .filter(e => e.level === 'error')
-      .slice(0, 3);
-    
+    const recentErrors = this.events.filter(e => e.level === 'error').slice(0, 3);
+
     if (recentErrors.length > 0) {
       console.log();
       console.log(chalk.red.bold('Recent Errors:'));

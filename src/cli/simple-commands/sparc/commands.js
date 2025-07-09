@@ -127,8 +127,12 @@ export async function sparcUi(taskDescription, options = {}) {
 
     console.log('\n✅ SPARC UI Development completed');
     console.log(`🎨 Components: ${result.architecture?.components?.length || 0}`);
-    console.log(`♿ Accessibility: ${result.refinement?.validation?.usability?.accessibility?.score || 0}%`);
-    console.log(`📱 Responsive: ${result.refinement?.validation?.compatibility?.devices?.score || 0}%`);
+    console.log(
+      `♿ Accessibility: ${result.refinement?.validation?.usability?.accessibility?.score || 0}%`
+    );
+    console.log(
+      `📱 Responsive: ${result.refinement?.validation?.compatibility?.devices?.score || 0}%`
+    );
 
     return result;
   } catch (error) {
@@ -219,9 +223,15 @@ export async function sparcRefactor(taskDescription, options = {}) {
     const result = await sparc.execute();
 
     console.log('\n✅ SPARC Refactoring completed');
-    console.log(`📈 Quality Improvement: +${result.refinement?.refactoring?.after?.overall - result.refinement?.refactoring?.before?.overall || 0} points`);
-    console.log(`⚡ Performance Gain: ${result.refinement?.optimizations?.length || 0} optimizations applied`);
-    console.log(`🔧 Refactoring Techniques: ${result.refinement?.refactoring?.techniques?.length || 0}`);
+    console.log(
+      `📈 Quality Improvement: +${result.refinement?.refactoring?.after?.overall - result.refinement?.refactoring?.before?.overall || 0} points`
+    );
+    console.log(
+      `⚡ Performance Gain: ${result.refinement?.optimizations?.length || 0} optimizations applied`
+    );
+    console.log(
+      `🔧 Refactoring Techniques: ${result.refinement?.refactoring?.techniques?.length || 0}`
+    );
 
     return result;
   } catch (error) {
@@ -266,7 +276,9 @@ export async function sparcResearch(taskDescription, options = {}) {
     console.log('\n✅ SPARC Research completed');
     console.log(`📚 Sources Analyzed: ${result.specification?.userStories?.length || 0}`);
     console.log(`📊 Analysis Workflows: ${result.pseudocode?.algorithms?.length || 0}`);
-    console.log(`🎯 Research Quality: ${result.specification?.requirements?.filter(r => r.fulfilled)?.length || 0} requirements validated`);
+    console.log(
+      `🎯 Research Quality: ${result.specification?.requirements?.filter(r => r.fulfilled)?.length || 0} requirements validated`
+    );
 
     return result;
   } catch (error) {
@@ -358,7 +370,9 @@ export async function sparcSecurity(taskDescription, options = {}) {
     console.log('\n✅ SPARC Security Development completed');
     console.log(`🔒 Security Score: ${result.refinement?.security?.score || 0}/100`);
     console.log(`🛡️ Vulnerabilities: ${result.refinement?.security?.vulnerabilities?.length || 0}`);
-    console.log(`📋 Compliance: ${Object.values(result.refinement?.security?.compliance || {}).filter(c => c).length}/3 standards`);
+    console.log(
+      `📋 Compliance: ${Object.values(result.refinement?.security?.compliance || {}).filter(c => c).length}/3 standards`
+    );
 
     return result;
   } catch (error) {
@@ -402,9 +416,15 @@ export async function sparcDevOps(taskDescription, options = {}) {
     const result = await sparc.execute();
 
     console.log('\n✅ SPARC DevOps completed');
-    console.log(`🚀 Deployments: ${result.completion?.deployment?.environments?.length || 0} environments`);
-    console.log(`📊 Monitoring: ${result.completion?.monitoring?.alerts?.length || 0} alerts configured`);
-    console.log(`🤖 Automation: ${result.completion?.deployment?.successful ? 'Successful' : 'Pending'}`);
+    console.log(
+      `🚀 Deployments: ${result.completion?.deployment?.environments?.length || 0} environments`
+    );
+    console.log(
+      `📊 Monitoring: ${result.completion?.monitoring?.alerts?.length || 0} alerts configured`
+    );
+    console.log(
+      `🤖 Automation: ${result.completion?.deployment?.successful ? 'Successful' : 'Pending'}`
+    );
 
     return result;
   } catch (error) {
@@ -448,8 +468,12 @@ export async function sparcPerformance(taskDescription, options = {}) {
     const result = await sparc.execute();
 
     console.log('\n✅ SPARC Performance Optimization completed');
-    console.log(`⚡ Response Time: ${result.refinement?.performance?.responseTime?.average || 0}ms`);
-    console.log(`🚀 Throughput: ${result.refinement?.performance?.throughput?.requestsPerSecond || 0} req/s`);
+    console.log(
+      `⚡ Response Time: ${result.refinement?.performance?.responseTime?.average || 0}ms`
+    );
+    console.log(
+      `🚀 Throughput: ${result.refinement?.performance?.throughput?.requestsPerSecond || 0} req/s`
+    );
     console.log(`📈 Optimizations: ${result.refinement?.optimizations?.length || 0} applied`);
 
     return result;
@@ -487,7 +511,9 @@ export function getSparcCommands() {
  */
 export async function executeSparcCommand(command, taskDescription, options = {}) {
   if (!sparcCommands[command]) {
-    throw new Error(`Unknown SPARC command: ${command}. Available commands: ${getSparcCommands().join(', ')}`);
+    throw new Error(
+      `Unknown SPARC command: ${command}. Available commands: ${getSparcCommands().join(', ')}`
+    );
   }
 
   return await sparcCommands[command](taskDescription, options);
@@ -520,10 +546,12 @@ export function showSparcCommandsHelp() {
   console.log('🎯 SPARC Command Variations:');
   console.log();
 
-  for (const [command, helpText] of Object.entries(getSparcCommands().reduce((acc, cmd) => {
-    acc[cmd] = getSparcCommandHelp(cmd);
-    return acc;
-  }, {}))) {
+  for (const [command, helpText] of Object.entries(
+    getSparcCommands().reduce((acc, cmd) => {
+      acc[cmd] = getSparcCommandHelp(cmd);
+      return acc;
+    }, {})
+  )) {
     console.log(`  sparc-${command.padEnd(12)} ${helpText}`);
   }
 

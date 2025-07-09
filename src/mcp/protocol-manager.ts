@@ -59,8 +59,8 @@ export class MCPProtocolManager {
         'notifications',
         'tool_list_changed',
         'resource_list_changed',
-        'prompt_list_changed',
-      ],
+        'prompt_list_changed'
+      ]
     },
     {
       version: { major: 2024, minor: 11, patch: 4 },
@@ -73,20 +73,14 @@ export class MCPProtocolManager {
         'logging',
         'notifications',
         'tool_list_changed',
-        'resource_list_changed',
-      ],
+        'resource_list_changed'
+      ]
     },
     {
       version: { major: 2024, minor: 11, patch: 3 },
       name: 'MCP 2024.11.3',
       releaseDate: new Date('2024-10-01'),
-      supportedFeatures: [
-        'tools',
-        'prompts',
-        'resources',
-        'logging',
-        'notifications',
-      ],
+      supportedFeatures: ['tools', 'prompts', 'resources', 'logging', 'notifications']
     },
     {
       version: { major: 2024, minor: 10, patch: 0 },
@@ -94,24 +88,16 @@ export class MCPProtocolManager {
       releaseDate: new Date('2024-09-01'),
       deprecated: true,
       deprecationDate: new Date('2024-11-01'),
-      supportedFeatures: [
-        'tools',
-        'prompts',
-        'resources',
-        'logging',
-      ],
-      breakingChanges: [
-        'Changed tool response format',
-        'Modified error codes',
-      ],
-      migrationGuide: 'https://docs.mcp.io/migration/2024.10-to-2024.11',
-    },
+      supportedFeatures: ['tools', 'prompts', 'resources', 'logging'],
+      breakingChanges: ['Changed tool response format', 'Modified error codes'],
+      migrationGuide: 'https://docs.mcp.io/migration/2024.10-to-2024.11'
+    }
   ];
 
   constructor(
     private logger: ILogger,
     preferredVersion?: MCPProtocolVersion,
-    serverCapabilities?: MCPCapabilities,
+    serverCapabilities?: MCPCapabilities
   ) {
     // Initialize supported versions
     for (const versionInfo of this.knownVersions) {
@@ -121,13 +107,13 @@ export class MCPProtocolManager {
 
     // Set current version (latest supported or preferred)
     this.currentVersion = preferredVersion || this.getLatestSupportedVersion();
-    
+
     // Set server capabilities
     this.serverCapabilities = serverCapabilities || this.getDefaultCapabilities();
 
     this.logger.info('Protocol manager initialized', {
       currentVersion: this.versionToString(this.currentVersion),
-      supportedVersions: this.getSupportedVersionStrings(),
+      supportedVersions: this.getSupportedVersionStrings()
     });
   }
 
@@ -138,7 +124,7 @@ export class MCPProtocolManager {
     this.logger.debug('Starting protocol negotiation', {
       clientVersion: this.versionToString(clientParams.protocolVersion),
       clientCapabilities: clientParams.capabilities,
-      clientInfo: clientParams.clientInfo,
+      clientInfo: clientParams.clientInfo
     });
 
     const result: NegotiationResult = {
@@ -147,13 +133,13 @@ export class MCPProtocolManager {
       clientCapabilities: clientParams.capabilities,
       serverCapabilities: this.serverCapabilities,
       warnings: [],
-      limitations: [],
+      limitations: []
     };
 
     try {
       // Check version compatibility
       const compatibility = this.checkCompatibility(clientParams.protocolVersion);
-      
+
       if (!compatibility.compatible) {
         throw new MCPError(
           `Protocol version ${this.versionToString(clientParams.protocolVersion)} is not compatible. ${compatibility.errors.join(', ')}`
@@ -164,7 +150,7 @@ export class MCPProtocolManager {
       if (this.isVersionSupported(clientParams.protocolVersion)) {
         const clientVersionInfo = this.getVersionInfo(clientParams.protocolVersion);
         const currentVersionInfo = this.getVersionInfo(this.currentVersion);
-        
+
         if (clientVersionInfo && currentVersionInfo) {
           if (this.compareVersions(clientParams.protocolVersion, this.currentVersion) <= 0) {
             result.agreedVersion = clientParams.protocolVersion;
@@ -187,7 +173,7 @@ export class MCPProtocolManager {
       if (versionInfo?.deprecated) {
         result.warnings.push(
           `Protocol version ${this.versionToString(result.agreedVersion)} is deprecated. ` +
-          `Please upgrade to a newer version.`
+            `Please upgrade to a newer version.`
         );
       }
 
@@ -196,7 +182,7 @@ export class MCPProtocolManager {
         result.agreedVersion,
         result.agreedCapabilities
       );
-      
+
       if (missingFeatures.length > 0) {
         result.limitations.push(
           `Some features may not be available: ${missingFeatures.join(', ')}`
@@ -206,14 +192,14 @@ export class MCPProtocolManager {
       this.logger.info('Protocol negotiation completed', {
         agreedVersion: this.versionToString(result.agreedVersion),
         warnings: result.warnings.length,
-        limitations: result.limitations.length,
+        limitations: result.limitations.length
       });
 
       return result;
     } catch (error) {
       this.logger.error('Protocol negotiation failed', {
         clientVersion: this.versionToString(clientParams.protocolVersion),
-        error,
+        error
       });
       throw error;
     }
@@ -226,7 +212,7 @@ export class MCPProtocolManager {
     const result: CompatibilityResult = {
       compatible: false,
       warnings: [],
-      errors: [],
+      errors: []
     };
 
     const clientVersionInfo = this.getVersionInfo(clientVersion);
@@ -260,7 +246,7 @@ export class MCPProtocolManager {
     if (clientVersionInfo.deprecated) {
       result.warnings.push(
         `Client is using deprecated version ${this.versionToString(clientVersion)}. ` +
-        `Support will be removed after ${clientVersionInfo.deprecationDate?.toISOString().split('T')[0]}`
+          `Support will be removed after ${clientVersionInfo.deprecationDate?.toISOString().split('T')[0]}`
       );
       result.recommendedVersion = this.getLatestSupportedVersion();
     }
@@ -269,7 +255,7 @@ export class MCPProtocolManager {
     const serverFeatures = serverVersionInfo?.supportedFeatures || [];
     const clientFeatures = clientVersionInfo.supportedFeatures;
     const missingFeatures = serverFeatures.filter(feature => !clientFeatures.includes(feature));
-    
+
     if (missingFeatures.length > 0) {
       result.missingFeatures = missingFeatures;
       result.warnings.push(
@@ -311,7 +297,7 @@ export class MCPProtocolManager {
     const versions = Array.from(this.supportedVersions.values())
       .filter(v => !v.deprecated)
       .sort((a, b) => this.compareVersions(b.version, a.version));
-    
+
     return versions[0]?.version || { major: 2024, minor: 11, patch: 5 };
   }
 
@@ -358,18 +344,18 @@ export class MCPProtocolManager {
   private getDefaultCapabilities(): MCPCapabilities {
     return {
       logging: {
-        level: 'info',
+        level: 'info'
       },
       tools: {
-        listChanged: true,
+        listChanged: true
       },
       resources: {
         listChanged: true,
-        subscribe: false,
+        subscribe: false
       },
       prompts: {
-        listChanged: true,
-      },
+        listChanged: true
+      }
     };
   }
 
@@ -386,29 +372,31 @@ export class MCPProtocolManager {
         level: this.negotiateLogLevel(
           clientCapabilities.logging.level,
           serverCapabilities.logging.level
-        ),
+        )
       };
     }
 
     // Negotiate tools capabilities
     if (clientCapabilities.tools && serverCapabilities.tools) {
       result.tools = {
-        listChanged: clientCapabilities.tools.listChanged && serverCapabilities.tools.listChanged,
+        listChanged: clientCapabilities.tools.listChanged && serverCapabilities.tools.listChanged
       };
     }
 
     // Negotiate resources capabilities
     if (clientCapabilities.resources && serverCapabilities.resources) {
       result.resources = {
-        listChanged: clientCapabilities.resources.listChanged && serverCapabilities.resources.listChanged,
-        subscribe: clientCapabilities.resources.subscribe && serverCapabilities.resources.subscribe,
+        listChanged:
+          clientCapabilities.resources.listChanged && serverCapabilities.resources.listChanged,
+        subscribe: clientCapabilities.resources.subscribe && serverCapabilities.resources.subscribe
       };
     }
 
     // Negotiate prompts capabilities
     if (clientCapabilities.prompts && serverCapabilities.prompts) {
       result.prompts = {
-        listChanged: clientCapabilities.prompts.listChanged && serverCapabilities.prompts.listChanged,
+        listChanged:
+          clientCapabilities.prompts.listChanged && serverCapabilities.prompts.listChanged
       };
     }
 
@@ -423,7 +411,7 @@ export class MCPProtocolManager {
     const levels = ['debug', 'info', 'warn', 'error'];
     const clientIndex = clientLevel ? levels.indexOf(clientLevel) : 1;
     const serverIndex = serverLevel ? levels.indexOf(serverLevel) : 1;
-    
+
     // Use the more restrictive (higher) level
     const chosenIndex = Math.max(clientIndex, serverIndex);
     return levels[chosenIndex] as 'debug' | 'info' | 'warn' | 'error';
@@ -442,15 +430,15 @@ export class MCPProtocolManager {
     if (versionInfo.supportedFeatures.includes('logging') && capabilities.logging) {
       result.logging = capabilities.logging;
     }
-    
+
     if (versionInfo.supportedFeatures.includes('tools') && capabilities.tools) {
       result.tools = capabilities.tools;
     }
-    
+
     if (versionInfo.supportedFeatures.includes('resources') && capabilities.resources) {
       result.resources = capabilities.resources;
     }
-    
+
     if (versionInfo.supportedFeatures.includes('prompts') && capabilities.prompts) {
       result.prompts = capabilities.prompts;
     }
@@ -458,10 +446,7 @@ export class MCPProtocolManager {
     return result;
   }
 
-  private getMissingFeatures(
-    version: MCPProtocolVersion,
-    capabilities: MCPCapabilities
-  ): string[] {
+  private getMissingFeatures(version: MCPProtocolVersion, capabilities: MCPCapabilities): string[] {
     const versionInfo = this.getVersionInfo(version);
     if (!versionInfo) return [];
 
@@ -471,7 +456,7 @@ export class MCPProtocolManager {
     // Check what's missing compared to latest version
     const latestVersion = this.getLatestSupportedVersion();
     const latestVersionInfo = this.getVersionInfo(latestVersion);
-    
+
     if (latestVersionInfo) {
       for (const feature of latestVersionInfo.supportedFeatures) {
         if (!availableFeatures.includes(feature)) {

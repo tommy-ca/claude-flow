@@ -49,7 +49,7 @@ export class FallbackCoordinator extends EventEmitter {
     maxQueueSize: 100,
     queueTimeout: 300000, // 5 minutes
     cliPath: 'npx ruv-swarm',
-    fallbackNotificationInterval: 30000, // 30 seconds
+    fallbackNotificationInterval: 30000 // 30 seconds
   };
 
   constructor(
@@ -58,12 +58,12 @@ export class FallbackCoordinator extends EventEmitter {
   ) {
     super();
     this.config = { ...this.defaultConfig, ...config };
-    
+
     this.state = {
       isFallbackActive: false,
       queuedOperations: 0,
       failedOperations: 0,
-      successfulOperations: 0,
+      successfulOperations: 0
     };
   }
 
@@ -94,13 +94,13 @@ export class FallbackCoordinator extends EventEmitter {
     }
 
     this.logger.warn('Enabling CLI fallback mode');
-    
+
     this.state.isFallbackActive = true;
     this.state.lastFallbackActivation = new Date();
-    
+
     // Start notification timer
     this.startNotificationTimer();
-    
+
     this.emit('fallbackEnabled', this.state);
   }
 
@@ -113,14 +113,14 @@ export class FallbackCoordinator extends EventEmitter {
     }
 
     this.logger.info('Disabling CLI fallback mode');
-    
+
     this.state.isFallbackActive = false;
-    
+
     // Stop notification timer
     this.stopNotificationTimer();
-    
+
     this.emit('fallbackDisabled', this.state);
-    
+
     // Process any queued operations
     if (this.operationQueue.length > 0) {
       this.processQueue().catch(error => {
@@ -147,7 +147,7 @@ export class FallbackCoordinator extends EventEmitter {
     const queuedOp: FallbackOperation = {
       ...operation,
       id: this.generateOperationId(),
-      timestamp: new Date(),
+      timestamp: new Date()
     };
 
     this.operationQueue.push(queuedOp);
@@ -157,7 +157,7 @@ export class FallbackCoordinator extends EventEmitter {
       id: queuedOp.id,
       type: queuedOp.type,
       method: queuedOp.method,
-      queueSize: this.operationQueue.length,
+      queueSize: this.operationQueue.length
     });
 
     this.emit('operationQueued', queuedOp);
@@ -180,20 +180,20 @@ export class FallbackCoordinator extends EventEmitter {
 
     this.processingQueue = true;
     this.logger.info('Processing operation queue', {
-      queueSize: this.operationQueue.length,
+      queueSize: this.operationQueue.length
     });
 
     this.emit('queueProcessingStart', this.operationQueue.length);
 
     const results = {
       successful: 0,
-      failed: 0,
+      failed: 0
     };
 
     // Process operations in order
     while (this.operationQueue.length > 0) {
       const operation = this.operationQueue.shift()!;
-      
+
       // Check if operation has expired
       if (this.isOperationExpired(operation)) {
         this.logger.warn('Operation expired', { id: operation.id });
@@ -208,7 +208,7 @@ export class FallbackCoordinator extends EventEmitter {
       } catch (error) {
         this.logger.error('Failed to replay operation', {
           operation,
-          error,
+          error
         });
         results.failed++;
         this.state.failedOperations++;
@@ -248,7 +248,7 @@ export class FallbackCoordinator extends EventEmitter {
     const clearedCount = this.operationQueue.length;
     this.operationQueue = [];
     this.state.queuedOperations = 0;
-    
+
     this.logger.info('Operation queue cleared', { clearedCount });
     this.emit('queueCleared', clearedCount);
   }
@@ -256,26 +256,26 @@ export class FallbackCoordinator extends EventEmitter {
   private async executeViaCliFallback(operation: FallbackOperation): Promise<void> {
     this.logger.debug('Executing operation via CLI fallback', {
       id: operation.id,
-      method: operation.method,
+      method: operation.method
     });
 
     try {
       // Map MCP operations to CLI commands
       const cliCommand = this.mapOperationToCli(operation);
-      
+
       if (!cliCommand) {
         throw new Error(`No CLI mapping for operation: ${operation.method}`);
       }
 
       const { stdout, stderr } = await execAsync(cliCommand);
-      
+
       if (stderr) {
         this.logger.warn('CLI command stderr', { stderr });
       }
 
       this.logger.debug('CLI fallback execution successful', {
         id: operation.id,
-        stdout: stdout.substring(0, 200), // Log first 200 chars
+        stdout: stdout.substring(0, 200) // Log first 200 chars
       });
 
       this.state.successfulOperations++;
@@ -283,7 +283,7 @@ export class FallbackCoordinator extends EventEmitter {
     } catch (error) {
       this.logger.error('CLI fallback execution failed', {
         operation,
-        error,
+        error
       });
 
       this.state.failedOperations++;
@@ -301,7 +301,7 @@ export class FallbackCoordinator extends EventEmitter {
     // For now, we'll log it
     this.logger.info('Replaying operation', {
       id: operation.id,
-      method: operation.method,
+      method: operation.method
     });
 
     // Emit event for handling by the MCP client
@@ -313,18 +313,19 @@ export class FallbackCoordinator extends EventEmitter {
     const mappings: Record<string, (params: any) => string> = {
       // Tool operations
       'tools/list': () => `${this.config.cliPath} tools list`,
-      'tools/call': (params) => `${this.config.cliPath} tools call ${params.name} '${JSON.stringify(params.arguments)}'`,
-      
+      'tools/call': params =>
+        `${this.config.cliPath} tools call ${params.name} '${JSON.stringify(params.arguments)}'`,
+
       // Resource operations
       'resources/list': () => `${this.config.cliPath} resources list`,
-      'resources/read': (params) => `${this.config.cliPath} resources read ${params.uri}`,
-      
+      'resources/read': params => `${this.config.cliPath} resources read ${params.uri}`,
+
       // Session operations
-      'initialize': () => `${this.config.cliPath} session init`,
-      'shutdown': () => `${this.config.cliPath} session shutdown`,
-      
+      initialize: () => `${this.config.cliPath} session init`,
+      shutdown: () => `${this.config.cliPath} session shutdown`,
+
       // Custom operations
-      'heartbeat': () => `${this.config.cliPath} health check`,
+      heartbeat: () => `${this.config.cliPath} health check`
     };
 
     const mapper = mappings[operation.method];
@@ -349,7 +350,7 @@ export class FallbackCoordinator extends EventEmitter {
       if (this.state.isFallbackActive && this.operationQueue.length > 0) {
         this.logger.info('Fallback mode active', {
           queuedOperations: this.operationQueue.length,
-          duration: Date.now() - (this.state.lastFallbackActivation?.getTime() || 0),
+          duration: Date.now() - (this.state.lastFallbackActivation?.getTime() || 0)
         });
 
         this.emit('fallbackStatus', this.state);

@@ -2,12 +2,7 @@
  * Resource pressure detection interfaces
  */
 
-import {
-  IResourceMetrics,
-  ResourcePressureLevel,
-  ResourceType,
-  IResourceAlert
-} from './metrics';
+import { IResourceMetrics, ResourcePressureLevel, ResourceType, IResourceAlert } from './metrics';
 
 /**
  * Pressure detection configuration
@@ -165,58 +160,42 @@ export enum AnomalyAlgorithm {
 export interface IResourcePressureDetector {
   /** Start pressure detection */
   start(): Promise<void>;
-  
+
   /** Stop pressure detection */
   stop(): Promise<void>;
-  
+
   /** Get current pressure level */
   getCurrentPressure(): IPressureStatus;
-  
+
   /** Get pressure history */
-  getPressureHistory(
-    duration: number
-  ): IPressureStatus[];
-  
+  getPressureHistory(duration: number): IPressureStatus[];
+
   /** Predict future pressure */
-  predictPressure(
-    horizon: number
-  ): Promise<IPressurePrediction>;
-  
+  predictPressure(horizon: number): Promise<IPressurePrediction>;
+
   /** Check for anomalies */
-  detectAnomalies(
-    metrics: IResourceMetrics
-  ): IAnomalyResult[];
-  
+  detectAnomalies(metrics: IResourceMetrics): IAnomalyResult[];
+
   /** Subscribe to pressure changes */
-  subscribe(
-    callback: PressureCallback
-  ): () => void;
-  
+  subscribe(callback: PressureCallback): () => void;
+
   /** Register response action */
-  registerAction(
-    action: IResponseAction
-  ): void;
-  
+  registerAction(action: IResponseAction): void;
+
   /** Update configuration */
-  updateConfig(
-    config: Partial<IPressureDetectorConfig>
-  ): void;
-  
+  updateConfig(config: Partial<IPressureDetectorConfig>): void;
+
   /** Get configuration */
   getConfig(): IPressureDetectorConfig;
-  
+
   /** Manually trigger pressure check */
   check(): Promise<IPressureStatus>;
-  
+
   /** Get action history */
-  getActionHistory(
-    limit?: number
-  ): IActionHistoryEntry[];
-  
+  getActionHistory(limit?: number): IActionHistoryEntry[];
+
   /** Export pressure data */
-  exportData(
-    format: ExportFormat
-  ): Promise<string>;
+  exportData(format: ExportFormat): Promise<string>;
 }
 
 /**
@@ -398,9 +377,7 @@ export enum AnomalySeverity {
 /**
  * Pressure callback
  */
-export type PressureCallback = (
-  status: IPressureStatus
-) => void;
+export type PressureCallback = (status: IPressureStatus) => void;
 
 /**
  * Action history entry

@@ -77,16 +77,18 @@ export class SettingsManager {
     this.setupActionButtons();
 
     // Click outside to close
-    document.addEventListener('click', (event) => {
-      if (this.isVisible &&
-          !this.settingsPanel.contains(event.target) &&
-          !document.getElementById('settingsToggle').contains(event.target)) {
+    document.addEventListener('click', event => {
+      if (
+        this.isVisible &&
+        !this.settingsPanel.contains(event.target) &&
+        !document.getElementById('settingsToggle').contains(event.target)
+      ) {
         this.hide();
       }
     });
 
     // ESC key to close
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', event => {
       if (event.key === 'Escape' && this.isVisible) {
         this.hide();
       }
@@ -102,30 +104,30 @@ export class SettingsManager {
     this.bindSetting('authToken', 'input');
 
     // Appearance settings
-    this.bindSetting('fontSize', 'change', (value) => {
+    this.bindSetting('fontSize', 'change', value => {
       this.applyFontSize(parseInt(value));
     });
 
-    this.bindSetting('theme', 'change', (value) => {
+    this.bindSetting('theme', 'change', value => {
       this.applyTheme(value);
     });
 
-    this.bindSetting('lineHeight', 'change', (value) => {
+    this.bindSetting('lineHeight', 'change', value => {
       this.applyLineHeight(parseFloat(value));
     });
 
     // Behavior settings
-    this.bindSetting('autoScroll', 'change', (value) => {
+    this.bindSetting('autoScroll', 'change', value => {
       localStorage.setItem('console_auto_scroll', value);
     });
 
-    this.bindSetting('showTimestamps', 'change', (value) => {
+    this.bindSetting('showTimestamps', 'change', value => {
       localStorage.setItem('console_show_timestamps', value);
     });
 
     this.bindSetting('enableSounds', 'change');
 
-    this.bindSetting('maxLines', 'input', (value) => {
+    this.bindSetting('maxLines', 'input', value => {
       const maxLines = parseInt(value);
       if (maxLines >= 100 && maxLines <= 10000) {
         this.emit('max_lines_changed', maxLines);
@@ -181,7 +183,9 @@ export class SettingsManager {
    */
   bindSetting(settingName, eventType, callback) {
     const element = document.getElementById(settingName);
-    if (!element) {return;}
+    if (!element) {
+      return;
+    }
 
     // Set initial value
     const value = this.get(settingName);
@@ -192,7 +196,7 @@ export class SettingsManager {
     }
 
     // Listen for changes
-    element.addEventListener(eventType, (event) => {
+    element.addEventListener(eventType, event => {
       let newValue;
 
       if (element.type === 'checkbox') {
@@ -416,16 +420,29 @@ export class SettingsManager {
    */
   validateSetting(key, value) {
     const validators = {
-      fontSize: (v) => v >= 10 && v <= 24,
-      lineHeight: (v) => v >= 1.0 && v <= 2.0,
-      maxLines: (v) => v >= 100 && v <= 10000,
-      theme: (v) => ['dark', 'light', 'classic', 'matrix'].includes(v),
-      defaultMode: (v) => ['coder', 'architect', 'analyst', 'researcher', 'reviewer',
-        'tester', 'debugger', 'documenter', 'optimizer', 'designer'].includes(v),
-      swarmStrategy: (v) => ['development', 'research', 'analysis', 'testing',
-        'optimization', 'maintenance'].includes(v),
-      coordinationMode: (v) => ['centralized', 'hierarchical', 'distributed',
-        'mesh', 'hybrid'].includes(v)
+      fontSize: v => v >= 10 && v <= 24,
+      lineHeight: v => v >= 1.0 && v <= 2.0,
+      maxLines: v => v >= 100 && v <= 10000,
+      theme: v => ['dark', 'light', 'classic', 'matrix'].includes(v),
+      defaultMode: v =>
+        [
+          'coder',
+          'architect',
+          'analyst',
+          'researcher',
+          'reviewer',
+          'tester',
+          'debugger',
+          'documenter',
+          'optimizer',
+          'designer'
+        ].includes(v),
+      swarmStrategy: v =>
+        ['development', 'research', 'analysis', 'testing', 'optimization', 'maintenance'].includes(
+          v
+        ),
+      coordinationMode: v =>
+        ['centralized', 'hierarchical', 'distributed', 'mesh', 'hybrid'].includes(v)
     };
 
     const validator = validators[key];
@@ -470,13 +487,19 @@ export class SettingsManager {
       }
     }
 
-    const statusClass = status.connected ? 'connected' :
-      status.connecting ? 'connecting' : 'disconnected';
+    const statusClass = status.connected
+      ? 'connected'
+      : status.connecting
+        ? 'connecting'
+        : 'disconnected';
 
     infoElement.className = `connection-info ${statusClass}`;
 
-    const title = status.connected ? 'Connected' :
-      status.connecting ? 'Connecting...' : 'Disconnected';
+    const title = status.connected
+      ? 'Connected'
+      : status.connecting
+        ? 'Connecting...'
+        : 'Disconnected';
 
     const details = status.connected
       ? `Connected to ${status.url}\nPending requests: ${status.pendingRequests}\nQueued messages: ${status.queuedMessages}`
@@ -499,7 +522,7 @@ export class SettingsManager {
     // Listen for theme changes from system
     if (window.matchMedia) {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-      mediaQuery.addEventListener('change', (e) => {
+      mediaQuery.addEventListener('change', e => {
         if (this.get('theme') === 'auto') {
           this.applyTheme(e.matches ? 'dark' : 'light');
         }

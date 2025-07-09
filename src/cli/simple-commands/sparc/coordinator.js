@@ -81,13 +81,24 @@ export class SparcCoordinator {
    */
   assessTaskComplexity() {
     const taskDescription = this.options.taskDescription || '';
-    const complexityKeywords = ['complex', 'enterprise', 'scalable', 'distributed', 'microservice', 'integration'];
+    const complexityKeywords = [
+      'complex',
+      'enterprise',
+      'scalable',
+      'distributed',
+      'microservice',
+      'integration'
+    ];
     const matchedKeywords = complexityKeywords.filter(keyword =>
       taskDescription.toLowerCase().includes(keyword)
     );
 
-    if (matchedKeywords.length >= 3) {return 3;} // High complexity
-    if (matchedKeywords.length >= 1) {return 2;} // Medium complexity
+    if (matchedKeywords.length >= 3) {
+      return 3;
+    } // High complexity
+    if (matchedKeywords.length >= 1) {
+      return 2;
+    } // Medium complexity
     return 1; // Low complexity
   }
 
@@ -96,12 +107,36 @@ export class SparcCoordinator {
    */
   async spawnSparcAgents() {
     const agentTypes = [
-      { type: 'sparc_specification', role: 'Requirements Analyst', capabilities: ['analysis', 'documentation', 'validation'] },
-      { type: 'sparc_pseudocode', role: 'Logic Designer', capabilities: ['design', 'flowcharts', 'algorithms'] },
-      { type: 'sparc_architecture', role: 'System Architect', capabilities: ['architecture', 'design_patterns', 'scalability'] },
-      { type: 'sparc_refinement', role: 'TDD Engineer', capabilities: ['testing', 'refactoring', 'code_quality'] },
-      { type: 'sparc_completion', role: 'Integration Specialist', capabilities: ['integration', 'deployment', 'validation'] },
-      { type: 'sparc_coordinator', role: 'SPARC Orchestrator', capabilities: ['coordination', 'monitoring', 'optimization'] }
+      {
+        type: 'sparc_specification',
+        role: 'Requirements Analyst',
+        capabilities: ['analysis', 'documentation', 'validation']
+      },
+      {
+        type: 'sparc_pseudocode',
+        role: 'Logic Designer',
+        capabilities: ['design', 'flowcharts', 'algorithms']
+      },
+      {
+        type: 'sparc_architecture',
+        role: 'System Architect',
+        capabilities: ['architecture', 'design_patterns', 'scalability']
+      },
+      {
+        type: 'sparc_refinement',
+        role: 'TDD Engineer',
+        capabilities: ['testing', 'refactoring', 'code_quality']
+      },
+      {
+        type: 'sparc_completion',
+        role: 'Integration Specialist',
+        capabilities: ['integration', 'deployment', 'validation']
+      },
+      {
+        type: 'sparc_coordinator',
+        role: 'SPARC Orchestrator',
+        capabilities: ['coordination', 'monitoring', 'optimization']
+      }
     ];
 
     for (const agentSpec of agentTypes) {
@@ -143,12 +178,12 @@ export class SparcCoordinator {
    */
   getAgentConcurrency(agentType) {
     const concurrencyMap = {
-      'sparc_specification': 2,
-      'sparc_pseudocode': 1,
-      'sparc_architecture': 3,
-      'sparc_refinement': 4,
-      'sparc_completion': 2,
-      'sparc_coordinator': 1
+      sparc_specification: 2,
+      sparc_pseudocode: 1,
+      sparc_architecture: 3,
+      sparc_refinement: 4,
+      sparc_completion: 2,
+      sparc_coordinator: 1
     };
 
     return concurrencyMap[agentType] || 2;
@@ -173,10 +208,10 @@ export class SparcCoordinator {
     await this.executeSwarmHook('setup_dependencies', {
       phases: Object.keys(this.phases),
       dependencies: {
-        'pseudocode': ['specification'],
-        'architecture': ['specification', 'pseudocode'],
-        'refinement': ['specification', 'pseudocode', 'architecture'],
-        'completion': ['specification', 'pseudocode', 'architecture', 'refinement']
+        pseudocode: ['specification'],
+        architecture: ['specification', 'pseudocode'],
+        refinement: ['specification', 'pseudocode', 'architecture'],
+        completion: ['specification', 'pseudocode', 'architecture', 'refinement']
       }
     });
 
@@ -225,7 +260,9 @@ export class SparcCoordinator {
    * Pre-phase coordination
    */
   async prePhase(phaseName) {
-    if (!this.swarmEnabled) {return;}
+    if (!this.swarmEnabled) {
+      return;
+    }
 
     console.log(`🔄 Pre-phase coordination: ${phaseName}`);
 
@@ -248,7 +285,6 @@ export class SparcCoordinator {
           neuralContext: this.neuralContext
         }
       });
-
     } catch (error) {
       console.warn(`⚠️ Pre-phase coordination failed for ${phaseName}: ${error.message}`);
     }
@@ -273,10 +309,18 @@ export class SparcCoordinator {
         confidence: neuralData.confidence || 0.5
       };
 
-      console.log(`🧠 Neural context loaded for ${phaseName} (confidence: ${this.neuralContext.confidence.toFixed(2)})`);
+      console.log(
+        `🧠 Neural context loaded for ${phaseName} (confidence: ${this.neuralContext.confidence.toFixed(2)})`
+      );
     } catch (error) {
       console.warn(`⚠️ Neural context loading failed: ${error.message}`);
-      this.neuralContext = { phase: phaseName, patterns: [], insights: [], recommendations: [], confidence: 0.5 };
+      this.neuralContext = {
+        phase: phaseName,
+        patterns: [],
+        insights: [],
+        recommendations: [],
+        confidence: 0.5
+      };
     }
   }
 
@@ -287,11 +331,21 @@ export class SparcCoordinator {
     const taskDescription = this.options.taskDescription || '';
     const taskLower = taskDescription.toLowerCase();
 
-    if (taskLower.includes('api') || taskLower.includes('service')) {return 'api_development';}
-    if (taskLower.includes('ui') || taskLower.includes('frontend')) {return 'frontend_development';}
-    if (taskLower.includes('data') || taskLower.includes('database')) {return 'data_management';}
-    if (taskLower.includes('test') || taskLower.includes('testing')) {return 'testing';}
-    if (taskLower.includes('deploy') || taskLower.includes('infrastructure')) {return 'deployment';}
+    if (taskLower.includes('api') || taskLower.includes('service')) {
+      return 'api_development';
+    }
+    if (taskLower.includes('ui') || taskLower.includes('frontend')) {
+      return 'frontend_development';
+    }
+    if (taskLower.includes('data') || taskLower.includes('database')) {
+      return 'data_management';
+    }
+    if (taskLower.includes('test') || taskLower.includes('testing')) {
+      return 'testing';
+    }
+    if (taskLower.includes('deploy') || taskLower.includes('infrastructure')) {
+      return 'deployment';
+    }
 
     return 'general_development';
   }
@@ -336,11 +390,11 @@ export class SparcCoordinator {
    */
   getPhasePriority(phaseName) {
     const priorities = {
-      'specification': 5, // Highest priority
-      'pseudocode': 4,
-      'architecture': 4,
-      'refinement': 3,
-      'completion': 2
+      specification: 5, // Highest priority
+      pseudocode: 4,
+      architecture: 4,
+      refinement: 3,
+      completion: 2
     };
 
     return priorities[phaseName] || 1;
@@ -373,11 +427,11 @@ export class SparcCoordinator {
    */
   getPhaseDependencies(phaseName) {
     const dependencies = {
-      'specification': [],
-      'pseudocode': ['specification'],
-      'architecture': ['specification', 'pseudocode'],
-      'refinement': ['specification', 'pseudocode', 'architecture'],
-      'completion': ['specification', 'pseudocode', 'architecture', 'refinement']
+      specification: [],
+      pseudocode: ['specification'],
+      architecture: ['specification', 'pseudocode'],
+      refinement: ['specification', 'pseudocode', 'architecture'],
+      completion: ['specification', 'pseudocode', 'architecture', 'refinement']
     };
 
     return dependencies[phaseName] || [];
@@ -387,7 +441,9 @@ export class SparcCoordinator {
    * Post-phase coordination
    */
   async postPhase(phaseName, result) {
-    if (!this.swarmEnabled) {return;}
+    if (!this.swarmEnabled) {
+      return;
+    }
 
     console.log(`✅ Post-phase coordination: ${phaseName}`);
 
@@ -405,10 +461,11 @@ export class SparcCoordinator {
           timestamp: Date.now(),
           result: result,
           validation: validation,
-          agents: this.phaseAgents.get(phaseName)?.map(a => ({
-            id: a.id,
-            performance: a.performance
-          })) || []
+          agents:
+            this.phaseAgents.get(phaseName)?.map(a => ({
+              id: a.id,
+              performance: a.performance
+            })) || []
         }
       });
 
@@ -422,7 +479,6 @@ export class SparcCoordinator {
 
       // Update metrics
       this.updateCoordinationMetrics(phaseName, result, validation);
-
     } catch (error) {
       console.warn(`⚠️ Post-phase coordination failed for ${phaseName}: ${error.message}`);
     }
@@ -452,7 +508,6 @@ export class SparcCoordinator {
       validation.score = swarmValidation.score;
       validation.issues = swarmValidation.issues || [];
       validation.recommendations = swarmValidation.recommendations || [];
-
     } catch (error) {
       console.warn(`⚠️ Swarm validation failed: ${error.message}`);
       // Fallback to basic validation
@@ -468,23 +523,23 @@ export class SparcCoordinator {
    */
   getValidationCriteria(phaseName) {
     const criteria = {
-      'specification': {
+      specification: {
         requiredFields: ['requirements', 'acceptanceCriteria', 'userStories'],
         qualityThresholds: { completeness: 0.9, clarity: 0.8 }
       },
-      'pseudocode': {
+      pseudocode: {
         requiredFields: ['flowDiagram', 'pseudocode', 'algorithms'],
         qualityThresholds: { completeness: 0.85, complexity: 0.7 }
       },
-      'architecture': {
+      architecture: {
         requiredFields: ['systemDesign', 'components', 'designPatterns'],
         qualityThresholds: { modularity: 0.8, scalability: 0.75 }
       },
-      'refinement': {
+      refinement: {
         requiredFields: ['testResults', 'codeQuality', 'implementations'],
         qualityThresholds: { testCoverage: 0.8, codeQuality: 0.75 }
       },
-      'completion': {
+      completion: {
         requiredFields: ['validation', 'deployment', 'documentation'],
         qualityThresholds: { completeness: 0.9, readiness: 0.85 }
       }
@@ -529,7 +584,7 @@ export class SparcCoordinator {
    */
   getPhaseStartTime(phaseName) {
     // This would typically be stored in memory or agent state
-    return Date.now() - (5 * 60 * 1000); // Default to 5 minutes ago
+    return Date.now() - 5 * 60 * 1000; // Default to 5 minutes ago
   }
 
   /**
@@ -537,11 +592,11 @@ export class SparcCoordinator {
    */
   getExpectedPhaseTime(phaseName) {
     const expectedTimes = {
-      'specification': 10 * 60 * 1000,  // 10 minutes
-      'pseudocode': 5 * 60 * 1000,      // 5 minutes
-      'architecture': 15 * 60 * 1000,   // 15 minutes
-      'refinement': 20 * 60 * 1000,     // 20 minutes
-      'completion': 10 * 60 * 1000      // 10 minutes
+      specification: 10 * 60 * 1000, // 10 minutes
+      pseudocode: 5 * 60 * 1000, // 5 minutes
+      architecture: 15 * 60 * 1000, // 15 minutes
+      refinement: 20 * 60 * 1000, // 20 minutes
+      completion: 10 * 60 * 1000 // 10 minutes
     };
 
     return expectedTimes[phaseName] || 10 * 60 * 1000;
@@ -606,9 +661,13 @@ export class SparcCoordinator {
    */
   calculatePhaseEfficiency(phaseName) {
     const phaseAgents = this.phaseAgents.get(phaseName) || [];
-    if (phaseAgents.length === 0) {return 0.5;}
+    if (phaseAgents.length === 0) {
+      return 0.5;
+    }
 
-    const avgEfficiency = phaseAgents.reduce((sum, agent) => sum + agent.performance.efficiency, 0) / phaseAgents.length;
+    const avgEfficiency =
+      phaseAgents.reduce((sum, agent) => sum + agent.performance.efficiency, 0) /
+      phaseAgents.length;
     return avgEfficiency;
   }
 
@@ -639,7 +698,9 @@ export class SparcCoordinator {
    */
   async preparePhaseHandoff(phaseName, result) {
     const nextPhase = this.getNextPhase(phaseName);
-    if (!nextPhase) {return;}
+    if (!nextPhase) {
+      return;
+    }
 
     // Prepare artifacts for next phase
     await this.executeSwarmHook('prepare_handoff', {
@@ -669,7 +730,9 @@ export class SparcCoordinator {
   getNextPhase(currentPhase) {
     const sequence = ['specification', 'pseudocode', 'architecture', 'refinement', 'completion'];
     const currentIndex = sequence.indexOf(currentPhase);
-    return currentIndex >= 0 && currentIndex < sequence.length - 1 ? sequence[currentIndex + 1] : null;
+    return currentIndex >= 0 && currentIndex < sequence.length - 1
+      ? sequence[currentIndex + 1]
+      : null;
   }
 
   /**
@@ -687,11 +750,13 @@ export class SparcCoordinator {
     }
 
     if (result.qualityGates) {
-      decisions.push(...result.qualityGates.map(gate => ({
-        decision: `Quality gate: ${gate.name}`,
-        rationale: gate.rationale || 'Quality assurance',
-        impact: gate.impact || 'process'
-      })));
+      decisions.push(
+        ...result.qualityGates.map(gate => ({
+          decision: `Quality gate: ${gate.name}`,
+          rationale: gate.rationale || 'Quality assurance',
+          impact: gate.impact || 'process'
+        }))
+      );
     }
 
     return decisions;
@@ -740,7 +805,9 @@ export class SparcCoordinator {
    * Finalize coordination
    */
   async finalize() {
-    if (!this.swarmEnabled) {return;}
+    if (!this.swarmEnabled) {
+      return;
+    }
 
     console.log('🏁 Finalizing SPARC coordination');
 
@@ -836,7 +903,9 @@ export class SparcCoordinator {
       }
 
       analysis[gate.phase].executions += 1;
-      if (gate.passed) {analysis[gate.phase].passed += 1;}
+      if (gate.passed) {
+        analysis[gate.phase].passed += 1;
+      }
       analysis[gate.phase].totalScore += gate.score;
     }
 
@@ -856,8 +925,9 @@ export class SparcCoordinator {
     const recommendations = [];
 
     // Analyze agent utilization
-    const avgUtilization = Object.values(this.metrics.agentUtilization).reduce((sum, agent) =>
-      sum + agent.phases, 0) / Object.keys(this.metrics.agentUtilization).length;
+    const avgUtilization =
+      Object.values(this.metrics.agentUtilization).reduce((sum, agent) => sum + agent.phases, 0) /
+      Object.keys(this.metrics.agentUtilization).length;
 
     if (avgUtilization < 2) {
       recommendations.push('Consider reducing agent count for better utilization');
@@ -871,7 +941,8 @@ export class SparcCoordinator {
     }
 
     // Analyze quality gates
-    const qualityGateSuccess = this.metrics.qualityGates.filter(g => g.passed).length / this.metrics.qualityGates.length;
+    const qualityGateSuccess =
+      this.metrics.qualityGates.filter(g => g.passed).length / this.metrics.qualityGates.length;
     if (qualityGateSuccess < 0.8) {
       recommendations.push('Review quality gate criteria and provide additional agent training');
     }
@@ -892,7 +963,9 @@ export class SparcCoordinator {
     }
 
     // Quality analysis
-    const avgQuality = this.metrics.learningData.reduce((sum, d) => sum + d.quality, 0) / this.metrics.learningData.length;
+    const avgQuality =
+      this.metrics.learningData.reduce((sum, d) => sum + d.quality, 0) /
+      this.metrics.learningData.length;
     if (avgQuality > 85) {
       insights.push('High quality outcomes consistently achieved');
     } else if (avgQuality < 70) {
@@ -928,15 +1001,15 @@ export class SparcCoordinator {
         let output = '';
         let error = '';
 
-        process.stdout.on('data', (data) => {
+        process.stdout.on('data', data => {
           output += data.toString();
         });
 
-        process.stderr.on('data', (data) => {
+        process.stderr.on('data', data => {
           error += data.toString();
         });
 
-        process.on('close', (code) => {
+        process.on('close', code => {
           if (code === 0) {
             try {
               const result = JSON.parse(output);
@@ -949,7 +1022,7 @@ export class SparcCoordinator {
           }
         });
 
-        process.on('error', (err) => {
+        process.on('error', err => {
           reject(err);
         });
       });
@@ -962,7 +1035,9 @@ export class SparcCoordinator {
    * Record learning from SPARC execution
    */
   async recordLearning(learningData) {
-    if (!this.options.neuralLearning) {return;}
+    if (!this.options.neuralLearning) {
+      return;
+    }
 
     try {
       await this.executeSwarmHook('neural_record_learning', {
@@ -985,7 +1060,8 @@ export class SparcCoordinator {
       agentCount: this.agents.length,
       phaseAgents: Object.fromEntries(
         Array.from(this.phaseAgents.entries()).map(([phase, agents]) => [
-          phase, agents.map(a => ({ id: a.id, type: a.type, status: a.status }))
+          phase,
+          agents.map(a => ({ id: a.id, type: a.type, status: a.status }))
         ])
       ),
       metrics: this.metrics,

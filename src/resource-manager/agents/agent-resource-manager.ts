@@ -15,31 +15,31 @@ export interface AgentResourceConfig {
   qosClass: 'Guaranteed' | 'Burstable' | 'BestEffort';
   resources: {
     cpu: {
-      minimum: number;     // Minimum CPU cores
-      maximum: number;     // Maximum CPU cores
-      target: number;      // Target CPU utilization %
+      minimum: number; // Minimum CPU cores
+      maximum: number; // Maximum CPU cores
+      target: number; // Target CPU utilization %
     };
     memory: {
-      minimum: number;     // Minimum memory in MB
-      maximum: number;     // Maximum memory in MB
-      target: number;      // Target memory utilization %
+      minimum: number; // Minimum memory in MB
+      maximum: number; // Maximum memory in MB
+      target: number; // Target memory utilization %
     };
-    priority: number;      // Resource priority (1-10)
+    priority: number; // Resource priority (1-10)
   };
   scaling: {
     enabled: boolean;
     minReplicas: number;
     maxReplicas: number;
-    scaleUpThreshold: number;    // CPU/Memory % to scale up
-    scaleDownThreshold: number;  // CPU/Memory % to scale down
-    scaleUpCooldown: number;     // Cooldown in ms
-    scaleDownCooldown: number;   // Cooldown in ms
+    scaleUpThreshold: number; // CPU/Memory % to scale up
+    scaleDownThreshold: number; // CPU/Memory % to scale down
+    scaleUpCooldown: number; // Cooldown in ms
+    scaleDownCooldown: number; // Cooldown in ms
   };
   healthCheck: {
     enabled: boolean;
-    interval: number;     // Health check interval in ms
-    timeout: number;      // Health check timeout in ms
-    retries: number;      // Number of retries before marking unhealthy
+    interval: number; // Health check interval in ms
+    timeout: number; // Health check timeout in ms
+    retries: number; // Number of retries before marking unhealthy
   };
 }
 
@@ -47,19 +47,19 @@ export interface AgentResourceUsage {
   agentId: string;
   timestamp: number;
   cpu: {
-    used: number;         // CPU cores used
-    utilization: number;  // CPU utilization %
-    limit: number;        // CPU limit
+    used: number; // CPU cores used
+    utilization: number; // CPU utilization %
+    limit: number; // CPU limit
   };
   memory: {
-    used: number;         // Memory used in MB
-    utilization: number;  // Memory utilization %
-    limit: number;        // Memory limit in MB
+    used: number; // Memory used in MB
+    utilization: number; // Memory utilization %
+    limit: number; // Memory limit in MB
   };
   replicas: {
-    current: number;      // Current number of replicas
-    desired: number;      // Desired number of replicas
-    healthy: number;      // Number of healthy replicas
+    current: number; // Current number of replicas
+    desired: number; // Desired number of replicas
+    healthy: number; // Number of healthy replicas
   };
   status: 'healthy' | 'degraded' | 'unhealthy' | 'scaling';
 }
@@ -147,7 +147,7 @@ export class AgentResourceManager extends EventEmitter {
    */
   async registerAgent(config: AgentResourceConfig): Promise<void> {
     this.agents.set(config.agentId, config);
-    
+
     // Initialize usage tracking
     this.usage.set(config.agentId, {
       agentId: config.agentId,
@@ -282,7 +282,7 @@ export class AgentResourceManager extends EventEmitter {
   async scaleAgentUp(agentId: string, reason: string): Promise<boolean> {
     const config = this.agents.get(agentId);
     const usage = this.usage.get(agentId);
-    
+
     if (!config || !usage) {
       throw new Error(`Agent ${agentId} not found`);
     }
@@ -294,8 +294,11 @@ export class AgentResourceManager extends EventEmitter {
 
     // Check cooldown
     const lastAction = this.lastScalingAction.get(agentId);
-    if (lastAction && lastAction.type === 'scale_up' && 
-        Date.now() - lastAction.timestamp < config.scaling.scaleUpCooldown) {
+    if (
+      lastAction &&
+      lastAction.type === 'scale_up' &&
+      Date.now() - lastAction.timestamp < config.scaling.scaleUpCooldown
+    ) {
       logger.debug(`Agent ${agentId} scale up in cooldown`);
       return false;
     }
@@ -334,7 +337,6 @@ export class AgentResourceManager extends EventEmitter {
       this.emit('agent-scaled-up', scalingEvent);
       logger.info(`Agent ${agentId} scaled up from ${fromReplicas} to ${toReplicas} replicas`);
       return true;
-
     } catch (error) {
       const scalingEvent: ScalingEvent = {
         id: `scale-up-${agentId}-${Date.now()}`,
@@ -363,7 +365,7 @@ export class AgentResourceManager extends EventEmitter {
   async scaleAgentDown(agentId: string, reason: string): Promise<boolean> {
     const config = this.agents.get(agentId);
     const usage = this.usage.get(agentId);
-    
+
     if (!config || !usage) {
       throw new Error(`Agent ${agentId} not found`);
     }
@@ -375,8 +377,11 @@ export class AgentResourceManager extends EventEmitter {
 
     // Check cooldown
     const lastAction = this.lastScalingAction.get(agentId);
-    if (lastAction && lastAction.type === 'scale_down' && 
-        Date.now() - lastAction.timestamp < config.scaling.scaleDownCooldown) {
+    if (
+      lastAction &&
+      lastAction.type === 'scale_down' &&
+      Date.now() - lastAction.timestamp < config.scaling.scaleDownCooldown
+    ) {
       logger.debug(`Agent ${agentId} scale down in cooldown`);
       return false;
     }
@@ -415,7 +420,6 @@ export class AgentResourceManager extends EventEmitter {
       this.emit('agent-scaled-down', scalingEvent);
       logger.info(`Agent ${agentId} scaled down from ${fromReplicas} to ${toReplicas} replicas`);
       return true;
-
     } catch (error) {
       const scalingEvent: ScalingEvent = {
         id: `scale-down-${agentId}-${Date.now()}`,
@@ -455,7 +459,9 @@ export class AgentResourceManager extends EventEmitter {
 
     // Analyze resource utilization patterns
     const avgCpuUtilization = this.calculateAverage(historicalData.map(h => h.cpu.utilization));
-    const avgMemoryUtilization = this.calculateAverage(historicalData.map(h => h.memory.utilization));
+    const avgMemoryUtilization = this.calculateAverage(
+      historicalData.map(h => h.memory.utilization)
+    );
 
     // CPU recommendations
     if (avgCpuUtilization > 80) {
@@ -464,13 +470,13 @@ export class AgentResourceManager extends EventEmitter {
         timestamp: Date.now(),
         type: 'resource_adjustment',
         current: { resources: { cpu: config.resources.cpu } },
-        recommended: { 
-          resources: { 
-            cpu: { 
-              ...config.resources.cpu, 
-              maximum: Math.min(config.resources.cpu.maximum * 1.5, 16) 
-            } 
-          } 
+        recommended: {
+          resources: {
+            cpu: {
+              ...config.resources.cpu,
+              maximum: Math.min(config.resources.cpu.maximum * 1.5, 16)
+            }
+          }
         },
         impact: {
           performance: 'positive',
@@ -490,13 +496,13 @@ export class AgentResourceManager extends EventEmitter {
         timestamp: Date.now(),
         type: 'resource_adjustment',
         current: { resources: { cpu: config.resources.cpu } },
-        recommended: { 
-          resources: { 
-            cpu: { 
-              ...config.resources.cpu, 
-              maximum: Math.max(config.resources.cpu.maximum * 0.8, config.resources.cpu.minimum) 
-            } 
-          } 
+        recommended: {
+          resources: {
+            cpu: {
+              ...config.resources.cpu,
+              maximum: Math.max(config.resources.cpu.maximum * 0.8, config.resources.cpu.minimum)
+            }
+          }
         },
         impact: {
           performance: 'neutral',
@@ -519,13 +525,13 @@ export class AgentResourceManager extends EventEmitter {
         timestamp: Date.now(),
         type: 'resource_adjustment',
         current: { resources: { memory: config.resources.memory } },
-        recommended: { 
-          resources: { 
-            memory: { 
-              ...config.resources.memory, 
-              maximum: Math.min(config.resources.memory.maximum * 1.3, 32768) 
-            } 
-          } 
+        recommended: {
+          resources: {
+            memory: {
+              ...config.resources.memory,
+              maximum: Math.min(config.resources.memory.maximum * 1.3, 32768)
+            }
+          }
         },
         impact: {
           performance: 'positive',
@@ -543,20 +549,22 @@ export class AgentResourceManager extends EventEmitter {
 
     // Scaling policy recommendations
     const scalingEvents = this.scalingHistory.get(agentId)?.toArray() || [];
-    const recentScalingEvents = scalingEvents.filter(e => Date.now() - e.timestamp < 24 * 60 * 60 * 1000);
-    
+    const recentScalingEvents = scalingEvents.filter(
+      e => Date.now() - e.timestamp < 24 * 60 * 60 * 1000
+    );
+
     if (recentScalingEvents.length > 10) {
       recommendations.push({
         agentId,
         timestamp: Date.now(),
         type: 'scaling_policy',
         current: { scaling: config.scaling },
-        recommended: { 
-          scaling: { 
-            ...config.scaling, 
+        recommended: {
+          scaling: {
+            ...config.scaling,
             scaleUpThreshold: Math.min(config.scaling.scaleUpThreshold + 10, 90),
             scaleDownThreshold: Math.max(config.scaling.scaleDownThreshold - 5, 20)
-          } 
+          }
         },
         impact: {
           performance: 'neutral',
@@ -617,14 +625,18 @@ export class AgentResourceManager extends EventEmitter {
     const avgUtilization = (usage.cpu.utilization + usage.memory.utilization) / 2;
 
     // Check scale up conditions
-    if (avgUtilization > config.scaling.scaleUpThreshold && 
-        usage.replicas.current < config.scaling.maxReplicas) {
+    if (
+      avgUtilization > config.scaling.scaleUpThreshold &&
+      usage.replicas.current < config.scaling.maxReplicas
+    ) {
       await this.scaleAgentUp(agentId, `High resource utilization: ${avgUtilization.toFixed(1)}%`);
     }
 
     // Check scale down conditions
-    if (avgUtilization < config.scaling.scaleDownThreshold && 
-        usage.replicas.current > config.scaling.minReplicas) {
+    if (
+      avgUtilization < config.scaling.scaleDownThreshold &&
+      usage.replicas.current > config.scaling.minReplicas
+    ) {
       await this.scaleAgentDown(agentId, `Low resource utilization: ${avgUtilization.toFixed(1)}%`);
     }
   }
@@ -632,7 +644,10 @@ export class AgentResourceManager extends EventEmitter {
   /**
    * Determine agent status
    */
-  private determineAgentStatus(metrics: IResourceMetrics, config: AgentResourceConfig): AgentResourceUsage['status'] {
+  private determineAgentStatus(
+    metrics: IResourceMetrics,
+    config: AgentResourceConfig
+  ): AgentResourceUsage['status'] {
     const cpuUtilization = metrics.cpu.usage;
     const memoryUtilization = metrics.memory.usage;
 
@@ -654,7 +669,7 @@ export class AgentResourceManager extends EventEmitter {
     // This would interface with the actual container orchestration system
     // For now, we simulate the scaling operation
     logger.info(`Scaling agent ${agentId} to ${replicas} replicas`);
-    
+
     // Simulate some delay
     await new Promise(resolve => setTimeout(resolve, 1000));
   }
@@ -685,8 +700,8 @@ export class AgentResourceManager extends EventEmitter {
           config,
           usage: this.usage.get(agentId)
         }))
-        .filter(({ usage, config }) => 
-          usage && usage.replicas.current > config.scaling.minReplicas
+        .filter(
+          ({ usage, config }) => usage && usage.replicas.current > config.scaling.minReplicas
         );
 
       // Scale down lowest priority agents first
@@ -714,7 +729,7 @@ export class AgentResourceManager extends EventEmitter {
     if (this.monitoringInterval) {
       clearInterval(this.monitoringInterval);
     }
-    
+
     this.isEnabled = false;
     this.removeAllListeners();
     logger.info('Agent Resource Manager shutdown');

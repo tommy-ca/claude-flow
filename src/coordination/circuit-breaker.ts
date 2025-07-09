@@ -16,7 +16,7 @@ export interface CircuitBreakerConfig {
 export enum CircuitState {
   CLOSED = 'closed',
   OPEN = 'open',
-  HALF_OPEN = 'half-open',
+  HALF_OPEN = 'half-open'
 }
 
 export interface CircuitBreakerMetrics {
@@ -48,7 +48,7 @@ export class CircuitBreaker {
     private name: string,
     private config: CircuitBreakerConfig,
     private logger: ILogger,
-    private eventBus?: IEventBus,
+    private eventBus?: IEventBus
   ) {}
 
   /**
@@ -68,15 +68,15 @@ export class CircuitBreaker {
     try {
       // Execute the function
       const result = await fn();
-      
+
       // Record success
       this.onSuccess();
-      
+
       return result;
     } catch (error) {
       // Record failure
       this.onFailure();
-      
+
       throw error;
     }
   }
@@ -88,7 +88,7 @@ export class CircuitBreaker {
     switch (this.state) {
       case CircuitState.CLOSED:
         return true;
-        
+
       case CircuitState.OPEN:
         // Check if we should transition to half-open
         if (this.nextAttempt && new Date() >= this.nextAttempt) {
@@ -96,11 +96,11 @@ export class CircuitBreaker {
           return true;
         }
         return false;
-        
+
       case CircuitState.HALF_OPEN:
         // Allow limited requests in half-open state
         return this.halfOpenRequests < this.config.halfOpenLimit;
-        
+
       default:
         return false;
     }
@@ -111,22 +111,22 @@ export class CircuitBreaker {
    */
   private onSuccess(): void {
     this.lastSuccessTime = new Date();
-    
+
     switch (this.state) {
       case CircuitState.CLOSED:
         this.failures = 0; // Reset failure count
         break;
-        
+
       case CircuitState.HALF_OPEN:
         this.successes++;
         this.halfOpenRequests++;
-        
+
         // Check if we should close the circuit
         if (this.successes >= this.config.successThreshold) {
           this.transitionTo(CircuitState.CLOSED);
         }
         break;
-        
+
       case CircuitState.OPEN:
         // Shouldn't happen, but handle gracefully
         this.transitionTo(CircuitState.HALF_OPEN);
@@ -139,22 +139,22 @@ export class CircuitBreaker {
    */
   private onFailure(): void {
     this.lastFailureTime = new Date();
-    
+
     switch (this.state) {
       case CircuitState.CLOSED:
         this.failures++;
-        
+
         // Check if we should open the circuit
         if (this.failures >= this.config.failureThreshold) {
           this.transitionTo(CircuitState.OPEN);
         }
         break;
-        
+
       case CircuitState.HALF_OPEN:
         // Single failure in half-open state reopens the circuit
         this.transitionTo(CircuitState.OPEN);
         break;
-        
+
       case CircuitState.OPEN:
         // Already open, update next attempt time
         this.nextAttempt = new Date(Date.now() + this.config.timeout);
@@ -168,12 +168,12 @@ export class CircuitBreaker {
   private transitionTo(newState: CircuitState): void {
     const oldState = this.state;
     this.state = newState;
-    
+
     this.logger.info(`Circuit breaker '${this.name}' state change`, {
       from: oldState,
       to: newState,
       failures: this.failures,
-      successes: this.successes,
+      successes: this.successes
     });
 
     // Reset counters based on new state
@@ -184,13 +184,13 @@ export class CircuitBreaker {
         this.halfOpenRequests = 0;
         delete this.nextAttempt;
         break;
-        
+
       case CircuitState.OPEN:
         this.successes = 0;
         this.halfOpenRequests = 0;
         this.nextAttempt = new Date(Date.now() + this.config.timeout);
         break;
-        
+
       case CircuitState.HALF_OPEN:
         this.successes = 0;
         this.failures = 0;
@@ -204,7 +204,7 @@ export class CircuitBreaker {
         name: this.name,
         from: oldState,
         to: newState,
-        metrics: this.getMetrics(),
+        metrics: this.getMetrics()
       });
     }
   }
@@ -234,17 +234,17 @@ export class CircuitBreaker {
       successes: this.successes,
       totalRequests: this.totalRequests,
       rejectedRequests: this.rejectedRequests,
-      halfOpenRequests: this.halfOpenRequests,
+      halfOpenRequests: this.halfOpenRequests
     };
-    
+
     if (this.lastFailureTime !== undefined) {
       metrics.lastFailureTime = this.lastFailureTime;
     }
-    
+
     if (this.lastSuccessTime !== undefined) {
       metrics.lastSuccessTime = this.lastSuccessTime;
     }
-    
+
     return metrics;
   }
 
@@ -272,7 +272,7 @@ export class CircuitBreaker {
       state: this.state,
       failures: this.failures,
       successes: this.successes,
-      nextAttempt: this.nextAttempt,
+      nextAttempt: this.nextAttempt
     });
   }
 }
@@ -286,7 +286,7 @@ export class CircuitBreakerManager {
   constructor(
     private defaultConfig: CircuitBreakerConfig,
     private logger: ILogger,
-    private eventBus?: IEventBus,
+    private eventBus?: IEventBus
   ) {}
 
   /**
@@ -294,13 +294,13 @@ export class CircuitBreakerManager {
    */
   getBreaker(name: string, config?: Partial<CircuitBreakerConfig>): CircuitBreaker {
     let breaker = this.breakers.get(name);
-    
+
     if (!breaker) {
       const finalConfig = { ...this.defaultConfig, ...config };
       breaker = new CircuitBreaker(name, finalConfig, this.logger, this.eventBus);
       this.breakers.set(name, breaker);
     }
-    
+
     return breaker;
   }
 
@@ -308,9 +308,9 @@ export class CircuitBreakerManager {
    * Execute with circuit breaker
    */
   async execute<T>(
-    name: string, 
+    name: string,
     fn: () => Promise<T>,
-    config?: Partial<CircuitBreakerConfig>,
+    config?: Partial<CircuitBreakerConfig>
   ): Promise<T> {
     const breaker = this.getBreaker(name, config);
     return breaker.execute(fn);
@@ -328,11 +328,11 @@ export class CircuitBreakerManager {
    */
   getAllMetrics(): Record<string, CircuitBreakerMetrics> {
     const metrics: Record<string, CircuitBreakerMetrics> = {};
-    
+
     for (const [name, breaker] of this.breakers) {
       metrics[name] = breaker.getMetrics();
     }
-    
+
     return metrics;
   }
 

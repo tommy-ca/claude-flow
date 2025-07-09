@@ -89,7 +89,6 @@ export class SparcArchitecture extends SparcPhase {
 
       console.log('✅ Architecture phase completed');
       return result;
-
     } catch (error) {
       console.error('❌ Architecture phase failed:', error.message);
       throw error;
@@ -114,8 +113,8 @@ export class SparcArchitecture extends SparcPhase {
     const hasApiRequirements = requirements.some(req => req.toLowerCase().includes('api'));
     const hasUiRequirements = requirements.some(req => req.toLowerCase().includes('ui'));
     const hasDataRequirements = requirements.some(req => req.toLowerCase().includes('data'));
-    const hasDistributedRequirements = requirements.some(req =>
-      req.toLowerCase().includes('distributed') || req.toLowerCase().includes('microservice')
+    const hasDistributedRequirements = requirements.some(
+      req => req.toLowerCase().includes('distributed') || req.toLowerCase().includes('microservice')
     );
 
     if (hasDistributedRequirements) {
@@ -199,7 +198,8 @@ export class SparcArchitecture extends SparcPhase {
       order: index + 1,
       triggers: index === 0 ? ['external request'] : [`${layers[index - 1].name} completion`],
       actions: ['process', 'validate', 'transform', 'forward'],
-      outcomes: index === layers.length - 1 ? ['final response'] : [`trigger ${layers[index + 1].name}`]
+      outcomes:
+        index === layers.length - 1 ? ['final response'] : [`trigger ${layers[index + 1].name}`]
     }));
   }
 
@@ -390,7 +390,8 @@ export class SparcArchitecture extends SparcPhase {
    * Convert to PascalCase
    */
   toPascalCase(str) {
-    return str.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase())
+    return str
+      .replace(/_([a-z])/g, (match, letter) => letter.toUpperCase())
       .replace(/^([a-z])/, (match, letter) => letter.toUpperCase());
   }
 
@@ -401,11 +402,21 @@ export class SparcArchitecture extends SparcPhase {
     const dependencies = [];
 
     for (const step of steps) {
-      if (step.includes('database')) {dependencies.push('DatabaseConnection');}
-      if (step.includes('authenticate')) {dependencies.push('AuthenticationService');}
-      if (step.includes('validate')) {dependencies.push('ValidationService');}
-      if (step.includes('log')) {dependencies.push('Logger');}
-      if (step.includes('cache')) {dependencies.push('CacheManager');}
+      if (step.includes('database')) {
+        dependencies.push('DatabaseConnection');
+      }
+      if (step.includes('authenticate')) {
+        dependencies.push('AuthenticationService');
+      }
+      if (step.includes('validate')) {
+        dependencies.push('ValidationService');
+      }
+      if (step.includes('log')) {
+        dependencies.push('Logger');
+      }
+      if (step.includes('cache')) {
+        dependencies.push('CacheManager');
+      }
     }
 
     return [...new Set(dependencies)];
@@ -417,10 +428,18 @@ export class SparcArchitecture extends SparcPhase {
   inferPatterns(steps) {
     const patterns = [];
 
-    if (steps.some(step => step.includes('CALL'))) {patterns.push('Command');}
-    if (steps.some(step => step.includes('IF'))) {patterns.push('Strategy');}
-    if (steps.some(step => step.includes('VALIDATE'))) {patterns.push('Chain of Responsibility');}
-    if (steps.some(step => step.includes('RETURN'))) {patterns.push('Factory');}
+    if (steps.some(step => step.includes('CALL'))) {
+      patterns.push('Command');
+    }
+    if (steps.some(step => step.includes('IF'))) {
+      patterns.push('Strategy');
+    }
+    if (steps.some(step => step.includes('VALIDATE'))) {
+      patterns.push('Chain of Responsibility');
+    }
+    if (steps.some(step => step.includes('RETURN'))) {
+      patterns.push('Factory');
+    }
 
     return patterns.length > 0 ? patterns : ['Service'];
   }
@@ -433,7 +452,11 @@ export class SparcArchitecture extends SparcPhase {
     const requirements = specification.requirements || [];
 
     // Creational patterns
-    if (requirements.some(req => req.toLowerCase().includes('create') || req.toLowerCase().includes('instantiate'))) {
+    if (
+      requirements.some(
+        req => req.toLowerCase().includes('create') || req.toLowerCase().includes('instantiate')
+      )
+    ) {
       patterns.push({
         name: 'Factory Pattern',
         type: 'creational',
@@ -445,7 +468,11 @@ export class SparcArchitecture extends SparcPhase {
     }
 
     // Structural patterns
-    if (requirements.some(req => req.toLowerCase().includes('interface') || req.toLowerCase().includes('adapt'))) {
+    if (
+      requirements.some(
+        req => req.toLowerCase().includes('interface') || req.toLowerCase().includes('adapt')
+      )
+    ) {
       patterns.push({
         name: 'Adapter Pattern',
         type: 'structural',
@@ -457,7 +484,11 @@ export class SparcArchitecture extends SparcPhase {
     }
 
     // Behavioral patterns
-    if (requirements.some(req => req.toLowerCase().includes('strategy') || req.toLowerCase().includes('algorithm'))) {
+    if (
+      requirements.some(
+        req => req.toLowerCase().includes('strategy') || req.toLowerCase().includes('algorithm')
+      )
+    ) {
       patterns.push({
         name: 'Strategy Pattern',
         type: 'behavioral',
@@ -554,8 +585,12 @@ export class SparcArchitecture extends SparcPhase {
 
       for (const word of words) {
         // Look for nouns that could be entities
-        if (word.length > 3 &&
-            !['system', 'must', 'should', 'will', 'data', 'user', 'interface'].includes(word.toLowerCase())) {
+        if (
+          word.length > 3 &&
+          !['system', 'must', 'should', 'will', 'data', 'user', 'interface'].includes(
+            word.toLowerCase()
+          )
+        ) {
           if (word[0] === word[0].toUpperCase()) {
             entities.add(word);
           }
@@ -607,7 +642,7 @@ export class SparcArchitecture extends SparcPhase {
       specificAttributes.push(
         { name: 'name', type: 'VARCHAR(255)', nullable: false },
         { name: 'description', type: 'TEXT', nullable: true },
-        { name: 'status', type: 'VARCHAR(50)', nullable: false, default: '\'active\'' }
+        { name: 'status', type: 'VARCHAR(50)', nullable: false, default: "'active'" }
       );
     }
 
@@ -620,15 +655,27 @@ export class SparcArchitecture extends SparcPhase {
   generateConstraints(entityName) {
     const constraints = [
       { name: `${entityName.toLowerCase()}_id_pk`, type: 'PRIMARY KEY', column: 'id' },
-      { name: `${entityName.toLowerCase()}_version_positive`, type: 'CHECK', condition: 'version > 0' },
-      { name: `${entityName.toLowerCase()}_created_before_updated`, type: 'CHECK', condition: 'created_at <= updated_at' }
+      {
+        name: `${entityName.toLowerCase()}_version_positive`,
+        type: 'CHECK',
+        condition: 'version > 0'
+      },
+      {
+        name: `${entityName.toLowerCase()}_created_before_updated`,
+        type: 'CHECK',
+        condition: 'created_at <= updated_at'
+      }
     ];
 
     const entityLower = entityName.toLowerCase();
 
     if (entityLower.includes('user')) {
       constraints.push(
-        { name: 'user_email_format', type: 'CHECK', condition: 'email ~* \'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$\'' },
+        {
+          name: 'user_email_format',
+          type: 'CHECK',
+          condition: "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'"
+        },
         { name: 'user_username_length', type: 'CHECK', condition: 'length(username) >= 3' }
       );
     }
@@ -641,7 +688,11 @@ export class SparcArchitecture extends SparcPhase {
    */
   generateIndexes(entityName) {
     const indexes = [
-      { name: `idx_${entityName.toLowerCase()}_created_at`, type: 'BTREE', columns: ['created_at'] },
+      {
+        name: `idx_${entityName.toLowerCase()}_created_at`,
+        type: 'BTREE',
+        columns: ['created_at']
+      },
       { name: `idx_${entityName.toLowerCase()}_updated_at`, type: 'BTREE', columns: ['updated_at'] }
     ];
 
@@ -724,7 +775,7 @@ export class SparcArchitecture extends SparcPhase {
       if (entity.attributes.some(attr => attr.name === 'is_active' || attr.name === 'status')) {
         views.push({
           name: `active_${entity.name.toLowerCase()}s`,
-          definition: `SELECT * FROM ${entity.name} WHERE ${entity.attributes.some(attr => attr.name === 'is_active') ? 'is_active = true' : 'status = \'active\''}`,
+          definition: `SELECT * FROM ${entity.name} WHERE ${entity.attributes.some(attr => attr.name === 'is_active') ? 'is_active = true' : "status = 'active'"}`,
           purpose: `Show only active ${entity.name.toLowerCase()} records`
         });
       }
@@ -800,9 +851,7 @@ export class SparcArchitecture extends SparcPhase {
         path: '/resources/{id}',
         method: 'GET',
         summary: 'Get resource by ID',
-        parameters: [
-          { name: 'id', type: 'string', description: 'Resource ID', required: true }
-        ],
+        parameters: [{ name: 'id', type: 'string', description: 'Resource ID', required: true }],
         responses: {
           200: { description: 'Success', schema: 'Resource' },
           404: { description: 'Not Found', schema: 'Error' },
@@ -824,9 +873,7 @@ export class SparcArchitecture extends SparcPhase {
         path: '/resources/{id}',
         method: 'PUT',
         summary: 'Update resource',
-        parameters: [
-          { name: 'id', type: 'string', description: 'Resource ID', required: true }
-        ],
+        parameters: [{ name: 'id', type: 'string', description: 'Resource ID', required: true }],
         requestBody: { schema: 'UpdateResourceRequest' },
         responses: {
           200: { description: 'Updated', schema: 'Resource' },
@@ -839,9 +886,7 @@ export class SparcArchitecture extends SparcPhase {
         path: '/resources/{id}',
         method: 'DELETE',
         summary: 'Delete resource',
-        parameters: [
-          { name: 'id', type: 'string', description: 'Resource ID', required: true }
-        ],
+        parameters: [{ name: 'id', type: 'string', description: 'Resource ID', required: true }],
         responses: {
           204: { description: 'Deleted' },
           404: { description: 'Not Found', schema: 'Error' },
@@ -879,7 +924,7 @@ export class SparcArchitecture extends SparcPhase {
       name: 'ResourceList',
       type: 'object',
       properties: {
-        data: { type: 'array', items: { '$ref': '#/schemas/Resource' } },
+        data: { type: 'array', items: { $ref: '#/schemas/Resource' } },
         pagination: {
           type: 'object',
           properties: {
@@ -1326,7 +1371,11 @@ export class SparcArchitecture extends SparcPhase {
       context: 'Need to choose appropriate architectural style for the system',
       decision: `Implement ${result.systemDesign.style} architecture with ${result.systemDesign.layers.length} layers`,
       consequences: {
-        positive: ['Clear separation of concerns', 'Maintainable code structure', 'Scalable design'],
+        positive: [
+          'Clear separation of concerns',
+          'Maintainable code structure',
+          'Scalable design'
+        ],
         negative: ['Potential performance overhead', 'Added complexity for simple operations']
       },
       alternatives: ['Monolithic', 'Microservices', 'Event-driven'],
@@ -1341,7 +1390,11 @@ export class SparcArchitecture extends SparcPhase {
       context: 'Need to ensure consistent and well-understood design patterns',
       decision: `Implement ${result.designPatterns.length} design patterns including Repository, Factory, and Strategy patterns`,
       consequences: {
-        positive: ['Improved code maintainability', 'Better testability', 'Consistent design approach'],
+        positive: [
+          'Improved code maintainability',
+          'Better testability',
+          'Consistent design approach'
+        ],
         negative: ['Learning curve for developers', 'Potential over-engineering']
       },
       alternatives: ['Ad-hoc design', 'Framework-specific patterns'],
@@ -1455,26 +1508,36 @@ export class SparcArchitecture extends SparcPhase {
 **Style**: ${result.systemDesign.style}
 **Layers**: ${result.systemDesign.layers.length}
 
-${result.systemDesign.layers.map((layer, index) => `
+${result.systemDesign.layers
+  .map(
+    (layer, index) => `
 #### ${index + 1}. ${layer.name}
 **Responsibility**: ${layer.responsibility}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ### Data Flow
 ${result.systemDesign.dataFlow.map(flow => `- ${flow.from} → ${flow.to} (${flow.direction}): ${flow.dataType}`).join('\n')}
 
 ### Control Flow
-${result.systemDesign.controlFlow.map(flow => `
+${result.systemDesign.controlFlow
+  .map(
+    flow => `
 #### ${flow.layer}
 - **Order**: ${flow.order}
 - **Triggers**: ${flow.triggers.join(', ')}
 - **Actions**: ${flow.actions.join(', ')}
 - **Outcomes**: ${flow.outcomes.join(', ')}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Components
 
-${result.components.map((component, index) => `
+${result.components
+  .map(
+    (component, index) => `
 ### ${index + 1}. ${component.name}
 **Type**: ${component.type}
 **Responsibility**: ${component.responsibility}
@@ -1482,23 +1545,31 @@ ${result.components.map((component, index) => `
 **Dependencies**: ${component.dependencies.join(', ')}
 **Patterns**: ${component.patterns.join(', ')}
 **Complexity**: ${component.complexity}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Design Patterns
 
-${result.designPatterns.map((pattern, index) => `
+${result.designPatterns
+  .map(
+    (pattern, index) => `
 ### ${index + 1}. ${pattern.name}
 **Type**: ${pattern.type}
 **Purpose**: ${pattern.purpose}
 **Applicability**: ${pattern.applicability}
 **Implementation**: ${pattern.implementation}
 **Benefits**: ${pattern.benefits.join(', ')}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Data Model
 
 ### Entities
-${result.dataModel.entities.map((entity, index) => `
+${result.dataModel.entities
+  .map(
+    (entity, index) => `
 #### ${index + 1}. ${entity.name}
 **Primary Key**: ${entity.primaryKey}
 **Attributes**:
@@ -1509,17 +1580,23 @@ ${entity.constraints.map(constraint => `- ${constraint.name}: ${constraint.type}
 
 **Indexes**:
 ${entity.indexes.map(index => `- ${index.name}: ${index.type} (${index.columns.join(', ')})`).join('\n')}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ### Relationships
-${result.dataModel.relationships.map((rel, index) => `
+${result.dataModel.relationships
+  .map(
+    (rel, index) => `
 #### ${index + 1}. ${rel.name}
 **Type**: ${rel.type}
 **Parent**: ${rel.parent} (${rel.parentKey})
 **Child**: ${rel.child} (${rel.childKey})
 **On Delete**: ${rel.onDelete}
 **On Update**: ${rel.onUpdate}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## API Design
 
@@ -1529,33 +1606,52 @@ ${result.dataModel.relationships.map((rel, index) => `
 **Authentication**: ${result.apiDesign.authentication}
 
 ### Endpoints
-${result.apiDesign.endpoints.map((endpoint, index) => `
+${result.apiDesign.endpoints
+  .map(
+    (endpoint, index) => `
 #### ${index + 1}. ${endpoint.method} ${endpoint.path}
 **Summary**: ${endpoint.summary}
 **Parameters**: ${endpoint.parameters ? endpoint.parameters.map(p => `${p.name} (${p.type})`).join(', ') : 'None'}
 **Request Body**: ${endpoint.requestBody ? endpoint.requestBody.schema : 'None'}
-**Responses**: ${Object.entries(endpoint.responses).map(([code, resp]) => `${code}: ${resp.description}`).join(', ')}
-`).join('\n')}
+**Responses**: ${Object.entries(endpoint.responses)
+      .map(([code, resp]) => `${code}: ${resp.description}`)
+      .join(', ')}
+`
+  )
+  .join('\n')}
 
 ### Schemas
-${result.apiDesign.schemas.map((schema, index) => `
+${result.apiDesign.schemas
+  .map(
+    (schema, index) => `
 #### ${index + 1}. ${schema.name}
 **Type**: ${schema.type}
 **Properties**:
-${Object.entries(schema.properties).map(([name, prop]) => `- ${name}: ${prop.type}${prop.format ? ` (${prop.format})` : ''}${prop.enum ? ` [${prop.enum.join(', ')}]` : ''}`).join('\n')}
+${Object.entries(schema.properties)
+  .map(
+    ([name, prop]) =>
+      `- ${name}: ${prop.type}${prop.format ? ` (${prop.format})` : ''}${prop.enum ? ` [${prop.enum.join(', ')}]` : ''}`
+  )
+  .join('\n')}
 **Required**: ${schema.required ? schema.required.join(', ') : 'None'}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Deployment Architecture
 
 ### Environments
-${result.deploymentArchitecture.environments.map((env, index) => `
+${result.deploymentArchitecture.environments
+  .map(
+    (env, index) => `
 #### ${index + 1}. ${env.name}
 **Purpose**: ${env.purpose}
 **Resources**: ${env.resources}
 **Database**: ${env.database}
 **Monitoring**: ${env.monitoring}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ### Infrastructure
 **Platform**: ${result.deploymentArchitecture.infrastructure.platform}
@@ -1596,14 +1692,22 @@ ${result.deploymentArchitecture.environments.map((env, index) => `
 
 ## Quality Attributes
 
-${Object.entries(result.qualityAttributes).map(([category, attributes]) => `
+${Object.entries(result.qualityAttributes)
+  .map(
+    ([category, attributes]) => `
 ### ${category.charAt(0).toUpperCase() + category.slice(1)}
-${Object.entries(attributes).map(([attr, desc]) => `- **${attr}**: ${desc}`).join('\n')}
-`).join('\n')}
+${Object.entries(attributes)
+  .map(([attr, desc]) => `- **${attr}**: ${desc}`)
+  .join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Architectural Decisions
 
-${result.architecturalDecisions.map((decision, index) => `
+${result.architecturalDecisions
+  .map(
+    (decision, index) => `
 ### ${decision.id}: ${decision.title}
 **Status**: ${decision.status}
 **Context**: ${decision.context}
@@ -1612,11 +1716,15 @@ ${result.architecturalDecisions.map((decision, index) => `
 **Negative Consequences**: ${decision.consequences.negative.join(', ')}
 **Alternatives Considered**: ${decision.alternatives.join(', ')}
 **Date**: ${decision.date}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Risk Assessment
 
-${result.riskAssessment.map((risk, index) => `
+${result.riskAssessment
+  .map(
+    (risk, index) => `
 ### ${risk.id}: ${risk.category}
 **Description**: ${risk.description}
 **Probability**: ${risk.probability}
@@ -1624,11 +1732,15 @@ ${result.riskAssessment.map((risk, index) => `
 **Risk Level**: ${risk.riskLevel}
 **Mitigation**: ${risk.mitigation.join(', ')}
 **Monitoring**: ${risk.monitoring}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 
 ## Integration Points
 
-${result.integrationPoints.map((integration, index) => `
+${result.integrationPoints
+  .map(
+    (integration, index) => `
 ### ${index + 1}. ${integration.name}
 **Type**: ${integration.type}
 **Purpose**: ${integration.purpose}
@@ -1637,7 +1749,9 @@ ${result.integrationPoints.map((integration, index) => `
 **Data Format**: ${integration.dataFormat}
 **Error Handling**: ${integration.errorHandling}
 **Monitoring**: ${integration.monitoring}
-`).join('\n')}
+`
+  )
+  .join('\n')}
 `;
 
     // Save document
