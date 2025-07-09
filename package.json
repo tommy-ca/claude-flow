@@ -29,7 +29,7 @@
     "test:coverage:unit": "NODE_OPTIONS='--experimental-vm-modules' npx jest tests/unit --coverage",
     "test:coverage:integration": "NODE_OPTIONS='--experimental-vm-modules' npx jest tests/integration --coverage",
     "test:coverage:e2e": "NODE_OPTIONS='--experimental-vm-modules' npx jest tests/e2e --coverage",
-    "test:ci": "node scripts/test-ci-deps.cjs && NODE_OPTIONS='--experimental-vm-modules' npx jest --config=jest.config.ci-minimal.js --ci --coverage --runInBand --forceExit",
+    "test:ci": "node scripts/test-ci-deps.js && NODE_OPTIONS='--experimental-vm-modules' npx jest --config=jest.config.ci-minimal.js --ci --coverage --runInBand --forceExit",
     "test:debug": "NODE_OPTIONS='--experimental-vm-modules --inspect-brk' npx jest --runInBand --no-cache",
     "test:comprehensive": "node scripts/test-comprehensive.js",
     "test:comprehensive:verbose": "node scripts/test-comprehensive.js --verbose",
@@ -44,7 +44,8 @@
     "format": "prettier --write src",
     "diagnostics": "node -e \"import('./dist/monitoring/diagnostics.js').then(m => m.DiagnosticManager.quickDiagnostic().then(console.log))\"",
     "health-check": "node -e \"import('./dist/monitoring/health-check.js').then(m => new m.HealthCheckManager().performHealthCheck().then(console.log))\"",
-    "postinstall": "node scripts/install-ci.js || echo 'Optional installation components skipped'",
+    "postinstall": "node scripts/postinstall.js",
+    "install:ci": "node scripts/install-ci.js",
     "prepublishOnly": "echo 'Alpha release - skipping build/test/lint for now'",
     "publish:alpha": "npm publish --tag alpha",
     "publish:major": "npm version major && npm publish",
@@ -104,8 +105,6 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "@types/better-sqlite3": "^7.6.13",
-    "better-sqlite3": "^12.2.0",
-    "blessed": "^0.1.81",
     "chalk": "^4.1.2",
     "cli-table3": "^0.6.3",
     "commander": "^11.1.0",
@@ -124,6 +123,10 @@
     "ruv-swarm": "^1.0.14",
     "systeminformation": "^5.22.0",
     "ws": "^8.18.3"
+  },
+  "optionalDependencies": {
+    "better-sqlite3": "^12.2.0",
+    "blessed": "^0.1.81"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",

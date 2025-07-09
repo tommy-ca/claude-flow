@@ -1,4 +1,5 @@
 // Minimal CI-specific Jest configuration
+/** @type {import('jest').Config} */
 export default {
   testEnvironment: 'node',
   roots: ['<rootDir>/tests'],
@@ -6,6 +7,8 @@ export default {
     '<rootDir>/tests/unit/simple-test.test.js',
     '<rootDir>/tests/unit/performance-simple.test.js'
   ],
+  // No TypeScript transformation needed for JS-only tests
+  transform: {},
   moduleFileExtensions: ['js', 'json'],
   modulePathIgnorePatterns: [
     '<rootDir>/dist/',
@@ -58,6 +61,9 @@ export default {
     'coverage/',
     '.claude/',
     'tmp/',
+    // Ignore all TypeScript test files
+    '\\.test\\.ts$',
+    '\\.spec\\.ts$',
     // Ignore problematic test files for CI
     'coordination-system.test.ts',
     'resource-detector.test.ts',
@@ -75,7 +81,8 @@ export default {
   testEnvironmentOptions: {
     url: 'http://localhost'
   },
-  extensionsToTreatAsEsm: ['.ts', '.tsx'],
+  // No TypeScript extension treatment needed
+  extensionsToTreatAsEsm: [],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   }

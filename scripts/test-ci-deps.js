@@ -5,9 +5,15 @@
  * Validates that all critical dependencies are available
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const require = createRequire(import.meta.url);
 
 console.log('🔍 Testing CI dependencies...\n');
 
@@ -53,11 +59,6 @@ const criticalDeps = [
   'p-queue'
 ];
 
-// Test MCP SDK separately (it has special export requirements)
-const specialDeps = [
-  '@modelcontextprotocol/sdk'
-];
-
 console.log('Testing critical dependencies:');
 let hasErrors = false;
 
@@ -71,22 +72,21 @@ for (const dep of criticalDeps) {
   }
 }
 
-// Test special dependencies
+// Test MCP SDK specially
 console.log('\nTesting special dependencies:');
-for (const dep of specialDeps) {
-  try {
-    // MCP SDK has ESM exports, so we just check if the package exists
-    const depPath = path.join(__dirname, '..', 'node_modules', dep, 'package.json');
-    if (fs.existsSync(depPath)) {
-      console.log(`  ✓ ${dep} (package exists)`);
-    } else {
-      throw new Error('Package not found');
-    }
-  } catch (error) {
-    console.error(`  ❌ ${dep} - ${error.message}`);
-    // MCP SDK is optional for basic tests
-    console.log(`    Note: ${dep} is optional for CI tests`);
+try {
+  // MCP SDK has a different export structure
+  const sdkPath = path.join(__dirname, '..', 'node_modules', '@modelcontextprotocol', 'sdk');
+  if (fs.existsSync(sdkPath)) {
+    // Try to import a specific export
+    await import('@modelcontextprotocol/sdk/types.js');
+    console.log(`  ✓ @modelcontextprotocol/sdk (package exists and loads)`);
+  } else {
+    throw new Error('Package not found');
   }
+} catch (error) {
+  console.error(`  ❌ @modelcontextprotocol/sdk - ${error.message}`);
+  hasErrors = true;
 }
 
 // Test native dependencies with fallback info
@@ -102,23 +102,24 @@ for (const dep of nativeDeps) {
   }
 }
 
-// Test fallback wrappers (skip ESM modules in CJS context)
+// Test fallback wrappers
 console.log('\nTesting fallback wrappers:');
-// Database wrapper uses top-level await, can't be required in CJS
-const dbWrapperPath = path.join(__dirname, '..', 'src', 'utils', 'database-wrapper.js');
-if (fs.existsSync(dbWrapperPath)) {
-  console.log(`  ✓ database-wrapper.js exists`);
-} else {
-  console.error(`  ❌ database-wrapper.js not found`);
+try {
+  const dbWrapper = await import('../src/utils/database-wrapper.js');
+  console.log(`  ✓ database-wrapper.js loads successfully`);
+  console.log(`    - Database available: ${dbWrapper.dbAvailable}`);
+} catch (error) {
+  console.error(`  ❌ database-wrapper.js failed: ${error.message}`);
   hasErrors = true;
 }
 
-// Blessed wrapper exists check
-const blessedWrapperPath = path.join(__dirname, '..', 'src', 'utils', 'blessed-wrapper.js');
-if (fs.existsSync(blessedWrapperPath)) {
-  console.log(`  ✓ blessed-wrapper.js exists`);
-} else {
-  console.warn(`  ⚠️  blessed-wrapper.js not found`);
+try {
+  const uiWrapper = await import('../src/utils/blessed-wrapper.js');
+  console.log(`  ✓ blessed-wrapper.js loads successfully`);
+  console.log(`    - Blessed available: ${uiWrapper.blessedAvailable}`);
+} catch (error) {
+  // UI wrapper is optional, just warn
+  console.warn(`  ⚠️  blessed-wrapper.js not available: ${error.message}`);
 }
 
 // Test npm ci

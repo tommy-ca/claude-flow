@@ -9,7 +9,7 @@ process.env.NODE_ENV = 'test';
 process.env.CLAUDE_FLOW_TEST_MODE = 'true';
 process.env.CLAUDE_FLOW_DISABLE_TELEMETRY = 'true';
 
-// Ensure Jest globals are available
+// Ensure Jest globals are available (commented out to avoid warnings)
 // import '@jest/globals';
 
 // Mock console methods to reduce test noise
