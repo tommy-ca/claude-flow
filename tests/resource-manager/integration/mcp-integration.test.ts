@@ -10,7 +10,8 @@ import { ResourceMemoryManager } from '../../../src/memory/resource-memory';
 import { MCPResourceReport, ResourceAllocationRequest } from '../../../src/mcp/resource-protocol';
 
 // Mock MCP components
-jest.mock('../../../src/mcp/resource-protocol');
+jest.mock('systeminformation');
+jest.mock('node-os-utils');
 jest.mock('../../../src/config/resource-manager-config');
 jest.mock('../../../src/memory/resource-memory');
 

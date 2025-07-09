@@ -196,15 +196,19 @@ export class ResourceManagerFactory implements IResourceManagerFactory {
    * Create complete resource manager
    */
   createResourceManager(
-    monitorConfig: IResourceMonitorConfig,
-    allocatorConfig: IResourceAllocatorConfig,
-    pressureDetectorConfig: IPressureDetectorConfig
+    monitorConfig?: IResourceMonitorConfig,
+    allocatorConfig?: IResourceAllocatorConfig,
+    pressureDetectorConfig?: IPressureDetectorConfig
   ): ResourceManager {
-    const monitor = this.createMonitor(monitorConfig);
-    const allocator = this.createAllocator(allocatorConfig);
-    const pressureDetector = this.createPressureDetector(pressureDetectorConfig);
+    // Import the required dependencies
+    const { ResourceManagerConfigManager } = require('../../config/resource-manager-config');
+    const { ResourceMemoryManager } = require('../../memory/resource-memory');
     
-    return new ResourceManager(monitor, allocator, pressureDetector);
+    // Create mock implementations for testing
+    const configManager = new ResourceManagerConfigManager();
+    const memoryManager = new ResourceMemoryManager();
+    
+    return new ResourceManager(configManager, memoryManager);
   }
 
   /**

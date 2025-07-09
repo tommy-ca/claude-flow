@@ -11,24 +11,54 @@ import { PressureDetector } from '../../../src/resource-manager/monitors/pressur
 import { AgentResourceManager } from '../../../src/resource-manager/agents/agent-resource-manager';
 import { ResourceDashboard } from '../../../src/resource-manager/monitors/resource-dashboard';
 import { MCPResourceReport, ResourceAllocationRequest } from '../../../src/mcp/resource-protocol';
+import { ResourceManager } from '../../../src/resource-manager/core/resource-manager';
+import { ResourceManagerConfigManager } from '../../../src/config/resource-manager-config';
+import { ResourceMemoryManager } from '../../../src/memory/resource-memory';
 
 // Mock external dependencies
 jest.mock('systeminformation');
 jest.mock('node-os-utils');
+jest.mock('../../../src/config/resource-manager-config');
+jest.mock('../../../src/memory/resource-memory');
 
 describe('System Integration Tests', () => {
   let factory: ResourceManagerFactory;
-  let resourceManager: any;
+  let resourceManager: ResourceManager;
   let detector: ResourceDetector;
   let monitor: ResourceMonitor;
   let pressureDetector: PressureDetector;
   let agentManager: AgentResourceManager;
   let dashboard: ResourceDashboard;
+  let configManager: jest.Mocked<ResourceManagerConfigManager>;
+  let memoryManager: jest.Mocked<ResourceMemoryManager>;
 
   beforeEach(async () => {
+    // Setup mocked dependencies
+    configManager = {
+      initialize: jest.fn(),
+      getConfig: jest.fn().mockReturnValue({
+        monitoring: { enabled: true, interval: 5000 },
+        optimization: { enabled: true, strategy: 'balanced', schedule: { enabled: false } },
+        thresholds: {
+          cpu: { warning: 80, critical: 90 },
+          memory: { warning: 80, critical: 90 }
+        }
+      }),
+      updateConfig: jest.fn(),
+      validateConfig: jest.fn()
+    } as any;
+
+    memoryManager = {
+      initialize: jest.fn(),
+      storeMetrics: jest.fn(),
+      storeEvent: jest.fn(),
+      queryMetrics: jest.fn().mockResolvedValue([]),
+      shutdown: jest.fn()
+    } as any;
+
     // Initialize the complete system
     factory = new ResourceManagerFactory();
-    resourceManager = await factory.createResourceManager();
+    resourceManager = new ResourceManager(configManager, memoryManager);
     
     detector = new ResourceDetector();
     monitor = new ResourceMonitor(detector);
@@ -37,6 +67,7 @@ describe('System Integration Tests', () => {
     dashboard = new ResourceDashboard(resourceManager, pressureDetector, agentManager);
 
     // Initialize all components
+    await resourceManager.initialize();
     await detector.initialize();
     await monitor.initialize();
     await pressureDetector.initialize();

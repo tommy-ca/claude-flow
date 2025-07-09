@@ -1,0 +1,126 @@
+{
+  "timestamp": "2025-07-09T20:32:13.651Z",
+  "platform": "linux",
+  "arch": "x64",
+  "nodeVersion": "v22.17.0",
+  "results": {
+    "suites": [
+      {
+        "name": "System Information",
+        "status": "passed",
+        "startTime": 1752093126700,
+        "tests": [],
+        "duration": 240,
+        "systemInfo": {
+          "platform": "linux",
+          "arch": "x64",
+          "nodeVersion": "v22.17.0",
+          "npmVersion": "10.9.2",
+          "memory": 31557320704,
+          "cpus": 4,
+          "hostname": "devpod-default-cl-b12b0",
+          "uptime": 6023193.89
+        }
+      },
+      {
+        "name": "Dependency Check",
+        "status": "passed",
+        "startTime": 1752093126940,
+        "tests": [],
+        "duration": 1
+      },
+      {
+        "name": "Performance Tests",
+        "status": "passed",
+        "startTime": 1752093126941,
+        "tests": [],
+        "duration": 332,
+        "performanceReport": {
+          "timestamp": "2025-07-09T20:32:07.257Z",
+          "platform": "linux",
+          "arch": "x64",
+          "nodeVersion": "v22.17.0",
+          "results": {
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "tests": [
+              {
+                "name": "Resource Detection Performance",
+                "status": "passed",
+                "duration": 1
+              },
+              {
+                "name": "Server Registration Load Test",
+                "status": "passed",
+                "duration": 1
+              },
+              {
+                "name": "Resource Allocation Performance",
+                "status": "passed",
+                "duration": 0
+              },
+              {
+                "name": "Platform Detection",
+                "status": "passed",
+                "duration": 1
+              },
+              {
+                "name": "Environment Variables",
+                "status": "passed",
+                "duration": 0
+              },
+              {
+                "name": "Dependencies Check",
+                "status": "passed",
+                "duration": 1
+              },
+              {
+                "name": "Memory Usage Monitoring",
+                "status": "passed",
+                "duration": 182
+              },
+              {
+                "name": "Garbage Collection Performance",
+                "status": "passed",
+                "duration": 0
+              }
+            ]
+          },
+          "summary": {
+            "total": 8,
+            "passed": 8,
+            "failed": 0,
+            "skipped": 0,
+            "passRate": 100
+          }
+        }
+      },
+      {
+        "name": "Load Tests",
+        "status": "passed",
+        "startTime": 1752093127273,
+        "tests": [],
+        "duration": 2642
+      },
+      {
+        "name": "CI Compatibility",
+        "status": "passed",
+        "startTime": 1752093129915,
+        "tests": [],
+        "duration": 3735
+      }
+    ],
+    "summary": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "duration": 6958
+    }
+  },
+  "environment": {
+    "ci": false,
+    "githubActions": false,
+    "nodeEnv": "development"
+  }
+}

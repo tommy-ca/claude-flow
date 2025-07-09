@@ -28,12 +28,34 @@ export class ResourceMonitor extends EventEmitter {
   private isMonitoring: boolean = false;
   private startTime: Date;
 
-  constructor(config: ResourceMonitorConfig) {
+  constructor(detector: any, config?: ResourceMonitorConfig) {
     super();
-    this.config = config;
+    this.config = config || {
+      interval: 5000,
+      enabled: true,
+      enableCPU: true,
+      enableMemory: true,
+      enableDisk: true,
+      enableNetwork: true,
+      enableGPU: true,
+      historySize: 100,
+      alertThresholds: {
+        cpu: 80,
+        memory: 80,
+        disk: 85
+      }
+    };
     this.metricsHistory = new Map();
     this.lastResources = new Map();
     this.startTime = new Date();
+  }
+
+  /**
+   * Initialize resource monitoring
+   */
+  async initialize(): Promise<void> {
+    await resourceDetector.initialize();
+    this.emit('monitor-initialized');
   }
 
   /**
@@ -405,5 +427,60 @@ export class ResourceMonitor extends EventEmitter {
       resourceCount: this.lastResources.size,
       historySize: this.metricsHistory.size
     };
+  }
+
+  /**
+   * Get resource metrics
+   */
+  async getResourceMetrics(): Promise<any> {
+    const cpu = await resourceDetector.detectCPU();
+    const memory = await resourceDetector.detectMemory();
+    const disks = await resourceDetector.detectDisks();
+    const networks = await resourceDetector.detectNetworks();
+    
+    return {
+      cpu: {
+        cores: cpu.cores,
+        usage: cpu.usage,
+        temperature: cpu.temperature
+      },
+      memory: {
+        total: memory.total,
+        used: memory.used,
+        usage: (memory.used / memory.total) * 100
+      },
+      disk: {
+        total: disks.reduce((sum, disk) => sum + disk.total, 0),
+        used: disks.reduce((sum, disk) => sum + disk.used, 0),
+        usage: disks.length > 0 ? (disks.reduce((sum, disk) => sum + disk.used, 0) / disks.reduce((sum, disk) => sum + disk.total, 0)) * 100 : 0
+      },
+      network: {
+        usage: networks.length > 0 ? networks[0].speed || 0 : 0
+      }
+    };
+  }
+
+  /**
+   * Start monitoring
+   */
+  startMonitoring(): void {
+    if (!this.isMonitoring) {
+      this.start();
+    }
+  }
+
+  /**
+   * Stop monitoring
+   */
+  stopMonitoring(): void {
+    this.stop();
+  }
+
+  /**
+   * Shutdown the monitor
+   */
+  async shutdown(): Promise<void> {
+    this.stop();
+    this.removeAllListeners();
   }
 }
