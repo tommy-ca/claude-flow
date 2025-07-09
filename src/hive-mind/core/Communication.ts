@@ -5,7 +5,7 @@
  * within the Hive Mind swarm.
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { DatabaseManager } from './DatabaseManager.js';
 import { Agent } from './Agent.js';
 import {

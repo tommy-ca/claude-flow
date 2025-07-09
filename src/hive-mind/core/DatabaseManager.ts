@@ -8,7 +8,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs/promises';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { fileURLToPath } from 'url';
 
 // ES module compatibility - define __dirname

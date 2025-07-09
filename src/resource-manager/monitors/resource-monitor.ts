@@ -3,7 +3,7 @@
  * Real-time monitoring with configurable intervals and event emission
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import {
   Resource,
   ResourceMetrics,

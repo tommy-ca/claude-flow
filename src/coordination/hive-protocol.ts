@@ -3,7 +3,7 @@
  * Defines how agents communicate, vote, and share knowledge
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { generateId } from '../utils/helpers.js';
 
 export interface HiveMessage {

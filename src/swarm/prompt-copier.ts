@@ -1,9 +1,9 @@
 import { getErrorMessage } from '../utils/error-handler.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { createHash } from 'crypto';
-import type { Worker } from 'worker_threads';
-import { EventEmitter } from 'events';
+import { createHash } from 'node:crypto';
+import type { Worker } from 'node:worker_threads';
+import { EventEmitter } from 'node:events';
 import { logger } from '../core/logger.js';
 
 export interface CopyOptions {

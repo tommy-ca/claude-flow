@@ -4,7 +4,7 @@
  */
 
 import * as si from 'systeminformation';
-import * as os from 'os';
+import * as os from 'node:os';
 import { nanoid } from 'nanoid';
 import {
   SystemCPUResource,

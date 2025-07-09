@@ -6,7 +6,7 @@ import { createLocalExecutable } from './executable-wrapper.js';
 import { createSparcStructureManually } from './sparc-structure.js';
 import { createClaudeSlashCommands } from './claude-commands/slash-commands.js';
 import { createOptimizedClaudeSlashCommands } from './claude-commands/optimized-slash-commands.js';
-import { execSync } from 'child_process';
+import { execSync } from 'node:child_process';
 import { promises as fs } from 'fs';
 import {
   createSparcClaudeMd,

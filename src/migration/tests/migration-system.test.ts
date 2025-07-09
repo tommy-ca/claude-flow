@@ -7,7 +7,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import { describe, it, expect, beforeEach, afterEach } from 'jest';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as os from 'os';
+import * as os from 'node:os';
 import { MigrationRunner } from '../migration-runner.js';
 import { MigrationAnalyzer } from '../migration-analyzer.js';
 import { RollbackManager } from '../rollback-manager.js';

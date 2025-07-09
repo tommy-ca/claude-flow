@@ -4,7 +4,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 import { getErrorMessage } from '../utils/error-handler.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { Worker } from 'worker_threads';
+import { Worker } from 'node:worker_threads';
 import { PromptCopier } from './prompt-copier.js';
 import type { CopyOptions, CopyResult, FileInfo } from './prompt-copier.js';
 import { logger } from '../core/logger.js';

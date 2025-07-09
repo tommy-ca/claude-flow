@@ -4,7 +4,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Integrates with TodoWrite/TodoRead for coordination and Memory for persistence
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import type { Task, TaskStatus, AgentProfile, Resource } from '../utils/types.js';
 import type { TaskMetadata } from './types.js';
 import { generateId } from '../utils/helpers.js';

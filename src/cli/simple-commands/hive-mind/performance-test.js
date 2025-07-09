@@ -5,7 +5,7 @@
 
 import { HiveMindCore } from './core.js';
 import { PerformanceOptimizer } from './performance-optimizer.js';
-import { performance } from 'perf_hooks';
+import { performance } from 'node:perf_hooks';
 
 /**
  * Performance test runner

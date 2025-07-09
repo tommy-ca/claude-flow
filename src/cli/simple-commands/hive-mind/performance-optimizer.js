@@ -8,7 +8,7 @@
  */
 
 import EventEmitter from 'events';
-import { performance } from 'perf_hooks';
+import { performance } from 'node:perf_hooks';
 
 /**
  * AsyncOperationQueue for managing concurrent operations

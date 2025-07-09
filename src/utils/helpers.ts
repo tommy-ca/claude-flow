@@ -4,7 +4,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  */
 
 import { promisify } from 'util';
-import { exec } from 'child_process';
+import { exec } from 'node:child_process';
 
 // Utility helper functions
 

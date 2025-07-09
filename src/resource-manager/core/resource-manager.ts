@@ -3,7 +3,7 @@
  * Main orchestrator for the intelligent resource management system
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import {
   MCPResourceReport,
   ResourceAllocationRequest,

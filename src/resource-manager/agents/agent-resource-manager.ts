@@ -3,7 +3,7 @@
  * Manages resources for individual agents with auto-scaling and health monitoring
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { IResourceMetrics, ResourceType } from '../types';
 import { PressureDetector, PressureAlert } from '../monitors/pressure-detector';
 import { CircularBuffer } from '../utils/circular-buffer';

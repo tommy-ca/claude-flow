@@ -1,8 +1,8 @@
 import { getErrorMessage } from '../utils/error-handler.js';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { writeFile, readFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import { Logger } from '../core/logger.js';
 import { ConfigManager } from '../core/config.js';
 

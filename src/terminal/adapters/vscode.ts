@@ -3,7 +3,7 @@ import { getErrorMessage } from '../../utils/error-handler.js';
  * VSCode terminal adapter implementation
  */
 
-import { platform } from 'os';
+import { platform } from 'node:os';
 import type { ITerminalAdapter, Terminal } from './base.js';
 import type { ILogger } from '../../core/logger.js';
 import { TerminalError } from '../../utils/errors.js';

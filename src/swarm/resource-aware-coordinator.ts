@@ -3,7 +3,7 @@
  * Extends the base swarm coordinator with intelligent resource-based agent deployment
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { SwarmCoordinator } from './coordinator';
 import { Agent, SwarmTopology, ExecutionResult } from './types';
 import {

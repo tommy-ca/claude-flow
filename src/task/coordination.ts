@@ -4,7 +4,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Provides seamless coordination between task management and Claude Code batch tools
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import type { TaskEngine, WorkflowTask, TaskExecution } from './engine.js';
 import type { TodoItem, MemoryEntry, CoordinationContext } from './types.js';
 import { generateId } from '../utils/helpers.js';

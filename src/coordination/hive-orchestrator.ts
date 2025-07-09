@@ -2,7 +2,7 @@
  * Hive Mind Orchestrator - Advanced task coordination with consensus
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { generateId } from '../utils/helpers.js';
 
 export interface HiveTask {

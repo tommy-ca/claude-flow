@@ -11,7 +11,7 @@ import { generateId } from '../../utils/helpers.js';
 import { success, error, warning, info } from '../cli-core.js';
 import type { CommandContext } from '../cli-core.js';
 import type { SwarmStrategy, SwarmMode, AgentType } from '../../swarm/types.js';
-import { spawn, execSync } from 'child_process';
+import { spawn, execSync } from 'node:child_process';
 import * as readline from 'readline';
 
 async function launchClaudeCodeWithSwarm(objective: string, options: any): Promise<void> {

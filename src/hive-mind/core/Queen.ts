@@ -5,7 +5,7 @@
  * and strategic planning for the Hive Mind swarm.
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { v4 as uuidv4 } from 'uuid';
 import { Agent } from './Agent.js';
 import { DatabaseManager } from './DatabaseManager.js';

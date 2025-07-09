@@ -7,7 +7,7 @@ import { getErrorMessage } from '../utils/error-handler.js';
 import readline from 'readline';
 import fs from 'fs/promises';
 import path from 'path';
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import chalk from 'chalk';
 import colors from 'chalk';
 import Table from 'cli-table3';

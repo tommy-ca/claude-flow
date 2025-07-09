@@ -6,8 +6,8 @@
 import EventEmitter from 'events';
 import Database from 'better-sqlite3';
 import path from 'path';
-import { performance } from 'perf_hooks';
-import { Worker } from 'worker_threads';
+import { performance } from 'node:perf_hooks';
+import { Worker } from 'node:worker_threads';
 
 /**
  * Memory types and their characteristics

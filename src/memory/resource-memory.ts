@@ -3,7 +3,7 @@
  * Manages persistent storage and retrieval of resource metrics and history
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { MCPResourceReport } from '../mcp/resource-protocol';
 import { AdvancedMemoryManager } from './advanced-memory-manager';
 import { logger } from '../utils/logger';

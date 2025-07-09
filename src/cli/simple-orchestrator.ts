@@ -3,11 +3,11 @@ import { getErrorMessage } from '../utils/error-handler.js';
  * Simple orchestrator implementation for Node.js compatibility
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import cors from 'cors';

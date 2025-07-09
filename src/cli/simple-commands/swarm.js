@@ -3,7 +3,7 @@
  */
 
 import { args, mkdirAsync, writeTextFile, exit, cwd } from '../node-compat.js';
-import { spawn, execSync } from 'child_process';
+import { spawn, execSync } from 'node:child_process';
 import { existsSync, chmodSync, statSync } from 'fs';
 import { open } from 'fs/promises';
 import process from 'process';

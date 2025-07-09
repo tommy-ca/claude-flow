@@ -5,7 +5,7 @@
  * execution strategies within the Hive Mind swarm.
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { HiveMind } from '../core/HiveMind.js';
 import { Agent } from '../core/Agent.js';
 import { DatabaseManager } from '../core/DatabaseManager.js';

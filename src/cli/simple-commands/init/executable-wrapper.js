@@ -1,7 +1,7 @@
 // executable-wrapper.js - Create local executable wrapper
 
 import { writeFile, chmod } from 'fs/promises';
-import { platform } from 'os';
+import { platform } from 'node:os';
 
 export async function createLocalExecutable(workingDir, dryRun = false) {
   try {

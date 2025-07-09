@@ -8,7 +8,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as crypto from 'crypto';
+import * as crypto from 'node:crypto';
 import type {
   MigrationOptions,
   MigrationResult,

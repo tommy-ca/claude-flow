@@ -3,7 +3,7 @@
  * Advanced swarm intelligence with collective decision-making
  */
 
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync } from 'fs';
 import { writeFile, readFile } from 'fs/promises';
 import path from 'path';

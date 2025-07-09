@@ -6,8 +6,8 @@ import { getErrorMessage } from '../utils/error-handler.js';
 
 import { promises as fs } from 'fs';
 import { join } from 'path';
-import { homedir } from 'os';
-import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'crypto';
+import { homedir } from 'node:os';
+import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'node:crypto';
 import type { Config } from '../utils/types.js';
 import { deepMerge, safeParseJSON } from '../utils/helpers.js';
 import { ConfigError, ValidationError } from '../utils/errors.js';

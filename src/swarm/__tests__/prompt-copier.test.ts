@@ -1,7 +1,7 @@
 import { getErrorMessage } from '../utils/error-handler.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import * as os from 'os';
+import * as os from 'node:os';
 import { PromptCopier, copyPrompts } from '../prompt-copier.js';
 import { EnhancedPromptCopier, copyPromptsEnhanced } from '../prompt-copier-enhanced.js';
 import { PromptConfigManager, PromptValidator } from '../prompt-utils.js';

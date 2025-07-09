@@ -22,7 +22,7 @@ import {
   mkdirAsync,
   errors
 } from './node-compat.js';
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import process from 'process';
 import readline from 'readline';
 import { getMainHelp, getCommandHelp } from './help-text.js';

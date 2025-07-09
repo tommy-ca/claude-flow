@@ -1,5 +1,5 @@
 import { getErrorMessage } from '../utils/error-handler.js';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { writeFile, readFile, mkdir, readdir, stat } from 'fs/promises';
 import { join } from 'path';
 import { Logger } from '../core/logger.js';

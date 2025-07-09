@@ -3,7 +3,7 @@
  * Monitors system resources and detects pressure conditions to prevent failures
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { IResourceMetrics, ResourceType } from '../types';
 import { CircularBuffer } from '../utils/circular-buffer';
 import { logger } from '../../utils/logger';

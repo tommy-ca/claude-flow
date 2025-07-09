@@ -6,8 +6,8 @@
  * and memory management.
  */
 
-import { EventEmitter } from 'events';
-import { exec } from 'child_process';
+import { EventEmitter } from 'node:events';
+import { exec } from 'node:child_process';
 import { promisify } from 'util';
 import { getErrorMessage } from '../../utils/type-guards.js';
 

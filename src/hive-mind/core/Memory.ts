@@ -5,8 +5,8 @@
  * providing persistent storage, retrieval, and learning capabilities.
  */
 
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { EventEmitter } from 'node:events';
+import { performance } from 'node:perf_hooks';
 import { DatabaseManager } from './DatabaseManager.js';
 import { MCPToolWrapper } from '../integration/MCPToolWrapper.js';
 import {

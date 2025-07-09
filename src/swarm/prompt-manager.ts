@@ -1,6 +1,6 @@
 import { getErrorMessage } from '../utils/error-handler.js';
 import * as path from 'path';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import {
   copyPrompts,
   copyPromptsEnhanced,

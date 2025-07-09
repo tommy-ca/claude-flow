@@ -3,7 +3,7 @@
  * Wraps all 87 MCP tools for coordinated swarm usage
  */
 
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 
 /**
  * MCP Tool categories and their methods

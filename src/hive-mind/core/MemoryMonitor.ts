@@ -5,8 +5,8 @@
  * recommendations for the Hive Mind memory subsystem.
  */
 
-import { EventEmitter } from 'events';
-import { performance } from 'perf_hooks';
+import { EventEmitter } from 'node:events';
+import { performance } from 'node:perf_hooks';
 import { Memory } from './Memory.js';
 import { DatabaseManager } from './DatabaseManager.js';
 

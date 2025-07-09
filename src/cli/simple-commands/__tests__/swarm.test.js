@@ -6,7 +6,7 @@ import { jest } from '@jest/globals';
 import { swarmCommand } from '../swarm.js';
 import fs from 'fs-extra';
 import path from 'path';
-import { spawn } from 'child_process';
+import { spawn } from 'node:child_process';
 import ora from 'ora';
 
 jest.mock('fs-extra');

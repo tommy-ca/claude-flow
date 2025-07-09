@@ -1,5 +1,5 @@
 import { getErrorMessage } from '../utils/error-handler.js';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { promises as fs } from 'node:fs';
 import { Logger } from '../core/logger.js';
 import { generateId } from '../utils/helpers.js';

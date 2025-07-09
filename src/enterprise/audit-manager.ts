@@ -1,8 +1,8 @@
 import { getErrorMessage } from '../utils/error-handler.js';
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { writeFile, readFile, mkdir, readdir } from 'fs/promises';
 import { join } from 'path';
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 import { Logger } from '../core/logger.js';
 import { ConfigManager } from '../core/config.js';
 

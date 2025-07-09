@@ -3,7 +3,7 @@
  * Real-time monitoring and telemetry dashboard for resource management
  */
 
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import { ResourceManager } from '../core/resource-manager';
 import { PressureDetector, PressureAnalysis } from './pressure-detector';
 import {

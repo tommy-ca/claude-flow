@@ -3,8 +3,8 @@
  * Handles inter-agent messaging and coordination
  */
 
-import EventEmitter from 'events';
-import crypto from 'crypto';
+import EventEmitter from 'node:events';
+import crypto from 'node:crypto';
 
 /**
  * Message types and their priorities
