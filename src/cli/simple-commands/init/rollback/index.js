@@ -31,15 +31,15 @@ export class RollbackSystem {
 
     try {
       console.log('🔄 Creating pre-initialization backup...');
-      
+
       const backup = await this.backupManager.createBackup('pre-init');
       result.backupId = backup.id;
       result.success = backup.success;
-      
+
       if (backup.success) {
         printSuccess(`Backup created: ${backup.id}`);
         console.log(`  📁 Backup location: ${backup.location}`);
-        
+
         // Record rollback point
         await this.stateTracker.recordRollbackPoint('pre-init', {
           backupId: backup.id,
@@ -118,7 +118,7 @@ export class RollbackSystem {
 
       if (rollbackResult.success) {
         printSuccess('Full rollback completed successfully');
-        
+
         // Update state tracking
         await this.stateTracker.recordRollback(targetBackup, 'full');
       } else {
@@ -165,7 +165,7 @@ export class RollbackSystem {
 
       if (rollbackResult.success) {
         printSuccess(`Partial rollback completed for phase: ${phase}`);
-        
+
         // Update state tracking
         await this.stateTracker.recordRollback(checkpoint, 'partial', phase);
       } else {
@@ -320,11 +320,11 @@ export class RollbackSystem {
     try {
       const rollbackPoints = await this.stateTracker.getRollbackPoints();
       const preInitPoints = rollbackPoints.filter(point => point.type === 'pre-init');
-      
+
       if (preInitPoints.length > 0) {
         return preInitPoints.sort((a, b) => b.timestamp - a.timestamp)[0].backupId;
       }
-      
+
       return null;
     } catch {
       return null;
@@ -335,11 +335,11 @@ export class RollbackSystem {
     try {
       const checkpoints = await this.stateTracker.getCheckpoints();
       const phaseCheckpoints = checkpoints.filter(checkpoint => checkpoint.phase === phase);
-      
+
       if (phaseCheckpoints.length > 0) {
         return phaseCheckpoints.sort((a, b) => b.timestamp - a.timestamp)[0];
       }
-      
+
       return null;
     } catch {
       return null;
@@ -366,7 +366,7 @@ export class AtomicOperation {
       `atomic-${this.operationName}`,
       { operation: this.operationName, started: Date.now() }
     );
-    
+
     this.checkpointId = checkpoint.checkpointId;
     return checkpoint.success;
   }
@@ -376,7 +376,7 @@ export class AtomicOperation {
    */
   async commit() {
     this.completed = true;
-    
+
     // Mark checkpoint as committed
     if (this.checkpointId) {
       await this.rollbackSystem.stateTracker.updateCheckpoint(this.checkpointId, {

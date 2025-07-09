@@ -42,24 +42,24 @@ export async function initializeEnhancedUI(options = {}) {
       const uiManager = new UIManager();
       await uiManager.initialize();
       return uiManager;
-      
+
     } else if (mode === 'enhanced' || (mode === 'auto' && existingUI)) {
       // Enhanced process UI
       const { EnhancedWebUI } = await import('./EnhancedWebUI.js');
       const enhancedUI = new EnhancedWebUI();
       await enhancedUI.initialize(existingUI);
       return enhancedUI;
-      
+
     } else {
       // Terminal/fallback mode
       const { EnhancedProcessUI } = await import('./EnhancedProcessUI.js');
       const processUI = new EnhancedProcessUI();
       return processUI;
     }
-    
+
   } catch (error) {
     console.warn('Enhanced UI initialization failed, using fallback:', error);
-    
+
     // Always provide fallback
     const { EnhancedProcessUI } = await import('./EnhancedProcessUI.js');
     const processUI = new EnhancedProcessUI();
@@ -200,15 +200,15 @@ if (typeof window !== 'undefined') {
     getInfo: getArchitectureInfo,
     toolCategories: TOOL_CATEGORIES_INFO
   };
-  
+
   // Auto-enhance existing UI if present
   window.addEventListener('DOMContentLoaded', async () => {
     if (window.claudeFlowProcessUI && !window.claudeFlowEnhanced) {
       try {
         console.log('🎨 Auto-enhancing existing process UI...');
-        const enhancedUI = await initializeEnhancedUI({ 
+        const enhancedUI = await initializeEnhancedUI({
           mode: 'enhanced',
-          existingUI: window.claudeFlowProcessUI 
+          existingUI: window.claudeFlowProcessUI
         });
         window.claudeFlowEnhanced = enhancedUI;
         console.log('✅ Enhanced UI auto-initialization complete');

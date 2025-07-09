@@ -9,6 +9,9 @@ process.env.NODE_ENV = 'test';
 process.env.CLAUDE_FLOW_TEST_MODE = 'true';
 process.env.CLAUDE_FLOW_DISABLE_TELEMETRY = 'true';
 
+// Ensure Jest globals are available
+// import '@jest/globals';
+
 // Mock console methods to reduce test noise
 const originalConsole = { ...console };
 global.originalConsole = originalConsole;
@@ -58,8 +61,57 @@ global.mockRequire = (moduleName) => {
         kill: () => {},
         pid: 12345
       })
+    },
+    'better-sqlite3': class MockDatabase {
+      constructor() {
+        this.memory = new Map();
+      }
+      prepare() {
+        return {
+          run: () => ({ changes: 1 }),
+          get: () => ({}),
+          all: () => []
+        };
+      }
+      close() {}
+    },
+    'inquirer': {
+      prompt: () => Promise.resolve({})
     }
   };
   
   return mocks[moduleName] || {};
 };
+
+// Mock problematic native modules - ensure jest is available
+if (typeof jest !== 'undefined') {
+  jest.mock('node-pty', () => ({
+    spawn: () => ({
+      onData: () => {},
+      write: () => {},
+      resize: () => {},
+      kill: () => {},
+      pid: 12345
+    })
+  }), { virtual: true });
+
+  jest.mock('better-sqlite3', () => {
+    return class MockDatabase {
+      constructor() {
+        this.memory = new Map();
+      }
+      prepare() {
+        return {
+          run: () => ({ changes: 1 }),
+          get: () => ({}),
+          all: () => []
+        };
+      }
+      close() {}
+    };
+  }, { virtual: true });
+
+  jest.mock('inquirer', () => ({
+    prompt: () => Promise.resolve({})
+  }), { virtual: true });
+}

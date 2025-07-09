@@ -5,7 +5,7 @@ export async function monitorCommand(subArgs, flags) {
   const interval = getFlag(subArgs, '--interval') || flags.interval || 5000;
   const format = getFlag(subArgs, '--format') || flags.format || 'pretty';
   const continuous = subArgs.includes('--watch') || flags.watch;
-  
+
   if (continuous) {
     await runContinuousMonitoring(interval, format);
   } else {
@@ -15,7 +15,7 @@ export async function monitorCommand(subArgs, flags) {
 
 async function showCurrentMetrics(format) {
   const metrics = await collectMetrics();
-  
+
   if (format === 'json') {
     console.log(JSON.stringify(metrics, null, 2));
   } else {
@@ -26,37 +26,37 @@ async function showCurrentMetrics(format) {
 async function runContinuousMonitoring(interval, format) {
   printSuccess(`Starting continuous monitoring (interval: ${interval}ms)`);
   console.log('Press Ctrl+C to stop monitoring\n');
-  
+
   // Simulate monitoring - in a real implementation, this would collect actual metrics
   let iteration = 0;
   const maxIterations = 10; // Limit for demo purposes
-  
+
   const monitorInterval = setInterval(async () => {
     iteration++;
-    
+
     if (iteration > maxIterations) {
       console.log('\n📊 Monitoring demo completed (limited to 10 iterations)');
       console.log('In production, this would run continuously until stopped');
       clearInterval(monitorInterval);
       return;
     }
-    
+
     console.clear(); // Clear screen for fresh output
     console.log(`🔄 Monitoring Claude-Flow System - Update #${iteration}`);
     console.log(`⏰ ${new Date().toLocaleTimeString()}\n`);
-    
+
     const metrics = await collectMetrics();
-    
+
     if (format === 'json') {
       console.log(JSON.stringify(metrics, null, 2));
     } else {
       displayMetrics(metrics);
     }
-    
+
     console.log(`\n🔄 Next update in ${interval}ms...`);
-    
+
   }, interval);
-  
+
   // In a real implementation, you would handle Ctrl+C gracefully
   setTimeout(() => {
     clearInterval(monitorInterval);
@@ -67,7 +67,7 @@ async function runContinuousMonitoring(interval, format) {
 async function collectMetrics() {
   // Simulate metric collection - in real implementation, this would gather actual system data
   const timestamp = Date.now();
-  
+
   return {
     timestamp,
     system: {
@@ -98,17 +98,17 @@ async function collectMetrics() {
 
 function displayMetrics(metrics) {
   const timestamp = new Date(metrics.timestamp).toLocaleTimeString();
-  
+
   console.log('📊 System Metrics');
   console.log('================');
-  
+
   // System metrics
   console.log('\n🖥️  System Resources:');
   console.log(`   CPU Usage: ${metrics.system.cpu_usage.toFixed(1)}%`);
   console.log(`   Memory: ${metrics.system.memory_usage.toFixed(1)} MB`);
   console.log(`   Disk Usage: ${metrics.system.disk_usage.toFixed(1)}%`);
   console.log(`   Uptime: ${formatUptime(metrics.system.uptime)}`);
-  
+
   // Orchestrator metrics
   console.log('\n🎭 Orchestrator:');
   console.log(`   Status: ${getStatusIcon(metrics.orchestrator.status)} ${metrics.orchestrator.status}`);
@@ -116,29 +116,29 @@ function displayMetrics(metrics) {
   console.log(`   Queued Tasks: ${metrics.orchestrator.queued_tasks}`);
   console.log(`   Completed: ${metrics.orchestrator.completed_tasks}`);
   console.log(`   Errors: ${metrics.orchestrator.errors}`);
-  
+
   // Performance metrics
   console.log('\n⚡ Performance:');
   console.log(`   Avg Task Duration: ${metrics.performance.avg_task_duration.toFixed(0)}ms`);
   console.log(`   Throughput: ${metrics.performance.throughput.toFixed(1)} tasks/min`);
   console.log(`   Success Rate: ${metrics.performance.success_rate.toFixed(1)}%`);
-  
+
   // Resource utilization
   console.log('\n📦 Resources:');
   console.log(`   Memory Entries: ${metrics.resources.memory_entries}`);
   console.log(`   Terminal Sessions: ${metrics.resources.terminal_sessions}`);
   console.log(`   MCP Connections: ${metrics.resources.mcp_connections}`);
-  
+
   console.log(`\n⏰ Last Updated: ${timestamp}`);
 }
 
 function getStatusIcon(status) {
   switch (status) {
-    case 'running': return '🟢';
-    case 'stopped': return '🔴';
-    case 'starting': return '🟡';
-    case 'error': return '❌';
-    default: return '⚪';
+  case 'running': return '🟢';
+  case 'stopped': return '🔴';
+  case 'starting': return '🟡';
+  case 'error': return '❌';
+  default: return '⚪';
   }
 }
 
@@ -146,7 +146,7 @@ function formatUptime(seconds) {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = seconds % 60;
-  
+
   if (hours > 0) {
     return `${hours}h ${minutes}m ${secs}s`;
   } else if (minutes > 0) {

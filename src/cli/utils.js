@@ -77,12 +77,12 @@ export function formatBytes(bytes) {
   const units = ['B', 'KB', 'MB', 'GB'];
   let size = bytes;
   let unitIndex = 0;
-  
+
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
     unitIndex++;
   }
-  
+
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
@@ -90,14 +90,14 @@ export function formatBytes(bytes) {
 export function parseFlags(args) {
   const flags = {};
   const filteredArgs = [];
-  
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    
+
     if (arg.startsWith('--')) {
       const flagName = arg.substring(2);
       const nextArg = args[i + 1];
-      
+
       if (nextArg && !nextArg.startsWith('--')) {
         flags[flagName] = nextArg;
         i++; // Skip next arg since we consumed it
@@ -114,7 +114,7 @@ export function parseFlags(args) {
       filteredArgs.push(arg);
     }
   }
-  
+
   return { flags, args: filteredArgs };
 }
 
@@ -126,25 +126,25 @@ export async function runCommand(command, args = [], options = {}) {
       // Node.js environment
       const { spawn } = await import('child_process');
       const { promisify } = await import('util');
-      
+
       return new Promise((resolve) => {
         const child = spawn(command, args, {
           stdio: ['pipe', 'pipe', 'pipe'],
           shell: true,
           ...options
         });
-        
+
         let stdout = '';
         let stderr = '';
-        
+
         child.stdout?.on('data', (data) => {
           stdout += data.toString();
         });
-        
+
         child.stderr?.on('data', (data) => {
           stderr += data.toString();
         });
-        
+
         child.on('close', (code) => {
           resolve({
             success: code === 0,
@@ -153,7 +153,7 @@ export async function runCommand(command, args = [], options = {}) {
             stderr: stderr
           });
         });
-        
+
         child.on('error', (err) => {
           resolve({
             success: false,
@@ -169,9 +169,9 @@ export async function runCommand(command, args = [], options = {}) {
         args,
         ...options
       });
-      
+
       const result = await cmd.output();
-      
+
       return {
         success: result.code === 0,
         code: result.code,
@@ -196,18 +196,18 @@ export async function loadConfig(path = 'claude-flow.config.json') {
       poolSize: 10,
       recycleAfter: 20,
       healthCheckInterval: 30000,
-      type: "auto"
+      type: 'auto'
     },
     orchestrator: {
       maxConcurrentTasks: 10,
       taskTimeout: 300000
     },
     memory: {
-      backend: "json",
-      path: "./memory/claude-flow-data.json"
+      backend: 'json',
+      path: './memory/claude-flow-data.json'
     }
   };
-  
+
   try {
     const content = await Deno.readTextFile(path);
     return { ...defaultConfig, ...JSON.parse(content) };
@@ -293,51 +293,51 @@ export async function retry(fn, maxAttempts = 3, delay = 1000) {
   }
 }
 
-// Claude Flow MCP integration helpers  
+// Claude Flow MCP integration helpers
 export async function callRuvSwarmMCP(tool, params = {}) {
   try {
     // First try real ruv-swarm MCP server
     const tempFile = `/tmp/mcp_request_${Date.now()}.json`;
     const tempScript = `/tmp/mcp_script_${Date.now()}.sh`;
-    
+
     // Create JSON-RPC messages for ruv-swarm MCP
     const initMessage = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: 1,
-      method: "initialize",
+      method: 'initialize',
       params: {
-        protocolVersion: "2024-11-05",
+        protocolVersion: '2024-11-05',
         capabilities: { tools: {}, resources: {} },
-        clientInfo: { name: "claude-flow-cli", version: "2.0.0" }
+        clientInfo: { name: 'claude-flow-cli', version: '2.0.0' }
       }
     };
-    
+
     const toolMessage = {
-      jsonrpc: "2.0",
+      jsonrpc: '2.0',
       id: 2,
-      method: "tools/call",
+      method: 'tools/call',
       params: {
         name: tool,
         arguments: params
       }
     };
-    
+
     // Write messages to temp file
     const messages = JSON.stringify(initMessage) + '\n' + JSON.stringify(toolMessage);
     await Deno.writeTextFile(tempFile, messages);
-    
+
     // Create a script that feeds the file to the REAL ruv-swarm MCP server
     const script = `#!/bin/bash
 timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -1
 `;
     await Deno.writeTextFile(tempScript, script);
     await Deno.chmod(tempScript, 0o755);
-    
+
     const result = await runCommand('bash', [tempScript], {
       stdout: 'piped',
       stderr: 'piped'
     });
-    
+
     // Clean up temp files
     try {
       await Deno.remove(tempFile);
@@ -345,7 +345,7 @@ timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -
     } catch {
       // Ignore cleanup errors
     }
-    
+
     if (result.success && result.stdout.trim()) {
       try {
         const response = JSON.parse(result.stdout.trim());
@@ -357,12 +357,12 @@ timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -
         // If parsing fails, continue to fallback
       }
     }
-    
+
     // If MCP fails, use direct ruv-swarm CLI commands for neural training
     if (tool === 'neural_train') {
       return await callRuvSwarmDirectNeural(params);
     }
-    
+
     // Always return realistic fallback data for other tools
     return {
       success: true,
@@ -384,7 +384,7 @@ timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -
     if (tool === 'neural_train') {
       return await callRuvSwarmDirectNeural(params);
     }
-    
+
     // Always provide good fallback data instead of showing errors to user
     return {
       success: true,
@@ -397,7 +397,7 @@ timeout 30s npx ruv-swarm mcp start --stdio < "${tempFile}" 2>/dev/null | tail -
       },
       learned_patterns: [
         'coordination_efficiency_boost',
-        'agent_selection_optimization', 
+        'agent_selection_optimization',
         'task_distribution_enhancement'
       ]
     };
@@ -410,21 +410,21 @@ export async function callRuvSwarmDirectNeural(params = {}) {
     const modelName = params.model || 'general';
     const epochs = params.epochs || 50;
     const dataSource = params.data || 'recent';
-    
-    console.log(`🧠 Using REAL ruv-swarm WASM neural training...`);
+
+    console.log('🧠 Using REAL ruv-swarm WASM neural training...');
     console.log(`🚀 Executing: npx ruv-swarm neural train --model ${modelName} --iterations ${epochs} --data-source ${dataSource}`);
-    console.log(`📺 LIVE TRAINING OUTPUT:\n`);
-    
+    console.log('📺 LIVE TRAINING OUTPUT:\n');
+
     // Use a different approach to show live output - spawn with stdio inheritance
     let result;
     if (typeof process !== 'undefined' && process.versions && process.versions.node) {
       // Node.js environment - use spawn with stdio inherit
       const { spawn } = await import('child_process');
-      
+
       result = await new Promise((resolve) => {
         const child = spawn('npx', [
-          'ruv-swarm', 
-          'neural', 
+          'ruv-swarm',
+          'neural',
           'train',
           '--model', modelName,
           '--iterations', epochs.toString(),
@@ -434,7 +434,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
           stdio: 'inherit', // This will show live output in Node.js
           shell: true
         });
-        
+
         child.on('close', (code) => {
           resolve({
             success: code === 0,
@@ -443,7 +443,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
             stderr: ''
           });
         });
-        
+
         child.on('error', (err) => {
           resolve({
             success: false,
@@ -456,8 +456,8 @@ export async function callRuvSwarmDirectNeural(params = {}) {
     } else {
       // Deno environment - fallback to regular command
       result = await runCommand('npx', [
-        'ruv-swarm', 
-        'neural', 
+        'ruv-swarm',
+        'neural',
         'train',
         '--model', modelName,
         '--iterations', epochs.toString(),
@@ -467,7 +467,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
         stdout: 'piped',
         stderr: 'piped'
       });
-      
+
       // Show the output manually in Deno
       if (result.stdout) {
         console.log(result.stdout);
@@ -476,9 +476,9 @@ export async function callRuvSwarmDirectNeural(params = {}) {
         console.error(result.stderr);
       }
     }
-    
+
     console.log(`\n🎯 ruv-swarm training completed with exit code: ${result.code}`);
-    
+
     // Since we used 'inherit', we need to get the training results from the saved JSON file
     try {
       // Read the latest training file
@@ -486,7 +486,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
       const files = await Deno.readDir(neuralDir);
       let latestFile = null;
       let latestTime = 0;
-      
+
       for await (const file of files) {
         if (file.name.startsWith(`training-${modelName}-`) && file.name.endsWith('.json')) {
           const filePath = `${neuralDir}/${file.name}`;
@@ -497,11 +497,11 @@ export async function callRuvSwarmDirectNeural(params = {}) {
           }
         }
       }
-      
+
       if (latestFile) {
         const content = await Deno.readTextFile(latestFile);
         const realResult = JSON.parse(content);
-        
+
         return {
           success: result.code === 0,
           modelId: `${modelName}_${Date.now()}`,
@@ -522,7 +522,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
     } catch (fileError) {
       console.log(`⚠️ Could not read training results file: ${fileError.message}`);
     }
-    
+
     // If we get here, ruv-swarm ran but we couldn't read the results file
     // Return success with indication that real training happened
     return {
@@ -539,7 +539,7 @@ export async function callRuvSwarmDirectNeural(params = {}) {
       ruv_swarm_executed: true,
       timestamp: new Date().toISOString()
     };
-    
+
   } catch (err) {
     console.log(`⚠️ Direct ruv-swarm call failed: ${err.message}`);
     throw err;
@@ -550,7 +550,7 @@ export async function execRuvSwarmHook(hookName, params = {}) {
   try {
     const command = 'npx';
     const args = ['ruv-swarm', 'hook', hookName];
-    
+
     // Add parameters as CLI arguments
     Object.entries(params).forEach(([key, value]) => {
       args.push(`--${key}`);
@@ -558,16 +558,16 @@ export async function execRuvSwarmHook(hookName, params = {}) {
         args.push(String(value));
       }
     });
-    
+
     const result = await runCommand(command, args, {
       stdout: 'piped',
       stderr: 'piped'
     });
-    
+
     if (!result.success) {
       throw new Error(`ruv-swarm hook failed: ${result.stderr}`);
     }
-    
+
     return {
       success: true,
       output: result.stdout,
@@ -585,7 +585,7 @@ export async function checkRuvSwarmAvailable() {
       stdout: 'piped',
       stderr: 'piped'
     });
-    
+
     return result.success;
   } catch {
     return false;

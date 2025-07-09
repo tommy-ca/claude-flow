@@ -47,9 +47,9 @@ export class ViewManager {
    */
   setupDOMContainer() {
     // Create main container
-    this.containerElement = document.getElementById('claude-flow-ui') || 
+    this.containerElement = document.getElementById('claude-flow-ui') ||
                            document.createElement('div');
-    
+
     if (!this.containerElement.id) {
       this.containerElement.id = 'claude-flow-ui';
       this.containerElement.className = 'claude-flow-main-container';
@@ -64,7 +64,7 @@ export class ViewManager {
    * Add CSS styles for view transitions
    */
   addTransitionStyles() {
-    if (document.getElementById('claude-flow-styles')) return;
+    if (document.getElementById('claude-flow-styles')) {return;}
 
     const styles = document.createElement('style');
     styles.id = 'claude-flow-styles';
@@ -164,7 +164,7 @@ export class ViewManager {
         }
       }
     `;
-    
+
     document.head.appendChild(styles);
   }
 
@@ -294,16 +294,16 @@ export class ViewManager {
     // Create view header
     const header = document.createElement('div');
     header.className = 'claude-flow-header';
-    
+
     const titleSection = document.createElement('div');
     const title = document.createElement('h1');
     title.className = 'claude-flow-title';
     title.textContent = `${viewConfig.icon} ${viewConfig.name}`;
-    
+
     const breadcrumb = document.createElement('div');
     breadcrumb.className = 'claude-flow-breadcrumb';
     breadcrumb.textContent = viewConfig.description;
-    
+
     titleSection.appendChild(title);
     titleSection.appendChild(breadcrumb);
     header.appendChild(titleSection);
@@ -405,8 +405,8 @@ export class ViewManager {
         if (viewConfig.toolCount) {
           console.log(`   Tools: ${viewConfig.toolCount}`);
         }
-        console.log(`   Params:`, params);
-        console.log(`   [This view is under development]\n`);
+        console.log('   Params:', params);
+        console.log('   [This view is under development]\n');
       },
       destroy: () => {}
     };
@@ -444,7 +444,7 @@ export class ViewManager {
    * Hide current view with transition
    */
   async hideCurrentView() {
-    if (!this.currentView) return;
+    if (!this.currentView) {return;}
 
     const loadedView = this.loadedViews.get(this.currentView);
     if (loadedView?.element) {
@@ -505,7 +505,7 @@ export class ViewManager {
    */
   async unloadView(viewId) {
     const loadedView = this.loadedViews.get(viewId);
-    if (!loadedView) return;
+    if (!loadedView) {return;}
 
     // Call destroy method if available
     if (loadedView.component.destroy) {

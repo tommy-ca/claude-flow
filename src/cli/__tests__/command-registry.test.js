@@ -3,71 +3,71 @@
  */
 
 import { jest } from '@jest/globals';
-import { 
-  commandRegistry, 
-  registerCoreCommands, 
-  executeCommand, 
-  hasCommand, 
-  showCommandHelp, 
-  showAllCommands, 
-  listCommands 
+import {
+  commandRegistry,
+  registerCoreCommands,
+  executeCommand,
+  hasCommand,
+  showCommandHelp,
+  showAllCommands,
+  listCommands
 } from '../command-registry.js';
 
 // Mock all command modules
 jest.mock('../simple-commands/init.js', () => ({
-  initCommand: jest.fn().mockResolvedValue(undefined),
+  initCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/memory.js', () => ({
-  memoryCommand: jest.fn().mockResolvedValue(undefined),
+  memoryCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/agent.js', () => ({
-  agentCommand: jest.fn().mockResolvedValue(undefined),
+  agentCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/task.js', () => ({
-  taskCommand: jest.fn().mockResolvedValue(undefined),
+  taskCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/swarm.js', () => ({
-  swarmCommand: jest.fn().mockResolvedValue(undefined),
+  swarmCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/config.js', () => ({
-  configCommand: jest.fn().mockResolvedValue(undefined),
+  configCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/status.js', () => ({
-  statusCommand: jest.fn().mockResolvedValue(undefined),
+  statusCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/mcp.js', () => ({
-  mcpCommand: jest.fn().mockResolvedValue(undefined),
+  mcpCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/monitor.js', () => ({
-  monitorCommand: jest.fn().mockResolvedValue(undefined),
+  monitorCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/start.js', () => ({
-  startCommand: jest.fn().mockResolvedValue(undefined),
+  startCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/sparc.js', () => ({
-  sparcCommand: jest.fn().mockResolvedValue(undefined),
+  sparcCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../simple-commands/batch-manager.js', () => ({
-  batchManagerCommand: jest.fn().mockResolvedValue(undefined),
+  batchManagerCommand: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../commands/ruv-swarm.js', () => ({
-  ruvSwarmAction: jest.fn().mockResolvedValue(undefined),
+  ruvSwarmAction: jest.fn().mockResolvedValue(undefined)
 }));
 
 jest.mock('../commands/config-integration.js', () => ({
-  configIntegrationAction: jest.fn().mockResolvedValue(undefined),
+  configIntegrationAction: jest.fn().mockResolvedValue(undefined)
 }));
 
 describe('Command Registry', () => {
@@ -89,14 +89,14 @@ describe('Command Registry', () => {
   describe('registerCoreCommands', () => {
     test('should register all core commands', () => {
       registerCoreCommands();
-      
+
       const expectedCommands = [
-        'init', 'start', 'memory', 'sparc', 'agent', 
+        'init', 'start', 'memory', 'sparc', 'agent',
         'task', 'config', 'status', 'mcp', 'monitor',
         'swarm', 'batch-manager', 'github', 'docker',
         'ruv-swarm', 'config-integration'
       ];
-      
+
       expectedCommands.forEach(cmd => {
         expect(commandRegistry.has(cmd)).toBe(true);
       });
@@ -104,7 +104,7 @@ describe('Command Registry', () => {
 
     test('should register commands with correct metadata', () => {
       registerCoreCommands();
-      
+
       const initCmd = commandRegistry.get('init');
       expect(initCmd).toHaveProperty('handler');
       expect(initCmd).toHaveProperty('description');
@@ -139,9 +139,9 @@ describe('Command Registry', () => {
 
     test('should execute command handler with arguments', async () => {
       const { initCommand } = await import('../simple-commands/init.js');
-      
+
       await executeCommand('init', ['--sparc'], { force: true });
-      
+
       expect(initCommand).toHaveBeenCalledWith(['--sparc'], { force: true });
     });
 
@@ -153,7 +153,7 @@ describe('Command Registry', () => {
     test('should handle command execution errors', async () => {
       const { swarmCommand } = await import('../simple-commands/swarm.js');
       swarmCommand.mockRejectedValue(new Error('Command failed'));
-      
+
       await expect(executeCommand('swarm', ['test'], {}))
         .rejects.toThrow('Command failed');
     });
@@ -166,7 +166,7 @@ describe('Command Registry', () => {
 
     test('should display help for existing command', () => {
       showCommandHelp('init');
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('init');
       expect(output).toContain('Initialize Claude Code integration');
@@ -176,7 +176,7 @@ describe('Command Registry', () => {
 
     test('should show error for unknown command', () => {
       showCommandHelp('unknown');
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Unknown command: unknown')
       );
@@ -187,15 +187,15 @@ describe('Command Registry', () => {
     test('should display all registered commands grouped by category', () => {
       registerCoreCommands();
       showAllCommands();
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
-      
+
       // Check for categories
       expect(output).toContain('SWARM INTELLIGENCE COMMANDS');
       expect(output).toContain('WORKFLOW AUTOMATION');
       expect(output).toContain('DEVELOPMENT & TESTING');
       expect(output).toContain('INFRASTRUCTURE');
-      
+
       // Check for specific commands
       expect(output).toContain('swarm');
       expect(output).toContain('agent');
@@ -209,7 +209,7 @@ describe('Command Registry', () => {
     test('should return array of all command names', () => {
       registerCoreCommands();
       const commands = listCommands();
-      
+
       expect(Array.isArray(commands)).toBe(true);
       expect(commands).toContain('init');
       expect(commands).toContain('swarm');
@@ -220,7 +220,7 @@ describe('Command Registry', () => {
     test('should return empty array when no commands registered', () => {
       commandRegistry.clear();
       const commands = listCommands();
-      
+
       expect(commands).toEqual([]);
     });
   });

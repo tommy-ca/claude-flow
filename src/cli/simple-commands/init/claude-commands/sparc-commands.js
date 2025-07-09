@@ -3,8 +3,8 @@
 // Create SPARC mode slash command
 export function createSparcSlashCommand(mode) {
   // Extract the full description without truncation
-  const fullDescription = mode.roleDefinition.length > 100 
-    ? `${mode.roleDefinition.substring(0, 97)}...` 
+  const fullDescription = mode.roleDefinition.length > 100
+    ? `${mode.roleDefinition.substring(0, 97)}...`
     : mode.roleDefinition;
 
   return `---
@@ -22,13 +22,13 @@ ${mode.customInstructions}
 
 ## Available Tools
 ${Array.isArray(mode.groups) ? mode.groups.map(g => {
-  if (typeof g === 'string') {
-    return `- **${g}**: ${getToolDescription(g)}`;
-  } else if (Array.isArray(g)) {
-    return `- **${g[0]}**: ${g[1]?.description || getToolDescription(g[0])} ${g[1]?.fileRegex ? `(Files matching: ${g[1].fileRegex})` : ''}`;
-  }
-  return `- ${JSON.stringify(g)}`;
-}).join('\n') : 'None'}
+    if (typeof g === 'string') {
+      return `- **${g}**: ${getToolDescription(g)}`;
+    } else if (Array.isArray(g)) {
+      return `- **${g[0]}**: ${g[1]?.description || getToolDescription(g[0])} ${g[1]?.fileRegex ? `(Files matching: ${g[1].fileRegex})` : ''}`;
+    }
+    return `- ${JSON.stringify(g)}`;
+  }).join('\n') : 'None'}
 
 ## Usage
 
@@ -103,12 +103,12 @@ function getExampleTask(slug) {
 // Create main SPARC command
 export function createMainSparcCommand(modes) {
   const modeList = modes.map(m => `- \`/sparc-${m.slug}\` - ${m.name}`).join('\n');
-  
+
   // Find the sparc orchestrator mode for its full description
   const sparcMode = modes.find(m => m.slug === 'sparc');
   const sparcDescription = sparcMode ? sparcMode.roleDefinition : 'SPARC orchestrator for complex workflows';
   const sparcInstructions = sparcMode ? sparcMode.customInstructions : '';
-  
+
   return `---
 name: sparc
 description: Execute SPARC methodology workflows with Claude-Flow

@@ -157,10 +157,10 @@ ${flags.mode === 'full' || !flags.mode ? `
 - Document both API contracts and user interfaces` : ''}
 
 ## Commit Strategy
-${flags.commit === 'phase' ? `- **Phase Commits**: Commit after completing major phases (planning, implementation, testing)` : ''}
-${flags.commit === 'feature' ? `- **Feature Commits**: Commit after each feature or module is complete` : ''}
-${flags.commit === 'manual' ? `- **Manual Commits**: Only commit when explicitly requested by the user` : ''}
-${!flags.commit ? `- **Default (Phase)**: Commit after completing major phases` : ''}
+${flags.commit === 'phase' ? '- **Phase Commits**: Commit after completing major phases (planning, implementation, testing)' : ''}
+${flags.commit === 'feature' ? '- **Feature Commits**: Commit after each feature or module is complete' : ''}
+${flags.commit === 'manual' ? '- **Manual Commits**: Only commit when explicitly requested by the user' : ''}
+${!flags.commit ? '- **Default (Phase)**: Commit after completing major phases' : ''}
 
 ## Additional Guidelines
 ${flags.noPermissions ? `

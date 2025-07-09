@@ -100,7 +100,7 @@ class AsyncOperationQueue {
   getMetrics() {
     return {
       ...this.metrics,
-      successRate: this.metrics.processed > 0 
+      successRate: this.metrics.processed > 0
         ? ((this.metrics.processed - this.metrics.failures) / this.metrics.processed * 100).toFixed(2)
         : 100,
       queueSize: this.queue.length,
@@ -116,7 +116,7 @@ class AsyncOperationQueue {
 class BatchProcessor extends EventEmitter {
   constructor(config = {}) {
     super();
-    
+
     this.config = {
       maxBatchSize: config.maxBatchSize || 50,
       flushInterval: config.flushInterval || 1000,
@@ -168,12 +168,12 @@ class BatchProcessor extends EventEmitter {
 
   async _processBatch(batchKey) {
     const batch = this.batches.get(batchKey);
-    if (!batch || batch.items.length === 0) return;
+    if (!batch || batch.items.length === 0) {return;}
 
     // Clear timer and remove from maps
     const timer = this.timers.get(batchKey);
-    if (timer) clearTimeout(timer);
-    
+    if (timer) {clearTimeout(timer);}
+
     this.timers.delete(batchKey);
     this.batches.delete(batchKey);
 
@@ -187,8 +187,8 @@ class BatchProcessor extends EventEmitter {
       this.metrics.batchesProcessed++;
       this.metrics.itemsProcessed += batch.items.length;
       this.metrics.avgBatchSize = this.metrics.itemsProcessed / this.metrics.batchesProcessed;
-      this.metrics.avgProcessingTime = 
-        (this.metrics.avgProcessingTime * (this.metrics.batchesProcessed - 1) + processingTime) / 
+      this.metrics.avgProcessingTime =
+        (this.metrics.avgProcessingTime * (this.metrics.batchesProcessed - 1) + processingTime) /
         this.metrics.batchesProcessed;
 
       // Resolve individual item promises
@@ -223,7 +223,7 @@ class BatchProcessor extends EventEmitter {
   _startPeriodicFlush() {
     setInterval(() => {
       const now = Date.now();
-      
+
       for (const [batchKey, batch] of this.batches.entries()) {
         // Flush batches that have been waiting too long
         if (now - batch.createdAt > this.config.flushInterval) {
@@ -320,13 +320,13 @@ export class PerformanceOptimizer extends EventEmitter {
     }
 
     const startTime = performance.now();
-    
+
     try {
       const result = await this.asyncQueue.add(operation, options.priority || 5);
-      
+
       const executionTime = performance.now() - startTime;
       this.metrics.optimizations.asyncOperations++;
-      
+
       // Track performance gain vs baseline
       if (this.performanceBaseline) {
         const gain = Math.max(0, this.performanceBaseline.avgAsyncTime - executionTime);
@@ -358,14 +358,14 @@ export class PerformanceOptimizer extends EventEmitter {
    */
   async optimizeWithCache(key, operation, ttl = 300000) { // 5 minutes default
     const cached = this.cache.get(key);
-    
+
     if (cached && Date.now() - cached.timestamp < ttl) {
       this.metrics.optimizations.cacheHits++;
       return cached.value;
     }
 
     const result = await operation();
-    
+
     this.cache.set(key, {
       value: result,
       timestamp: Date.now()
@@ -384,16 +384,16 @@ export class PerformanceOptimizer extends EventEmitter {
    */
   async optimizeMemoryOperation(operation, connectionPool) {
     const startTime = performance.now();
-    
+
     let connection = null;
     try {
       connection = await connectionPool.acquire();
       const result = await operation(connection);
-      
+
       const executionTime = performance.now() - startTime;
-      
+
       // Track connection efficiency
-      this.metrics.system.throughput = 
+      this.metrics.system.throughput =
         (this.metrics.system.throughput * 0.9) + (1000 / executionTime * 0.1);
 
       return result;
@@ -435,7 +435,7 @@ export class PerformanceOptimizer extends EventEmitter {
     };
 
     const groups = [];
-    
+
     Object.entries(complexity).forEach(([level, types]) => {
       const groupAgents = agentTypes.filter(type => types.includes(type));
       if (groupAgents.length > 0) {
@@ -456,24 +456,24 @@ export class PerformanceOptimizer extends EventEmitter {
     // Adjust async queue concurrency based on utilization
     if (queueMetrics.utilization > 90 && this.asyncQueue.maxConcurrency < 20) {
       this.asyncQueue.maxConcurrency += 2;
-      this.emit('auto_tune', { 
-        type: 'concurrency_increased', 
-        newValue: this.asyncQueue.maxConcurrency 
+      this.emit('auto_tune', {
+        type: 'concurrency_increased',
+        newValue: this.asyncQueue.maxConcurrency
       });
     } else if (queueMetrics.utilization < 30 && this.asyncQueue.maxConcurrency > 5) {
       this.asyncQueue.maxConcurrency = Math.max(5, this.asyncQueue.maxConcurrency - 1);
-      this.emit('auto_tune', { 
-        type: 'concurrency_decreased', 
-        newValue: this.asyncQueue.maxConcurrency 
+      this.emit('auto_tune', {
+        type: 'concurrency_decreased',
+        newValue: this.asyncQueue.maxConcurrency
       });
     }
 
     // Adjust batch sizes based on processing efficiency
     if (batchMetrics.avgBatchSize > 30 && batchMetrics.avgProcessingTime > 5000) {
       this.batchProcessor.config.maxBatchSize = Math.max(20, this.batchProcessor.config.maxBatchSize - 5);
-      this.emit('auto_tune', { 
-        type: 'batch_size_decreased', 
-        newValue: this.batchProcessor.config.maxBatchSize 
+      this.emit('auto_tune', {
+        type: 'batch_size_decreased',
+        newValue: this.batchProcessor.config.maxBatchSize
       });
     }
   }
@@ -484,11 +484,11 @@ export class PerformanceOptimizer extends EventEmitter {
   _cleanCache() {
     const now = Date.now();
     const entries = Array.from(this.cache.entries());
-    
+
     // Remove oldest 20% of entries
     entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
     const toRemove = Math.floor(entries.length * 0.2);
-    
+
     for (let i = 0; i < toRemove; i++) {
       this.cache.delete(entries[i][0]);
     }
@@ -504,7 +504,7 @@ export class PerformanceOptimizer extends EventEmitter {
 
     // Estimate throughput based on recent operations
     const queueMetrics = this.asyncQueue.getMetrics();
-    this.metrics.system.throughput = queueMetrics.processed > 0 ? 
+    this.metrics.system.throughput = queueMetrics.processed > 0 ?
       (queueMetrics.processed / (queueMetrics.avgProcessingTime / 1000)).toFixed(2) : 0;
   }
 
@@ -518,9 +518,9 @@ export class PerformanceOptimizer extends EventEmitter {
       batchProcessor: this.batchProcessor.getMetrics(),
       cache: {
         size: this.cache.size,
-        hitRate: this.metrics.optimizations.cacheHits > 0 ? 
-          (this.metrics.optimizations.cacheHits / 
-           (this.metrics.optimizations.asyncOperations + this.metrics.optimizations.cacheHits) * 100).toFixed(2) 
+        hitRate: this.metrics.optimizations.cacheHits > 0 ?
+          (this.metrics.optimizations.cacheHits /
+           (this.metrics.optimizations.asyncOperations + this.metrics.optimizations.cacheHits) * 100).toFixed(2)
           : 0
       }
     };
@@ -589,10 +589,10 @@ export class PerformanceOptimizer extends EventEmitter {
     ];
 
     const avgScore = factors.reduce((sum, score) => sum + score, 0) / factors.length;
-    
-    if (avgScore >= 80) return 'excellent';
-    if (avgScore >= 60) return 'good';
-    if (avgScore >= 40) return 'fair';
+
+    if (avgScore >= 80) {return 'excellent';}
+    if (avgScore >= 60) {return 'good';}
+    if (avgScore >= 40) {return 'fair';}
     return 'poor';
   }
 

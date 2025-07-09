@@ -5,79 +5,79 @@
  */
 
 const SWARM_MODE = {
-  name: "swarm",
-  description: "Advanced multi-agent coordination with timeout-free execution for complex tasks",
-  icon: "🐝",
-  category: "coordination",
-  difficulty: "expert",
-  estimatedTime: "30-120+ minutes",
-  
+  name: 'swarm',
+  description: 'Advanced multi-agent coordination with timeout-free execution for complex tasks',
+  icon: '🐝',
+  category: 'coordination',
+  difficulty: 'expert',
+  estimatedTime: '30-120+ minutes',
+
   // Core capabilities
   capabilities: [
-    "Multi-agent coordination",
-    "Timeout-free execution", 
-    "Distributed memory sharing",
-    "Intelligent load balancing",
-    "Background task processing",
-    "Real-time monitoring",
-    "Fault tolerance",
-    "Cross-agent collaboration"
+    'Multi-agent coordination',
+    'Timeout-free execution',
+    'Distributed memory sharing',
+    'Intelligent load balancing',
+    'Background task processing',
+    'Real-time monitoring',
+    'Fault tolerance',
+    'Cross-agent collaboration'
   ],
 
   // When to use this mode
   useCases: [
-    "Complex multi-step projects requiring parallel processing",
-    "Large-scale development tasks that might timeout",
-    "Research projects needing multiple specialized agents",
-    "Long-running optimization and refactoring tasks",
-    "Comprehensive testing and quality assurance workflows",
-    "Documentation and analysis projects with multiple components"
+    'Complex multi-step projects requiring parallel processing',
+    'Large-scale development tasks that might timeout',
+    'Research projects needing multiple specialized agents',
+    'Long-running optimization and refactoring tasks',
+    'Comprehensive testing and quality assurance workflows',
+    'Documentation and analysis projects with multiple components'
   ],
 
   // Prerequisites
   prerequisites: [
-    "Claude-Flow initialized with --sparc flag",
-    "Understanding of agent types and coordination strategies",
-    "Basic familiarity with swarm concepts",
-    "Project structure suitable for parallel processing"
+    'Claude-Flow initialized with --sparc flag',
+    'Understanding of agent types and coordination strategies',
+    'Basic familiarity with swarm concepts',
+    'Project structure suitable for parallel processing'
   ],
 
   // Swarm strategies available
   strategies: {
     development: {
-      name: "Development",
-      agents: ["developer", "tester", "reviewer", "documenter"],
-      focus: "Code implementation with quality assurance",
+      name: 'Development',
+      agents: ['developer', 'tester', 'reviewer', 'documenter'],
+      focus: 'Code implementation with quality assurance',
       parallel: true
     },
     research: {
-      name: "Research", 
-      agents: ["researcher", "analyzer", "documenter"],
-      focus: "Information gathering and analysis",
+      name: 'Research',
+      agents: ['researcher', 'analyzer', 'documenter'],
+      focus: 'Information gathering and analysis',
       parallel: true
     },
     analysis: {
-      name: "Analysis",
-      agents: ["analyzer", "researcher", "documenter"],
-      focus: "Data analysis and insights generation",
+      name: 'Analysis',
+      agents: ['analyzer', 'researcher', 'documenter'],
+      focus: 'Data analysis and insights generation',
       parallel: false
     },
     testing: {
-      name: "Testing",
-      agents: ["tester", "developer", "reviewer"],
-      focus: "Comprehensive testing and quality assurance",
+      name: 'Testing',
+      agents: ['tester', 'developer', 'reviewer'],
+      focus: 'Comprehensive testing and quality assurance',
       parallel: true
     },
     optimization: {
-      name: "Optimization",
-      agents: ["analyzer", "developer", "monitor"],
-      focus: "Performance optimization and monitoring",
+      name: 'Optimization',
+      agents: ['analyzer', 'developer', 'monitor'],
+      focus: 'Performance optimization and monitoring',
       parallel: false
     },
     maintenance: {
-      name: "Maintenance",
-      agents: ["developer", "monitor", "tester"],
-      focus: "System maintenance and updates",
+      name: 'Maintenance',
+      agents: ['developer', 'monitor', 'tester'],
+      focus: 'System maintenance and updates',
       parallel: false
     }
   }

@@ -547,7 +547,7 @@ Advanced swarm coordination features:
   • 27+ neural models for cognitive approaches
   • Persistent memory across sessions
   • Automatic topology optimization
-  
+
 Commands:
   init        - Initialize swarm with specified topology
   status      - Get current swarm status and metrics
@@ -623,12 +623,12 @@ Advanced configuration management features:
   • Automatic synchronization between config systems
   • Import/export capabilities with validation
   • Real-time status monitoring and validation
-  
+
 Presets:
   development  - Hierarchical topology, specialized strategy, 8 agents
-  research     - Mesh topology, adaptive strategy, 12 agents  
+  research     - Mesh topology, adaptive strategy, 12 agents
   production   - Star topology, balanced strategy, 6 agents
-  
+
 Commands:
   setup        - Initialize ruv-swarm integration
   sync         - Synchronize configurations
@@ -646,7 +646,7 @@ export function registerCommand(name, command) {
   if (commandRegistry.has(name)) {
     console.warn(`Command '${name}' already exists and will be overwritten`);
   }
-  
+
   commandRegistry.set(name, {
     handler: command.handler,
     description: command.description || 'No description available',
@@ -686,7 +686,7 @@ export async function executeCommand(name, subArgs, flags) {
   if (!command) {
     throw new Error(`Unknown command: ${name}`);
   }
-  
+
   try {
     await command.handler(subArgs, flags);
   } catch (err) {
@@ -701,15 +701,15 @@ export function showCommandHelp(name) {
     console.log(`Unknown command: ${name}`);
     return;
   }
-  
+
   console.log(`Command: ${name}`);
   console.log(`Description: ${command.description}`);
   console.log(`Usage: claude-flow ${command.usage}`);
-  
+
   if (command.details) {
     console.log(command.details);
   }
-  
+
   if (command.examples.length > 0) {
     console.log('\nExamples:');
     for (const example of command.examples) {
@@ -725,14 +725,14 @@ export function showCommandHelp(name) {
 // Helper to show all commands
 export function showAllCommands() {
   const commands = listCommands();
-  
+
   console.log('Available commands:');
   console.log();
-  
+
   for (const command of commands) {
     console.log(`  ${command.name.padEnd(12)} ${command.description}`);
   }
-  
+
   console.log();
   console.log('Use "claude-flow help <command>" for detailed usage information');
 }

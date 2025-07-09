@@ -18,7 +18,7 @@ export class SparcMethodology {
       verbose: options.verbose || false,
       ...options
     };
-    
+
     this.phases = {
       specification: new SparcSpecification(this.taskDescription, this.options),
       pseudocode: new SparcPseudocode(this.taskDescription, this.options),
@@ -26,7 +26,7 @@ export class SparcMethodology {
       refinement: new SparcRefinement(this.taskDescription, this.options),
       completion: new SparcCompletion(this.taskDescription, this.options)
     };
-    
+
     this.coordinator = new SparcCoordinator(this.phases, this.options);
     this.currentPhase = 'specification';
     this.phaseOrder = ['specification', 'pseudocode', 'architecture', 'refinement', 'completion'];
@@ -52,26 +52,26 @@ export class SparcMethodology {
     // Execute each phase in order
     for (const phaseName of this.phaseOrder) {
       console.log(`\n📍 Phase: ${phaseName.toUpperCase()}`);
-      
+
       try {
         // Pre-phase coordination
         await this.coordinator.prePhase(phaseName);
-        
+
         // Execute phase
         const phase = this.phases[phaseName];
         const result = await phase.execute();
-        
+
         // Store artifacts
         this.artifacts[phaseName] = result;
-        
+
         // Quality gate validation
         const qualityGate = await this.validateQualityGate(phaseName, result);
         this.qualityGates[phaseName] = qualityGate;
-        
+
         if (!qualityGate.passed) {
           console.log(`❌ Quality Gate Failed for ${phaseName}`);
           console.log(`Reasons: ${qualityGate.reasons.join(', ')}`);
-          
+
           // Attempt auto-remediation
           if (this.options.autoRemediation) {
             await this.autoRemediate(phaseName, qualityGate);
@@ -79,27 +79,27 @@ export class SparcMethodology {
             throw new Error(`Quality gate failed for phase: ${phaseName}`);
           }
         }
-        
+
         // Post-phase coordination
         await this.coordinator.postPhase(phaseName, result);
-        
+
         console.log(`✅ ${phaseName} completed successfully`);
-        
+
       } catch (error) {
         console.error(`❌ Error in ${phaseName}: ${error.message}`);
-        
+
         // Neural learning from failures
         if (this.options.neuralLearning) {
           await this.learnFromFailure(phaseName, error);
         }
-        
+
         throw error;
       }
     }
 
     // Final coordination and cleanup
     await this.coordinator.finalize();
-    
+
     console.log('\n🎉 SPARC Methodology Execution Complete');
     return this.generateSummary();
   }
@@ -113,10 +113,10 @@ export class SparcMethodology {
     }
 
     console.log(`📍 Executing Phase: ${phaseName.toUpperCase()}`);
-    
+
     const phase = this.phases[phaseName];
     const result = await phase.execute();
-    
+
     this.artifacts[phaseName] = result;
     return result;
   }
@@ -131,60 +131,60 @@ export class SparcMethodology {
     };
 
     switch (phaseName) {
-      case 'specification':
-        if (!result.requirements || result.requirements.length === 0) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('No requirements defined');
-        }
-        if (!result.acceptanceCriteria || result.acceptanceCriteria.length === 0) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('No acceptance criteria defined');
-        }
-        break;
+    case 'specification':
+      if (!result.requirements || result.requirements.length === 0) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('No requirements defined');
+      }
+      if (!result.acceptanceCriteria || result.acceptanceCriteria.length === 0) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('No acceptance criteria defined');
+      }
+      break;
 
-      case 'pseudocode':
-        if (!result.flowDiagram) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('No flow diagram created');
-        }
-        if (!result.pseudocode || result.pseudocode.length < 10) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('Insufficient pseudocode detail');
-        }
-        break;
+    case 'pseudocode':
+      if (!result.flowDiagram) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('No flow diagram created');
+      }
+      if (!result.pseudocode || result.pseudocode.length < 10) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('Insufficient pseudocode detail');
+      }
+      break;
 
-      case 'architecture':
-        if (!result.components || result.components.length === 0) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('No components defined');
-        }
-        if (!result.designPatterns || result.designPatterns.length === 0) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('No design patterns specified');
-        }
-        break;
+    case 'architecture':
+      if (!result.components || result.components.length === 0) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('No components defined');
+      }
+      if (!result.designPatterns || result.designPatterns.length === 0) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('No design patterns specified');
+      }
+      break;
 
-      case 'refinement':
-        if (!result.testResults || result.testResults.passed === 0) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('No passing tests');
-        }
-        if (result.codeQuality && result.codeQuality.score < 0.8) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('Code quality below threshold');
-        }
-        break;
+    case 'refinement':
+      if (!result.testResults || result.testResults.passed === 0) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('No passing tests');
+      }
+      if (result.codeQuality && result.codeQuality.score < 0.8) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('Code quality below threshold');
+      }
+      break;
 
-      case 'completion':
-        if (!result.validated) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('Final validation failed');
-        }
-        if (!result.documented) {
-          qualityGate.passed = false;
-          qualityGate.reasons.push('Documentation incomplete');
-        }
-        break;
+    case 'completion':
+      if (!result.validated) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('Final validation failed');
+      }
+      if (!result.documented) {
+        qualityGate.passed = false;
+        qualityGate.reasons.push('Documentation incomplete');
+      }
+      break;
     }
 
     return qualityGate;
@@ -195,7 +195,7 @@ export class SparcMethodology {
    */
   async autoRemediate(phaseName, qualityGate) {
     console.log(`🔄 Attempting auto-remediation for ${phaseName}`);
-    
+
     // Neural learning can inform remediation strategies
     if (this.options.neuralLearning) {
       await this.learnFromFailure(phaseName, new Error(`Quality gate failed: ${qualityGate.reasons.join(', ')}`));
@@ -204,18 +204,18 @@ export class SparcMethodology {
     // Re-execute the phase with enhanced context
     const phase = this.phases[phaseName];
     phase.setRemediationContext(qualityGate);
-    
+
     const result = await phase.execute();
     this.artifacts[phaseName] = result;
-    
+
     // Re-validate
     const newQualityGate = await this.validateQualityGate(phaseName, result);
     this.qualityGates[phaseName] = newQualityGate;
-    
+
     if (!newQualityGate.passed) {
       throw new Error(`Auto-remediation failed for ${phaseName}: ${newQualityGate.reasons.join(', ')}`);
     }
-    
+
     console.log(`✅ Auto-remediation successful for ${phaseName}`);
   }
 
@@ -303,7 +303,7 @@ export class SparcMethodology {
   getProgress() {
     const completedPhases = Object.keys(this.artifacts).length;
     const totalPhases = this.phaseOrder.length;
-    
+
     return {
       completed: completedPhases,
       total: totalPhases,

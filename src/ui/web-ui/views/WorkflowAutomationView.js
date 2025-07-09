@@ -23,7 +23,7 @@ class WorkflowAutomationView {
    * Initialize the workflow & automation view
    */
   async initialize() {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {return;}
 
     // Get component library from event bus
     this.eventBus.emit('component-library:get', (library) => {
@@ -713,7 +713,7 @@ npm run lint</textarea>
     console.log('  🎯 sparc_mode       - SPARC development modes');
     console.log('  🎭 task_orchestrate - Task orchestration');
     console.log('═'.repeat(50));
-    
+
     if (params.tool) {
       console.log(`\n🔧 Executing: ${params.tool}`);
       this.quickAction(params.tool, params);
@@ -726,29 +726,29 @@ npm run lint</textarea>
   async quickAction(toolName, params = {}) {
     try {
       console.log(`🔧 Executing ${toolName}...`);
-      
+
       // Emit tool execution event
       this.eventBus.emit('tool:execute', {
         tool: toolName,
         params: params,
         source: 'workflow-view'
       });
-      
+
       // Handle specific tool actions
       switch (toolName) {
-        case 'workflow_create':
-          await this.handleWorkflowCreate(params);
-          break;
-        case 'automation_setup':
-          await this.handleAutomationSetup(params);
-          break;
-        case 'sparc_mode':
-          await this.handleSparcMode(params);
-          break;
-        default:
-          console.log(`Tool ${toolName} executed`);
+      case 'workflow_create':
+        await this.handleWorkflowCreate(params);
+        break;
+      case 'automation_setup':
+        await this.handleAutomationSetup(params);
+        break;
+      case 'sparc_mode':
+        await this.handleSparcMode(params);
+        break;
+      default:
+        console.log(`Tool ${toolName} executed`);
       }
-      
+
     } catch (error) {
       console.error(`❌ Error executing ${toolName}:`, error);
     }
@@ -763,9 +763,9 @@ npm run lint</textarea>
       steps: params.steps || [],
       triggers: params.triggers || []
     };
-    
+
     console.log('🔄 Creating workflow with parameters:', workflowParams);
-    
+
     // Update UI if in browser mode
     if (this.container) {
       const listEl = document.getElementById('workflows-list');
@@ -783,9 +783,9 @@ npm run lint</textarea>
     const automationParams = {
       rules: params.rules || []
     };
-    
+
     console.log('⚡ Setting up automation with parameters:', automationParams);
-    
+
     // Update UI if in browser mode
     if (this.container) {
       const listEl = document.getElementById('automation-rules-list');
@@ -805,9 +805,9 @@ npm run lint</textarea>
       task_description: params.task_description || 'Build feature',
       options: params.options || {}
     };
-    
+
     console.log('🎯 Executing SPARC mode with parameters:', sparcParams);
-    
+
     // Update UI if in browser mode
     if (this.container) {
       const historyEl = document.getElementById('sparc-history-list');
@@ -881,7 +881,7 @@ npm run lint</textarea>
    * Initialize drag and drop for workflow builder
    */
   initializeDragDrop() {
-    if (!this.container) return;
+    if (!this.container) {return;}
 
     // Setup draggable components
     const draggables = this.container.querySelectorAll('.draggable-component');
@@ -938,12 +938,12 @@ npm run lint</textarea>
    */
   addWorkflowComponent(type, event) {
     const canvas = document.getElementById('workflow-canvas');
-    if (!canvas) return;
+    if (!canvas) {return;}
 
     const component = document.createElement('div');
     component.className = 'workflow-component';
     component.dataset.type = type;
-    
+
     const icons = {
       trigger: '🎯',
       action: '⚡',
@@ -952,7 +952,7 @@ npm run lint</textarea>
       parallel: '🔀',
       sparc: '🎯'
     };
-    
+
     component.innerHTML = `
       <div class="component-header">
         <span class="component-icon">${icons[type]}</span>
@@ -966,7 +966,7 @@ npm run lint</textarea>
         <div class="connector output"></div>
       </div>
     `;
-    
+
     canvas.appendChild(component);
   }
 
@@ -976,9 +976,9 @@ npm run lint</textarea>
   updateSparcDescription() {
     const modeSelect = document.getElementById('sparc-mode');
     const descriptionEl = document.getElementById('sparc-description');
-    
-    if (!modeSelect || !descriptionEl) return;
-    
+
+    if (!modeSelect || !descriptionEl) {return;}
+
     const descriptions = {
       architect: '🏗️ Design system architecture and create technical specifications',
       code: '💻 Implement features with clean, maintainable code',
@@ -996,7 +996,7 @@ npm run lint</textarea>
       tutorial: '🎓 Create step-by-step tutorials',
       generic: '🔨 Handle any development task'
     };
-    
+
     const selectedMode = modeSelect.value;
     descriptionEl.innerHTML = `<p>${descriptions[selectedMode] || 'Select a SPARC mode to see its description.'}</p>`;
   }
@@ -1011,17 +1011,17 @@ npm run lint</textarea>
         this.handleToolResult(data);
       }
     });
-    
+
     // Listen for real-time updates
     this.eventBus.on('ui:real-time:update', () => {
       this.updateStats();
     });
-    
+
     // Listen for theme changes
     this.eventBus.on('ui:theme:changed', (theme) => {
       this.updateTheme(theme);
     });
-    
+
     // Initialize drag and drop when view is rendered
     this.eventBus.on('view:rendered', () => {
       this.initializeDragDrop();
@@ -1033,7 +1033,7 @@ npm run lint</textarea>
    */
   handleToolResult(data) {
     console.log(`✅ Tool ${data.tool} completed:`, data.result);
-    
+
     // Update UI based on result
     if (this.container) {
       this.updateUIWithResult(data.tool, data.result);
@@ -1065,28 +1065,28 @@ npm run lint</textarea>
     const workflowsStatEl = document.getElementById('workflows-stat');
     if (workflowsStatEl) {
       const valueEl = workflowsStatEl.querySelector('.stat-value');
-      if (valueEl) valueEl.textContent = this.workflows.size;
+      if (valueEl) {valueEl.textContent = this.workflows.size;}
     }
-    
+
     // Update pipeline count
     const pipelinesStatEl = document.getElementById('pipelines-stat');
     if (pipelinesStatEl) {
       const valueEl = pipelinesStatEl.querySelector('.stat-value');
-      if (valueEl) valueEl.textContent = this.pipelines.size;
+      if (valueEl) {valueEl.textContent = this.pipelines.size;}
     }
-    
+
     // Update automation rules count
     const rulesStatEl = document.getElementById('rules-stat');
     if (rulesStatEl) {
       const valueEl = rulesStatEl.querySelector('.stat-value');
-      if (valueEl) valueEl.textContent = this.automationRules.size;
+      if (valueEl) {valueEl.textContent = this.automationRules.size;}
     }
-    
+
     // Update scheduled tasks count
     const scheduledStatEl = document.getElementById('scheduled-stat');
     if (scheduledStatEl) {
       const valueEl = scheduledStatEl.querySelector('.stat-value');
-      if (valueEl) valueEl.textContent = this.scheduledTasks.size;
+      if (valueEl) {valueEl.textContent = this.scheduledTasks.size;}
     }
   }
 

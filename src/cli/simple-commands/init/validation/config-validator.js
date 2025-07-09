@@ -29,7 +29,7 @@ export class ConfigValidator {
 
       // Read and parse JSON
       const content = await Deno.readTextFile(roomodesPath);
-      
+
       try {
         const config = JSON.parse(content);
         result.config = config;
@@ -131,7 +131,7 @@ export class ConfigValidator {
 
     try {
       const content = await Deno.readTextFile(memoryDataPath);
-      
+
       try {
         const data = JSON.parse(content);
         result.data = data;
@@ -214,7 +214,7 @@ export class ConfigValidator {
 
     try {
       const stat = await Deno.stat(executablePath);
-      
+
       if (!stat.isFile) {
         result.success = false;
         result.errors.push('claude-flow executable is not a file');
@@ -231,7 +231,7 @@ export class ConfigValidator {
 
       // Read and validate content
       const content = await Deno.readTextFile(executablePath);
-      
+
       // Check for required elements
       if (content.includes('#!/usr/bin/env')) {
         // Script file

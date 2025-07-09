@@ -28,10 +28,10 @@ export class PostInitValidator {
 
     for (const file of expectedFiles) {
       const filePath = `${this.workingDir}/${file.path}`;
-      
+
       try {
         const stat = await Deno.stat(filePath);
-        
+
         // Check if it exists and is a file
         if (!stat.isFile) {
           result.success = false;
@@ -114,7 +114,7 @@ export class PostInitValidator {
     // Check required directories
     for (const dir of requiredDirs) {
       const dirPath = `${this.workingDir}/${dir}`;
-      
+
       try {
         const stat = await Deno.stat(dirPath);
         if (!stat.isDirectory) {
@@ -132,7 +132,7 @@ export class PostInitValidator {
     // Check optional directories (SPARC-related)
     for (const dir of optionalDirs) {
       const dirPath = `${this.workingDir}/${dir}`;
-      
+
       try {
         await Deno.stat(dirPath);
       } catch {
@@ -225,12 +225,12 @@ export class PostInitValidator {
 
     for (const item of itemsToCheck) {
       const itemPath = `${this.workingDir}/${item.path}`;
-      
+
       try {
         const stat = await Deno.stat(itemPath);
         const actualMode = stat.mode & 0o777;
         const expectedMode = item.requiredMode;
-        
+
         result.permissions[item.path] = {
           actual: actualMode.toString(8),
           expected: expectedMode.toString(8),
@@ -369,7 +369,7 @@ export class PostInitValidator {
     try {
       const stat = await Deno.stat(`${this.workingDir}/.roo`);
       structure.hasRooDir = stat.isDirectory;
-      
+
       if (structure.hasRooDir) {
         const expectedDirs = ['templates', 'workflows', 'modes', 'configs'];
         for (const dir of expectedDirs) {

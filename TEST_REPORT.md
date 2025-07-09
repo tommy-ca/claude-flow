@@ -1,6 +1,6 @@
 # Claude Flow Test Report
 
-**Generated:** 2025-07-09T20:32:13.651Z
+**Generated:** 2025-07-09T20:58:40.749Z
 **Platform:** linux (x64)
 **Node.js:** v22.17.0
 **CI Environment:** No
@@ -13,14 +13,14 @@
 | Passed | 5 |
 | Failed | 0 |
 | Pass Rate | 100.0% |
-| Duration | 6.96s |
+| Duration | 6.90s |
 
 ## Test Suites
 
 ### ✅ System Information
 
 - **Status:** passed
-- **Duration:** 240ms
+- **Duration:** 231ms
 
 ### ✅ Dependency Check
 
@@ -30,15 +30,15 @@
 ### ✅ Performance Tests
 
 - **Status:** passed
-- **Duration:** 332ms
+- **Duration:** 306ms
 
 ### ✅ Load Tests
 
 - **Status:** passed
-- **Duration:** 2642ms
+- **Duration:** 2651ms
 
 ### ✅ CI Compatibility
 
 - **Status:** passed
-- **Duration:** 3735ms
+- **Duration:** 3704ms
 

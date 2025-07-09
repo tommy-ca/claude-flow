@@ -80,7 +80,7 @@ export class HealthChecker {
 
       for (const dir of templateDirs) {
         const dirPath = `${this.workingDir}/${dir}`;
-        
+
         try {
           const stat = await Deno.stat(dirPath);
           if (stat.isDirectory) {
@@ -103,7 +103,7 @@ export class HealthChecker {
 
       for (const template of coreTemplates) {
         const templatePath = `${this.workingDir}/${template}`;
-        
+
         try {
           const content = await Deno.readTextFile(templatePath);
           if (content.length < 50) {
@@ -280,7 +280,7 @@ export class HealthChecker {
       const roomodesPath = `${this.workingDir}/.roomodes`;
       const content = await Deno.readTextFile(roomodesPath);
       const config = JSON.parse(content);
-      
+
       return !!(config.modes && config.modes[mode]);
     } catch {
       return false;
@@ -298,7 +298,7 @@ export class HealthChecker {
       for await (const entry of Deno.readDir(dirPath)) {
         if (entry.isFile) {
           const filePath = `${dirPath}/${entry.name}`;
-          
+
           try {
             const stat = await Deno.stat(filePath);
             if (stat.size === 0) {
@@ -332,7 +332,7 @@ export class HealthChecker {
 
       if (config.modes) {
         const commandsDir = `${this.workingDir}/.claude/commands`;
-        
+
         try {
           const commandFiles = [];
           for await (const entry of Deno.readDir(commandsDir)) {
@@ -453,11 +453,11 @@ export class HealthChecker {
       });
 
       const { stdout, success } = await command.output();
-      
+
       if (success) {
         const output = new TextDecoder().decode(stdout);
         const lines = output.trim().split('\n');
-        
+
         if (lines.length >= 2) {
           const parts = lines[1].split(/\s+/);
           if (parts.length >= 4) {
@@ -490,11 +490,11 @@ export class HealthChecker {
       });
 
       const { stdout, success } = await command.output();
-      
+
       if (success) {
         const output = new TextDecoder().decode(stdout);
         const lines = output.trim().split('\n');
-        
+
         for (const line of lines) {
           if (line.startsWith('Mem:')) {
             const parts = line.split(/\s+/);
@@ -530,7 +530,7 @@ export class HealthChecker {
       });
 
       const { stdout, success } = await command.output();
-      
+
       if (success) {
         const count = parseInt(new TextDecoder().decode(stdout).trim());
         result.open = count;
@@ -557,7 +557,7 @@ export class HealthChecker {
       });
 
       const { stdout, success } = await command.output();
-      
+
       if (success) {
         const output = new TextDecoder().decode(stdout);
         // Parse ulimit output for important limits

@@ -12,7 +12,7 @@ export async function createSparcStructureManually() {
   try {
     // Ensure we're in the working directory
     const workingDir = process.env.PWD || cwd();
-    
+
     // Create .roo directory structure in working directory (legacy support)
     const rooDirectories = [
       `${workingDir}/.roo`,
@@ -21,7 +21,7 @@ export async function createSparcStructureManually() {
       `${workingDir}/.roo/modes`,
       `${workingDir}/.roo/configs`
     ];
-    
+
     for (const dir of rooDirectories) {
       try {
         await Deno.mkdir(dir, { recursive: true });
@@ -32,7 +32,7 @@ export async function createSparcStructureManually() {
         }
       }
     }
-    
+
     // Create .roomodes file (copy from existing if available, or create basic version)
     let roomodesContent;
     try {
@@ -45,22 +45,22 @@ export async function createSparcStructureManually() {
       await Deno.writeTextFile(`${workingDir}/.roomodes`, roomodesContent);
       console.log('  ✓ Created .roomodes configuration');
     }
-    
+
     // Create basic workflow templates
     const basicWorkflow = createBasicSparcWorkflow();
     await Deno.writeTextFile(`${workingDir}/.roo/workflows/basic-tdd.json`, basicWorkflow);
     console.log('  ✓ Created .roo/workflows/basic-tdd.json');
-    
+
     // Create README for .roo directory
     const rooReadme = createRooReadme();
     await Deno.writeTextFile(`${workingDir}/.roo/README.md`, rooReadme);
     console.log('  ✓ Created .roo/README.md');
-    
+
     // Create Claude Code slash commands for SPARC modes
     await createClaudeSlashCommands(workingDir);
-    
+
     console.log('  ✅ Basic SPARC structure created successfully');
-    
+
   } catch (err) {
     console.log(`  ❌ Failed to create SPARC structure: ${err.message}`);
   }

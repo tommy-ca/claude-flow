@@ -22,24 +22,24 @@ describe('Swarm Command', () => {
   beforeEach(() => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+
     mockSpinner = {
       start: jest.fn().mockReturnThis(),
       succeed: jest.fn().mockReturnThis(),
       fail: jest.fn().mockReturnThis(),
       info: jest.fn().mockReturnThis(),
       warn: jest.fn().mockReturnThis(),
-      text: '',
+      text: ''
     };
     ora.mockReturnValue(mockSpinner);
-    
+
     mockSpawnProcess = {
       stdout: { on: jest.fn() },
       stderr: { on: jest.fn() },
-      on: jest.fn(),
+      on: jest.fn()
     };
     spawn.mockReturnValue(mockSpawnProcess);
-    
+
     jest.clearAllMocks();
   });
 
@@ -53,7 +53,7 @@ describe('Swarm Command', () => {
       const swarmDir = path.join(process.cwd(), '.claude', 'swarm');
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-      
+
       // Mock spawn process events
       mockSpawnProcess.on.mockImplementation((event, callback) => {
         if (event === 'close') {
@@ -62,10 +62,10 @@ describe('Swarm Command', () => {
       });
 
       await swarmCommand(['Build a REST API'], {});
-      
+
       expect(mockSpinner.start).toHaveBeenCalledWith('Initializing swarm...');
       expect(fs.ensureDir).toHaveBeenCalledWith(swarmDir);
-      
+
       const writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[0]).toBe(path.join(swarmDir, 'swarm.json'));
       expect(writeJsonCall[1]).toMatchObject({
@@ -79,13 +79,13 @@ describe('Swarm Command', () => {
     test('should handle custom strategy', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-      
+
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') callback(0);
+        if (event === 'close') {callback(0);}
       });
 
       await swarmCommand(['Research task'], { strategy: 'research' });
-      
+
       const writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].strategy).toBe('research');
     });
@@ -93,13 +93,13 @@ describe('Swarm Command', () => {
     test('should handle custom topology mode', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-      
+
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') callback(0);
+        if (event === 'close') {callback(0);}
       });
 
       await swarmCommand(['Task'], { mode: 'mesh' });
-      
+
       const writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].topology).toBe('mesh');
     });
@@ -107,13 +107,13 @@ describe('Swarm Command', () => {
     test('should set max agents', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-      
+
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') callback(0);
+        if (event === 'close') {callback(0);}
       });
 
       await swarmCommand(['Task'], { 'max-agents': '10' });
-      
+
       const writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].maxAgents).toBe(10);
     });
@@ -121,13 +121,13 @@ describe('Swarm Command', () => {
     test('should enable parallel execution', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-      
+
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') callback(0);
+        if (event === 'close') {callback(0);}
       });
 
       await swarmCommand(['Task'], { parallel: true });
-      
+
       const writeJsonCall = fs.writeJson.mock.calls[0];
       expect(writeJsonCall[1].parallel).toBe(true);
     });
@@ -135,13 +135,13 @@ describe('Swarm Command', () => {
     test('should enable monitoring', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-      
+
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'close') callback(0);
+        if (event === 'close') {callback(0);}
       });
 
       await swarmCommand(['Task'], { monitor: true });
-      
+
       expect(spawn).toHaveBeenCalledWith(
         'npx',
         expect.arrayContaining(['--monitor']),
@@ -173,7 +173,7 @@ describe('Swarm Command', () => {
       fs.readJson.mockResolvedValue(mockSwarmData);
 
       await swarmCommand(['status'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Swarm Status');
       expect(output).toContain('Build API');
@@ -187,7 +187,7 @@ describe('Swarm Command', () => {
       fs.pathExists.mockResolvedValue(false);
 
       await swarmCommand(['status'], {});
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('No active swarm found')
       );
@@ -208,7 +208,7 @@ describe('Swarm Command', () => {
       fs.remove.mockResolvedValue(undefined);
 
       await swarmCommand(['stop'], {});
-      
+
       expect(mockSpinner.succeed).toHaveBeenCalledWith('Swarm stopped successfully');
       expect(fs.remove).toHaveBeenCalledWith(
         path.join(process.cwd(), '.claude', 'swarm', 'swarm.json')
@@ -220,7 +220,7 @@ describe('Swarm Command', () => {
       fs.remove.mockResolvedValue(undefined);
 
       await swarmCommand(['stop'], { force: true });
-      
+
       expect(fs.remove).toHaveBeenCalled();
       expect(mockSpinner.warn).toHaveBeenCalledWith('Swarm forcefully terminated');
     });
@@ -238,7 +238,7 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await swarmCommand(['pause'], {});
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].status).toBe('paused');
       expect(mockSpinner.succeed).toHaveBeenCalledWith('Swarm paused');
@@ -255,7 +255,7 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await swarmCommand(['resume'], {});
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].status).toBe('active');
       expect(mockSpinner.succeed).toHaveBeenCalledWith('Swarm resumed');
@@ -274,7 +274,7 @@ describe('Swarm Command', () => {
       fs.readJson.mockResolvedValue({ logs: mockLogs });
 
       await swarmCommand(['logs'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Swarm Logs');
       expect(output).toContain('Swarm initialized');
@@ -293,7 +293,7 @@ describe('Swarm Command', () => {
       fs.readJson.mockResolvedValue({ logs: mockLogs });
 
       await swarmCommand(['logs'], { level: 'error' });
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Error message');
       expect(output).not.toContain('Info message');
@@ -311,7 +311,7 @@ describe('Swarm Command', () => {
       fs.readJson.mockResolvedValue({ logs: mockLogs });
 
       await swarmCommand(['logs'], { tail: '10' });
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Log entry 50');
       expect(output).toContain('Log entry 41');
@@ -322,7 +322,7 @@ describe('Swarm Command', () => {
   describe('error handling', () => {
     test('should handle missing objective', async () => {
       await swarmCommand([], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('objective is required')
       );
@@ -333,7 +333,7 @@ describe('Swarm Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await swarmCommand(['Task'], { strategy: 'invalid-strategy' });
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid strategy')
       );
@@ -342,13 +342,13 @@ describe('Swarm Command', () => {
     test('should handle spawn process errors', async () => {
       fs.ensureDir.mockResolvedValue(undefined);
       fs.writeJson.mockResolvedValue(undefined);
-      
+
       mockSpawnProcess.on.mockImplementation((event, callback) => {
-        if (event === 'error') callback(new Error('Spawn failed'));
+        if (event === 'error') {callback(new Error('Spawn failed'));}
       });
 
       await swarmCommand(['Task'], {});
-      
+
       expect(mockSpinner.fail).toHaveBeenCalledWith(
         expect.stringContaining('Failed to initialize swarm')
       );
@@ -358,7 +358,7 @@ describe('Swarm Command', () => {
       fs.ensureDir.mockRejectedValue(new Error('Permission denied'));
 
       await swarmCommand(['Task'], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error:')
       );
@@ -368,7 +368,7 @@ describe('Swarm Command', () => {
   describe('help', () => {
     test('should show help for invalid subcommand', async () => {
       await swarmCommand(['invalid'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Swarm Orchestration');
       expect(output).toContain('USAGE:');

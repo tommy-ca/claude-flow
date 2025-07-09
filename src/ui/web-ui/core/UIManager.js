@@ -71,13 +71,13 @@ export class UIManager {
     this.viewManager = new ViewManager(this.eventBus);
     this.stateManager = new StateManager(this.eventBus);
     this.componentLibrary = new ComponentLibrary();
-    
+
     this.currentView = VIEW_CATEGORIES.OVERVIEW;
     this.viewHistory = [];
     this.shortcuts = new Map();
     this.theme = 'dark';
     this.isResponsive = true;
-    
+
     this.initializeEventHandlers();
     this.setupKeyboardShortcuts();
   }
@@ -91,22 +91,22 @@ export class UIManager {
       await this.stateManager.initialize();
       await this.mcpIntegration.initialize();
       await this.viewManager.initialize();
-      
+
       // Load user preferences
       await this.loadUserPreferences();
-      
+
       // Register all views
       await this.registerAllViews();
-      
+
       // Set up real-time updates
       this.setupRealTimeUpdates();
-      
+
       // Initialize component library
       this.componentLibrary.initialize();
-      
+
       this.eventBus.emit('ui:initialized');
       console.log('🎨 UI Manager initialized successfully');
-      
+
     } catch (error) {
       console.error('❌ Failed to initialize UI Manager:', error);
       throw error;
@@ -239,18 +239,18 @@ export class UIManager {
 
     // Update current view
     this.currentView = viewId;
-    
+
     // Load view with parameters
     await this.viewManager.loadView(viewId, params);
-    
+
     // Update browser history if available
     if (typeof window !== 'undefined' && window.history) {
       window.history.pushState({ viewId, params }, '', `#${viewId}`);
     }
-    
+
     // Update state
     await this.stateManager.setViewState(viewId, params);
-    
+
     // Emit navigation event
     this.eventBus.emit('ui:navigation', { viewId, params });
   }
@@ -259,8 +259,8 @@ export class UIManager {
    * Go back to previous view
    */
   async goBack() {
-    if (this.viewHistory.length === 0) return;
-    
+    if (this.viewHistory.length === 0) {return;}
+
     const previousView = this.viewHistory.pop();
     await this.navigateToView(previousView.viewId, previousView.params);
   }
@@ -272,18 +272,18 @@ export class UIManager {
     try {
       // Show loading indicator
       this.eventBus.emit('ui:loading', { tool: toolName, params });
-      
+
       // Execute tool through MCP integration layer
       const result = await this.mcpIntegration.executeTool(toolName, params);
-      
+
       // Handle result based on tool type
       await this.handleToolResult(toolName, result, params);
-      
+
       // Hide loading indicator
       this.eventBus.emit('ui:loading:complete', { tool: toolName, result });
-      
+
       return result;
-      
+
     } catch (error) {
       this.eventBus.emit('ui:error', { tool: toolName, error, params });
       throw error;
@@ -296,7 +296,7 @@ export class UIManager {
   async handleToolResult(toolName, result, originalParams) {
     // Update relevant views with new data
     const category = this.getToolCategory(toolName);
-    
+
     if (category) {
       this.eventBus.emit(`view:${category}:update`, {
         tool: toolName,
@@ -304,10 +304,10 @@ export class UIManager {
         params: originalParams
       });
     }
-    
+
     // Store result in state for persistence
     await this.stateManager.setToolResult(toolName, result);
-    
+
     // Log execution
     this.eventBus.emit('ui:log', {
       level: 'info',
@@ -347,7 +347,7 @@ export class UIManager {
     this.shortcuts.set('ctrl+b', () => this.goBack());
     this.shortcuts.set('ctrl+r', () => this.refreshCurrentView());
     this.shortcuts.set('ctrl+t', () => this.toggleTheme());
-    
+
     // Setup event listener for keyboard events
     if (typeof window !== 'undefined') {
       window.addEventListener('keydown', (event) => {
@@ -366,17 +366,17 @@ export class UIManager {
    */
   getKeyString(event) {
     const parts = [];
-    if (event.ctrlKey) parts.push('ctrl');
-    if (event.shiftKey) parts.push('shift');
-    if (event.altKey) parts.push('alt');
-    if (event.metaKey) parts.push('meta');
-    
+    if (event.ctrlKey) {parts.push('ctrl');}
+    if (event.shiftKey) {parts.push('shift');}
+    if (event.altKey) {parts.push('alt');}
+    if (event.metaKey) {parts.push('meta');}
+
     if (event.key.length === 1) {
       parts.push(event.key.toLowerCase());
     } else {
       parts.push(event.key.toLowerCase());
     }
-    
+
     return parts.join('+');
   }
 
@@ -417,7 +417,7 @@ export class UIManager {
     setInterval(() => {
       this.eventBus.emit('ui:real-time:update');
     }, 5000);
-    
+
     // Setup MCP tool result streaming
     this.mcpIntegration.on('tool:result', (result) => {
       this.eventBus.emit('ui:real-time:tool-result', result);
@@ -432,17 +432,17 @@ export class UIManager {
     this.eventBus.on('tool:execute', async (data) => {
       await this.executeMCPTool(data.tool, data.params);
     });
-    
+
     // Handle view navigation requests
     this.eventBus.on('view:navigate', async (data) => {
       await this.navigateToView(data.viewId, data.params);
     });
-    
+
     // Handle state persistence
     this.eventBus.on('state:persist', async (data) => {
       await this.stateManager.persistState(data);
     });
-    
+
     // Handle errors
     this.eventBus.on('ui:error', (error) => {
       console.error('UI Error:', error);
@@ -473,7 +473,7 @@ export class UIManager {
       toolsAvailable: Object.values(MCP_TOOL_CATEGORIES).flat().length,
       viewsRegistered: this.viewManager.getViewCount()
     };
-    
+
     return status;
   }
 

@@ -32,21 +32,21 @@ export class MCPIntegrationLayer {
     try {
       // Check if MCP server is available
       this.mcpServerStatus = await this.checkMCPServerStatus();
-      
+
       // Discover available tools
       await this.discoverTools();
-      
+
       // Setup tool execution handlers
       this.setupToolHandlers();
-      
+
       // Initialize caching system
       this.initializeCache();
-      
+
       this.isInitialized = true;
       this.eventBus.emit('mcp:initialized', { status: this.mcpServerStatus });
-      
+
       console.log('🔌 MCP Integration Layer initialized');
-      
+
     } catch (error) {
       console.error('❌ Failed to initialize MCP Integration Layer:', error);
       this.mcpServerStatus = 'error';
@@ -64,14 +64,14 @@ export class MCPIntegrationLayer {
       if (typeof window !== 'undefined' && window.claudeFlowMCP) {
         return 'connected';
       }
-      
+
       // Check for Node.js environment with MCP tools
       if (typeof process !== 'undefined' && process.env.CLAUDE_FLOW_MCP_ENABLED === 'true') {
         return 'connected';
       }
-      
+
       return 'mock'; // Use mock mode for development
-      
+
     } catch (error) {
       console.warn('MCP Server connection check failed:', error);
       return 'offline';
@@ -101,7 +101,7 @@ export class MCPIntegrationLayer {
         { name: 'wasm_optimize', description: 'WASM SIMD optimization', params: ['operation'] },
         { name: 'inference_run', description: 'Run neural inference', params: ['modelId', 'data'] }
       ],
-      
+
       // Memory & Persistence Tools
       memory: [
         { name: 'memory_usage', description: 'Store/retrieve persistent memory', params: ['action', 'key', 'value', 'namespace', 'ttl'] },
@@ -116,7 +116,7 @@ export class MCPIntegrationLayer {
         { name: 'memory_persist', description: 'Cross-session persistence', params: ['sessionId'] },
         { name: 'memory_namespace', description: 'Namespace management', params: ['namespace', 'action'] }
       ],
-      
+
       // Monitoring & Analysis Tools
       monitoring: [
         { name: 'performance_report', description: 'Generate performance reports', params: ['format', 'timeframe'] },
@@ -133,7 +133,7 @@ export class MCPIntegrationLayer {
         { name: 'swarm_monitor', description: 'Real-time swarm monitoring', params: ['swarmId', 'interval'] },
         { name: 'agent_metrics', description: 'Agent performance metrics', params: ['agentId'] }
       ],
-      
+
       // Workflow & Automation Tools
       workflow: [
         { name: 'workflow_create', description: 'Create custom workflows', params: ['name', 'steps', 'triggers'] },
@@ -148,7 +148,7 @@ export class MCPIntegrationLayer {
         { name: 'sparc_mode', description: 'Run SPARC development modes', params: ['mode', 'task_description', 'options'] },
         { name: 'task_orchestrate', description: 'Orchestrate complex task workflows', params: ['task', 'strategy', 'priority', 'dependencies'] }
       ],
-      
+
       // GitHub Integration Tools
       github: [
         { name: 'github_repo_analyze', description: 'Repository analysis', params: ['repo', 'analysis_type'] },
@@ -160,7 +160,7 @@ export class MCPIntegrationLayer {
         { name: 'github_sync_coord', description: 'Multi-repo sync coordination', params: ['repos'] },
         { name: 'github_metrics', description: 'Repository metrics', params: ['repo'] }
       ],
-      
+
       // DAA Tools
       daa: [
         { name: 'daa_agent_create', description: 'Create dynamic agents', params: ['agent_type', 'capabilities', 'resources'] },
@@ -172,7 +172,7 @@ export class MCPIntegrationLayer {
         { name: 'daa_fault_tolerance', description: 'Fault tolerance & recovery', params: ['agentId', 'strategy'] },
         { name: 'daa_optimization', description: 'Performance optimization', params: ['target', 'metrics'] }
       ],
-      
+
       // System & Utilities
       system: [
         { name: 'security_scan', description: 'Security scanning', params: ['target', 'depth'] },
@@ -286,18 +286,18 @@ export class MCPIntegrationLayer {
     // This would call the actual MCP tool
     // For now, we'll simulate the call
     const mcpToolName = `mcp__claude-flow__${toolName}`;
-    
+
     if (typeof window !== 'undefined' && window.claudeFlowMCP) {
       return await window.claudeFlowMCP.execute(mcpToolName, params);
     }
-    
+
     // Node.js environment
     if (typeof process !== 'undefined') {
       // This would import and execute the actual MCP tool
       // For now, return mock data
       return this.executeMockTool(toolName, params);
     }
-    
+
     throw new Error('MCP server not available');
   }
 
@@ -314,9 +314,9 @@ export class MCPIntegrationLayer {
       neural_predict: { prediction: 'sample_prediction', confidence: 0.87 },
       neural_status: { modelId: params.modelId, status: 'ready', accuracy: 0.92 },
       neural_patterns: { patterns: ['pattern1', 'pattern2'], insights: 'analysis complete' },
-      
+
       // Memory tools
-      memory_usage: { 
+      memory_usage: {
         action: params.action,
         key: params.key,
         success: true,
@@ -324,7 +324,7 @@ export class MCPIntegrationLayer {
       },
       memory_backup: { backupId: 'backup_' + Date.now(), size: '1.2MB', success: true },
       memory_analytics: { entries: 42, size: '156KB', namespaces: 4 },
-      
+
       // Monitoring tools
       performance_report: {
         cpu: 45,
@@ -333,32 +333,32 @@ export class MCPIntegrationLayer {
         efficiency: 92,
         bottlenecks: ['network_io', 'memory_allocation']
       },
-      bottleneck_analyze: { 
+      bottleneck_analyze: {
         component: params.component,
         issues: ['high_cpu_usage', 'memory_leaks'],
         recommendations: ['optimize_queries', 'increase_cache']
       },
-      
+
       // Workflow tools
       workflow_create: { workflowId: 'wf_' + Date.now(), status: 'created' },
       workflow_execute: { workflowId: params.workflowId, status: 'completed', duration: 1500 },
       task_orchestrate: { taskId: 'task_' + Date.now(), status: 'orchestrated', agents: 3 },
-      
+
       // GitHub tools
-      github_repo_analyze: { 
+      github_repo_analyze: {
         repo: params.repo,
         score: 85,
         issues: 12,
         complexity: 'medium',
         recommendations: ['add_tests', 'update_dependencies']
       },
-      
+
       // DAA tools
       daa_agent_create: { agentId: 'agent_' + Date.now(), type: params.agent_type, status: 'created' },
       daa_capability_match: { matches: ['agent1', 'agent2'], confidence: 0.89 },
-      
+
       // System tools
-      security_scan: { 
+      security_scan: {
         target: params.target,
         vulnerabilities: 2,
         score: 'A-',
@@ -515,13 +515,13 @@ export class MCPIntegrationLayer {
   async shutdown() {
     // Cancel all active executions
     this.activeExecutions.clear();
-    
+
     // Clear cache
     this.cache.clear();
-    
+
     // Clear tool results
     this.toolResults.clear();
-    
+
     this.eventBus.emit('mcp:shutdown');
   }
 }

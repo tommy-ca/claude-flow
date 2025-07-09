@@ -60,7 +60,7 @@ for (const [dirName, dirInfo] of Object.entries(manifest.directories)) {
     fs.mkdirSync(targetPath, { recursive: true });
     console.log(`  ✓ ${dirInfo.path}`);
   }
-  
+
   // Create README for empty directories
   if (dirInfo.createEmpty) {
     const readmePath = path.join(targetPath, 'README.md');
@@ -78,7 +78,7 @@ let errorCount = 0;
 for (const file of manifest.files) {
   const sourcePath = path.join(SOURCE_DIR, file.destination);
   const targetPath = path.join(TARGET_DIR, file.destination);
-  
+
   try {
     if (fs.existsSync(sourcePath)) {
       // Ensure target directory exists
@@ -86,7 +86,7 @@ for (const file of manifest.files) {
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
-      
+
       // Copy file
       fs.copyFileSync(sourcePath, targetPath);
       console.log(`  ✓ ${file.destination}`);

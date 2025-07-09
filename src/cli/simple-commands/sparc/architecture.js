@@ -18,9 +18,9 @@ export class SparcArchitecture extends SparcPhase {
    */
   async execute() {
     console.log('🏗️ Starting Architecture Phase');
-    
+
     await this.initializePhase();
-    
+
     const result = {
       systemDesign: null,
       components: [],
@@ -40,44 +40,44 @@ export class SparcArchitecture extends SparcPhase {
       // Load previous phases
       const specification = await this.retrieveFromMemory('specification_complete');
       const pseudocode = await this.retrieveFromMemory('pseudocode_complete');
-      
+
       if (!specification || !pseudocode) {
         throw new Error('Specification and Pseudocode phases must be completed first');
       }
 
       // Design system architecture
       result.systemDesign = await this.designSystemArchitecture(specification, pseudocode);
-      
+
       // Define components
       result.components = await this.defineComponents(specification, pseudocode);
-      
+
       // Select design patterns
       result.designPatterns = await this.selectDesignPatterns(specification, pseudocode);
-      
+
       // Design data model
       result.dataModel = await this.designDataModel(specification);
-      
+
       // Design API structure
       result.apiDesign = await this.designApiStructure(specification);
-      
+
       // Plan deployment architecture
       result.deploymentArchitecture = await this.planDeploymentArchitecture(specification);
-      
+
       // Design security architecture
       result.securityArchitecture = await this.designSecurityArchitecture(specification);
-      
+
       // Plan scalability
       result.scalabilityPlan = await this.planScalability(specification);
-      
+
       // Identify integration points
       result.integrationPoints = await this.identifyIntegrationPoints(specification);
-      
+
       // Define quality attributes
       result.qualityAttributes = await this.defineQualityAttributes(specification);
-      
+
       // Document architectural decisions
       result.architecturalDecisions = await this.documentArchitecturalDecisions(result);
-      
+
       // Assess risks
       result.riskAssessment = await this.assessArchitecturalRisks(result);
 
@@ -114,7 +114,7 @@ export class SparcArchitecture extends SparcPhase {
     const hasApiRequirements = requirements.some(req => req.toLowerCase().includes('api'));
     const hasUiRequirements = requirements.some(req => req.toLowerCase().includes('ui'));
     const hasDataRequirements = requirements.some(req => req.toLowerCase().includes('data'));
-    const hasDistributedRequirements = requirements.some(req => 
+    const hasDistributedRequirements = requirements.some(req =>
       req.toLowerCase().includes('distributed') || req.toLowerCase().includes('microservice')
     );
 
@@ -155,10 +155,10 @@ export class SparcArchitecture extends SparcPhase {
 
     // Define data flow
     architecture.dataFlow = this.defineDataFlow(architecture.layers);
-    
+
     // Define control flow
     architecture.controlFlow = this.defineControlFlow(architecture.layers);
-    
+
     // Define boundaries
     architecture.boundaries = this.defineBoundaries(architecture.layers);
 
@@ -170,7 +170,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   defineDataFlow(layers) {
     const dataFlow = [];
-    
+
     for (let i = 0; i < layers.length - 1; i++) {
       dataFlow.push({
         from: layers[i].name,
@@ -178,7 +178,7 @@ export class SparcArchitecture extends SparcPhase {
         direction: 'downstream',
         dataType: 'processed data'
       });
-      
+
       dataFlow.push({
         from: layers[i + 1].name,
         to: layers[i].name,
@@ -186,7 +186,7 @@ export class SparcArchitecture extends SparcPhase {
         dataType: 'results/responses'
       });
     }
-    
+
     return dataFlow;
   }
 
@@ -250,7 +250,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   createComponentFromRequirement(requirement) {
     const reqLower = requirement.toLowerCase();
-    
+
     if (reqLower.includes('api')) {
       return {
         name: 'APIController',
@@ -368,10 +368,10 @@ export class SparcArchitecture extends SparcPhase {
    */
   mergeComponents(components) {
     const componentMap = new Map();
-    
+
     for (const component of components) {
       const key = component.name;
-      
+
       if (componentMap.has(key)) {
         const existing = componentMap.get(key);
         // Merge dependencies and interfaces
@@ -382,7 +382,7 @@ export class SparcArchitecture extends SparcPhase {
         componentMap.set(key, component);
       }
     }
-    
+
     return Array.from(componentMap.values());
   }
 
@@ -391,7 +391,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   toPascalCase(str) {
     return str.replace(/_([a-z])/g, (match, letter) => letter.toUpperCase())
-              .replace(/^([a-z])/, (match, letter) => letter.toUpperCase());
+      .replace(/^([a-z])/, (match, letter) => letter.toUpperCase());
   }
 
   /**
@@ -399,15 +399,15 @@ export class SparcArchitecture extends SparcPhase {
    */
   extractDependencies(steps) {
     const dependencies = [];
-    
+
     for (const step of steps) {
-      if (step.includes('database')) dependencies.push('DatabaseConnection');
-      if (step.includes('authenticate')) dependencies.push('AuthenticationService');
-      if (step.includes('validate')) dependencies.push('ValidationService');
-      if (step.includes('log')) dependencies.push('Logger');
-      if (step.includes('cache')) dependencies.push('CacheManager');
+      if (step.includes('database')) {dependencies.push('DatabaseConnection');}
+      if (step.includes('authenticate')) {dependencies.push('AuthenticationService');}
+      if (step.includes('validate')) {dependencies.push('ValidationService');}
+      if (step.includes('log')) {dependencies.push('Logger');}
+      if (step.includes('cache')) {dependencies.push('CacheManager');}
     }
-    
+
     return [...new Set(dependencies)];
   }
 
@@ -416,12 +416,12 @@ export class SparcArchitecture extends SparcPhase {
    */
   inferPatterns(steps) {
     const patterns = [];
-    
-    if (steps.some(step => step.includes('CALL'))) patterns.push('Command');
-    if (steps.some(step => step.includes('IF'))) patterns.push('Strategy');
-    if (steps.some(step => step.includes('VALIDATE'))) patterns.push('Chain of Responsibility');
-    if (steps.some(step => step.includes('RETURN'))) patterns.push('Factory');
-    
+
+    if (steps.some(step => step.includes('CALL'))) {patterns.push('Command');}
+    if (steps.some(step => step.includes('IF'))) {patterns.push('Strategy');}
+    if (steps.some(step => step.includes('VALIDATE'))) {patterns.push('Chain of Responsibility');}
+    if (steps.some(step => step.includes('RETURN'))) {patterns.push('Factory');}
+
     return patterns.length > 0 ? patterns : ['Service'];
   }
 
@@ -431,7 +431,7 @@ export class SparcArchitecture extends SparcPhase {
   async selectDesignPatterns(specification, pseudocode) {
     const patterns = [];
     const requirements = specification.requirements || [];
-    
+
     // Creational patterns
     if (requirements.some(req => req.toLowerCase().includes('create') || req.toLowerCase().includes('instantiate'))) {
       patterns.push({
@@ -514,7 +514,7 @@ export class SparcArchitecture extends SparcPhase {
     // Extract entities from requirements
     const requirements = specification.requirements || [];
     const entities = this.extractEntities(requirements);
-    
+
     for (const entityName of entities) {
       const entity = {
         name: entityName,
@@ -524,19 +524,19 @@ export class SparcArchitecture extends SparcPhase {
         constraints: this.generateConstraints(entityName),
         indexes: this.generateIndexes(entityName)
       };
-      
+
       dataModel.entities.push(entity);
     }
 
     // Define relationships
     dataModel.relationships = this.defineRelationships(dataModel.entities);
-    
+
     // Define global constraints
     dataModel.constraints = this.defineGlobalConstraints();
-    
+
     // Define indexes
     dataModel.indexes = this.defineGlobalIndexes(dataModel.entities);
-    
+
     // Define views
     dataModel.views = this.defineViews(dataModel.entities);
 
@@ -548,13 +548,13 @@ export class SparcArchitecture extends SparcPhase {
    */
   extractEntities(requirements) {
     const entities = new Set();
-    
+
     for (const requirement of requirements) {
       const words = requirement.split(' ');
-      
+
       for (const word of words) {
         // Look for nouns that could be entities
-        if (word.length > 3 && 
+        if (word.length > 3 &&
             !['system', 'must', 'should', 'will', 'data', 'user', 'interface'].includes(word.toLowerCase())) {
           if (word[0] === word[0].toUpperCase()) {
             entities.add(word);
@@ -562,14 +562,14 @@ export class SparcArchitecture extends SparcPhase {
         }
       }
     }
-    
+
     // Add default entities if none found
     if (entities.size === 0) {
       entities.add('User');
       entities.add('Session');
       entities.add('Configuration');
     }
-    
+
     return Array.from(entities);
   }
 
@@ -586,7 +586,7 @@ export class SparcArchitecture extends SparcPhase {
 
     const specificAttributes = [];
     const entityLower = entityName.toLowerCase();
-    
+
     if (entityLower.includes('user')) {
       specificAttributes.push(
         { name: 'username', type: 'VARCHAR(50)', nullable: false, unique: true },
@@ -607,7 +607,7 @@ export class SparcArchitecture extends SparcPhase {
       specificAttributes.push(
         { name: 'name', type: 'VARCHAR(255)', nullable: false },
         { name: 'description', type: 'TEXT', nullable: true },
-        { name: 'status', type: 'VARCHAR(50)', nullable: false, default: "'active'" }
+        { name: 'status', type: 'VARCHAR(50)', nullable: false, default: '\'active\'' }
       );
     }
 
@@ -625,10 +625,10 @@ export class SparcArchitecture extends SparcPhase {
     ];
 
     const entityLower = entityName.toLowerCase();
-    
+
     if (entityLower.includes('user')) {
       constraints.push(
-        { name: 'user_email_format', type: 'CHECK', condition: "email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'" },
+        { name: 'user_email_format', type: 'CHECK', condition: 'email ~* \'^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$\'' },
         { name: 'user_username_length', type: 'CHECK', condition: 'length(username) >= 3' }
       );
     }
@@ -646,7 +646,7 @@ export class SparcArchitecture extends SparcPhase {
     ];
 
     const entityLower = entityName.toLowerCase();
-    
+
     if (entityLower.includes('user')) {
       indexes.push(
         { name: 'idx_user_email', type: 'BTREE', columns: ['email'] },
@@ -663,11 +663,11 @@ export class SparcArchitecture extends SparcPhase {
    */
   defineRelationships(entities) {
     const relationships = [];
-    
+
     // Look for entities that could have relationships
     const userEntity = entities.find(e => e.name.toLowerCase().includes('user'));
     const sessionEntity = entities.find(e => e.name.toLowerCase().includes('session'));
-    
+
     if (userEntity && sessionEntity) {
       relationships.push({
         name: 'user_sessions',
@@ -699,7 +699,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   defineGlobalIndexes(entities) {
     const indexes = [];
-    
+
     // Add composite indexes for common query patterns
     for (const entity of entities) {
       indexes.push({
@@ -718,13 +718,13 @@ export class SparcArchitecture extends SparcPhase {
    */
   defineViews(entities) {
     const views = [];
-    
+
     // Create a view for active entities
     for (const entity of entities) {
       if (entity.attributes.some(attr => attr.name === 'is_active' || attr.name === 'status')) {
         views.push({
           name: `active_${entity.name.toLowerCase()}s`,
-          definition: `SELECT * FROM ${entity.name} WHERE ${entity.attributes.some(attr => attr.name === 'is_active') ? 'is_active = true' : "status = 'active'"}`,
+          definition: `SELECT * FROM ${entity.name} WHERE ${entity.attributes.some(attr => attr.name === 'is_active') ? 'is_active = true' : 'status = \'active\''}`,
           purpose: `Show only active ${entity.name.toLowerCase()} records`
         });
       }
@@ -750,7 +750,7 @@ export class SparcArchitecture extends SparcPhase {
 
     // Generate endpoints based on requirements
     const requirements = specification.requirements || [];
-    
+
     for (const requirement of requirements) {
       if (requirement.toLowerCase().includes('api')) {
         const endpoints = this.generateEndpoints(requirement);
@@ -760,13 +760,13 @@ export class SparcArchitecture extends SparcPhase {
 
     // Generate schemas
     apiDesign.schemas = this.generateApiSchemas(apiDesign.endpoints);
-    
+
     // Define error handling
     apiDesign.errorHandling = this.defineApiErrorHandling();
-    
+
     // Define rate limiting
     apiDesign.rateLimiting = this.defineApiRateLimiting();
-    
+
     // Define versioning strategy
     apiDesign.versioning = this.defineApiVersioning();
 
@@ -778,7 +778,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   generateEndpoints(requirement) {
     const endpoints = [];
-    
+
     // Basic CRUD endpoints
     endpoints.push(
       {
@@ -858,7 +858,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   generateApiSchemas(endpoints) {
     const schemas = [];
-    
+
     // Basic resource schema
     schemas.push({
       name: 'Resource',
@@ -1218,7 +1218,7 @@ export class SparcArchitecture extends SparcPhase {
     // Analyze requirements for integration needs
     for (const requirement of requirements) {
       const reqLower = requirement.toLowerCase();
-      
+
       if (reqLower.includes('external') || reqLower.includes('third-party')) {
         integrations.push({
           name: 'External API Integration',
@@ -1231,7 +1231,7 @@ export class SparcArchitecture extends SparcPhase {
           monitoring: 'API health checks and response time monitoring'
         });
       }
-      
+
       if (reqLower.includes('database') || reqLower.includes('data')) {
         integrations.push({
           name: 'Database Integration',
@@ -1244,7 +1244,7 @@ export class SparcArchitecture extends SparcPhase {
           monitoring: 'Database performance and connection monitoring'
         });
       }
-      
+
       if (reqLower.includes('message') || reqLower.includes('event')) {
         integrations.push({
           name: 'Message Queue Integration',
@@ -1317,7 +1317,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   async documentArchitecturalDecisions(result) {
     const decisions = [];
-    
+
     // Architecture style decision
     decisions.push({
       id: 'AD-001',
@@ -1371,7 +1371,7 @@ export class SparcArchitecture extends SparcPhase {
    */
   async assessArchitecturalRisks(result) {
     const risks = [];
-    
+
     // Complexity risk
     risks.push({
       id: 'AR-001',

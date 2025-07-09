@@ -27,9 +27,9 @@ class ResourceCommands {
    */
   async status(args = {}) {
     await this.initialize();
-    
+
     const { json, server: serverId, verbose } = args;
-    
+
     try {
       let reports;
       if (serverId) {
@@ -64,7 +64,7 @@ class ResourceCommands {
    */
   async monitor(args = {}) {
     await this.initialize();
-    
+
     const { interval = 5000, metrics = 'cpu,memory,network', server: serverId } = args;
     const selectedMetrics = metrics.split(',').map(m => m.trim());
 
@@ -113,7 +113,7 @@ class ResourceCommands {
    */
   async optimize(args = {}) {
     await this.initialize();
-    
+
     const { strategy = 'balanced', dryRun = false, verbose } = args;
 
     console.log(chalk.bold.cyan('\n🚀 Resource Optimization\n'));
@@ -161,7 +161,7 @@ class ResourceCommands {
    */
   async history(args = {}) {
     await this.initialize();
-    
+
     const { duration = '1h', server: serverId, metric = 'all', format = 'chart' } = args;
 
     console.log(chalk.bold.cyan('\n📈 Resource History\n'));
@@ -308,8 +308,8 @@ class ResourceCommands {
     const empty = width - filled;
 
     let color = 'green';
-    if (percentage > 0.8) color = 'red';
-    else if (percentage > 0.6) color = 'yellow';
+    if (percentage > 0.8) {color = 'red';}
+    else if (percentage > 0.6) {color = 'yellow';}
 
     const bar = chalk[color]('█'.repeat(filled)) + chalk.gray('░'.repeat(empty));
     return `[${bar}]`;
@@ -326,7 +326,7 @@ class ResourceCommands {
       healthy: reports.filter(r => r.status === 'healthy').length,
       degraded: reports.filter(r => r.status === 'degraded').length,
       overloaded: reports.filter(r => r.status === 'overloaded').length,
-      offline: reports.filter(r => r.status === 'offline').length,
+      offline: reports.filter(r => r.status === 'offline').length
     };
 
     const table = new Table({
@@ -445,7 +445,7 @@ class ResourceCommands {
     const metrics = {};
     history.forEach(entry => {
       Object.keys(entry.metrics).forEach(metric => {
-        if (!metrics[metric]) metrics[metric] = [];
+        if (!metrics[metric]) {metrics[metric] = [];}
         metrics[metric].push(entry.metrics[metric]);
       });
     });
@@ -453,7 +453,7 @@ class ResourceCommands {
     // Display each metric
     Object.entries(metrics).forEach(([metric, values]) => {
       console.log(chalk.bold(`${metric.toUpperCase()}:`));
-      
+
       const max = Math.max(...values);
       const min = Math.min(...values);
       const range = max - min;
@@ -497,7 +497,7 @@ class ResourceCommands {
     const metrics = {};
     history.forEach(entry => {
       Object.entries(entry.metrics).forEach(([metric, value]) => {
-        if (!metrics[metric]) metrics[metric] = [];
+        if (!metrics[metric]) {metrics[metric] = [];}
         metrics[metric].push(value);
       });
     });
@@ -508,7 +508,7 @@ class ResourceCommands {
       const avg = sum / values.length;
       const min = Math.min(...values);
       const max = Math.max(...values);
-      
+
       // Calculate standard deviation
       const squaredDiffs = values.map(v => Math.pow(v - avg, 2));
       const avgSquaredDiff = squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
@@ -527,7 +527,7 @@ const resourceCommands = new ResourceCommands();
 module.exports = {
   name: 'resource',
   description: 'Manage and monitor system resources',
-  
+
   commands: {
     status: {
       description: 'Display current resource status',

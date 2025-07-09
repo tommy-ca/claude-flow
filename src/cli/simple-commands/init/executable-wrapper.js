@@ -51,13 +51,13 @@ npx claude-flow@latest %*
         console.log('  ✓ Created local claude-flow.cmd executable wrapper');
         console.log('    You can now use: claude-flow instead of npx claude-flow');
       }
-      
+
     } else {
       // Check if we're in development mode (claude-code-flow repo)
       const isDevelopment = workingDir.includes('claude-code-flow');
-      const devBinPath = isDevelopment ? 
+      const devBinPath = isDevelopment ?
         workingDir.split('claude-code-flow')[0] + 'claude-code-flow/bin/claude-flow' : '';
-      
+
       // Create Unix/Linux/Mac shell script
       const wrapperScript = `#!/usr/bin/env bash
 # Claude-Flow local wrapper
@@ -104,15 +104,15 @@ fi
       // Write the wrapper script
       if (!dryRun) {
         await writeFile(`${workingDir}/claude-flow`, wrapperScript, 'utf8');
-        
+
         // Make it executable
         await chmod(`${workingDir}/claude-flow`, 0o755);
-        
+
         console.log('  ✓ Created local claude-flow executable wrapper');
         console.log('    You can now use: ./claude-flow instead of npx claude-flow');
       }
     }
-    
+
   } catch (err) {
     console.log(`  ⚠️  Could not create local executable: ${err.message}`);
   }

@@ -144,7 +144,7 @@ export class PerformanceTest {
     // This would test the CollectiveMemory optimizations
     // For now, we'll simulate the test
     const pooledStart = performance.now();
-    
+
     // Simulate 100 memory operations with connection pooling
     const operations = Array(100).fill(null).map(async (_, i) => {
       await new Promise(resolve => setTimeout(resolve, Math.random() * 10));
@@ -207,10 +207,10 @@ export class PerformanceTest {
     );
 
     await Promise.all(taskPromises);
-    
+
     // Wait for tasks to complete (simulated)
     await new Promise(resolve => setTimeout(resolve, 2000));
-    
+
     const concurrentTime = performance.now() - concurrentStart;
 
     // Get final status
@@ -269,7 +269,7 @@ export class PerformanceTest {
     // Test batch processing
     const batchStart = performance.now();
     const batchPromises = [];
-    
+
     for (let i = 0; i < 10; i++) {
       batchPromises.push(
         optimizer.optimizeBatchOperation(
@@ -310,27 +310,27 @@ export class PerformanceTest {
     console.log('=' .repeat(80));
 
     let totalPassed = 0;
-    let totalTests = this.results.length;
+    const totalTests = this.results.length;
 
     this.results.forEach((result, index) => {
       console.log(`\n${index + 1}. ${result.test}`);
       console.log('-'.repeat(40));
-      
+
       Object.entries(result).forEach(([key, value]) => {
         if (key !== 'test' && key !== 'status') {
           console.log(`   ${key.charAt(0).toUpperCase() + key.slice(1)}: ${value}`);
         }
       });
-      
+
       const statusIcon = result.status === 'PASS' ? '✅' : '⚠️';
       console.log(`   Status: ${statusIcon} ${result.status}`);
-      
-      if (result.status === 'PASS') totalPassed++;
+
+      if (result.status === 'PASS') {totalPassed++;}
     });
 
     console.log('\n' + '='.repeat(80));
     console.log(`📈 Overall Results: ${totalPassed}/${totalTests} tests passed`);
-    
+
     if (totalPassed === totalTests) {
       console.log('🎉 All performance optimizations are working correctly!');
     } else {
@@ -341,7 +341,7 @@ export class PerformanceTest {
     const improvements = this.results
       .filter(r => r.improvement)
       .map(r => parseFloat(r.improvement));
-    
+
     if (improvements.length > 0) {
       const avgImprovement = improvements.reduce((a, b) => a + b, 0) / improvements.length;
       console.log(`🚀 Average Performance Improvement: ${avgImprovement.toFixed(2)}%`);

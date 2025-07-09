@@ -20,43 +20,43 @@ export class RecoveryManager {
       console.log(`🔧 Attempting recovery for: ${failureType}`);
 
       let recoveryResult;
-      
+
       switch (failureType) {
-        case 'permission-denied':
-          recoveryResult = await this.recoverFromPermissionDenied(context);
-          break;
-        
-        case 'disk-space':
-          recoveryResult = await this.recoverFromDiskSpace(context);
-          break;
-        
-        case 'missing-dependencies':
-          recoveryResult = await this.recoverFromMissingDependencies(context);
-          break;
-        
-        case 'corrupted-config':
-          recoveryResult = await this.recoverFromCorruptedConfig(context);
-          break;
-        
-        case 'partial-initialization':
-          recoveryResult = await this.recoverFromPartialInitialization(context);
-          break;
-        
-        case 'sparc-failure':
-          recoveryResult = await this.recoverFromSparcFailure(context);
-          break;
-        
-        case 'executable-creation-failure':
-          recoveryResult = await this.recoverFromExecutableFailure(context);
-          break;
-        
-        case 'memory-setup-failure':
-          recoveryResult = await this.recoverFromMemorySetupFailure(context);
-          break;
-        
-        default:
-          recoveryResult = await this.performGenericRecovery(failureType, context);
-          break;
+      case 'permission-denied':
+        recoveryResult = await this.recoverFromPermissionDenied(context);
+        break;
+
+      case 'disk-space':
+        recoveryResult = await this.recoverFromDiskSpace(context);
+        break;
+
+      case 'missing-dependencies':
+        recoveryResult = await this.recoverFromMissingDependencies(context);
+        break;
+
+      case 'corrupted-config':
+        recoveryResult = await this.recoverFromCorruptedConfig(context);
+        break;
+
+      case 'partial-initialization':
+        recoveryResult = await this.recoverFromPartialInitialization(context);
+        break;
+
+      case 'sparc-failure':
+        recoveryResult = await this.recoverFromSparcFailure(context);
+        break;
+
+      case 'executable-creation-failure':
+        recoveryResult = await this.recoverFromExecutableFailure(context);
+        break;
+
+      case 'memory-setup-failure':
+        recoveryResult = await this.recoverFromMemorySetupFailure(context);
+        break;
+
+      default:
+        recoveryResult = await this.performGenericRecovery(failureType, context);
+        break;
       }
 
       result.success = recoveryResult.success;
@@ -94,7 +94,7 @@ export class RecoveryManager {
           });
 
           const { success } = await command.output();
-          
+
           if (success) {
             result.actions.push('Fixed directory permissions');
           } else {
@@ -338,7 +338,7 @@ export class RecoveryManager {
     try {
       // Try to recreate the executable
       const executablePath = `${this.workingDir}/claude-flow`;
-      
+
       // Remove corrupted executable if it exists
       try {
         await Deno.remove(executablePath);
@@ -351,7 +351,7 @@ export class RecoveryManager {
       const createResult = await this.createExecutableWrapper();
       if (createResult.success) {
         result.actions.push('Recreated claude-flow executable');
-        
+
         // Set permissions
         if (Deno.build.os !== 'windows') {
           try {
@@ -456,7 +456,7 @@ export class RecoveryManager {
 
     try {
       // Attempt common recovery procedures
-      
+
       // 1. Clean up temporary files
       const tempCleanup = await this.cleanupTemporaryFiles();
       result.actions.push(...tempCleanup.actions);
@@ -545,7 +545,7 @@ export class RecoveryManager {
 
     try {
       const backupDir = `${this.workingDir}/.claude-flow-backups`;
-      
+
       // This would normally integrate with BackupManager
       result.actions.push('Cleaned old backups');
     } catch {
@@ -563,11 +563,11 @@ export class RecoveryManager {
       });
 
       const { stdout, success } = await command.output();
-      
+
       if (success) {
         const output = new TextDecoder().decode(stdout);
         const lines = output.trim().split('\n');
-        
+
         if (lines.length >= 2) {
           const parts = lines[1].split(/\s+/);
           if (parts.length >= 4) {
@@ -629,7 +629,7 @@ export class RecoveryManager {
 
     // This would contain config file recovery logic
     // Generate default config based on filename
-    
+
     return result;
   }
 
@@ -639,7 +639,7 @@ export class RecoveryManager {
 
   async identifyCompletedItems() {
     const items = [];
-    
+
     const checkFiles = [
       'CLAUDE.md',
       'memory-bank.md',
@@ -660,7 +660,7 @@ export class RecoveryManager {
 
   async identifyMissingItems() {
     const missing = [];
-    
+
     const requiredFiles = [
       'CLAUDE.md',
       'memory-bank.md',
@@ -685,7 +685,7 @@ export class RecoveryManager {
     };
 
     // This would contain item completion logic based on item type
-    
+
     return result;
   }
 
@@ -700,16 +700,16 @@ export class RecoveryManager {
 
     // Generate basic .roomodes content
     const basicRoomodes = {
-      version: "1.0",
+      version: '1.0',
       modes: {
         architect: {
-          description: "System design and architecture planning"
+          description: 'System design and architecture planning'
         },
         code: {
-          description: "Clean, modular code implementation"
+          description: 'Clean, modular code implementation'
         },
         tdd: {
-          description: "Test-driven development and testing"
+          description: 'Test-driven development and testing'
         }
       }
     };

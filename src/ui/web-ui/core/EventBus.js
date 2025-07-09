@@ -103,10 +103,10 @@ export class EventBus {
    */
   off(event, handler) {
     const handlers = this.events.get(event);
-    if (!handlers) return false;
+    if (!handlers) {return false;}
 
     const index = handlers.findIndex(h => h.handler === handler);
-    if (index === -1) return false;
+    if (index === -1) {return false;}
 
     handlers.splice(index, 1);
 
@@ -126,10 +126,10 @@ export class EventBus {
    */
   offOnce(event, handler) {
     const handlers = this.onceEvents.get(event);
-    if (!handlers) return false;
+    if (!handlers) {return false;}
 
     const index = handlers.findIndex(h => h.handler === handler);
-    if (index === -1) return false;
+    if (index === -1) {return false;}
 
     handlers.splice(index, 1);
 
@@ -145,10 +145,10 @@ export class EventBus {
    */
   offWildcard(pattern, handler) {
     const handlers = this.wildcardHandlers.get(pattern);
-    if (!handlers) return false;
+    if (!handlers) {return false;}
 
     const index = handlers.findIndex(h => h.handler === handler);
-    if (index === -1) return false;
+    if (index === -1) {return false;}
 
     handlers.splice(index, 1);
 
@@ -290,7 +290,7 @@ export class EventBus {
     }
 
     const results = await Promise.allSettled(promises);
-    
+
     // Handle any rejections
     const failures = results.filter(r => r.status === 'rejected');
     if (failures.length > 0) {
@@ -322,7 +322,7 @@ export class EventBus {
 
       return result;
     } catch (error) {
-      console.error(`📡 EventBus: Error in async handler:`, error);
+      console.error('📡 EventBus: Error in async handler:', error);
       throw error;
     }
   }
@@ -357,7 +357,7 @@ export class EventBus {
     if (event) {
       this.events.delete(event);
       this.onceEvents.delete(event);
-      
+
       // Remove matching wildcard handlers
       for (const [pattern, handlers] of this.wildcardHandlers) {
         if (pattern === event) {
@@ -381,7 +381,7 @@ export class EventBus {
   listenerCount(event) {
     const regular = this.events.get(event)?.length || 0;
     const once = this.onceEvents.get(event)?.length || 0;
-    
+
     let wildcard = 0;
     for (const [pattern, handlers] of this.wildcardHandlers) {
       const regex = this.createWildcardRegex(pattern);
@@ -398,15 +398,15 @@ export class EventBus {
    */
   eventNames() {
     const names = new Set();
-    
+
     for (const event of this.events.keys()) {
       names.add(event);
     }
-    
+
     for (const event of this.onceEvents.keys()) {
       names.add(event);
     }
-    
+
     return Array.from(names);
   }
 
@@ -449,7 +449,7 @@ export class EventBus {
       .replace(/[.+^${}()|[\]\\]/g, '\\$&')
       .replace(/\*/g, '.*')
       .replace(/\?/g, '.');
-    
+
     return new RegExp(`^${escaped}$`);
   }
 
@@ -472,7 +472,7 @@ export class EventBus {
    */
   addToHistory(eventInfo) {
     this.eventHistory.push(eventInfo);
-    
+
     // Keep history size under control
     if (this.eventHistory.length > this.maxHistorySize) {
       this.eventHistory = this.eventHistory.slice(-this.maxHistorySize);

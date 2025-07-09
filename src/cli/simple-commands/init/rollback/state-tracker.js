@@ -17,7 +17,7 @@ export class StateTracker {
 
     try {
       const state = await this.loadState();
-      
+
       const rollbackPoint = {
         id: this.generateId(),
         type,
@@ -56,7 +56,7 @@ export class StateTracker {
 
     try {
       const state = await this.loadState();
-      
+
       const checkpoint = {
         id: this.generateId(),
         phase,
@@ -96,7 +96,7 @@ export class StateTracker {
 
     try {
       const state = await this.loadState();
-      
+
       if (state.checkpoints) {
         const checkpoint = state.checkpoints.find(cp => cp.id === checkpointId);
         if (checkpoint) {
@@ -127,7 +127,7 @@ export class StateTracker {
 
     try {
       const state = await this.loadState();
-      
+
       const rollbackRecord = {
         id: this.generateId(),
         targetId,
@@ -202,7 +202,7 @@ export class StateTracker {
 
     try {
       const state = await this.loadState();
-      
+
       const fileOp = {
         id: this.generateId(),
         operation, // 'create', 'modify', 'delete'
@@ -254,7 +254,7 @@ export class StateTracker {
       const state = await this.loadState();
       state.currentPhase = phase;
       state.phaseTimestamp = Date.now();
-      
+
       // Track phase transitions
       state.phaseHistory = state.phaseHistory || [];
       state.phaseHistory.push({
@@ -278,7 +278,7 @@ export class StateTracker {
   async getInitializationStats() {
     try {
       const state = await this.loadState();
-      
+
       return {
         rollbackPoints: (state.rollbackPoints || []).length,
         checkpoints: (state.checkpoints || []).length,
@@ -314,7 +314,7 @@ export class StateTracker {
     try {
       const state = await this.loadState();
       const cutoffTime = Date.now() - (daysToKeep * 24 * 60 * 60 * 1000);
-      
+
       let cleaned = 0;
 
       // Clean rollback points
@@ -339,7 +339,7 @@ export class StateTracker {
       }
 
       result.cleaned = cleaned;
-      
+
       if (cleaned > 0) {
         await this.saveState(state);
       }
@@ -365,7 +365,7 @@ export class StateTracker {
     try {
       // Test state file access
       const state = await this.loadState();
-      
+
       // Test write access
       state.lastValidation = Date.now();
       await this.saveState(state);
@@ -452,7 +452,7 @@ export class StateTracker {
   async saveState(state) {
     state.lastActivity = Date.now();
     state.version = '1.0';
-    
+
     await Deno.writeTextFile(
       this.stateFile,
       JSON.stringify(state, null, 2)

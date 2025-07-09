@@ -15,7 +15,7 @@ import { isInteractive, isRawModeSupported, getEnvironmentType } from './interac
 export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
   return async function(...args) {
     const flags = args[args.length - 1] || {};
-    
+
     // Check if user explicitly requested non-interactive mode
     if (flags.nonInteractive || flags['no-interactive']) {
       if (fallbackFn) {
@@ -26,15 +26,15 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
         process.exit(1);
       }
     }
-    
+
     // Auto-detect if we should use non-interactive mode
     if (!isInteractive() || !isRawModeSupported()) {
       const envType = getEnvironmentType();
-      
+
       if (!options.silent) {
         console.log(chalk.yellow('\n⚠️  Interactive mode not available'));
         console.log(chalk.gray(`Detected environment: ${envType}`));
-        
+
         // Provide specific message based on environment
         if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) {
           console.log(chalk.gray('WSL detected - raw mode may cause process hangs'));
@@ -48,10 +48,10 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
         } else if (!isRawModeSupported()) {
           console.log(chalk.gray('Terminal does not support raw mode'));
         }
-        
+
         console.log();
       }
-      
+
       if (fallbackFn) {
         return fallbackFn(...args);
       } else {
@@ -60,7 +60,7 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
         process.exit(1);
       }
     }
-    
+
     // Try to run the interactive function
     try {
       return await interactiveFn(...args);
@@ -74,7 +74,7 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
       )) {
         console.log(chalk.yellow('\n⚠️  Interactive mode failed'));
         console.log(chalk.gray(error.message));
-        
+
         if (fallbackFn) {
           console.log(chalk.cyan('Falling back to non-interactive mode...'));
           return fallbackFn(...args);
@@ -83,7 +83,7 @@ export function safeInteractive(interactiveFn, fallbackFn, options = {}) {
           process.exit(1);
         }
       }
-      
+
       // Re-throw other errors
       throw error;
     }
@@ -127,7 +127,7 @@ export function nonInteractiveSelect(message, choices, defaultChoice) {
  */
 export function nonInteractiveProgress(message) {
   console.log(chalk.gray(`⏳ ${message}...`));
-  
+
   return {
     update: (newMessage) => {
       console.log(chalk.gray(`   ${newMessage}`));

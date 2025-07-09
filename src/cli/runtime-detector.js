@@ -58,7 +58,7 @@ export class UnifiedTerminalIO {
     if (typeof data === 'string') {
       data = this.encoder.encode(data);
     }
-    
+
     if (runtime === 'deno') {
       await stdout.write(data);
     } else {
@@ -87,7 +87,7 @@ export class UnifiedTerminalIO {
             resolve(bytesToCopy);
           }
         };
-        
+
         // Only set raw mode if available (terminal environments)
         if (stdin.setRawMode && typeof stdin.setRawMode === 'function') {
           try {
@@ -96,11 +96,11 @@ export class UnifiedTerminalIO {
             // Ignore errors if not in a TTY
           }
         }
-        
+
         if (stdin.resume && typeof stdin.resume === 'function') {
           stdin.resume();
         }
-        
+
         stdin.on('data', onData);
       });
     }
@@ -170,7 +170,7 @@ export const RuntimeDetector = {
   isNode: () => isNode,
   isDeno: () => isDeno,
   getRuntime: () => runtime,
-  
+
   /**
    * Get platform-specific information
    */
@@ -183,8 +183,8 @@ export const RuntimeDetector = {
       };
     } else {
       return {
-        os: process.platform === 'win32' ? 'windows' : 
-            process.platform === 'darwin' ? 'darwin' :
+        os: process.platform === 'win32' ? 'windows' :
+          process.platform === 'darwin' ? 'darwin' :
             process.platform === 'linux' ? 'linux' : process.platform,
         arch: process.arch,
         target: `${process.arch}-${process.platform}`
@@ -197,16 +197,16 @@ export const RuntimeDetector = {
    */
   hasAPI: (apiName) => {
     switch (apiName) {
-      case 'deno':
-        return isDeno;
-      case 'node':
-        return isNode;
-      case 'fs':
-        return runtime === 'node' || (runtime === 'deno' && typeof Deno.readFile !== 'undefined');
-      case 'process':
-        return runtime === 'node' || (runtime === 'deno' && typeof Deno.run !== 'undefined');
-      default:
-        return false;
+    case 'deno':
+      return isDeno;
+    case 'node':
+      return isNode;
+    case 'fs':
+      return runtime === 'node' || (runtime === 'deno' && typeof Deno.readFile !== 'undefined');
+    case 'process':
+      return runtime === 'node' || (runtime === 'deno' && typeof Deno.run !== 'undefined');
+    default:
+      return false;
     }
   },
 
@@ -241,22 +241,22 @@ export const createCompatibilityLayer = () => {
     runtime,
     terminal: new UnifiedTerminalIO(),
     detector: RuntimeDetector,
-    
+
     // Unified APIs
     TextEncoder,
     TextDecoder,
-    
+
     // Platform info
     platform: RuntimeDetector.getPlatform(),
-    
+
     // Environment
     getEnv: RuntimeDetector.getEnv,
     setEnv: RuntimeDetector.setEnv,
-    
+
     // Process control
     exit,
     pid,
-    
+
     // Graceful degradation helpers
     safeCall: async (fn, fallback = null) => {
       try {
@@ -266,7 +266,7 @@ export const createCompatibilityLayer = () => {
         return fallback;
       }
     },
-    
+
     // Feature detection
     hasFeature: (feature) => {
       return RuntimeDetector.hasAPI(feature);

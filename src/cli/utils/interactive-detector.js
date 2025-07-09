@@ -8,12 +8,12 @@ export function isInteractive() {
   if (!process.stdin.isTTY) {
     return false;
   }
-  
+
   // Check if stdout is a TTY
   if (!process.stdout.isTTY) {
     return false;
   }
-  
+
   // Check for CI environment variables
   const ciVars = [
     'CI',
@@ -27,23 +27,23 @@ export function isInteractive() {
     'BUILDKITE',
     'DRONE'
   ];
-  
+
   for (const varName of ciVars) {
     if (process.env[varName]) {
       return false;
     }
   }
-  
+
   // Check if running inside Docker (common indicator)
   if (process.env.DOCKER_CONTAINER || process.env.KUBERNETES_SERVICE_HOST) {
     return false;
   }
-  
+
   // Check if running in non-interactive mode explicitly
   if (process.env.CLAUDE_FLOW_NON_INTERACTIVE === 'true') {
     return false;
   }
-  
+
   return true;
 }
 
@@ -58,15 +58,15 @@ export function isRawModeSupported() {
  * Get environment type for logging/debugging
  */
 export function getEnvironmentType() {
-  if (!process.stdin.isTTY) return 'non-tty-stdin';
-  if (!process.stdout.isTTY) return 'non-tty-stdout';
-  if (process.env.CI) return 'ci-environment';
-  if (process.env.GITHUB_ACTIONS) return 'github-actions';
-  if (process.env.DOCKER_CONTAINER) return 'docker';
-  if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) return 'wsl';
-  if (process.platform === 'win32') return 'windows';
-  if (process.env.TERM_PROGRAM === 'vscode') return 'vscode';
-  if (!isRawModeSupported()) return 'no-raw-mode';
+  if (!process.stdin.isTTY) {return 'non-tty-stdin';}
+  if (!process.stdout.isTTY) {return 'non-tty-stdout';}
+  if (process.env.CI) {return 'ci-environment';}
+  if (process.env.GITHUB_ACTIONS) {return 'github-actions';}
+  if (process.env.DOCKER_CONTAINER) {return 'docker';}
+  if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) {return 'wsl';}
+  if (process.platform === 'win32') {return 'windows';}
+  if (process.env.TERM_PROGRAM === 'vscode') {return 'vscode';}
+  if (!isRawModeSupported()) {return 'no-raw-mode';}
   return 'interactive';
 }
 

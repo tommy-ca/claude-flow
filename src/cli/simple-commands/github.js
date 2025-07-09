@@ -106,7 +106,7 @@ export async function githubCommand(args, flags) {
 
   if (!objective) {
     printError(`❌ Usage: github ${mode} <objective>`);
-    
+
     if (GITHUB_MODES[mode]) {
       console.log(`\nExamples for ${mode}:`);
       for (const example of GITHUB_MODES[mode].examples) {
@@ -132,7 +132,7 @@ export async function githubCommand(args, flags) {
 
   printSuccess(`🐙 GitHub ${mode} mode activated`);
   console.log(`📋 Objective: ${objective}`);
-  
+
   if (flags['dry-run']) {
     console.log('\n🎛️  Configuration:');
     console.log(`  Mode: ${mode}`);
@@ -148,7 +148,7 @@ export async function githubCommand(args, flags) {
   try {
     // Check if Claude is available
     const { execSync } = await import('child_process');
-    
+
     try {
       execSync('which claude', { stdio: 'ignore' });
     } catch (e) {
@@ -230,27 +230,27 @@ IMPORTANT:
 Begin execution now. Create all necessary GitHub workflow files and configuration.`;
 
     console.log('🚀 Launching GitHub automation via Claude...');
-    
+
     // Execute Claude with the GitHub prompt
     const { spawn } = await import('child_process');
-    
+
     const claudeArgs = [];
-    
+
     // Add auto-permission flag if requested
     if (flags['auto-approve'] || flags['dangerously-skip-permissions']) {
       claudeArgs.push('--dangerously-skip-permissions');
     }
-    
+
     // Spawn claude process
     const claudeProcess = spawn('claude', claudeArgs, {
       stdio: ['pipe', 'inherit', 'inherit'],
       shell: false
     });
-    
+
     // Write the prompt to stdin and close it
     claudeProcess.stdin.write(githubPrompt);
     claudeProcess.stdin.end();
-    
+
     // Wait for the process to complete
     await new Promise((resolve, reject) => {
       claudeProcess.on('close', (code) => {
@@ -261,7 +261,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
           reject(new Error(`Claude process exited with code ${code}`));
         }
       });
-      
+
       claudeProcess.on('error', (err) => {
         reject(err);
       });
@@ -269,7 +269,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
 
   } catch (error) {
     printError(`❌ GitHub automation failed: ${error.message}`);
-    
+
     // Fallback implementation details
     console.log('\n📋 Fallback execution plan:');
     console.log(`1. ${mode} workflow would be configured for: ${objective}`);
@@ -277,7 +277,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
     console.log('3. Repository settings would be configured');
     console.log('4. Automation rules would be established');
     console.log('5. Monitoring and reporting would be set up');
-    
+
     printWarning('\n⚠️  Note: Full GitHub automation requires Claude CLI.');
     console.log('Install Claude: https://claude.ai/code');
   }
@@ -287,7 +287,7 @@ Begin execution now. Create all necessary GitHub workflow files and configuratio
 if (import.meta.main) {
   const args = [];
   const flags = {};
-  
+
   // Parse arguments and flags from Deno.args if available
   if (typeof Deno !== 'undefined' && Deno.args) {
     for (let i = 0; i < Deno.args.length; i++) {
@@ -295,7 +295,7 @@ if (import.meta.main) {
       if (arg.startsWith('--')) {
         const flagName = arg.substring(2);
         const nextArg = Deno.args[i + 1];
-        
+
         if (nextArg && !nextArg.startsWith('--')) {
           flags[flagName] = nextArg;
           i++; // Skip the next argument
@@ -307,6 +307,6 @@ if (import.meta.main) {
       }
     }
   }
-  
+
   await githubCommand(args, flags);
 }

@@ -99,18 +99,18 @@ ${chalk.blue('https://github.com/ruvnet/claude-flow/tree/main/docs/hive-mind')}
  */
 async function initHiveMind(flags) {
   const spinner = ora('Initializing Hive Mind system...').start();
-  
+
   try {
     // Create hive mind directory structure
     const hiveMindDir = path.join(cwd(), '.hive-mind');
     if (!existsSync(hiveMindDir)) {
       mkdirSync(hiveMindDir, { recursive: true });
     }
-    
+
     // Initialize SQLite database
     const dbPath = path.join(hiveMindDir, 'hive.db');
     const db = new Database(dbPath);
-    
+
     // Create tables
     db.exec(`
       CREATE TABLE IF NOT EXISTS swarms (
@@ -177,9 +177,9 @@ async function initHiveMind(flags) {
         FOREIGN KEY (swarm_id) REFERENCES swarms(id)
       );
     `);
-    
+
     db.close();
-    
+
     // Create configuration file
     const config = {
       version: '2.0.0',
@@ -198,21 +198,21 @@ async function initHiveMind(flags) {
         timeout: 60000
       }
     };
-    
+
     await writeFile(
       path.join(hiveMindDir, 'config.json'),
       JSON.stringify(config, null, 2)
     );
-    
+
     spinner.succeed('Hive Mind system initialized successfully!');
-    
+
     console.log('\n' + chalk.green('✓') + ' Created .hive-mind directory');
     console.log(chalk.green('✓') + ' Initialized SQLite database');
     console.log(chalk.green('✓') + ' Created configuration file');
     console.log('\n' + chalk.yellow('Next steps:'));
     console.log('  1. Run ' + chalk.cyan('claude-flow hive-mind spawn') + ' to create your first swarm');
     console.log('  2. Use ' + chalk.cyan('claude-flow hive-mind wizard') + ' for interactive setup');
-    
+
   } catch (error) {
     spinner.fail('Failed to initialize Hive Mind system');
     console.error(chalk.red('Error:'), error.message);
@@ -228,7 +228,7 @@ const hiveMindWizard = safeInteractive(
   // Interactive version
   async function(flags = {}) {
     console.log(chalk.yellow('\n🧙 Hive Mind Interactive Wizard\n'));
-    
+
     const { action } = await inquirer.prompt([
       {
         type: 'list',
@@ -245,35 +245,35 @@ const hiveMindWizard = safeInteractive(
         ]
       }
     ]);
-    
+
     switch (action) {
-      case 'spawn':
-        await spawnSwarmWizard();
-        break;
-      case 'status':
-        await showStatus({});
-        break;
-      case 'memory':
-        await manageMemoryWizard();
-        break;
-      case 'consensus':
-        await showConsensus({});
-        break;
-      case 'metrics':
-        await showMetrics({});
-        break;
-      case 'config':
-        await configureWizard();
-        break;
-      case 'exit':
-        console.log(chalk.gray('Exiting wizard...'));
-        break;
+    case 'spawn':
+      await spawnSwarmWizard();
+      break;
+    case 'status':
+      await showStatus({});
+      break;
+    case 'memory':
+      await manageMemoryWizard();
+      break;
+    case 'consensus':
+      await showConsensus({});
+      break;
+    case 'metrics':
+      await showMetrics({});
+      break;
+    case 'config':
+      await configureWizard();
+      break;
+    case 'exit':
+      console.log(chalk.gray('Exiting wizard...'));
+      break;
     }
   },
   // Non-interactive fallback
   async function(flags = {}) {
     console.log(chalk.yellow('\n🧙 Hive Mind - Non-Interactive Mode\n'));
-    
+
     // Default to creating a swarm with sensible defaults
     console.log(chalk.cyan('Creating new swarm with default settings...'));
     console.log(chalk.gray('Use command-line flags to customize:'));
@@ -281,7 +281,7 @@ const hiveMindWizard = safeInteractive(
     console.log(chalk.gray('  --queen-type strategic     Set queen type'));
     console.log(chalk.gray('  --max-workers 8            Set worker count'));
     console.log();
-    
+
     const objective = flags.objective || 'General task coordination';
     const config = {
       name: flags.name || `swarm-${Date.now()}`,
@@ -291,7 +291,7 @@ const hiveMindWizard = safeInteractive(
       autoScale: flags.autoScale || flags['auto-scale'] || false,
       encryption: flags.encryption || false
     };
-    
+
     await spawnSwarm([objective], {
       ...flags,
       name: config.name,
@@ -379,7 +379,7 @@ async function spawnSwarmWizard() {
       default: true
     }
   ]);
-  
+
   // Spawn the swarm with collected parameters
   await spawnSwarm([answers.objective], {
     name: answers.name,
@@ -397,15 +397,15 @@ async function spawnSwarmWizard() {
  */
 async function spawnSwarm(args, flags) {
   const objective = args.join(' ').trim();
-  
+
   if (!objective && !flags.wizard) {
     console.error(chalk.red('Error: Please provide an objective or use --wizard flag'));
     console.log('Example: claude-flow hive-mind spawn "Build REST API"');
     return;
   }
-  
+
   const spinner = ora('Spawning Hive Mind swarm...').start();
-  
+
   try {
     // Initialize hive mind core with error handling
     let hiveMind;
@@ -424,17 +424,17 @@ async function spawnSwarm(args, flags) {
       console.error('HiveMindCore initialization failed:', error);
       throw new Error(`Failed to initialize HiveMindCore: ${error.message}`);
     }
-    
+
     spinner.text = 'Setting up database connection...';
     // Initialize database connection
     const dbDir = path.join(cwd(), '.hive-mind');
     const dbPath = path.join(dbDir, 'hive.db');
-    
+
     // Ensure .hive-mind directory exists
     if (!existsSync(dbDir)) {
       mkdirSync(dbDir, { recursive: true });
     }
-    
+
     // Check if database file exists and try to create a clean one if needed
     let db;
     try {
@@ -458,7 +458,7 @@ async function spawnSwarm(args, flags) {
       // Create new database
       db = new Database(dbPath);
     }
-    
+
     // Initialize database schema if not exists
     spinner.text = 'Creating database schema...';
     try {
@@ -504,7 +504,7 @@ async function spawnSwarm(args, flags) {
       console.error('Database schema creation failed:', error);
       throw new Error(`Failed to create database schema: ${error.message}`);
     }
-    
+
     // Create swarm record with safe ID generation
     spinner.text = 'Creating swarm record...';
     const timestamp = Date.now();
@@ -519,16 +519,16 @@ async function spawnSwarm(args, flags) {
       console.error('Failed to create swarm record:', error);
       throw new Error(`Failed to create swarm record: ${error.message}`);
     }
-    
+
     spinner.text = 'Initializing Queen coordinator...';
-    
+
     // Initialize Queen
     const queen = new QueenCoordinator({
       swarmId,
       type: hiveMind.config.queenType,
       objective
     });
-    
+
     // Spawn Queen agent
     const queenAgent = {
       id: `queen-${swarmId}`,
@@ -539,25 +539,25 @@ async function spawnSwarm(args, flags) {
       status: 'active',
       capabilities: JSON.stringify(['coordination', 'planning', 'decision-making'])
     };
-    
+
     db.prepare(`
       INSERT INTO agents (id, swarm_id, name, type, role, status, capabilities)
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(...Object.values(queenAgent));
-    
+
     spinner.text = 'Spawning worker agents...';
-    
+
     // Determine worker types
-    const workerTypes = flags.workerTypes 
-      ? flags.workerTypes.split(',') 
+    const workerTypes = flags.workerTypes
+      ? flags.workerTypes.split(',')
       : ['researcher', 'coder', 'analyst', 'tester'];
-    
+
     // Spawn worker agents
     const workers = [];
     for (let i = 0; i < Math.min(workerTypes.length, hiveMind.config.maxWorkers); i++) {
       const workerType = workerTypes[i % workerTypes.length];
       const workerId = `worker-${swarmId}-${i}`;
-      
+
       const worker = {
         id: workerId,
         swarmId,
@@ -567,40 +567,40 @@ async function spawnSwarm(args, flags) {
         status: 'idle',
         capabilities: JSON.stringify(getAgentCapabilities(workerType))
       };
-      
+
       workers.push(worker);
-      
+
       db.prepare(`
         INSERT INTO agents (id, swarm_id, name, type, role, status, capabilities)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       `).run(...Object.values(worker));
     }
-    
+
     spinner.text = 'Initializing collective memory...';
-    
+
     // Initialize collective memory
     const memory = new CollectiveMemory({
       swarmId,
       maxSize: flags.memorySize || 100
     });
-    
+
     // Store initial context
     memory.store('objective', objective, 'context');
     memory.store('queen_type', hiveMind.config.queenType, 'config');
     memory.store('worker_count', workers.length, 'metrics');
-    
+
     spinner.text = 'Establishing communication channels...';
-    
+
     // Initialize communication system
     const communication = new SwarmCommunication({
       swarmId,
       encryption: hiveMind.config.encryption
     });
-    
+
     db.close();
-    
+
     spinner.succeed('Hive Mind swarm spawned successfully!');
-    
+
     // Display swarm summary
     console.log('\n' + chalk.bold('🐝 Swarm Summary:'));
     console.log(chalk.gray('─'.repeat(50)));
@@ -613,17 +613,17 @@ async function spawnSwarm(args, flags) {
     console.log(chalk.cyan('Consensus:'), hiveMind.config.consensusAlgorithm);
     console.log(chalk.cyan('Auto-scaling:'), hiveMind.config.autoScale ? 'Enabled' : 'Disabled');
     console.log(chalk.gray('─'.repeat(50)));
-    
+
     // Launch monitoring if requested
     if (flags.monitor) {
       console.log('\n' + chalk.yellow('Launching monitoring dashboard...'));
       // TODO: Implement monitoring dashboard
     }
-    
+
     // Enhanced coordination instructions with MCP tools
     console.log('\n' + chalk.green('✓') + ' Swarm is ready for coordination');
     console.log(chalk.gray('Use "claude-flow hive-mind status" to view swarm activity'));
-    
+
     // Offer to spawn Claude Code instances with coordination instructions
     if (flags.claude || flags.spawn) {
       await spawnClaudeCodeInstances(swarmId, hiveMind.config.name, objective, workers, flags);
@@ -631,11 +631,11 @@ async function spawnSwarm(args, flags) {
       console.log('\n' + chalk.blue('💡 Pro Tip:') + ' Add --claude to spawn coordinated Claude Code instances');
       console.log(chalk.gray('   claude-flow hive-mind spawn "objective" --claude'));
     }
-    
+
   } catch (error) {
     spinner.fail('Failed to spawn Hive Mind swarm');
     console.error(chalk.red('Error:'), error.message);
-    
+
     // If error contains "sha3", provide specific guidance
     if (error.message.includes('sha3') || error.message.includes('SHA3')) {
       console.error('\n🔍 SHA3 Function Error Detected');
@@ -647,7 +647,7 @@ async function spawnSwarm(args, flags) {
       console.error('\n🚨 Detailed error:');
       console.error(error.stack || error.message);
     }
-    
+
     exit(1);
   }
 }
@@ -666,7 +666,7 @@ function getAgentCapabilities(type) {
     optimizer: ['performance-tuning', 'optimization', 'profiling', 'enhancement'],
     documenter: ['documentation', 'explanation', 'tutorial-creation', 'knowledge-base']
   };
-  
+
   return capabilities[type] || ['general'];
 }
 
@@ -676,30 +676,30 @@ function getAgentCapabilities(type) {
 async function showStatus(flags) {
   try {
     const dbPath = path.join(cwd(), '.hive-mind', 'hive.db');
-    
+
     if (!existsSync(dbPath)) {
       console.error(chalk.red('Error: Hive Mind not initialized'));
       console.log('Run "claude-flow hive-mind init" first');
       return;
     }
-    
+
     const db = new Database(dbPath);
-    
+
     // Get active swarms
     const swarms = db.prepare(`
       SELECT * FROM swarms 
       WHERE status = 'active' 
       ORDER BY created_at DESC
     `).all();
-    
+
     if (swarms.length === 0) {
       console.log(chalk.gray('No active swarms found'));
       db.close();
       return;
     }
-    
+
     console.log(chalk.bold('\n🐝 Active Hive Mind Swarms\n'));
-    
+
     for (const swarm of swarms) {
       console.log(chalk.yellow('═'.repeat(60)));
       console.log(chalk.cyan('Swarm:'), swarm.name);
@@ -708,30 +708,30 @@ async function showStatus(flags) {
       console.log(chalk.cyan('Queen Type:'), swarm.queen_type);
       console.log(chalk.cyan('Status:'), chalk.green(swarm.status));
       console.log(chalk.cyan('Created:'), new Date(swarm.created_at).toLocaleString());
-      
+
       // Get agents
       const agents = db.prepare(`
         SELECT * FROM agents 
         WHERE swarm_id = ?
       `).all(swarm.id);
-      
+
       console.log('\n' + chalk.bold('Agents:'));
-      
+
       // Group by role
       const queen = agents.find(a => a.role === 'queen');
       const workers = agents.filter(a => a.role === 'worker');
-      
+
       if (queen) {
         console.log('  ' + chalk.magenta('👑 Queen:'), queen.name, chalk.gray(`(${queen.status})`));
       }
-      
+
       console.log('  ' + chalk.blue('🐝 Workers:'));
       workers.forEach(worker => {
-        const statusColor = worker.status === 'active' ? 'green' : 
-                          worker.status === 'busy' ? 'yellow' : 'gray';
+        const statusColor = worker.status === 'active' ? 'green' :
+          worker.status === 'busy' ? 'yellow' : 'gray';
         console.log(`    - ${worker.name} (${worker.type}) ${chalk[statusColor](worker.status)}`);
       });
-      
+
       // Get task statistics
       const taskStats = db.prepare(`
         SELECT 
@@ -742,36 +742,36 @@ async function showStatus(flags) {
         FROM tasks
         WHERE swarm_id = ?
       `).get(swarm.id);
-      
+
       console.log('\n' + chalk.bold('Tasks:'));
       console.log(`  Total: ${taskStats.total}`);
       console.log(`  Completed: ${chalk.green(taskStats.completed)}`);
       console.log(`  In Progress: ${chalk.yellow(taskStats.in_progress)}`);
       console.log(`  Pending: ${chalk.gray(taskStats.pending)}`);
-      
+
       // Get memory stats
       const memoryCount = db.prepare(`
         SELECT COUNT(*) as count FROM collective_memory
         WHERE swarm_id = ?
       `).get(swarm.id);
-      
+
       console.log('\n' + chalk.bold('Collective Memory:'));
       console.log(`  Entries: ${memoryCount.count}`);
-      
+
       // Get consensus stats
       const consensusCount = db.prepare(`
         SELECT COUNT(*) as count FROM consensus_decisions
         WHERE swarm_id = ?
       `).get(swarm.id);
-      
+
       console.log('\n' + chalk.bold('Consensus Decisions:'));
       console.log(`  Total: ${consensusCount.count}`);
     }
-    
+
     console.log(chalk.yellow('═'.repeat(60)) + '\n');
-    
+
     db.close();
-    
+
   } catch (error) {
     console.error(chalk.red('Error:'), error.message);
     exit(1);
@@ -785,7 +785,7 @@ async function showConsensus(flags) {
   try {
     const dbPath = path.join(cwd(), '.hive-mind', 'hive.db');
     const db = new Database(dbPath);
-    
+
     const decisions = db.prepare(`
       SELECT cd.*, s.name as swarm_name
       FROM consensus_decisions cd
@@ -793,15 +793,15 @@ async function showConsensus(flags) {
       ORDER BY cd.created_at DESC
       LIMIT 20
     `).all();
-    
+
     if (decisions.length === 0) {
       console.log(chalk.gray('No consensus decisions found'));
       db.close();
       return;
     }
-    
+
     console.log(chalk.bold('\n🤝 Recent Consensus Decisions\n'));
-    
+
     decisions.forEach(decision => {
       console.log(chalk.yellow('─'.repeat(50)));
       console.log(chalk.cyan('Swarm:'), decision.swarm_name);
@@ -810,17 +810,17 @@ async function showConsensus(flags) {
       console.log(chalk.cyan('Algorithm:'), decision.algorithm);
       console.log(chalk.cyan('Confidence:'), `${(decision.confidence * 100).toFixed(1)}%`);
       console.log(chalk.cyan('Time:'), new Date(decision.created_at).toLocaleString());
-      
+
       if (decision.votes) {
         const votes = JSON.parse(decision.votes);
         console.log(chalk.cyan('Votes:'));
-        
+
         // Handle vote summary format (for/against/abstain/details)
         if (votes.for !== undefined || votes.against !== undefined || votes.abstain !== undefined) {
           console.log(`  - for: ${votes.for || 0}`);
           console.log(`  - against: ${votes.against || 0}`);
           console.log(`  - abstain: ${votes.abstain || 0}`);
-          
+
           // Display vote details properly if they exist
           if (votes.details && Array.isArray(votes.details)) {
             console.log('  - details:');
@@ -830,15 +830,15 @@ async function showConsensus(flags) {
                 const agent = detail.agentId || detail.agent || detail.id || detail.name || `agent-${index + 1}`;
                 const vote = detail.vote || detail.choice || detail.decision || 'unknown';
                 const reason = detail.reason || detail.justification || detail.rationale;
-                
+
                 // Build display string
                 let displayString = `    ${index + 1}. Agent: ${agent}, Vote: ${vote}`;
-                
+
                 // Add reason if available
                 if (reason && reason !== 'N/A' && reason !== '') {
                   displayString += `, Reason: ${reason}`;
                 }
-                
+
                 console.log(displayString);
               } else {
                 console.log(`    ${index + 1}. ${detail}`);
@@ -853,11 +853,11 @@ async function showConsensus(flags) {
         }
       }
     });
-    
+
     console.log(chalk.yellow('─'.repeat(50)) + '\n');
-    
+
     db.close();
-    
+
   } catch (error) {
     console.error(chalk.red('Error:'), error.message);
     exit(1);
@@ -871,7 +871,7 @@ async function showMetrics(flags) {
   try {
     const dbPath = path.join(cwd(), '.hive-mind', 'hive.db');
     const db = new Database(dbPath);
-    
+
     // Get overall metrics
     const overallStats = db.prepare(`
       SELECT 
@@ -880,9 +880,9 @@ async function showMetrics(flags) {
         (SELECT COUNT(*) FROM tasks) as total_tasks,
         (SELECT COUNT(*) FROM tasks WHERE status = 'completed') as completed_tasks
     `).get();
-    
+
     console.log(chalk.bold('\n📊 Hive Mind Performance Metrics\n'));
-    
+
     // Get task status breakdown
     const taskBreakdown = db.prepare(`
       SELECT 
@@ -898,24 +898,24 @@ async function showMetrics(flags) {
     console.log(`  Total Agents: ${overallStats.total_agents}`);
     console.log(`  Total Tasks: ${overallStats.total_tasks}`);
     console.log(`  Completed Tasks: ${overallStats.completed_tasks}`);
-    console.log(`  Success Rate: ${overallStats.total_tasks > 0 
+    console.log(`  Success Rate: ${overallStats.total_tasks > 0
       ? ((overallStats.completed_tasks / overallStats.total_tasks) * 100).toFixed(1) + '%'
       : 'N/A'}`);
-    
+
     if (taskBreakdown.length > 0) {
       console.log('\n' + chalk.cyan('Task Status Breakdown:'));
       taskBreakdown.forEach(status => {
-        const percentage = overallStats.total_tasks > 0 
+        const percentage = overallStats.total_tasks > 0
           ? ((status.count / overallStats.total_tasks) * 100).toFixed(1)
           : '0';
-        const statusColor = 
+        const statusColor =
           status.status === 'completed' ? 'green' :
-          status.status === 'in_progress' ? 'yellow' :
-          status.status === 'failed' ? 'red' : 'gray';
+            status.status === 'in_progress' ? 'yellow' :
+              status.status === 'failed' ? 'red' : 'gray';
         console.log(`  ${chalk[statusColor](status.status.charAt(0).toUpperCase() + status.status.slice(1))}: ${status.count} (${percentage}%)`);
       });
     }
-    
+
     // Get agent performance (check for completed_at column)
     let agentPerf = [];
     try {
@@ -924,7 +924,7 @@ async function showMetrics(flags) {
         SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
         WHERE name = 'completed_at'
       `).get();
-      
+
       if (hasCompletedAt && hasCompletedAt.count > 0) {
         agentPerf = db.prepare(`
           SELECT 
@@ -962,7 +962,7 @@ async function showMetrics(flags) {
     } catch (error) {
       console.warn('Could not get agent performance:', error.message);
     }
-    
+
     if (agentPerf.length > 0) {
       console.log('\n' + chalk.cyan('Top Performing Agents:'));
       agentPerf.forEach((agent, index) => {
@@ -976,7 +976,7 @@ async function showMetrics(flags) {
         }
       });
     }
-    
+
     // Get swarm performance
     const swarmPerf = db.prepare(`
       SELECT 
@@ -992,7 +992,7 @@ async function showMetrics(flags) {
       ORDER BY s.created_at DESC
       LIMIT 5
     `).all();
-    
+
     if (swarmPerf.length > 0) {
       console.log('\n' + chalk.cyan('Active Swarm Performance:'));
       swarmPerf.forEach(swarm => {
@@ -1005,7 +1005,7 @@ async function showMetrics(flags) {
         console.log(`  Memory: ${swarm.memory_entries} entries, Consensus: ${swarm.consensus_count} decisions`);
       });
     }
-    
+
     // Get performance insights
     let avgTaskTime = { avg_minutes: null };
     try {
@@ -1014,7 +1014,7 @@ async function showMetrics(flags) {
         SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
         WHERE name = 'completed_at'
       `).get();
-      
+
       if (hasCompletedAt && hasCompletedAt.count > 0) {
         avgTaskTime = db.prepare(`
           SELECT 
@@ -1028,7 +1028,7 @@ async function showMetrics(flags) {
     } catch (error) {
       console.warn('Could not calculate average task time:', error.message);
     }
-    
+
     // Get agent type performance
     let agentTypePerf = [];
     try {
@@ -1037,7 +1037,7 @@ async function showMetrics(flags) {
         SELECT COUNT(*) as count FROM pragma_table_info('tasks') 
         WHERE name = 'completed_at'
       `).get();
-      
+
       if (hasCompletedAt && hasCompletedAt.count > 0) {
         agentTypePerf = db.prepare(`
           SELECT 
@@ -1071,15 +1071,15 @@ async function showMetrics(flags) {
     } catch (error) {
       console.warn('Could not get agent type performance:', error.message);
     }
-    
+
     if (avgTaskTime.avg_minutes) {
       console.log('\n' + chalk.cyan('Performance Insights:'));
       console.log(`  Average Task Completion Time: ${avgTaskTime.avg_minutes.toFixed(1)} minutes`);
-      
+
       if (agentTypePerf.length > 0) {
         console.log('\n' + chalk.cyan('Agent Type Performance:'));
         agentTypePerf.forEach(type => {
-          const successRate = type.total_tasks > 0 
+          const successRate = type.total_tasks > 0
             ? ((type.completed_tasks / type.total_tasks) * 100).toFixed(1)
             : '0';
           console.log(`  ${type.type.charAt(0).toUpperCase() + type.type.slice(1)}: ${type.completed_tasks}/${type.total_tasks} (${successRate}%)`);
@@ -1089,10 +1089,10 @@ async function showMetrics(flags) {
         });
       }
     }
-    
+
     console.log('\n');
     db.close();
-    
+
   } catch (error) {
     console.error(chalk.red('Error:'), error.message);
     exit(1);
@@ -1104,7 +1104,7 @@ async function showMetrics(flags) {
  */
 async function manageMemoryWizard() {
   console.log(chalk.blue('\n🧠 Collective Memory Management\n'));
-  
+
   const { action } = await inquirer.prompt([
     {
       type: 'list',
@@ -1121,31 +1121,31 @@ async function manageMemoryWizard() {
       ]
     }
   ]);
-  
+
   switch (action) {
-    case 'list':
-      await listMemories();
-      break;
-    case 'search':
-      await searchMemories();
-      break;
-    case 'store':
-      await storeMemoryWizard();
-      break;
-    case 'stats':
-      await showMemoryStats();
-      break;
-    case 'clean':
-      await cleanMemories();
-      break;
-    case 'export':
-      await exportMemoryBackup();
-      break;
-    case 'back':
-      await hiveMindWizard();
-      return;
+  case 'list':
+    await listMemories();
+    break;
+  case 'search':
+    await searchMemories();
+    break;
+  case 'store':
+    await storeMemoryWizard();
+    break;
+  case 'stats':
+    await showMemoryStats();
+    break;
+  case 'clean':
+    await cleanMemories();
+    break;
+  case 'export':
+    await exportMemoryBackup();
+    break;
+  case 'back':
+    await hiveMindWizard();
+    return;
   }
-  
+
   // Ask if user wants to continue
   const { continue: continueAction } = await inquirer.prompt([
     {
@@ -1155,7 +1155,7 @@ async function manageMemoryWizard() {
       default: true
     }
   ]);
-  
+
   if (continueAction) {
     await manageMemoryWizard();
   }
@@ -1175,61 +1175,61 @@ async function configureWizard() {
 export async function hiveMindCommand(args, flags) {
   const subcommand = args[0];
   const subArgs = args.slice(1);
-  
+
   // If no subcommand, show help
   if (!subcommand) {
     showHiveMindHelp();
     return;
   }
-  
+
   // Warn about non-interactive environments for certain commands
   if ((subcommand === 'spawn' && (flags.claude || flags.spawn)) || subcommand === 'wizard') {
     warnNonInteractive('hive-mind ' + subcommand);
   }
-  
+
   switch (subcommand) {
-    case 'init':
-      await initHiveMind(flags);
-      break;
-      
-    case 'spawn':
-      if (flags.wizard || subArgs.length === 0) {
-        await spawnSwarmWizard();
-      } else {
-        await spawnSwarm(subArgs, flags);
-      }
-      break;
-      
-    case 'status':
-      await showStatus(flags);
-      break;
-      
-    case 'consensus':
-      await showConsensus(flags);
-      break;
-      
-    case 'memory':
-      await manageMemoryWizard();
-      break;
-      
-    case 'metrics':
-      await showMetrics(flags);
-      break;
-      
-    case 'wizard':
-      await hiveMindWizard(flags);
-      break;
-      
-    case 'help':
-    case '--help':
-    case '-h':
-      showHiveMindHelp();
-      break;
-      
-    default:
-      console.error(chalk.red(`Unknown subcommand: ${subcommand}`));
-      console.log('Run "claude-flow hive-mind help" for usage information');
-      exit(1);
+  case 'init':
+    await initHiveMind(flags);
+    break;
+
+  case 'spawn':
+    if (flags.wizard || subArgs.length === 0) {
+      await spawnSwarmWizard();
+    } else {
+      await spawnSwarm(subArgs, flags);
+    }
+    break;
+
+  case 'status':
+    await showStatus(flags);
+    break;
+
+  case 'consensus':
+    await showConsensus(flags);
+    break;
+
+  case 'memory':
+    await manageMemoryWizard();
+    break;
+
+  case 'metrics':
+    await showMetrics(flags);
+    break;
+
+  case 'wizard':
+    await hiveMindWizard(flags);
+    break;
+
+  case 'help':
+  case '--help':
+  case '-h':
+    showHiveMindHelp();
+    break;
+
+  default:
+    console.error(chalk.red(`Unknown subcommand: ${subcommand}`));
+    console.log('Run "claude-flow hive-mind help" for usage information');
+    exit(1);
   }
 }
 
@@ -1239,11 +1239,11 @@ export async function hiveMindCommand(args, flags) {
 async function listMemories() {
   try {
     console.log(chalk.blue('\n📋 Collective Memory Store\n'));
-    
+
     // Use MCP wrapper to search for all memories (empty pattern matches all)
     const mcpWrapper = await getMcpWrapper();
     const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
-    
+
     // Handle different possible response structures
     let memories = [];
     if (searchResult && Array.isArray(searchResult.results)) {
@@ -1253,13 +1253,13 @@ async function listMemories() {
     } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
       memories = searchResult.data;
     }
-    
+
     if (!memories || memories.length === 0) {
       console.log(chalk.yellow('No memories found in the collective store.'));
       console.log(chalk.gray('Try storing some memories first using the "💾 Store new memory" option.'));
       return;
     }
-    
+
     memories.forEach((memory, index) => {
       console.log(chalk.cyan(`${index + 1}. ${memory.key || `memory-${index}`}`));
       console.log(`   Category: ${memory.type || 'general'}`);
@@ -1271,7 +1271,7 @@ async function listMemories() {
       }
       console.log('');
     });
-    
+
   } catch (error) {
     console.error(chalk.red('Error listing memories:'), error.message);
     console.log(chalk.gray('This might be because no memories have been stored yet.'));
@@ -1291,12 +1291,12 @@ async function searchMemories() {
         validate: input => input.length > 0
       }
     ]);
-    
+
     console.log(chalk.blue(`\n🔍 Searching for: "${searchTerm}"\n`));
-    
+
     const mcpWrapper = await getMcpWrapper();
     const searchResult = await mcpWrapper.searchMemory('hive-mind', searchTerm);
-    
+
     // Handle different possible response structures
     let memories = [];
     if (searchResult && Array.isArray(searchResult.results)) {
@@ -1306,12 +1306,12 @@ async function searchMemories() {
     } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
       memories = searchResult.data;
     }
-    
+
     if (!memories || memories.length === 0) {
       console.log(chalk.yellow('No memories found matching your search.'));
       return;
     }
-    
+
     memories.forEach((memory, index) => {
       console.log(chalk.green(`${index + 1}. ${memory.key || `result-${index}`}`));
       console.log(`   Category: ${memory.type || 'general'}`);
@@ -1319,7 +1319,7 @@ async function searchMemories() {
       console.log(`   Value: ${JSON.stringify(memory.value || memory, null, 2)}`);
       console.log('');
     });
-    
+
   } catch (error) {
     console.error(chalk.red('Error searching memories:'), error.message);
   }
@@ -1358,23 +1358,23 @@ async function storeMemoryWizard() {
         message: 'Memory content (JSON or text):'
       }
     ]);
-    
+
     const mcpWrapper = await getMcpWrapper();
     let memoryValue;
-    
+
     // Try to parse as JSON, fall back to string
     try {
       memoryValue = JSON.parse(answers.value);
     } catch {
       memoryValue = answers.value;
     }
-    
+
     await mcpWrapper.storeMemory('hive-mind', answers.key, memoryValue, answers.category);
-    
-    console.log(chalk.green(`\n✅ Memory stored successfully!`));
+
+    console.log(chalk.green('\n✅ Memory stored successfully!'));
     console.log(`Key: ${answers.key}`);
     console.log(`Category: ${answers.category}`);
-    
+
   } catch (error) {
     console.error(chalk.red('Error storing memory:'), error.message);
   }
@@ -1386,12 +1386,12 @@ async function storeMemoryWizard() {
 async function showMemoryStats() {
   try {
     console.log(chalk.blue('\n📊 Memory Statistics\n'));
-    
+
     const mcpWrapper = await getMcpWrapper();
-    
+
     // Search for all memories with an empty pattern to get everything
     const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
-    
+
     // Handle different possible response structures
     let memories = [];
     if (searchResult && Array.isArray(searchResult.results)) {
@@ -1401,13 +1401,13 @@ async function showMemoryStats() {
     } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
       memories = searchResult.data;
     }
-    
+
     if (!memories || memories.length === 0) {
       console.log(chalk.yellow('No memories found.'));
       console.log(chalk.gray('Use "Store new memory" to create your first memory.'));
       return;
     }
-    
+
     // Calculate statistics
     const stats = {
       total: memories.length,
@@ -1416,12 +1416,12 @@ async function showMemoryStats() {
       newestDate: null,
       totalSize: 0
     };
-    
+
     memories.forEach(memory => {
       // Count by category
       const category = memory.category || memory.type || 'general';
       stats.categories[category] = (stats.categories[category] || 0) + 1;
-      
+
       // Track dates
       const date = new Date(memory.timestamp || Date.now());
       if (!stats.oldestDate || date < stats.oldestDate) {
@@ -1430,21 +1430,21 @@ async function showMemoryStats() {
       if (!stats.newestDate || date > stats.newestDate) {
         stats.newestDate = date;
       }
-      
+
       // Estimate size
       stats.totalSize += JSON.stringify(memory).length;
     });
-    
+
     console.log(chalk.cyan('Total memories:'), stats.total);
     console.log(chalk.cyan('Estimated size:'), `${(stats.totalSize / 1024).toFixed(2)} KB`);
-    console.log(chalk.cyan('Date range:'), 
+    console.log(chalk.cyan('Date range:'),
       `${stats.oldestDate?.toLocaleDateString()} - ${stats.newestDate?.toLocaleDateString()}`);
-    
+
     console.log(chalk.cyan('\nBy category:'));
     Object.entries(stats.categories).forEach(([category, count]) => {
       console.log(`  ${category}: ${count}`);
     });
-    
+
   } catch (error) {
     console.error(chalk.red('Error getting memory stats:'), error.message);
   }
@@ -1464,7 +1464,7 @@ async function cleanMemories() {
         validate: input => input > 0
       }
     ]);
-    
+
     const { confirm } = await inquirer.prompt([
       {
         type: 'confirm',
@@ -1473,17 +1473,17 @@ async function cleanMemories() {
         default: false
       }
     ]);
-    
+
     if (!confirm) {
       console.log(chalk.yellow('Operation cancelled.'));
       return;
     }
-    
+
     const mcpWrapper = await getMcpWrapper();
-    
+
     // Get all memories first
     const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
-    
+
     // Handle different possible response structures
     let memories = [];
     if (searchResult && Array.isArray(searchResult.results)) {
@@ -1493,25 +1493,25 @@ async function cleanMemories() {
     } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
       memories = searchResult.data;
     }
-    
+
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
-    
+
     // Filter memories older than cutoff date
     const oldMemories = memories.filter(memory => {
       const memoryDate = new Date(memory.timestamp || 0);
       return memoryDate < cutoffDate;
     });
-    
+
     if (oldMemories.length === 0) {
       console.log(chalk.yellow('\n🎉 No old memories found to clean.'));
       return;
     }
-    
+
     console.log(chalk.green(`\n✅ Found ${oldMemories.length} old memories to clean.`));
     console.log(chalk.gray('Note: Individual memory deletion not yet implemented in MCPWrapper.'));
     console.log(chalk.gray('Consider implementing batch deletion or memory lifecycle management.'));
-    
+
   } catch (error) {
     console.error(chalk.red('Error cleaning memories:'), error.message);
   }
@@ -1530,12 +1530,12 @@ async function exportMemoryBackup() {
         default: `hive-mind-memory-backup-${new Date().toISOString().split('T')[0]}.json`
       }
     ]);
-    
+
     const mcpWrapper = await getMcpWrapper();
-    
+
     // Get all memories using search
     const searchResult = await mcpWrapper.searchMemory('hive-mind', '');
-    
+
     // Handle different possible response structures
     let memories = [];
     if (searchResult && Array.isArray(searchResult.results)) {
@@ -1545,7 +1545,7 @@ async function exportMemoryBackup() {
     } else if (searchResult && searchResult.data && Array.isArray(searchResult.data)) {
       memories = searchResult.data;
     }
-    
+
     const backup = {
       exportDate: new Date().toISOString(),
       version: '1.0',
@@ -1553,13 +1553,13 @@ async function exportMemoryBackup() {
       namespace: 'hive-mind',
       memories: memories
     };
-    
+
     const fs = await import('fs');
     fs.writeFileSync(filename, JSON.stringify(backup, null, 2));
-    
+
     console.log(chalk.green(`\n✅ Memory backup exported to: ${filename}`));
     console.log(chalk.cyan(`Exported ${memories.length} memories`));
-    
+
   } catch (error) {
     console.error(chalk.red('Error exporting memory backup:'), error.message);
   }
@@ -1571,16 +1571,16 @@ async function exportMemoryBackup() {
 async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, flags) {
   console.log('\n' + chalk.bold('🚀 Launching Claude Code with Hive Mind Coordination'));
   console.log(chalk.gray('─'.repeat(60)));
-  
+
   const spinner = ora('Preparing Hive Mind coordination prompt...').start();
-  
+
   try {
     // Generate comprehensive Hive Mind prompt
     const workerGroups = groupWorkersByType(workers);
     const hiveMindPrompt = generateHiveMindPrompt(swarmId, swarmName, objective, workers, workerGroups, flags);
-    
+
     spinner.succeed('Hive Mind coordination prompt ready!');
-    
+
     // Display coordination summary
     console.log('\n' + chalk.bold('🧠 Hive Mind Configuration'));
     console.log(chalk.gray('─'.repeat(60)));
@@ -1591,12 +1591,12 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
     console.log(chalk.cyan('Worker Types:'), Object.keys(workerGroups).join(', '));
     console.log(chalk.cyan('Consensus Algorithm:'), flags.consensus || 'majority');
     console.log(chalk.cyan('MCP Tools:'), 'Full Claude-Flow integration enabled');
-    
+
     try {
       // Check if claude command exists
       const { spawn: childSpawn, execSync } = await import('child_process');
       let claudeAvailable = false;
-      
+
       try {
         execSync('which claude', { stdio: 'ignore' });
         claudeAvailable = true;
@@ -1605,44 +1605,44 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
         console.log(chalk.gray('Install it with: npm install -g @anthropic-ai/claude-code'));
         console.log(chalk.gray('\nFalling back to displaying instructions...'));
       }
-      
-      
+
+
       if (claudeAvailable && !flags.dryRun) {
         // Pass the prompt directly as an argument to claude
         const claudeArgs = [hiveMindPrompt];
-        
+
         // Add auto-permission flag by default for hive-mind mode (unless explicitly disabled)
         if (flags['dangerously-skip-permissions'] !== false && !flags['no-auto-permissions']) {
           claudeArgs.push('--dangerously-skip-permissions');
           console.log(chalk.yellow('🔓 Using --dangerously-skip-permissions by default for seamless hive-mind execution'));
         }
-        
+
         // Spawn claude with the prompt as the first argument
         const claudeProcess = childSpawn('claude', claudeArgs, {
           stdio: 'inherit',
           shell: false
         });
-        
+
         console.log(chalk.green('\n✓ Claude Code launched with Hive Mind coordination'));
         console.log(chalk.blue('  The Queen coordinator will orchestrate all worker agents'));
         console.log(chalk.blue('  Use MCP tools for collective intelligence and task distribution'));
-        
+
       } else if (flags.dryRun) {
         console.log(chalk.blue('\nDry run - would execute Claude Code with prompt:'));
         console.log(chalk.gray('Prompt length:'), hiveMindPrompt.length, 'characters');
         console.log(chalk.gray('\nFirst 500 characters of prompt:'));
         console.log(chalk.yellow(hiveMindPrompt.substring(0, 500) + '...'));
-        
+
         // Save prompt to file for inspection
         const promptFile = `hive-mind-prompt-${swarmId}.txt`;
         await writeFile(promptFile, hiveMindPrompt, 'utf8');
         console.log(chalk.green(`\n✓ Full prompt saved to: ${promptFile}`));
-        
+
       } else {
         // Claude not available - save prompt and show instructions
         const promptFile = `hive-mind-prompt-${swarmId}.txt`;
         await writeFile(promptFile, hiveMindPrompt, 'utf8');
-        
+
         console.log(chalk.yellow('\n📋 Manual Execution Instructions:'));
         console.log(chalk.gray('─'.repeat(50)));
         console.log(chalk.gray('1. Install Claude Code:'));
@@ -1654,24 +1654,24 @@ async function spawnClaudeCodeInstances(swarmId, swarmName, objective, workers, 
         console.log(chalk.gray('\n4. With auto-permissions:'));
         console.log(chalk.green(`   claude --dangerously-skip-permissions < ${promptFile}`));
       }
-      
+
     } catch (error) {
       console.error(chalk.red('\nFailed to launch Claude Code:'), error.message);
-      
+
       // Save prompt as fallback
       const promptFile = `hive-mind-prompt-${swarmId}-fallback.txt`;
       await writeFile(promptFile, hiveMindPrompt, 'utf8');
       console.log(chalk.green(`\n✓ Prompt saved to: ${promptFile}`));
       console.log(chalk.yellow('\nYou can run Claude Code manually with the saved prompt'));
     }
-    
+
     console.log('\n' + chalk.bold('💡 Pro Tips:'));
     console.log(chalk.gray('─'.repeat(30)));
     console.log('• Use --auto-spawn to launch instances automatically');
     console.log('• Add --verbose for detailed coordination context');
     console.log('• Monitor with: claude-flow hive-mind status');
     console.log('• Share memories: mcp__ruv-swarm__memory_usage');
-    
+
   } catch (error) {
     spinner.fail('Failed to prepare Claude Code coordination');
     console.error(chalk.red('Error:'), error.message);
@@ -1686,7 +1686,7 @@ function generateHiveMindPrompt(swarmId, swarmName, objective, workers, workerGr
   const workerTypes = Object.keys(workerGroups);
   const queenType = flags.queenType || 'strategic';
   const consensusAlgorithm = flags.consensus || 'majority';
-  
+
   return `🧠 HIVE MIND COLLECTIVE INTELLIGENCE SYSTEM
 ═══════════════════════════════════════════════
 
@@ -1847,7 +1847,7 @@ function generateCoordinationInstructions(swarmId, swarmName, objective, workers
     hiveMindEndpoint: 'ws://localhost:3000/hive-mind',
     mcpTools: [
       'mcp__ruv-swarm__memory_usage',
-      'mcp__ruv-swarm__swarm_monitor', 
+      'mcp__ruv-swarm__swarm_monitor',
       'mcp__ruv-swarm__task_orchestrate',
       'mcp__ruv-swarm__neural_train',
       'mcp__ruv-swarm__consensus_vote',
@@ -1926,7 +1926,7 @@ ${getWorkerTypeInstructions(workerType)}
 Remember: You are part of a COLLECTIVE INTELLIGENCE. Your individual success depends on swarm coordination!`;
 
   const command = `claude code --context "${context.replace(/"/g, '\\"')}"`;
-  
+
   return {
     title: `${workerType.toUpperCase()} Agent (${typeWorkers.length} instance${typeWorkers.length > 1 ? 's' : ''})`,
     command,
@@ -1946,38 +1946,38 @@ function getWorkerTypeInstructions(workerType) {
 - Validate source credibility and relevance
 - Synthesize insights from multiple sources
 - Share research methodology and results`,
-    
+
     coder: `- Write clean, maintainable, well-documented code
 - Follow project conventions and best practices
 - Test implementations thoroughly
 - Document code changes and decisions
 - Review and optimize existing code`,
-    
+
     analyst: `- Analyze data patterns and trends
 - Create comprehensive reports and visualizations
 - Identify key insights and recommendations
 - Validate analytical methodologies
 - Correlate findings across data sources`,
-    
+
     tester: `- Design comprehensive test strategies
 - Execute functional, integration, and performance tests
 - Document test results and issues
 - Verify bug fixes and improvements
 - Ensure quality standards and coverage`,
-    
+
     coordinator: `- Monitor overall progress and coordination
 - Facilitate communication between agents
 - Resolve conflicts and blockers
 - Optimize resource allocation
 - Ensure alignment with objectives`,
-    
+
     architect: `- Design system architecture and components
 - Define technical standards and patterns
 - Create implementation guidelines
 - Review and approve design decisions
 - Ensure scalability and maintainability`
   };
-  
+
   return instructions[workerType] || `- Execute tasks according to ${workerType} best practices
 - Collaborate effectively with team members
 - Document work and share insights

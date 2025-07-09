@@ -29,17 +29,17 @@ export class SwarmWebUIIntegration {
 
       // Initialize actual swarm
       this.ui.addLog('info', `Initializing ${topology} swarm with ${maxAgents} agents...`);
-      
+
       // This would integrate with actual ruv-swarm MCP tools
       // For now, simulate swarm initialization
       this.swarmActive = true;
       this.swarmId = `swarm-${Date.now()}`;
-      
+
       this.ui.addLog('success', `Swarm ${this.swarmId} initialized successfully`);
-      
+
       // Update UI with swarm status
       this.updateSwarmStatus();
-      
+
     } catch (err) {
       this.ui.addLog('error', `Failed to initialize swarm: ${err.message}`);
     }
@@ -64,7 +64,7 @@ export class SwarmWebUIIntegration {
   initializeMockSwarm() {
     this.swarmActive = true;
     this.swarmId = 'mock-swarm';
-    
+
     // Create mock agents
     const agentTypes = ['researcher', 'coder', 'analyst', 'coordinator', 'tester'];
     agentTypes.forEach((type, index) => {
@@ -121,7 +121,7 @@ export class SwarmWebUIIntegration {
    * Update swarm status in UI
    */
   updateSwarmStatus() {
-    if (!this.swarmActive) return;
+    if (!this.swarmActive) {return;}
 
     // Update UI agents with swarm data
     this.ui.agents = Array.from(this.agents.values());
@@ -155,7 +155,7 @@ export class SwarmWebUIIntegration {
 
     this.agents.set(agentId, agent);
     this.updateSwarmStatus();
-    
+
     this.ui.addLog('success', `Spawned ${type} agent: ${agent.name}`);
     return agentId;
   }
@@ -182,7 +182,7 @@ export class SwarmWebUIIntegration {
 
     this.tasks.set(taskId, task);
     this.updateSwarmStatus();
-    
+
     this.ui.addLog('success', `Created task: ${description}`);
     return taskId;
   }
@@ -248,7 +248,7 @@ export class SwarmWebUIIntegration {
     const totalAgents = this.agents.size;
     const activeAgents = Array.from(this.agents.values()).filter(a => a.status === 'working').length;
     const idleAgents = totalAgents - activeAgents;
-    
+
     const totalTasks = this.tasks.size;
     const completedTasks = Array.from(this.tasks.values()).filter(t => t.status === 'completed').length;
     const pendingTasks = Array.from(this.tasks.values()).filter(t => t.status === 'pending').length;
@@ -275,7 +275,7 @@ export class SwarmWebUIIntegration {
    * Stop swarm
    */
   async stopSwarm() {
-    if (!this.swarmActive) return;
+    if (!this.swarmActive) {return;}
 
     this.swarmActive = false;
     this.agents.clear();

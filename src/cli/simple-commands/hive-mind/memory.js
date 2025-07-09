@@ -91,7 +91,7 @@ class OptimizedLRUCache {
 
   set(key, data) {
     const size = this._estimateSize(data);
-    
+
     // Check memory pressure
     if (this.currentMemory + size > this.maxMemory) {
       this._evictByMemoryPressure(size);
@@ -164,10 +164,10 @@ class OptimizedLRUCache {
 export class CollectiveMemory extends EventEmitter {
   constructor(config = {}) {
     super();
-    
+
     /** @type {import('better-sqlite3').Database | null} */
     this.db = null;
-    
+
     this.config = {
       swarmId: config.swarmId,
       maxSize: config.maxSize || 100, // MB
@@ -180,7 +180,7 @@ export class CollectiveMemory extends EventEmitter {
       enableAsyncOperations: config.enableAsyncOperations !== false,
       ...config
     };
-    
+
     this.state = {
       totalSize: 0,
       entryCount: 0,
@@ -194,12 +194,12 @@ export class CollectiveMemory extends EventEmitter {
         memoryEfficiency: 0
       }
     };
-    
+
     this.gcTimer = null;
-    
+
     // Optimized cache with LRU eviction
     this.cache = new OptimizedLRUCache(this.config.cacheSize, this.config.cacheMemoryMB);
-    
+
     // Memory pools for frequently created objects
     this.pools = {
       queryResults: new MemoryPool(
@@ -211,16 +211,16 @@ export class CollectiveMemory extends EventEmitter {
         (obj) => { obj.id = obj.key = obj.value = ''; Object.keys(obj.metadata).forEach(k => delete obj.metadata[k]); }
       )
     };
-    
+
     // Prepared statements for better performance
     this.statements = new Map();
-    
+
     // Background worker for heavy operations
     this.backgroundWorker = null;
-    
+
     this._initialize();
   }
-  
+
   /**
    * Initialize collective memory with optimizations
    */
@@ -228,7 +228,7 @@ export class CollectiveMemory extends EventEmitter {
     try {
       // Open database connection with optimizations
       this.db = new Database(this.config.dbPath);
-      
+
       // Performance optimizations
       this.db.pragma('journal_mode = WAL');
       this.db.pragma('synchronous = NORMAL');
@@ -236,7 +236,7 @@ export class CollectiveMemory extends EventEmitter {
       this.db.pragma('temp_store = MEMORY');
       this.db.pragma('mmap_size = 268435456'); // 256MB memory mapping
       this.db.pragma('optimize');
-      
+
       // Ensure table exists with optimized schema
       this.db.exec(`
         CREATE TABLE IF NOT EXISTS collective_memory (
@@ -277,22 +277,22 @@ export class CollectiveMemory extends EventEmitter {
         FROM collective_memory
         GROUP BY swarm_id, type;
       `);
-      
+
       // Prepare optimized statements
       this._prepareStatements();
-      
+
       // Load initial statistics
       this._updateStatistics();
-      
+
       // Start background optimization processes
       this._startOptimizationTimers();
-      
+
       // Initialize background worker for heavy operations
       if (this.config.enableAsyncOperations) {
         this._initializeBackgroundWorker();
       }
-      
-      this.emit('memory:initialized', { 
+
+      this.emit('memory:initialized', {
         swarmId: this.config.swarmId,
         optimizations: {
           pooling: this.config.enablePooling,
@@ -300,7 +300,7 @@ export class CollectiveMemory extends EventEmitter {
           cacheSize: this.config.cacheSize
         }
       });
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
@@ -316,26 +316,26 @@ export class CollectiveMemory extends EventEmitter {
       (id, swarm_id, key, value, type, confidence, created_by, compressed, size)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `));
-    
+
     this.statements.set('update', this.db.prepare(`
       UPDATE collective_memory 
       SET value = ?, accessed_at = strftime('%s','now'), access_count = access_count + 1,
           compressed = ?, size = ?
       WHERE swarm_id = ? AND key = ?
     `));
-    
+
     this.statements.set('select', this.db.prepare(`
       SELECT value, type, compressed, confidence, access_count
       FROM collective_memory
       WHERE swarm_id = ? AND key = ?
     `));
-    
+
     this.statements.set('updateAccess', this.db.prepare(`
       UPDATE collective_memory
       SET accessed_at = strftime('%s','now'), access_count = access_count + 1
       WHERE swarm_id = ? AND key = ?
     `));
-    
+
     this.statements.set('searchByPattern', this.db.prepare(`
       SELECT key, type, confidence, created_at, accessed_at, access_count
       FROM collective_memory
@@ -343,7 +343,7 @@ export class CollectiveMemory extends EventEmitter {
       ORDER BY access_count DESC, confidence DESC
       LIMIT ?
     `));
-    
+
     this.statements.set('getStats', this.db.prepare(`
       SELECT 
         COUNT(*) as count,
@@ -354,12 +354,12 @@ export class CollectiveMemory extends EventEmitter {
       FROM collective_memory
       WHERE swarm_id = ?
     `));
-    
+
     this.statements.set('deleteExpired', this.db.prepare(`
       DELETE FROM collective_memory
       WHERE swarm_id = ? AND type = ? AND (strftime('%s','now') - accessed_at) > ?
     `));
-    
+
     this.statements.set('getLRU', this.db.prepare(`
       SELECT id, size FROM collective_memory
       WHERE swarm_id = ? AND type NOT IN ('system', 'consensus')
@@ -374,13 +374,13 @@ export class CollectiveMemory extends EventEmitter {
   _startOptimizationTimers() {
     // Main garbage collection
     this.gcTimer = setInterval(() => this._garbageCollect(), this.config.gcInterval);
-    
+
     // Database optimization
     this.optimizeTimer = setInterval(() => this._optimizeDatabase(), 1800000); // 30 minutes
-    
+
     // Cache cleanup
     this.cacheTimer = setInterval(() => this._optimizeCache(), 60000); // 1 minute
-    
+
     // Performance monitoring
     this.metricsTimer = setInterval(() => this._updatePerformanceMetrics(), 30000); // 30 seconds
   }
@@ -394,7 +394,7 @@ export class CollectiveMemory extends EventEmitter {
     this.backgroundQueue = [];
     this.backgroundProcessing = false;
   }
-  
+
   /**
    * Store data in collective memory
    */
@@ -402,26 +402,26 @@ export class CollectiveMemory extends EventEmitter {
     try {
       const serialized = JSON.stringify(value);
       const size = Buffer.byteLength(serialized);
-      const shouldCompress = size > this.config.compressionThreshold && 
+      const shouldCompress = size > this.config.compressionThreshold &&
                            MEMORY_TYPES[type]?.compress;
-      
-      let storedValue = serialized;
+
+      const storedValue = serialized;
       let compressed = 0;
-      
+
       if (shouldCompress) {
         // In production, use proper compression like zlib
         // For now, we'll just mark it as compressed
         compressed = 1;
       }
-      
+
       const id = `${this.config.swarmId}-${key}-${Date.now()}`;
-      
+
       // Check if key already exists
       const existing = this.db.prepare(`
         SELECT id FROM collective_memory 
         WHERE swarm_id = ? AND key = ?
       `).get(this.config.swarmId, key);
-      
+
       if (existing) {
         // Update existing entry
         this.db.prepare(`
@@ -457,7 +457,7 @@ export class CollectiveMemory extends EventEmitter {
           size
         );
       }
-      
+
       // Update cache
       this.cache.set(key, {
         value,
@@ -465,23 +465,23 @@ export class CollectiveMemory extends EventEmitter {
         timestamp: Date.now(),
         size
       });
-      
+
       // Check memory limits
       this._checkMemoryLimits();
-      
+
       // Track access pattern
       this._trackAccess(key, 'write');
-      
+
       this.emit('memory:stored', { key, type, size });
-      
+
       return { success: true, id, size };
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Retrieve data from collective memory
    */
@@ -493,19 +493,19 @@ export class CollectiveMemory extends EventEmitter {
         this._trackAccess(key, 'cache_hit');
         return cached.value;
       }
-      
+
       // Query database
       const result = this.db.prepare(`
         SELECT value, type, compressed, confidence
         FROM collective_memory
         WHERE swarm_id = ? AND key = ?
       `).get(this.config.swarmId, key);
-      
+
       if (!result) {
         this._trackAccess(key, 'miss');
         return null;
       }
-      
+
       // Update access statistics
       this.db.prepare(`
         UPDATE collective_memory
@@ -513,16 +513,16 @@ export class CollectiveMemory extends EventEmitter {
             access_count = access_count + 1
         WHERE swarm_id = ? AND key = ?
       `).run(this.config.swarmId, key);
-      
+
       // Decompress if needed
-      let value = result.value;
+      const value = result.value;
       if (result.compressed) {
         // In production, decompress here
       }
-      
+
       // Parse JSON
       const parsed = JSON.parse(value);
-      
+
       // Add to cache
       this.cache.set(key, {
         value: parsed,
@@ -530,17 +530,17 @@ export class CollectiveMemory extends EventEmitter {
         timestamp: Date.now(),
         confidence: result.confidence
       });
-      
+
       this._trackAccess(key, 'read');
-      
+
       return parsed;
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Search collective memory
    */
@@ -549,7 +549,7 @@ export class CollectiveMemory extends EventEmitter {
       const limit = options.limit || 50;
       const type = options.type || null;
       const minConfidence = options.minConfidence || 0;
-      
+
       let query = `
         SELECT key, type, confidence, created_at, accessed_at, access_count
         FROM collective_memory
@@ -557,29 +557,29 @@ export class CollectiveMemory extends EventEmitter {
         AND key LIKE ?
         AND confidence >= ?
       `;
-      
+
       const params = [this.config.swarmId, `%${pattern}%`, minConfidence];
-      
+
       if (type) {
         query += ' AND type = ?';
         params.push(type);
       }
-      
+
       query += ' ORDER BY access_count DESC, confidence DESC LIMIT ?';
       params.push(limit);
-      
+
       const results = this.db.prepare(query).all(...params);
-      
+
       this._trackAccess(`search:${pattern}`, 'search');
-      
+
       return results;
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Get related memories using association
    */
@@ -587,8 +587,8 @@ export class CollectiveMemory extends EventEmitter {
     try {
       // Get the original memory
       const original = await this.retrieve(key);
-      if (!original) return [];
-      
+      if (!original) {return [];}
+
       // Simple association: find memories accessed around the same time
       const result = this.db.prepare(`
         SELECT m1.key, m1.type, m1.confidence, m1.access_count
@@ -601,15 +601,15 @@ export class CollectiveMemory extends EventEmitter {
         ORDER BY m1.confidence DESC, m1.access_count DESC
         LIMIT ?
       `).all(key, key, this.config.swarmId, limit);
-      
+
       return result;
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Build associations between memories
    */
@@ -622,22 +622,22 @@ export class CollectiveMemory extends EventEmitter {
         strength,
         created: Date.now()
       }, 'system');
-      
+
       await this.store(`assoc:${key2}:${key1}`, {
         from: key2,
         to: key1,
         strength,
         created: Date.now()
       }, 'system');
-      
+
       this.emit('memory:associated', { key1, key2, strength });
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Consolidate similar memories
    */
@@ -652,50 +652,50 @@ export class CollectiveMemory extends EventEmitter {
         ORDER BY created_at DESC
         LIMIT 1000
       `).all(this.config.swarmId);
-      
+
       const consolidated = new Map();
-      
+
       // Group by similarity (simple implementation)
       memories.forEach(memory => {
         const value = JSON.parse(memory.value);
         const category = this._categorizeMemory(value);
-        
+
         if (!consolidated.has(category)) {
           consolidated.set(category, []);
         }
-        
+
         consolidated.get(category).push({
           ...memory,
           value
         });
       });
-      
+
       // Merge similar memories
       let mergeCount = 0;
       consolidated.forEach((group, category) => {
         if (group.length > 1) {
           const merged = this._mergeMemories(group);
-          
+
           // Store merged memory
           this.store(`consolidated:${category}`, merged, 'knowledge', {
             confidence: merged.confidence,
             createdBy: 'consolidation'
           });
-          
+
           mergeCount++;
         }
       });
-      
+
       this.emit('memory:consolidated', { categories: consolidated.size, merged: mergeCount });
-      
+
       return { categories: consolidated.size, merged: mergeCount };
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Categorize memory for consolidation
    */
@@ -704,15 +704,15 @@ export class CollectiveMemory extends EventEmitter {
     if (typeof value === 'string') {
       return 'text';
     }
-    
+
     if (typeof value === 'object') {
       const keys = Object.keys(value).sort().join(':');
       return `object:${keys.substring(0, 50)}`;
     }
-    
+
     return 'other';
   }
-  
+
   /**
    * Merge similar memories
    */
@@ -721,25 +721,25 @@ export class CollectiveMemory extends EventEmitter {
     let totalWeight = 0;
     let weightedConfidence = 0;
     const mergedValue = {};
-    
+
     memories.forEach(memory => {
       const weight = memory.access_count + 1;
       totalWeight += weight;
       weightedConfidence += memory.confidence * weight;
-      
+
       // Merge values (simple implementation)
       if (typeof memory.value === 'object') {
         Object.assign(mergedValue, memory.value);
       }
     });
-    
+
     return {
       value: mergedValue,
       confidence: weightedConfidence / totalWeight,
       sourceCount: memories.length
     };
   }
-  
+
   /**
    * Garbage collection
    */
@@ -747,7 +747,7 @@ export class CollectiveMemory extends EventEmitter {
     try {
       const now = Date.now();
       let deletedCount = 0;
-      
+
       // Delete expired memories based on TTL
       Object.entries(MEMORY_TYPES).forEach(([type, config]) => {
         if (config.ttl) {
@@ -757,11 +757,11 @@ export class CollectiveMemory extends EventEmitter {
             AND type = ?
             AND (julianday('now') - julianday(accessed_at)) * 86400000 > ?
           `).run(this.config.swarmId, type, config.ttl);
-          
+
           deletedCount += result.changes;
         }
       });
-      
+
       // Clear old cache entries
       const cacheTimeout = 300000; // 5 minutes
       this.cache.forEach((value, key) => {
@@ -769,21 +769,21 @@ export class CollectiveMemory extends EventEmitter {
           this.cache.delete(key);
         }
       });
-      
+
       // Update statistics
       this._updateStatistics();
-      
+
       this.state.lastGC = now;
-      
+
       if (deletedCount > 0) {
         this.emit('memory:gc', { deleted: deletedCount, cacheSize: this.cache.size });
       }
-      
+
     } catch (error) {
       this.emit('error', error);
     }
   }
-  
+
   /**
    * Check memory limits and evict if necessary
    */
@@ -797,17 +797,17 @@ export class CollectiveMemory extends EventEmitter {
         ORDER BY accessed_at ASC, access_count ASC
         LIMIT 100
       `).all(this.config.swarmId);
-      
+
       let freedSize = 0;
       toEvict.forEach(memory => {
         this.db.prepare('DELETE FROM collective_memory WHERE id = ?').run(memory.id);
         freedSize += memory.size;
       });
-      
+
       this.emit('memory:evicted', { count: toEvict.length, freedSize });
     }
   }
-  
+
   /**
    * Optimize database performance
    */
@@ -817,17 +817,17 @@ export class CollectiveMemory extends EventEmitter {
       this.db.pragma('optimize');
       this.db.pragma('analysis_limit=1000');
       this.db.exec('ANALYZE');
-      
+
       // Update database statistics
       this._updateStatistics();
-      
+
       this.emit('database:optimized');
-      
+
     } catch (error) {
       this.emit('error', error);
     }
   }
-  
+
   /**
    * Optimize cache performance
    */
@@ -835,7 +835,7 @@ export class CollectiveMemory extends EventEmitter {
     try {
       const now = Date.now();
       const cacheTimeout = 300000; // 5 minutes
-      
+
       // Clear expired cache entries
       if (this.cache.cache) {
         this.cache.cache.forEach((value, key) => {
@@ -844,16 +844,16 @@ export class CollectiveMemory extends EventEmitter {
           }
         });
       }
-      
-      this.emit('cache:optimized', { 
-        size: this.cache.cache ? this.cache.cache.size : 0 
+
+      this.emit('cache:optimized', {
+        size: this.cache.cache ? this.cache.cache.size : 0
       });
-      
+
     } catch (error) {
       this.emit('error', error);
     }
   }
-  
+
   /**
    * Update performance metrics
    */
@@ -862,31 +862,31 @@ export class CollectiveMemory extends EventEmitter {
       // Calculate cache hit rate
       const cacheStats = this.cache.getStats();
       this.state.performanceMetrics.cacheHitRate = cacheStats.hitRate || 0;
-      
+
       // Calculate memory efficiency
-      this.state.performanceMetrics.memoryEfficiency = 
+      this.state.performanceMetrics.memoryEfficiency =
         (this.state.totalSize / (this.config.maxSize * 1024 * 1024)) * 100;
-      
+
       // Update average query time if we have recent measurements
       if (this.state.performanceMetrics.queryTimes.length > 0) {
-        this.state.performanceMetrics.avgQueryTime = 
-          this.state.performanceMetrics.queryTimes.reduce((sum, time) => sum + time, 0) / 
+        this.state.performanceMetrics.avgQueryTime =
+          this.state.performanceMetrics.queryTimes.reduce((sum, time) => sum + time, 0) /
           this.state.performanceMetrics.queryTimes.length;
-        
+
         // Keep only recent query times (last 100)
         if (this.state.performanceMetrics.queryTimes.length > 100) {
-          this.state.performanceMetrics.queryTimes = 
+          this.state.performanceMetrics.queryTimes =
             this.state.performanceMetrics.queryTimes.slice(-100);
         }
       }
-      
+
       this.emit('metrics:updated', this.state.performanceMetrics);
-      
+
     } catch (error) {
       this.emit('error', error);
     }
   }
-  
+
   /**
    * Update memory statistics
    */
@@ -900,17 +900,17 @@ export class CollectiveMemory extends EventEmitter {
       FROM collective_memory
       WHERE swarm_id = ?
     `).get(this.config.swarmId);
-    
+
     this.state.entryCount = stats.count || 0;
     this.state.totalSize = stats.totalSize || 0;
     this.state.avgConfidence = stats.avgConfidence || 1.0;
-    
+
     if (stats.compressedCount > 0) {
       // Estimate compression ratio
       this.state.compressionRatio = 0.6; // Assume 40% compression
     }
   }
-  
+
   /**
    * Track access patterns
    */
@@ -923,40 +923,40 @@ export class CollectiveMemory extends EventEmitter {
       misses: 0,
       lastAccess: Date.now()
     };
-    
+
     switch (operation) {
-      case 'read':
-        pattern.reads++;
-        break;
-      case 'write':
-        pattern.writes++;
-        break;
-      case 'search':
-        pattern.searches++;
-        break;
-      case 'cache_hit':
-        pattern.cacheHits++;
-        break;
-      case 'miss':
-        pattern.misses++;
-        break;
+    case 'read':
+      pattern.reads++;
+      break;
+    case 'write':
+      pattern.writes++;
+      break;
+    case 'search':
+      pattern.searches++;
+      break;
+    case 'cache_hit':
+      pattern.cacheHits++;
+      break;
+    case 'miss':
+      pattern.misses++;
+      break;
     }
-    
+
     pattern.lastAccess = Date.now();
     this.state.accessPatterns.set(key, pattern);
-    
+
     // Keep access patterns size limited
     if (this.state.accessPatterns.size > 1000) {
       // Remove oldest entries
       const sorted = Array.from(this.state.accessPatterns.entries())
         .sort((a, b) => a[1].lastAccess - b[1].lastAccess);
-      
+
       sorted.slice(0, 100).forEach(([key]) => {
         this.state.accessPatterns.delete(key);
       });
     }
   }
-  
+
   /**
    * Get enhanced memory statistics
    */
@@ -981,7 +981,7 @@ export class CollectiveMemory extends EventEmitter {
       }
     };
   }
-  
+
   /**
    * Export memory snapshot
    */
@@ -992,7 +992,7 @@ export class CollectiveMemory extends EventEmitter {
         WHERE swarm_id = ?
         ORDER BY created_at DESC
       `).all(this.config.swarmId);
-      
+
       const snapshot = {
         swarmId: this.config.swarmId,
         timestamp: new Date().toISOString(),
@@ -1002,26 +1002,26 @@ export class CollectiveMemory extends EventEmitter {
           value: JSON.parse(m.value)
         }))
       };
-      
+
       // In production, write to file
       // For now, return the snapshot
       this.emit('memory:exported', { count: memories.length });
-      
+
       return snapshot;
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Import memory snapshot
    */
   async importSnapshot(snapshot) {
     try {
       let imported = 0;
-      
+
       for (const memory of snapshot.memories) {
         await this.store(
           memory.key,
@@ -1034,46 +1034,46 @@ export class CollectiveMemory extends EventEmitter {
         );
         imported++;
       }
-      
+
       this.emit('memory:imported', { count: imported });
-      
+
       return { imported };
-      
+
     } catch (error) {
       this.emit('error', error);
       throw error;
     }
   }
-  
+
   /**
    * Enhanced shutdown with cleanup
    */
   close() {
     // Clear all timers
-    if (this.gcTimer) clearInterval(this.gcTimer);
-    if (this.optimizeTimer) clearInterval(this.optimizeTimer);
-    if (this.cacheTimer) clearInterval(this.cacheTimer);
-    if (this.metricsTimer) clearInterval(this.metricsTimer);
-    
+    if (this.gcTimer) {clearInterval(this.gcTimer);}
+    if (this.optimizeTimer) {clearInterval(this.optimizeTimer);}
+    if (this.cacheTimer) {clearInterval(this.cacheTimer);}
+    if (this.metricsTimer) {clearInterval(this.metricsTimer);}
+
     // Final optimization before closing
     try {
       this.db.pragma('optimize');
     } catch (error) {
       // Ignore errors during shutdown
     }
-    
+
     // Close database
     if (this.db) {
       this.db.close();
     }
-    
+
     // Clear memory pools
     if (this.config.enablePooling) {
       Object.values(this.pools).forEach(pool => {
         pool.pool.length = 0;
       });
     }
-    
+
     const finalStats = {
       cacheStats: this.cache.getStats ? this.cache.getStats() : {},
       poolStats: this.config.enablePooling ? {
@@ -1082,7 +1082,7 @@ export class CollectiveMemory extends EventEmitter {
       } : null,
       performanceMetrics: this.state.performanceMetrics
     };
-    
+
     this.emit('memory:closed', finalStats);
   }
 
@@ -1116,26 +1116,26 @@ export class CollectiveMemory extends EventEmitter {
       issues: [],
       recommendations: []
     };
-    
+
     // Check cache hit rate
     if (analytics.cache.hitRate < 50) {
       health.issues.push('Low cache hit rate');
       health.recommendations.push('Consider increasing cache size');
     }
-    
+
     // Check memory usage
     if (analytics.basic.utilizationPercent > 90) {
       health.status = 'warning';
       health.issues.push('High memory utilization');
       health.recommendations.push('Consider increasing max memory or running garbage collection');
     }
-    
+
     // Check query performance
     if (analytics.performance.avgQueryTime > 100) {
       health.issues.push('Slow query performance');
       health.recommendations.push('Consider database optimization or indexing');
     }
-    
+
     return health;
   }
 }
@@ -1146,37 +1146,37 @@ export class CollectiveMemory extends EventEmitter {
 export class MemoryOptimizer {
   static async optimizeCollectiveMemory(memory) {
     const startTime = performance.now();
-    
+
     // Run comprehensive optimization
     await memory._optimizeDatabase();
     memory._optimizeCache();
     memory._garbageCollect();
-    
+
     const duration = performance.now() - startTime;
-    
+
     return {
       duration,
       analytics: memory.getAnalytics(),
       health: await memory.healthCheck()
     };
   }
-  
+
   static calculateOptimalCacheSize(memoryStats, accessPatterns) {
     const avgEntrySize = memoryStats.totalSize / memoryStats.entryCount;
     const hotKeys = Array.from(accessPatterns.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, Math.min(1000, memoryStats.entryCount * 0.2));
-    
+
     const optimalCacheEntries = hotKeys.length * 1.2; // 20% buffer
     const optimalCacheMemoryMB = (optimalCacheEntries * avgEntrySize) / (1024 * 1024);
-    
+
     return {
       entries: Math.ceil(optimalCacheEntries),
       memoryMB: Math.ceil(optimalCacheMemoryMB),
       efficiency: hotKeys.length / memoryStats.entryCount * 100
     };
   }
-  
+
   static generateOptimizationReport(analytics) {
     const report = {
       timestamp: new Date().toISOString(),
@@ -1184,12 +1184,12 @@ export class MemoryOptimizer {
       recommendations: [],
       metrics: analytics
     };
-    
+
     // Performance summary
     report.summary.avgQueryTime = analytics.performance.avgQueryTime;
     report.summary.cacheHitRate = analytics.cache.hitRate || 0;
     report.summary.memoryEfficiency = analytics.cache.memoryUsage / (1024 * 1024);
-    
+
     // Generate recommendations
     if ((analytics.cache.hitRate || 0) < 70) {
       report.recommendations.push({
@@ -1199,7 +1199,7 @@ export class MemoryOptimizer {
         impact: 'Reduce database queries by up to 30%'
       });
     }
-    
+
     if (analytics.performance.avgQueryTime > 50) {
       report.recommendations.push({
         type: 'database',
@@ -1208,7 +1208,7 @@ export class MemoryOptimizer {
         impact: 'Improve query performance by 20-40%'
       });
     }
-    
+
     if (analytics.pools?.queryResults?.reuseRate < 50) {
       report.recommendations.push({
         type: 'pooling',
@@ -1217,7 +1217,7 @@ export class MemoryOptimizer {
         impact: 'Reduce garbage collection pressure'
       });
     }
-    
+
     return report;
   }
 }

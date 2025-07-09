@@ -27,7 +27,7 @@ export class ProcessUI {
     this.processes = new Map();
     this.running = true;
     this.selectedIndex = 0;
-    
+
     // Initialize process states
     PROCESSES.forEach(p => {
       this.processes.set(p.id, {
@@ -40,19 +40,19 @@ export class ProcessUI {
       });
     });
   }
-  
+
   async start() {
     // Clear screen
     console.clear();
-    
+
     // Show welcome
     printSuccess('🧠 Claude-Flow Process Management UI v1.0.43');
     console.log('─'.repeat(60));
     console.log();
-    
+
     // Initial render
     this.render();
-    
+
     // Main UI loop
     while (this.running) {
       await this.handleInput();
@@ -62,38 +62,38 @@ export class ProcessUI {
       }
     }
   }
-  
+
   render() {
     // Clear screen and move cursor to top
     console.log('\x1b[2J\x1b[H');
-    
+
     // Header
     console.log(colors.cyan('🧠 Claude-Flow Process Manager'));
     console.log(colors.gray('─'.repeat(60)));
     console.log();
-    
+
     // Process list
     console.log(colors.white('Processes:'));
     console.log();
-    
+
     let index = 0;
     for (const [id, process] of this.processes) {
       const selected = index === this.selectedIndex;
       const prefix = selected ? colors.yellow('▶ ') : '  ';
       const status = this.getStatusIcon(process.status);
       const name = selected ? colors.yellow(process.name) : colors.white(process.name);
-      
+
       console.log(`${prefix}[${index + 1}] ${status} ${name}`);
       console.log(`     ${colors.gray(process.description)}`);
-      
+
       if (process.status === 'running') {
         console.log(`     ${colors.gray(`PID: ${process.pid} | Uptime: ${this.formatUptime(process.uptime)}`)}`);
       }
       console.log();
-      
+
       index++;
     }
-    
+
     // Controls
     console.log(colors.gray('─'.repeat(60)));
     console.log(colors.white('Controls:'));
@@ -103,87 +103,87 @@ export class ProcessUI {
     console.log();
     console.log(colors.gray('─'.repeat(60)));
   }
-  
+
   getStatusIcon(status) {
     switch (status) {
-      case 'running': return colors.green('●');
-      case 'stopped': return colors.gray('○');
-      case 'error': return colors.red('✗');
-      case 'starting': return colors.yellow('◐');
-      default: return colors.gray('?');
+    case 'running': return colors.green('●');
+    case 'stopped': return colors.gray('○');
+    case 'error': return colors.red('✗');
+    case 'starting': return colors.yellow('◐');
+    default: return colors.gray('?');
     }
   }
-  
+
   formatUptime(seconds) {
-    if (seconds < 60) return `${seconds}s`;
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+    if (seconds < 60) {return `${seconds}s`;}
+    if (seconds < 3600) {return `${Math.floor(seconds / 60)}m`;}
     return `${Math.floor(seconds / 3600)}h`;
   }
-  
+
   async handleInput() {
     // Simple input reading
     const decoder = new TextDecoder();
     const encoder = new TextEncoder();
-    
+
     await Deno.stdout.write(encoder.encode('\nCommand: '));
-    
+
     const buf = new Uint8Array(1024);
     const n = await Deno.stdin.read(buf);
-    if (n === null) return;
-    
+    if (n === null) {return;}
+
     const rawInput = decoder.decode(buf.subarray(0, n)).trim();
     // Take only the first line if multiple lines were read
     const input = rawInput.split('\n')[0].toLowerCase();
-    
+
     // Handle commands
     switch (input) {
-      case 'q':
-      case 'quit':
-        this.running = false;
-        console.clear();
-        printSuccess('Goodbye!');
-        Deno.exit(0);  // Exit immediately
-        break;
-        
-      case 'a':
-        await this.startAll();
-        break;
-        
-      case 'z':
-        await this.stopAll();
-        break;
-        
-      case 'r':
-        await this.restartAll();
-        break;
-        
-      case '1':
-      case '2':
-      case '3':
-      case '4':
-      case '5':
-      case '6':
-        const index = parseInt(input) - 1;
-        if (index >= 0 && index < PROCESSES.length) {
-          this.selectedIndex = index;
-          await this.toggleSelected();
-        }
-        break;
-        
-      case ' ':
-      case 'enter':
-      case '':
+    case 'q':
+    case 'quit':
+      this.running = false;
+      console.clear();
+      printSuccess('Goodbye!');
+      Deno.exit(0);  // Exit immediately
+      break;
+
+    case 'a':
+      await this.startAll();
+      break;
+
+    case 'z':
+      await this.stopAll();
+      break;
+
+    case 'r':
+      await this.restartAll();
+      break;
+
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+      const index = parseInt(input) - 1;
+      if (index >= 0 && index < PROCESSES.length) {
+        this.selectedIndex = index;
         await this.toggleSelected();
-        break;
-        
-      default:
-        if (input) {
-          console.log(colors.yellow(`Unknown command: ${input}`));
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
+      }
+      break;
+
+    case ' ':
+    case 'enter':
+    case '':
+      await this.toggleSelected();
+      break;
+
+    default:
+      if (input) {
+        console.log(colors.yellow(`Unknown command: ${input}`));
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
     }
   }
-  
+
   async toggleSelected() {
     const process = Array.from(this.processes.values())[this.selectedIndex];
     if (process.status === 'stopped') {
@@ -192,23 +192,23 @@ export class ProcessUI {
       await this.stopProcess(process.id);
     }
   }
-  
+
   async startProcess(id) {
     const process = this.processes.get(id);
-    if (!process) return;
-    
+    if (!process) {return;}
+
     console.log(colors.yellow(`Starting ${process.name}...`));
     process.status = 'starting';
-    
+
     // Simulate startup
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     process.status = 'running';
     process.pid = Math.floor(Math.random() * 10000) + 1000;
     process.uptime = 0;
-    
+
     console.log(colors.green(`✓ ${process.name} started`));
-    
+
     // Start uptime counter
     const interval = setInterval(() => {
       if (process.status === 'running') {
@@ -218,20 +218,20 @@ export class ProcessUI {
       }
     }, 1000);
   }
-  
+
   async stopProcess(id) {
     const process = this.processes.get(id);
-    if (!process) return;
-    
+    if (!process) {return;}
+
     console.log(colors.yellow(`Stopping ${process.name}...`));
     process.status = 'stopped';
     process.pid = null;
     process.uptime = 0;
-    
+
     await new Promise(resolve => setTimeout(resolve, 300));
     console.log(colors.green(`✓ ${process.name} stopped`));
   }
-  
+
   async startAll() {
     console.log(colors.yellow('Starting all processes...'));
     for (const [id, process] of this.processes) {
@@ -241,7 +241,7 @@ export class ProcessUI {
     }
     console.log(colors.green('✓ All processes started'));
   }
-  
+
   async stopAll() {
     console.log(colors.yellow('Stopping all processes...'));
     for (const [id, process] of this.processes) {
@@ -251,7 +251,7 @@ export class ProcessUI {
     }
     console.log(colors.green('✓ All processes stopped'));
   }
-  
+
   async restartAll() {
     await this.stopAll();
     await new Promise(resolve => setTimeout(resolve, 500));

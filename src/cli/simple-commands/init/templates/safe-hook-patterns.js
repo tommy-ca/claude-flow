@@ -1,6 +1,6 @@
 /**
  * Safe Hook Patterns - Templates for safe Claude Code hook configurations
- * 
+ *
  * These patterns prevent infinite loops that could cost thousands of dollars
  * by avoiding recursive hook execution when hooks call 'claude' commands.
  */
@@ -10,24 +10,24 @@
  * This creates an infinite loop that can cost thousands of dollars!
  */
 export const DANGEROUS_PATTERN_EXAMPLE = {
-  name: "DANGEROUS: Stop hook calling claude command",
-  description: "❌ NEVER USE THIS - Creates infinite recursion loop",
+  name: 'DANGEROUS: Stop hook calling claude command',
+  description: '❌ NEVER USE THIS - Creates infinite recursion loop',
   pattern: {
-    "hooks": {
-      "Stop": [{
-        "matcher": "",
-        "hooks": [{
-          "type": "command",
-          "command": "claude -c -p \"Update all changes to history.md\""
+    'hooks': {
+      'Stop': [{
+        'matcher': '',
+        'hooks': [{
+          'type': 'command',
+          'command': 'claude -c -p "Update all changes to history.md"'
         }]
       }]
     }
   },
   problems: [
-    "🚨 Creates infinite loop: Stop → claude command → Stop → claude command...",
-    "💰 Can cost $3600+ per day by bypassing rate limits",
-    "🚫 Makes system unresponsive",
-    "⚡ No built-in protection in Claude Code"
+    '🚨 Creates infinite loop: Stop → claude command → Stop → claude command...',
+    '💰 Can cost $3600+ per day by bypassing rate limits',
+    '🚫 Makes system unresponsive',
+    '⚡ No built-in protection in Claude Code'
   ]
 };
 
@@ -36,30 +36,30 @@ export const DANGEROUS_PATTERN_EXAMPLE = {
  * Set a flag instead of calling claude directly
  */
 export const SAFE_FLAG_PATTERN = {
-  name: "Safe Pattern: Flag-based updates",
-  description: "✅ Set flag when update needed, run manually",
+  name: 'Safe Pattern: Flag-based updates',
+  description: '✅ Set flag when update needed, run manually',
   pattern: {
-    "hooks": {
-      "Stop": [{
-        "matcher": "",
-        "hooks": [{
-          "type": "command",
-          "command": "bash -c 'echo \"History update needed at $(date)\" > ~/.claude/needs_update && echo \"📝 History update flagged. Run: claude -c -p \\\"Update history.md\\\"\"'"
+    'hooks': {
+      'Stop': [{
+        'matcher': '',
+        'hooks': [{
+          'type': 'command',
+          'command': 'bash -c \'echo "History update needed at $(date)" > ~/.claude/needs_update && echo "📝 History update flagged. Run: claude -c -p \\"Update history.md\\""\''
         }]
       }]
     }
   },
   benefits: [
-    "✅ No recursion - just sets a flag",
-    "💰 Zero risk of infinite API calls",
-    "🔄 User controls when update runs",
-    "📝 Clear instructions for manual execution"
+    '✅ No recursion - just sets a flag',
+    '💰 Zero risk of infinite API calls',
+    '🔄 User controls when update runs',
+    '📝 Clear instructions for manual execution'
   ],
   usage: [
-    "1. Hook sets flag when update is needed",
-    "2. User sees notification",
-    "3. User manually runs: claude -c -p \"Update history.md\"",
-    "4. Update runs once safely"
+    '1. Hook sets flag when update is needed',
+    '2. User sees notification',
+    '3. User manually runs: claude -c -p "Update history.md"',
+    '4. Update runs once safely'
   ]
 };
 
@@ -68,30 +68,30 @@ export const SAFE_FLAG_PATTERN = {
  * React to specific tool usage rather than session end
  */
 export const SAFE_POST_TOOL_PATTERN = {
-  name: "Safe Pattern: PostToolUse hooks",
-  description: "✅ React to specific file operations instead of Stop events",
+  name: 'Safe Pattern: PostToolUse hooks',
+  description: '✅ React to specific file operations instead of Stop events',
   pattern: {
-    "hooks": {
-      "PostToolUse": [{
-        "matcher": "Write|Edit|MultiEdit",
-        "hooks": [{
-          "type": "command",
-          "command": "echo 'File modified: {file}' >> ~/.claude/modifications.log"
+    'hooks': {
+      'PostToolUse': [{
+        'matcher': 'Write|Edit|MultiEdit',
+        'hooks': [{
+          'type': 'command',
+          'command': 'echo \'File modified: {file}\' >> ~/.claude/modifications.log'
         }]
       }]
     }
   },
   benefits: [
-    "✅ Only triggers on actual file changes",
-    "🎯 More precise than Stop hooks",
-    "📝 Logs specific modifications",
-    "🔄 No risk of Stop hook recursion"
+    '✅ Only triggers on actual file changes',
+    '🎯 More precise than Stop hooks',
+    '📝 Logs specific modifications',
+    '🔄 No risk of Stop hook recursion'
   ],
   usage: [
-    "1. Triggers only when files are written/edited",
-    "2. Logs the specific file that was modified", 
-    "3. Can be used for change tracking",
-    "4. Safe to use with any logging command"
+    '1. Triggers only when files are written/edited',
+    '2. Logs the specific file that was modified',
+    '3. Can be used for change tracking',
+    '4. Safe to use with any logging command'
   ]
 };
 
@@ -100,30 +100,30 @@ export const SAFE_POST_TOOL_PATTERN = {
  * Check for hook context before executing claude commands
  */
 export const SAFE_CONDITIONAL_PATTERN = {
-  name: "Safe Pattern: Conditional execution with context check",
-  description: "✅ Check if running in hook context before calling claude",
+  name: 'Safe Pattern: Conditional execution with context check',
+  description: '✅ Check if running in hook context before calling claude',
   pattern: {
-    "hooks": {
-      "Stop": [{
-        "matcher": "",
-        "hooks": [{
-          "type": "command",
-          "command": "bash -c 'if [ -z \"$CLAUDE_HOOK_CONTEXT\" ]; then claude -c -p \"Update history.md\" --skip-hooks; else echo \"Skipping update - in hook context\"; fi'"
+    'hooks': {
+      'Stop': [{
+        'matcher': '',
+        'hooks': [{
+          'type': 'command',
+          'command': 'bash -c \'if [ -z "$CLAUDE_HOOK_CONTEXT" ]; then claude -c -p "Update history.md" --skip-hooks; else echo "Skipping update - in hook context"; fi\''
         }]
       }]
     }
   },
   benefits: [
-    "✅ Checks hook context before execution",
-    "🛡️ Uses --skip-hooks flag for safety",
-    "🔄 Prevents recursive hook calls",
-    "📊 Provides clear feedback"
+    '✅ Checks hook context before execution',
+    '🛡️ Uses --skip-hooks flag for safety',
+    '🔄 Prevents recursive hook calls',
+    '📊 Provides clear feedback'
   ],
   usage: [
-    "1. Checks CLAUDE_HOOK_CONTEXT environment variable",
-    "2. Only runs claude if not in hook context",
-    "3. Uses --skip-hooks to prevent triggering more hooks",
-    "4. Shows clear message when skipping"
+    '1. Checks CLAUDE_HOOK_CONTEXT environment variable',
+    '2. Only runs claude if not in hook context',
+    '3. Uses --skip-hooks to prevent triggering more hooks',
+    '4. Shows clear message when skipping'
   ]
 };
 
@@ -132,21 +132,21 @@ export const SAFE_CONDITIONAL_PATTERN = {
  * Accumulate changes and process them on a schedule
  */
 export const SAFE_BATCH_PATTERN = {
-  name: "Safe Pattern: Batch processing with scheduled execution",
-  description: "✅ Accumulate changes and process them separately",
+  name: 'Safe Pattern: Batch processing with scheduled execution',
+  description: '✅ Accumulate changes and process them separately',
   pattern: {
-    "hooks": {
-      "Stop": [{
-        "matcher": "",
-        "hooks": [{
-          "type": "command",
-          "command": "echo \"$(date): Session ended\" >> ~/.claude/session_log.txt"
+    'hooks': {
+      'Stop': [{
+        'matcher': '',
+        'hooks': [{
+          'type': 'command',
+          'command': 'echo "$(date): Session ended" >> ~/.claude/session_log.txt'
         }]
       }]
     }
   },
   additionalSetup: {
-    cronJob: "# Add to crontab (run every hour):\n# 0 * * * * /path/to/update-history.sh",
+    cronJob: '# Add to crontab (run every hour):\n# 0 * * * * /path/to/update-history.sh',
     updateScript: `#!/bin/bash
 # update-history.sh - Safe batch update script
 LOCK_FILE="~/.claude/update.lock"
@@ -174,10 +174,10 @@ fi
 rm "$LOCK_FILE"`
   },
   benefits: [
-    "✅ No risk of recursion",
-    "⏰ Scheduled processing prevents overload",
-    "🔒 Lock file prevents concurrent updates",
-    "📦 Batches multiple sessions efficiently"
+    '✅ No risk of recursion',
+    '⏰ Scheduled processing prevents overload',
+    '🔒 Lock file prevents concurrent updates',
+    '📦 Batches multiple sessions efficiently'
   ]
 };
 
@@ -186,15 +186,15 @@ rm "$LOCK_FILE"`
  * Use external queue for processing commands
  */
 export const SAFE_QUEUE_PATTERN = {
-  name: "Safe Pattern: Queue-based command processing",
-  description: "✅ Queue commands for external processing",
+  name: 'Safe Pattern: Queue-based command processing',
+  description: '✅ Queue commands for external processing',
   pattern: {
-    "hooks": {
-      "Stop": [{
-        "matcher": "",
-        "hooks": [{
-          "type": "command",
-          "command": "echo '{\"command\": \"update-history\", \"timestamp\": \"'$(date -Iseconds)'\", \"session\": \"'$CLAUDE_SESSION_ID'\"}' >> ~/.claude/command_queue.jsonl"
+    'hooks': {
+      'Stop': [{
+        'matcher': '',
+        'hooks': [{
+          'type': 'command',
+          'command': 'echo \'{"command": "update-history", "timestamp": "\'$(date -Iseconds)\'", "session": "\'$CLAUDE_SESSION_ID\'"}\' >> ~/.claude/command_queue.jsonl'
         }]
       }]
     }
@@ -242,10 +242,10 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             break`,
   benefits: [
-    "✅ Complete separation of hook and claude execution",
-    "⏰ Rate limited processing",
-    "🔄 Handles multiple queued commands",
-    "🛡️ No risk of infinite loops"
+    '✅ Complete separation of hook and claude execution',
+    '⏰ Rate limited processing',
+    '🔄 Handles multiple queued commands',
+    '🛡️ No risk of infinite loops'
   ]
 };
 

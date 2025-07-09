@@ -29,7 +29,7 @@ for (const [dirName, dirInfo] of Object.entries(manifest.directories)) {
     fs.mkdirSync(destPath, { recursive: true });
     console.log(`  ✓ Created ${dirInfo.path}`);
   }
-  
+
   // Create README for empty directories
   if (dirInfo.createEmpty) {
     const readmePath = path.join(destPath, 'README.md');
@@ -47,7 +47,7 @@ let errorCount = 0;
 for (const file of manifest.files) {
   const sourcePath = path.join(SOURCE_DIR, file.source);
   const destPath = path.join(DEST_DIR, file.destination);
-  
+
   try {
     if (fs.existsSync(sourcePath)) {
       // Ensure destination directory exists
@@ -55,7 +55,7 @@ for (const file of manifest.files) {
       if (!fs.existsSync(destDir)) {
         fs.mkdirSync(destDir, { recursive: true });
       }
-      
+
       // Copy file
       fs.copyFileSync(sourcePath, destPath);
       console.log(`  ✓ ${file.destination} (${file.category})`);
@@ -80,7 +80,7 @@ console.log(`  Total files in manifest: ${manifest.files.length}`);
 // Category summary
 console.log('\nFiles by category:');
 for (const [category, info] of Object.entries(manifest.categories)) {
-  const copied = manifest.files.filter(f => f.category === category && 
+  const copied = manifest.files.filter(f => f.category === category &&
     fs.existsSync(path.join(DEST_DIR, f.destination))).length;
   console.log(`  ${category}: ${copied}/${info.count} files`);
 }
@@ -88,11 +88,11 @@ for (const [category, info] of Object.entries(manifest.categories)) {
 // Verify installation
 if (errorCount === 0) {
   console.log('\n✅ Template installation completed successfully!');
-  
+
   // Create a timestamp file
   const timestamp = new Date().toISOString();
   fs.writeFileSync(
-    path.join(__dirname, '.installed'), 
+    path.join(__dirname, '.installed'),
     `Installed: ${timestamp}\nVersion: ${manifest.version}\n`
   );
 } else {

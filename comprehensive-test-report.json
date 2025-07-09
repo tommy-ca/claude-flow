@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-07-09T20:32:13.651Z",
+  "timestamp": "2025-07-09T20:58:40.749Z",
   "platform": "linux",
   "arch": "x64",
   "nodeVersion": "v22.17.0",
@@ -8,9 +8,9 @@
       {
         "name": "System Information",
         "status": "passed",
-        "startTime": 1752093126700,
+        "startTime": 1752094713855,
         "tests": [],
-        "duration": 240,
+        "duration": 231,
         "systemInfo": {
           "platform": "linux",
           "arch": "x64",
@@ -19,24 +19,24 @@
           "memory": 31557320704,
           "cpus": 4,
           "hostname": "devpod-default-cl-b12b0",
-          "uptime": 6023193.89
+          "uptime": 6024781.04
         }
       },
       {
         "name": "Dependency Check",
         "status": "passed",
-        "startTime": 1752093126940,
+        "startTime": 1752094714087,
         "tests": [],
         "duration": 1
       },
       {
         "name": "Performance Tests",
         "status": "passed",
-        "startTime": 1752093126941,
+        "startTime": 1752094714088,
         "tests": [],
-        "duration": 332,
+        "duration": 306,
         "performanceReport": {
-          "timestamp": "2025-07-09T20:32:07.257Z",
+          "timestamp": "2025-07-09T20:58:34.378Z",
           "platform": "linux",
           "arch": "x64",
           "nodeVersion": "v22.17.0",
@@ -63,7 +63,7 @@
               {
                 "name": "Platform Detection",
                 "status": "passed",
-                "duration": 1
+                "duration": 0
               },
               {
                 "name": "Environment Variables",
@@ -78,7 +78,7 @@
               {
                 "name": "Memory Usage Monitoring",
                 "status": "passed",
-                "duration": 182
+                "duration": 175
               },
               {
                 "name": "Garbage Collection Performance",
@@ -99,23 +99,23 @@
       {
         "name": "Load Tests",
         "status": "passed",
-        "startTime": 1752093127273,
+        "startTime": 1752094714394,
         "tests": [],
-        "duration": 2642
+        "duration": 2651
       },
       {
         "name": "CI Compatibility",
         "status": "passed",
-        "startTime": 1752093129915,
+        "startTime": 1752094717045,
         "tests": [],
-        "duration": 3735
+        "duration": 3704
       }
     ],
     "summary": {
       "total": 5,
       "passed": 5,
       "failed": 0,
-      "duration": 6958
+      "duration": 6899
     }
   },
   "environment": {

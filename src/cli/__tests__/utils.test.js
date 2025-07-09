@@ -3,7 +3,7 @@
  */
 
 import { jest } from '@jest/globals';
-import { 
+import {
   parseFlags,
   formatBytes,
   truncateString,
@@ -138,7 +138,7 @@ describe('Utils', () => {
     test('should generate unique IDs', () => {
       const id1 = generateId();
       const id2 = generateId();
-      
+
       expect(id1).not.toBe(id2);
       expect(id1.length).toBeGreaterThan(0);
       expect(typeof id1).toBe('string');
@@ -155,12 +155,12 @@ describe('Utils', () => {
       let attempts = 0;
       const fn = jest.fn(async () => {
         attempts++;
-        if (attempts < 3) throw new Error('Failed');
+        if (attempts < 3) {throw new Error('Failed');}
         return 'success';
       });
 
       const result = await retry(fn, 3, 10);
-      
+
       expect(result).toBe('success');
       expect(fn).toHaveBeenCalledTimes(3);
     });
@@ -180,7 +180,7 @@ describe('Utils', () => {
       const start = Date.now();
       await sleep(50);
       const end = Date.now();
-      
+
       expect(end - start).toBeGreaterThanOrEqual(45); // Allow some margin
     });
   });
@@ -189,7 +189,7 @@ describe('Utils', () => {
     test('should split array into chunks', () => {
       const array = [1, 2, 3, 4, 5, 6, 7];
       const result = chunk(array, 3);
-      
+
       expect(result).toEqual([[1, 2, 3], [4, 5, 6], [7]]);
     });
 
@@ -237,7 +237,7 @@ describe('Utils', () => {
     test('should format timestamp to readable string', () => {
       const timestamp = 1234567890000; // Fixed timestamp
       const result = formatTimestamp(timestamp);
-      
+
       expect(typeof result).toBe('string');
       expect(result.length).toBeGreaterThan(0);
     });
@@ -245,7 +245,7 @@ describe('Utils', () => {
     test('should handle current timestamp', () => {
       const now = Date.now();
       const result = formatTimestamp(now);
-      
+
       expect(typeof result).toBe('string');
       expect(result).toContain('2025'); // Should contain current year
     });

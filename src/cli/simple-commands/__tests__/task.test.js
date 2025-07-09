@@ -20,7 +20,7 @@ jest.mock('chalk', () => ({
     cyan: jest.fn(str => str),
     magenta: jest.fn(str => str),
     dim: jest.fn(str => str),
-    bold: jest.fn(str => str),
+    bold: jest.fn(str => str)
   }
 }));
 
@@ -32,17 +32,17 @@ describe('Task Command', () => {
   beforeEach(() => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-    
+
     mockSpinner = {
       start: jest.fn().mockReturnThis(),
       succeed: jest.fn().mockReturnThis(),
       fail: jest.fn().mockReturnThis(),
       info: jest.fn().mockReturnThis(),
       warn: jest.fn().mockReturnThis(),
-      text: '',
+      text: ''
     };
     ora.mockReturnValue(mockSpinner);
-    
+
     jest.clearAllMocks();
   });
 
@@ -82,7 +82,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['list'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Tasks (2)');
       expect(output).toContain('Implement authentication');
@@ -104,7 +104,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['list'], { status: 'in-progress' });
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Working task');
       expect(output).not.toContain('Done task');
@@ -124,7 +124,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['list'], { assignee: 'agent-1' });
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Agent 1 task');
       expect(output).not.toContain('Agent 2 task');
@@ -136,7 +136,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue({ tasks: [] });
 
       await taskCommand(['list'], {});
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('No tasks found')
       );
@@ -150,11 +150,11 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['create', 'New task title', 'Task description'], {});
-      
+
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
         expect.stringContaining('Task created')
       );
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks).toHaveLength(1);
       expect(writeCall[1].tasks[0].title).toBe('New task title');
@@ -168,7 +168,7 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['create', 'High priority task'], { priority: 'high' });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks[0].priority).toBe('high');
     });
@@ -179,7 +179,7 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['create', 'Tagged task'], { tags: 'api,security,urgent' });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks[0].tags).toEqual(['api', 'security', 'urgent']);
     });
@@ -190,7 +190,7 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['create', 'Assigned task'], { assign: 'agent-1' });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks[0].assignedTo).toBe('agent-1');
     });
@@ -201,7 +201,7 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['create', 'First task'], {});
-      
+
       expect(fs.ensureDir).toHaveBeenCalled();
       expect(fs.writeJson).toHaveBeenCalled();
     });
@@ -220,7 +220,7 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['update', 'task-1'], { status: 'in-progress' });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks[0].status).toBe('in-progress');
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
@@ -240,7 +240,7 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['update', 'task-1'], { assign: 'agent-2' });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks[0].assignedTo).toBe('agent-2');
     });
@@ -257,7 +257,7 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['update', 'task-1'], { priority: 'high' });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks[0].priority).toBe('high');
     });
@@ -267,7 +267,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue({ tasks: [] });
 
       await taskCommand(['update', 'nonexistent'], { status: 'completed' });
-      
+
       expect(mockSpinner.fail).toHaveBeenCalledWith(
         expect.stringContaining('Task nonexistent not found')
       );
@@ -301,7 +301,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['show', 'task-1'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Task Details: task-1');
       expect(output).toContain('Detailed task');
@@ -316,7 +316,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue({ tasks: [] });
 
       await taskCommand(['show', 'nonexistent'], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Task nonexistent not found')
       );
@@ -337,11 +337,11 @@ describe('Task Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await taskCommand(['delete', 'task-1'], { force: true });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].tasks).toHaveLength(1);
       expect(writeCall[1].tasks[0].id).toBe('task-2');
-      
+
       expect(mockSpinner.succeed).toHaveBeenCalledWith(
         expect.stringContaining('Task deleted')
       );
@@ -356,7 +356,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['delete', 'task-1'], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Use --force to confirm')
       );
@@ -379,7 +379,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['stats'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Task Statistics');
       expect(output).toContain('Total: 5');
@@ -406,7 +406,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['search', 'API'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Implement API authentication');
       expect(output).toContain('API documentation');
@@ -426,7 +426,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['search'], { tags: 'api' });
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Task 1');
       expect(output).toContain('Task 3');
@@ -437,7 +437,7 @@ describe('Task Command', () => {
   describe('help subcommand', () => {
     test('should show help when no arguments', async () => {
       await taskCommand([], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Task Management');
       expect(output).toContain('USAGE:');
@@ -450,7 +450,7 @@ describe('Task Command', () => {
       fs.pathExists.mockRejectedValue(new Error('Permission denied'));
 
       await taskCommand(['list'], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error:')
       );
@@ -461,7 +461,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue({ tasks: [] });
 
       await taskCommand(['create', 'Test task'], { priority: 'invalid' });
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid priority')
       );
@@ -473,7 +473,7 @@ describe('Task Command', () => {
       fs.readJson.mockResolvedValue(mockTasks);
 
       await taskCommand(['update', 'task-1'], { status: 'invalid-status' });
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Invalid status')
       );

@@ -35,14 +35,14 @@ const QUEEN_TYPES = {
 export class QueenCoordinator extends EventEmitter {
   constructor(config = {}) {
     super();
-    
+
     this.config = {
       swarmId: config.swarmId,
       type: config.type || 'strategic',
       objective: config.objective || '',
       ...QUEEN_TYPES[config.type || 'strategic']
     };
-    
+
     this.state = {
       status: 'initializing',
       decisionsCount: 0,
@@ -52,7 +52,7 @@ export class QueenCoordinator extends EventEmitter {
       taskQueue: [],
       workerAssignments: new Map()
     };
-    
+
     this.strategies = {
       divide_and_conquer: this._divideAndConquerStrategy.bind(this),
       parallel_execution: this._parallelExecutionStrategy.bind(this),
@@ -60,10 +60,10 @@ export class QueenCoordinator extends EventEmitter {
       consensus_driven: this._consensusDrivenStrategy.bind(this),
       adaptive_learning: this._adaptiveLearningStrategy.bind(this)
     };
-    
+
     this._initialize();
   }
-  
+
   /**
    * Initialize queen coordinator
    */
@@ -74,7 +74,7 @@ export class QueenCoordinator extends EventEmitter {
       traits: this.config.traits
     });
   }
-  
+
   /**
    * Analyze objective and create strategic plan
    */
@@ -87,14 +87,14 @@ export class QueenCoordinator extends EventEmitter {
       recommendedStrategy: this._selectStrategy(objective),
       resourceRequirements: this._estimateResources(objective)
     };
-    
+
     // Store analysis for learning
     this.state.learningData.set('objective_analysis', analysis);
-    
+
     this.emit('objective:analyzed', analysis);
     return analysis;
   }
-  
+
   /**
    * Assess complexity of objective
    */
@@ -104,15 +104,15 @@ export class QueenCoordinator extends EventEmitter {
       keywords: this._countComplexityKeywords(objective),
       components: this._identifyComponents(objective).length
     };
-    
+
     const score = Object.values(complexityFactors).reduce((a, b) => a + b, 0);
-    
-    if (score <= 3) return 'low';
-    if (score <= 6) return 'medium';
-    if (score <= 9) return 'high';
+
+    if (score <= 3) {return 'low';}
+    if (score <= 6) {return 'medium';}
+    if (score <= 9) {return 'high';}
     return 'very_high';
   }
-  
+
   /**
    * Count complexity keywords
    */
@@ -122,11 +122,11 @@ export class QueenCoordinator extends EventEmitter {
       'microservices', 'architecture', 'integration', 'optimization',
       'security', 'performance', 'concurrent', 'real-time'
     ];
-    
+
     const lowerText = text.toLowerCase();
     return complexKeywords.filter(keyword => lowerText.includes(keyword)).length;
   }
-  
+
   /**
    * Identify components in objective
    */
@@ -141,25 +141,25 @@ export class QueenCoordinator extends EventEmitter {
       deployment: ['deploy', 'ci/cd', 'docker', 'kubernetes'],
       monitoring: ['monitor', 'logging', 'metrics', 'observability']
     };
-    
+
     const lowerObjective = objective.toLowerCase();
-    
+
     Object.entries(componentKeywords).forEach(([component, keywords]) => {
       if (keywords.some(keyword => lowerObjective.includes(keyword))) {
         components.push(component);
       }
     });
-    
+
     return components;
   }
-  
+
   /**
    * Identify required capabilities
    */
   _identifyRequiredCapabilities(objective) {
     const capabilities = new Set();
     const components = this._identifyComponents(objective);
-    
+
     // Map components to capabilities
     const capabilityMap = {
       backend: ['coder', 'architect', 'tester'],
@@ -170,69 +170,69 @@ export class QueenCoordinator extends EventEmitter {
       deployment: ['architect', 'optimizer'],
       monitoring: ['analyst', 'optimizer']
     };
-    
+
     components.forEach(component => {
       const caps = capabilityMap[component] || [];
       caps.forEach(cap => capabilities.add(cap));
     });
-    
+
     // Always include researcher for initial analysis
     capabilities.add('researcher');
-    
+
     return Array.from(capabilities);
   }
-  
+
   /**
    * Estimate number of tasks
    */
   _estimateTaskCount(objective) {
     const complexity = this._assessComplexity(objective);
     const components = this._identifyComponents(objective).length;
-    
+
     const baseTaskCount = {
       low: 5,
       medium: 10,
       high: 20,
       very_high: 30
     };
-    
+
     return baseTaskCount[complexity] + (components * 3);
   }
-  
+
   /**
    * Select optimal strategy
    */
   _selectStrategy(objective) {
     const complexity = this._assessComplexity(objective);
     const components = this._identifyComponents(objective);
-    
+
     // Strategy selection heuristics
     if (components.length > 3 && complexity !== 'low') {
       return 'divide_and_conquer';
     }
-    
+
     if (objective.toLowerCase().includes('parallel') || components.length > 5) {
       return 'parallel_execution';
     }
-    
+
     if (objective.toLowerCase().includes('iterative') || objective.toLowerCase().includes('refine')) {
       return 'sequential_refinement';
     }
-    
+
     if (this.config.type === 'adaptive') {
       return 'adaptive_learning';
     }
-    
+
     return 'consensus_driven'; // Default
   }
-  
+
   /**
    * Estimate resource requirements
    */
   _estimateResources(objective) {
     const complexity = this._assessComplexity(objective);
     const taskCount = this._estimateTaskCount(objective);
-    
+
     return {
       minWorkers: Math.min(3, Math.ceil(taskCount / 10)),
       optimalWorkers: Math.min(8, Math.ceil(taskCount / 5)),
@@ -240,7 +240,7 @@ export class QueenCoordinator extends EventEmitter {
       memoryRequirement: complexity === 'very_high' ? 'high' : 'medium'
     };
   }
-  
+
   /**
    * Create execution plan
    */
@@ -249,23 +249,23 @@ export class QueenCoordinator extends EventEmitter {
     if (!strategy) {
       throw new Error(`Unknown strategy: ${analysis.recommendedStrategy}`);
     }
-    
+
     const plan = await strategy(analysis, workers);
-    
+
     this.state.currentStrategy = analysis.recommendedStrategy;
     this.state.strategiesExecuted++;
-    
+
     this.emit('plan:created', plan);
     return plan;
   }
-  
+
   /**
    * Divide and conquer strategy
    */
   async _divideAndConquerStrategy(analysis, workers) {
     const components = this._identifyComponents(analysis.objective);
     const phases = [];
-    
+
     // Phase 1: Research and planning
     phases.push({
       name: 'Research and Planning',
@@ -277,7 +277,7 @@ export class QueenCoordinator extends EventEmitter {
       workers: workers.filter(w => ['researcher', 'architect'].includes(w.type)),
       parallel: true
     });
-    
+
     // Phase 2: Component development
     components.forEach(component => {
       phases.push({
@@ -287,7 +287,7 @@ export class QueenCoordinator extends EventEmitter {
         parallel: true
       });
     });
-    
+
     // Phase 3: Integration and testing
     phases.push({
       name: 'Integration and Testing',
@@ -300,7 +300,7 @@ export class QueenCoordinator extends EventEmitter {
       workers: workers.filter(w => ['coder', 'tester'].includes(w.type)),
       parallel: false
     });
-    
+
     // Phase 4: Optimization and documentation
     phases.push({
       name: 'Optimization and Documentation',
@@ -313,7 +313,7 @@ export class QueenCoordinator extends EventEmitter {
       workers: workers.filter(w => ['optimizer', 'documenter'].includes(w.type)),
       parallel: true
     });
-    
+
     return {
       strategy: 'divide_and_conquer',
       phases,
@@ -321,14 +321,14 @@ export class QueenCoordinator extends EventEmitter {
       parallelism: 'high'
     };
   }
-  
+
   /**
    * Parallel execution strategy
    */
   async _parallelExecutionStrategy(analysis, workers) {
     const tasks = this._generateAllTasks(analysis);
     const workerGroups = this._groupWorkersByType(workers);
-    
+
     return {
       strategy: 'parallel_execution',
       phases: [{
@@ -342,14 +342,14 @@ export class QueenCoordinator extends EventEmitter {
       parallelism: 'maximum'
     };
   }
-  
+
   /**
    * Sequential refinement strategy
    */
   async _sequentialRefinementStrategy(analysis, workers) {
     const iterations = 3;
     const phases = [];
-    
+
     for (let i = 0; i < iterations; i++) {
       phases.push({
         name: `Iteration ${i + 1}`,
@@ -364,7 +364,7 @@ export class QueenCoordinator extends EventEmitter {
         requiresConsensus: true
       });
     }
-    
+
     return {
       strategy: 'sequential_refinement',
       phases,
@@ -373,22 +373,22 @@ export class QueenCoordinator extends EventEmitter {
       iterative: true
     };
   }
-  
+
   /**
    * Consensus-driven strategy
    */
   async _consensusDrivenStrategy(analysis, workers) {
     const decisionPoints = this._identifyDecisionPoints(analysis);
     const phases = [];
-    
+
     decisionPoints.forEach((decision, index) => {
       phases.push({
         name: `Decision Phase ${index + 1}: ${decision}`,
         tasks: [
           `Research options for ${decision}`,
-          `Analyze trade-offs`,
-          `Build consensus on approach`,
-          `Implement chosen solution`
+          'Analyze trade-offs',
+          'Build consensus on approach',
+          'Implement chosen solution'
         ],
         workers: workers,
         parallel: index === 0, // Only first phase in parallel
@@ -396,7 +396,7 @@ export class QueenCoordinator extends EventEmitter {
         consensusThreshold: this.config.consensusThreshold
       });
     });
-    
+
     return {
       strategy: 'consensus_driven',
       phases,
@@ -405,7 +405,7 @@ export class QueenCoordinator extends EventEmitter {
       consensusRequired: true
     };
   }
-  
+
   /**
    * Adaptive learning strategy
    */
@@ -445,7 +445,7 @@ export class QueenCoordinator extends EventEmitter {
         applyLearning: true
       }
     ];
-    
+
     return {
       strategy: 'adaptive_learning',
       phases: learningPhases,
@@ -454,7 +454,7 @@ export class QueenCoordinator extends EventEmitter {
       learningEnabled: true
     };
   }
-  
+
   /**
    * Generate component-specific tasks
    */
@@ -485,88 +485,88 @@ export class QueenCoordinator extends EventEmitter {
         'Test security'
       ]
     };
-    
+
     return taskTemplates[component] || [
       `Design ${component}`,
       `Implement ${component}`,
       `Test ${component}`
     ];
   }
-  
+
   /**
    * Generate all tasks based on analysis
    */
   _generateAllTasks(analysis) {
     const tasks = [];
     const components = this._identifyComponents(analysis.objective);
-    
+
     // Add general tasks
     tasks.push(
       'Analyze requirements',
       'Design architecture',
       'Set up project structure'
     );
-    
+
     // Add component tasks
     components.forEach(component => {
       tasks.push(...this._generateComponentTasks(component));
     });
-    
+
     // Add integration tasks
     tasks.push(
       'Integrate components',
       'Write tests',
       'Document solution'
     );
-    
+
     return tasks;
   }
-  
+
   /**
    * Group workers by type
    */
   _groupWorkersByType(workers) {
     const groups = {};
-    
+
     workers.forEach(worker => {
       if (!groups[worker.type]) {
         groups[worker.type] = [];
       }
       groups[worker.type].push(worker);
     });
-    
+
     return groups;
   }
-  
+
   /**
    * Optimize worker assignment for tasks
    */
   _optimizeWorkerAssignment(tasks, workerGroups) {
     const assignments = {};
-    
+
     tasks.forEach(task => {
       const bestWorkerType = this._findBestWorkerType(task);
       const availableWorkers = workerGroups[bestWorkerType] || [];
-      
+
       if (availableWorkers.length > 0) {
         // Round-robin assignment within type
         const workerIndex = Object.keys(assignments).filter(
           t => assignments[t].type === bestWorkerType
         ).length % availableWorkers.length;
-        
+
         assignments[task] = availableWorkers[workerIndex];
       }
     });
-    
+
     return assignments;
   }
-  
+
   /**
    * Find best worker type for task
    */
   _findBestWorkerType(task) {
     const taskLower = task.toLowerCase();
-    
+
     if (taskLower.includes('research') || taskLower.includes('analyze')) {
       return 'researcher';
     }
@@ -585,10 +585,10 @@ export class QueenCoordinator extends EventEmitter {
     if (taskLower.includes('document') || taskLower.includes('write')) {
       return 'documenter';
     }
-    
+
     return 'coder'; // Default
   }
-  
+
   /**
    * Identify decision points in objective
    */
@@ -597,28 +597,28 @@ export class QueenCoordinator extends EventEmitter {
       'choose', 'select', 'decide', 'option', 'approach',
       'strategy', 'method', 'solution', 'alternative'
     ];
-    
+
     const decisions = [];
     const components = this._identifyComponents(analysis.objective);
-    
+
     // Architecture decisions
     if (components.length > 2) {
       decisions.push('Architecture pattern selection');
     }
-    
+
     // Technology decisions
     components.forEach(component => {
       decisions.push(`Technology stack for ${component}`);
     });
-    
+
     // Implementation decisions
     if (analysis.complexity !== 'low') {
       decisions.push('Implementation approach');
     }
-    
+
     return decisions;
   }
-  
+
   /**
    * Make strategic decision
    */
@@ -630,22 +630,22 @@ export class QueenCoordinator extends EventEmitter {
       queenVote: this._calculateQueenVote(topic, options, workerVotes),
       timestamp: Date.now()
     };
-    
+
     // Calculate final decision with queen's weighted vote
     const finalDecision = this._calculateFinalDecision(decision);
-    
+
     decision.result = finalDecision;
     this.state.decisionsCount++;
-    
+
     // Learn from decision
     if (this.config.type === 'adaptive') {
       this._learnFromDecision(decision);
     }
-    
+
     this.emit('decision:made', decision);
     return decision;
   }
-  
+
   /**
    * Calculate queen's vote
    */
@@ -654,37 +654,37 @@ export class QueenCoordinator extends EventEmitter {
     if (this.config.type === 'strategic') {
       return this._strategicVote(topic, options);
     }
-    
+
     // Tactical queen focuses on immediate efficiency
     if (this.config.type === 'tactical') {
       return this._tacticalVote(topic, options, workerVotes);
     }
-    
+
     // Adaptive queen learns from past decisions
     if (this.config.type === 'adaptive') {
       return this._adaptiveVote(topic, options, workerVotes);
     }
-    
+
     return options[0]; // Default
   }
-  
+
   /**
    * Strategic voting logic
    */
   _strategicVote(topic, options) {
     // Prefer options that mention long-term benefits
     const strategicKeywords = ['scalable', 'maintainable', 'extensible', 'future'];
-    
+
     for (const option of options) {
       const optionLower = option.toLowerCase();
       if (strategicKeywords.some(keyword => optionLower.includes(keyword))) {
         return option;
       }
     }
-    
+
     return options[0];
   }
-  
+
   /**
    * Tactical voting logic
    */
@@ -694,25 +694,25 @@ export class QueenCoordinator extends EventEmitter {
     Object.values(workerVotes).forEach(vote => {
       voteCounts[vote] = (voteCounts[vote] || 0) + 1;
     });
-    
+
     const sorted = Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
     if (sorted.length > 0 && sorted[0][1] > Object.keys(workerVotes).length * 0.6) {
       return sorted[0][0];
     }
-    
+
     // Otherwise, prefer quick implementation
     const tacticalKeywords = ['simple', 'quick', 'fast', 'efficient'];
-    
+
     for (const option of options) {
       const optionLower = option.toLowerCase();
       if (tacticalKeywords.some(keyword => optionLower.includes(keyword))) {
         return option;
       }
     }
-    
+
     return options[0];
   }
-  
+
   /**
    * Adaptive voting logic
    */
@@ -720,43 +720,43 @@ export class QueenCoordinator extends EventEmitter {
     // Check if we've seen similar decisions before
     const similarDecisions = Array.from(this.state.learningData.entries())
       .filter(([key, value]) => key.includes('decision') && value.topic.includes(topic));
-    
+
     if (similarDecisions.length > 0) {
       // Use learned preferences
       const successfulOptions = similarDecisions
         .filter(([_, decision]) => decision.success)
         .map(([_, decision]) => decision.result);
-      
+
       for (const option of options) {
         if (successfulOptions.includes(option)) {
           return option;
         }
       }
     }
-    
+
     // Otherwise, explore new option
     return options[Math.floor(Math.random() * options.length)];
   }
-  
+
   /**
    * Calculate final decision with weighted votes
    */
   _calculateFinalDecision(decision) {
     const voteCounts = {};
-    
+
     // Count worker votes
     Object.values(decision.workerVotes).forEach(vote => {
       voteCounts[vote] = (voteCounts[vote] || 0) + 1;
     });
-    
+
     // Add queen's weighted vote
     voteCounts[decision.queenVote] = (voteCounts[decision.queenVote] || 0) + this.config.decisionWeight;
-    
+
     // Find winner
     const sorted = Object.entries(voteCounts).sort((a, b) => b[1] - a[1]);
     return sorted[0][0];
   }
-  
+
   /**
    * Learn from decision outcomes
    */
@@ -767,21 +767,21 @@ export class QueenCoordinator extends EventEmitter {
       success: true // Will be updated based on outcome
     });
   }
-  
+
   /**
    * Update decision outcome
    */
   updateDecisionOutcome(decisionId, success, metrics = {}) {
     const key = `decision-${decisionId}`;
     const decision = this.state.learningData.get(key);
-    
+
     if (decision) {
       decision.success = success;
       decision.metrics = metrics;
       this.emit('learning:updated', { decisionId, success, metrics });
     }
   }
-  
+
   /**
    * Get queen status
    */

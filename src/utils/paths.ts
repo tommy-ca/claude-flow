@@ -3,8 +3,18 @@ import { dirname, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// Handle both ES modules and CommonJS
+let __filename: string;
+let __dirname: string;
+
+if (typeof import.meta !== 'undefined' && import.meta.url) {
+  __filename = fileURLToPath(import.meta.url);
+  __dirname = dirname(__filename);
+} else {
+  // CommonJS fallback
+  __filename = __filename || '';
+  __dirname = __dirname || '';
+}
 
 export function getClaudeFlowRoot(): string {
   // Try multiple strategies to find the root

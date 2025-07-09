@@ -10,7 +10,7 @@ export default class DAAView {
     this.eventBus = eventBus;
     this.viewConfig = viewConfig;
     this.componentLibrary = null;
-    
+
     // DAA State Management
     this.agents = new Map();
     this.resources = new Map();
@@ -18,7 +18,7 @@ export default class DAAView {
     this.consensusHistory = [];
     this.faultEvents = [];
     this.optimizations = [];
-    
+
     this.currentTab = 'overview';
     this.isInitialized = false;
   }
@@ -27,7 +27,7 @@ export default class DAAView {
    * Initialize the DAA view
    */
   async initialize() {
-    if (this.isInitialized) return;
+    if (this.isInitialized) {return;}
 
     // Get component library from event bus
     this.eventBus.emit('component-library:get', (library) => {
@@ -769,7 +769,7 @@ Example:
     console.log('  🛡️ daa_fault_tolerance   - Fault recovery');
     console.log('  ⚡ daa_optimization      - Performance optimization');
     console.log('═'.repeat(50));
-    
+
     if (params.tool) {
       console.log(`\n🔧 Executing: ${params.tool}`);
       this.quickAction(params.tool, params);
@@ -782,44 +782,44 @@ Example:
   async quickAction(toolName, params = {}) {
     try {
       console.log(`🔧 Executing ${toolName}...`);
-      
+
       // Emit tool execution event
       this.eventBus.emit('tool:execute', {
         tool: toolName,
         params: params,
         source: 'daa-view'
       });
-      
+
       // Handle specific tool actions
       switch (toolName) {
-        case 'daa_agent_create':
-          await this.handleAgentCreate(params);
-          break;
-        case 'daa_capability_match':
-          await this.handleCapabilityMatch(params);
-          break;
-        case 'daa_resource_alloc':
-          await this.handleResourceAllocation(params);
-          break;
-        case 'daa_lifecycle_manage':
-          await this.handleLifecycleManagement(params);
-          break;
-        case 'daa_communication':
-          await this.handleCommunication(params);
-          break;
-        case 'daa_consensus':
-          await this.handleConsensus(params);
-          break;
-        case 'daa_fault_tolerance':
-          await this.handleFaultTolerance(params);
-          break;
-        case 'daa_optimization':
-          await this.handleOptimization(params);
-          break;
-        default:
-          console.log(`Tool ${toolName} executed`);
+      case 'daa_agent_create':
+        await this.handleAgentCreate(params);
+        break;
+      case 'daa_capability_match':
+        await this.handleCapabilityMatch(params);
+        break;
+      case 'daa_resource_alloc':
+        await this.handleResourceAllocation(params);
+        break;
+      case 'daa_lifecycle_manage':
+        await this.handleLifecycleManagement(params);
+        break;
+      case 'daa_communication':
+        await this.handleCommunication(params);
+        break;
+      case 'daa_consensus':
+        await this.handleConsensus(params);
+        break;
+      case 'daa_fault_tolerance':
+        await this.handleFaultTolerance(params);
+        break;
+      case 'daa_optimization':
+        await this.handleOptimization(params);
+        break;
+      default:
+        console.log(`Tool ${toolName} executed`);
       }
-      
+
     } catch (error) {
       console.error(`❌ Error executing ${toolName}:`, error);
     }
@@ -834,9 +834,9 @@ Example:
       capabilities: params.capabilities || ['compute', 'analyze'],
       resources: params.resources || { cpu: 10, memory: 512 }
     };
-    
+
     console.log('🤖 Creating dynamic agent with parameters:', agentParams);
-    
+
     // Update UI if in browser mode
     if (this.container) {
       this.updateAgentsList({
@@ -856,12 +856,12 @@ Example:
       task_requirements: params.task_requirements || ['compute', 'memory'],
       available_agents: Array.from(this.agents.values())
     };
-    
+
     console.log('🔀 Matching capabilities with parameters:', matchParams);
-    
+
     // Simulate matching logic
     const matches = this.findMatchingAgents(matchParams.task_requirements);
-    
+
     if (this.container) {
       this.displayCapabilityMatches(matches);
     }
@@ -875,9 +875,9 @@ Example:
       resources: params.resources || { cpu: 20, memory: 1024 },
       agents: params.agents || []
     };
-    
+
     console.log('📦 Allocating resources with parameters:', allocParams);
-    
+
     if (this.container) {
       this.updateResourceMeters(allocParams);
     }
@@ -891,9 +891,9 @@ Example:
       agentId: params.agentId || 'agent-1',
       action: params.action || 'status'
     };
-    
+
     console.log('🔄 Managing agent lifecycle:', lifecycleParams);
-    
+
     if (this.container) {
       this.updateLifecycleStatus(lifecycleParams.agentId, lifecycleParams.action);
     }
@@ -908,14 +908,14 @@ Example:
       to: params.to || 'worker-1',
       message: params.message || { type: 'command', content: 'execute_task' }
     };
-    
+
     console.log('📡 Handling communication:', commParams);
-    
+
     this.communications.push({
       timestamp: Date.now(),
       ...commParams
     });
-    
+
     if (this.container) {
       this.updateCommunicationLog(commParams);
     }
@@ -929,9 +929,9 @@ Example:
       agents: params.agents || Array.from(this.agents.keys()),
       proposal: params.proposal || { type: 'resource_allocation', details: {} }
     };
-    
+
     console.log('🤝 Processing consensus:', consensusParams);
-    
+
     if (this.container) {
       this.createConsensusProposal(consensusParams);
     }
@@ -945,14 +945,14 @@ Example:
       agentId: params.agentId || 'agent-1',
       strategy: params.strategy || 'restart'
     };
-    
+
     console.log('🛡️ Handling fault tolerance:', faultParams);
-    
+
     this.faultEvents.push({
       timestamp: Date.now(),
       ...faultParams
     });
-    
+
     if (this.container) {
       this.updateFaultEvents(faultParams);
     }
@@ -966,14 +966,14 @@ Example:
       target: params.target || 'performance',
       metrics: params.metrics || ['response_time', 'throughput']
     };
-    
+
     console.log('⚡ Running optimization:', optimizationParams);
-    
+
     this.optimizations.push({
       timestamp: Date.now(),
       ...optimizationParams
     });
-    
+
     if (this.container) {
       this.updateOptimizationResults(optimizationParams);
     }
@@ -984,8 +984,8 @@ Example:
    */
   updateAgentsList(agent) {
     const agentsListEl = document.getElementById('agents-list');
-    if (!agentsListEl) return;
-    
+    if (!agentsListEl) {return;}
+
     const agentCard = document.createElement('div');
     agentCard.className = 'agent-card';
     agentCard.innerHTML = `
@@ -1003,14 +1003,14 @@ Example:
         <button onclick="this.viewAgentDetails('${agent.id}')" class="mini-btn">Details</button>
       </div>
     `;
-    
+
     agentsListEl.appendChild(agentCard);
-    
+
     // Update agent count
     const agentsStat = document.getElementById('agents-stat');
     if (agentsStat) {
       const valueEl = agentsStat.querySelector('.stat-value');
-      if (valueEl) valueEl.textContent = this.agents.size;
+      if (valueEl) {valueEl.textContent = this.agents.size;}
     }
   }
 
@@ -1019,21 +1019,21 @@ Example:
    */
   displayCapabilityMatches(matches) {
     const matchesEl = document.getElementById('capability-matches');
-    if (!matchesEl) return;
-    
+    if (!matchesEl) {return;}
+
     if (matches.length === 0) {
       matchesEl.innerHTML = '<div class="no-matches">No matching agents found</div>';
       return;
     }
-    
+
     matchesEl.innerHTML = matches.map(match => `
       <div class="match-card">
         <div class="match-agent">${match.agent.id}</div>
         <div class="match-score">Match Score: ${match.score}%</div>
         <div class="match-capabilities">
-          ${match.matchedCapabilities.map(cap => 
-            `<span class="capability-tag">${cap}</span>`
-          ).join('')}
+          ${match.matchedCapabilities.map(cap =>
+    `<span class="capability-tag">${cap}</span>`
+  ).join('')}
         </div>
         <button onclick="this.assignToAgent('${match.agent.id}')" class="mini-btn primary">
           Assign Task
@@ -1047,12 +1047,12 @@ Example:
    */
   findMatchingAgents(requirements) {
     const matches = [];
-    
+
     for (const [agentId, agent] of this.agents) {
-      const matchedCaps = requirements.filter(req => 
+      const matchedCaps = requirements.filter(req =>
         agent.capabilities.includes(req)
       );
-      
+
       if (matchedCaps.length > 0) {
         matches.push({
           agent: agent,
@@ -1061,7 +1061,7 @@ Example:
         });
       }
     }
-    
+
     return matches.sort((a, b) => b.score - a.score);
   }
 
@@ -1076,7 +1076,7 @@ Example:
       cpuBar.style.width = `${usage}%`;
       cpuBar.nextElementSibling.textContent = `${usage}%`;
     }
-    
+
     // Update memory meter
     const memBar = document.getElementById('memory-usage-bar');
     if (memBar) {
@@ -1091,8 +1091,8 @@ Example:
    */
   updateLifecycleStatus(agentId, action) {
     const eventsEl = document.getElementById('lifecycle-events-list');
-    if (!eventsEl) return;
-    
+    if (!eventsEl) {return;}
+
     const event = document.createElement('div');
     event.className = 'lifecycle-event';
     event.innerHTML = `
@@ -1100,7 +1100,7 @@ Example:
       <span class="event-agent">${agentId}</span>
       <span class="event-action ${action}">${action}</span>
     `;
-    
+
     eventsEl.insertBefore(event, eventsEl.firstChild);
   }
 
@@ -1109,8 +1109,8 @@ Example:
    */
   updateCommunicationLog(commParams) {
     const logEl = document.getElementById('communication-log-list');
-    if (!logEl) return;
-    
+    if (!logEl) {return;}
+
     const message = document.createElement('div');
     message.className = `comm-message ${commParams.message.type}`;
     message.innerHTML = `
@@ -1125,7 +1125,7 @@ Example:
         ${commParams.message.content}
       </div>
     `;
-    
+
     logEl.insertBefore(message, logEl.firstChild);
   }
 
@@ -1134,8 +1134,8 @@ Example:
    */
   createConsensusProposal(consensusParams) {
     const proposalsEl = document.getElementById('proposals-list');
-    if (!proposalsEl) return;
-    
+    if (!proposalsEl) {return;}
+
     const proposal = document.createElement('div');
     proposal.className = 'proposal-card active';
     proposal.innerHTML = `
@@ -1157,7 +1157,7 @@ Example:
         <button onclick="this.voteOnProposal('reject')" class="mini-btn danger">Reject</button>
       </div>
     `;
-    
+
     proposalsEl.insertBefore(proposal, proposalsEl.firstChild);
   }
 
@@ -1166,8 +1166,8 @@ Example:
    */
   updateFaultEvents(faultParams) {
     const eventsEl = document.getElementById('fault-events-list');
-    if (!eventsEl) return;
-    
+    if (!eventsEl) {return;}
+
     const event = document.createElement('div');
     event.className = 'fault-event';
     event.innerHTML = `
@@ -1180,7 +1180,7 @@ Example:
         Recovery Strategy: ${faultParams.strategy}
       </div>
     `;
-    
+
     eventsEl.insertBefore(event, eventsEl.firstChild);
   }
 
@@ -1189,8 +1189,8 @@ Example:
    */
   updateOptimizationResults(optimizationParams) {
     const historyEl = document.getElementById('optimization-history-list');
-    if (!historyEl) return;
-    
+    if (!historyEl) {return;}
+
     const result = document.createElement('div');
     result.className = 'optimization-result';
     result.innerHTML = `
@@ -1205,7 +1205,7 @@ Example:
         <span class="improvement-value">+12%</span> improvement
       </div>
     `;
-    
+
     historyEl.insertBefore(result, historyEl.firstChild);
   }
 
@@ -1219,17 +1219,17 @@ Example:
         this.handleToolResult(data);
       }
     });
-    
+
     // Listen for real-time updates
     this.eventBus.on('ui:real-time:update', () => {
       this.updateStats();
     });
-    
+
     // Listen for theme changes
     this.eventBus.on('ui:theme:changed', (theme) => {
       this.updateTheme(theme);
     });
-    
+
     // Listen for agent updates
     this.eventBus.on('daa:agent:created', (agent) => {
       this.agents.set(agent.id, agent);
@@ -1237,7 +1237,7 @@ Example:
         this.updateAgentsList(agent);
       }
     });
-    
+
     // Listen for resource updates
     this.eventBus.on('daa:resource:allocated', (allocation) => {
       this.resources.set(allocation.id, allocation);
@@ -1252,7 +1252,7 @@ Example:
    */
   handleToolResult(data) {
     console.log(`✅ Tool ${data.tool} completed:`, data.result);
-    
+
     // Update UI based on result
     if (this.container) {
       this.updateUIWithResult(data.tool, data.result);
@@ -1284,9 +1284,9 @@ Example:
     const agentsStat = document.getElementById('agents-stat');
     if (agentsStat) {
       const valueEl = agentsStat.querySelector('.stat-value');
-      if (valueEl) valueEl.textContent = this.agents.size;
+      if (valueEl) {valueEl.textContent = this.agents.size;}
     }
-    
+
     // Update resource usage
     const resourcesStat = document.getElementById('resources-stat');
     if (resourcesStat) {
@@ -1297,13 +1297,13 @@ Example:
         valueEl.textContent = `${Math.round(totalUsage)}%`;
       }
     }
-    
+
     // Update communication rate
     const commStat = document.getElementById('communications-stat');
     if (commStat) {
       const valueEl = commStat.querySelector('.stat-value');
       if (valueEl) {
-        const recentComms = this.communications.filter(c => 
+        const recentComms = this.communications.filter(c =>
           Date.now() - c.timestamp < 60000
         ).length;
         valueEl.textContent = recentComms;
@@ -1326,22 +1326,22 @@ Example:
    */
   drawAgentNetwork() {
     const canvas = document.getElementById('agent-canvas');
-    if (!canvas) return;
-    
+    if (!canvas) {return;}
+
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
     // Draw simple network visualization
     const agents = Array.from(this.agents.values());
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     const radius = 150;
-    
+
     agents.forEach((agent, index) => {
       const angle = (index / agents.length) * 2 * Math.PI;
       const x = centerX + radius * Math.cos(angle);
       const y = centerY + radius * Math.sin(angle);
-      
+
       // Draw agent node
       ctx.beginPath();
       ctx.arc(x, y, 20, 0, 2 * Math.PI);
@@ -1349,7 +1349,7 @@ Example:
       ctx.fill();
       ctx.strokeStyle = '#fff';
       ctx.stroke();
-      
+
       // Draw agent label
       ctx.fillStyle = '#fff';
       ctx.font = '12px Arial';

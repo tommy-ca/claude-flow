@@ -1,9 +1,9 @@
 /**
  * Hook Safety System - Prevents recursive hook execution and financial damage
- * 
+ *
  * This system protects against infinite loops where Claude Code hooks call
  * 'claude' commands, which could bypass rate limits and cost thousands of dollars.
- * 
+ *
  * Critical protections:
  * - Environment variable context detection
  * - Recursive call prevention
@@ -22,17 +22,17 @@ import path from 'path';
 const HOOK_SAFETY_CONFIG = {
   // Maximum hook execution depth before blocking
   MAX_HOOK_DEPTH: 3,
-  
+
   // Maximum Stop hook executions per session
   MAX_STOP_HOOK_EXECUTIONS: 2,
-  
+
   // Circuit breaker timeout (milliseconds)
   CIRCUIT_BREAKER_TIMEOUT: 60000, // 1 minute
-  
+
   // Environment variables for context detection
   ENV_VARS: {
     CONTEXT: 'CLAUDE_HOOK_CONTEXT',
-    DEPTH: 'CLAUDE_HOOK_DEPTH', 
+    DEPTH: 'CLAUDE_HOOK_DEPTH',
     SESSION_ID: 'CLAUDE_HOOK_SESSION_ID',
     SKIP_HOOKS: 'CLAUDE_SKIP_HOOKS',
     SAFE_MODE: 'CLAUDE_SAFE_MODE'
@@ -48,30 +48,30 @@ class HookExecutionTracker {
     this.sessionId = this.generateSessionId();
     this.resetTimeout = null;
   }
-  
+
   generateSessionId() {
     return `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
   }
-  
+
   track(hookType) {
     const key = `${this.sessionId}:${hookType}`;
     const count = this.executions.get(key) || 0;
     this.executions.set(key, count + 1);
-    
+
     // Auto-reset after timeout
-    if (this.resetTimeout) clearTimeout(this.resetTimeout);
+    if (this.resetTimeout) {clearTimeout(this.resetTimeout);}
     this.resetTimeout = setTimeout(() => {
       this.executions.clear();
     }, HOOK_SAFETY_CONFIG.CIRCUIT_BREAKER_TIMEOUT);
-    
+
     return count + 1;
   }
-  
+
   getExecutionCount(hookType) {
     const key = `${this.sessionId}:${hookType}`;
     return this.executions.get(key) || 0;
   }
-  
+
   reset() {
     this.executions.clear();
     this.sessionId = this.generateSessionId();
@@ -90,7 +90,7 @@ export class HookContextManager {
     process.env[HOOK_SAFETY_CONFIG.ENV_VARS.DEPTH] = depth.toString();
     process.env[HOOK_SAFETY_CONFIG.ENV_VARS.SESSION_ID] = executionTracker.sessionId;
   }
-  
+
   static getContext() {
     return {
       type: process.env[HOOK_SAFETY_CONFIG.ENV_VARS.CONTEXT],
@@ -100,17 +100,17 @@ export class HookContextManager {
       safeMode: process.env[HOOK_SAFETY_CONFIG.ENV_VARS.SAFE_MODE] === 'true'
     };
   }
-  
+
   static clearContext() {
     delete process.env[HOOK_SAFETY_CONFIG.ENV_VARS.CONTEXT];
     delete process.env[HOOK_SAFETY_CONFIG.ENV_VARS.DEPTH];
     delete process.env[HOOK_SAFETY_CONFIG.ENV_VARS.SESSION_ID];
   }
-  
+
   static isInHookContext() {
     return !!process.env[HOOK_SAFETY_CONFIG.ENV_VARS.CONTEXT];
   }
-  
+
   static setSafeMode(enabled = true) {
     if (enabled) {
       process.env[HOOK_SAFETY_CONFIG.ENV_VARS.SAFE_MODE] = 'true';
@@ -118,7 +118,7 @@ export class HookContextManager {
       delete process.env[HOOK_SAFETY_CONFIG.ENV_VARS.SAFE_MODE];
     }
   }
-  
+
   static setSkipHooks(enabled = true) {
     if (enabled) {
       process.env[HOOK_SAFETY_CONFIG.ENV_VARS.SKIP_HOOKS] = 'true';
@@ -139,7 +139,7 @@ export class HookCommandValidator {
     const context = HookContextManager.getContext();
     const warnings = [];
     const errors = [];
-    
+
     // Critical check: Claude commands in Stop hooks
     if (hookType === 'Stop' && this.isClaudeCommand(command)) {
       errors.push({
@@ -151,11 +151,11 @@ export class HookCommandValidator {
                 'BLOCKED FOR SAFETY - Use alternative patterns instead.'
       });
     }
-    
+
     // General recursion detection
     if (context.type && this.isClaudeCommand(command)) {
       const depth = context.depth;
-      
+
       if (depth >= HOOK_SAFETY_CONFIG.MAX_HOOK_DEPTH) {
         errors.push({
           type: 'HOOK_RECURSION_LIMIT',
@@ -171,19 +171,19 @@ export class HookCommandValidator {
         });
       }
     }
-    
+
     // Check for other dangerous patterns
     if (this.isDangerousPattern(command, hookType)) {
       warnings.push({
         type: 'DANGEROUS_PATTERN',
-        message: `⚠️  WARNING: Potentially dangerous hook pattern detected.\n` +
+        message: '⚠️  WARNING: Potentially dangerous hook pattern detected.\n' +
                 'Review the command and consider safer alternatives.'
       });
     }
-    
+
     return { warnings, errors, safe: errors.length === 0 };
   }
-  
+
   static isClaudeCommand(command) {
     // Match various forms of claude command invocation
     const claudePatterns = [
@@ -193,10 +193,10 @@ export class HookCommandValidator {
       /\.\/claude\b/,        // Local claude wrapper
       /claude\.exe\b/        // Windows executable
     ];
-    
+
     return claudePatterns.some(pattern => pattern.test(command));
   }
-  
+
   static isDangerousPattern(command, hookType) {
     const dangerousPatterns = [
       // Commands that could trigger more hooks
@@ -209,7 +209,7 @@ export class HookCommandValidator {
       /bash.*hook/,
       /sh.*hook/
     ];
-    
+
     return dangerousPatterns.some(pattern => pattern.test(command));
   }
 }
@@ -223,40 +223,40 @@ export class HookCircuitBreaker {
    */
   static checkExecution(hookType) {
     const executionCount = executionTracker.track(hookType);
-    
+
     // Stop hook protection - maximum 2 executions per session
     if (hookType === 'Stop' && executionCount > HOOK_SAFETY_CONFIG.MAX_STOP_HOOK_EXECUTIONS) {
       throw new Error(
-        `🚨 CIRCUIT BREAKER ACTIVATED!\n` +
+        '🚨 CIRCUIT BREAKER ACTIVATED!\n' +
         `Stop hook has executed ${executionCount} times in this session.\n` +
-        `This indicates a potential infinite loop that could cost thousands of dollars.\n` +
-        `Execution blocked for financial protection.\n\n` +
-        `To reset: Use --reset-circuit-breaker flag or restart your session.`
+        'This indicates a potential infinite loop that could cost thousands of dollars.\n' +
+        'Execution blocked for financial protection.\n\n' +
+        'To reset: Use --reset-circuit-breaker flag or restart your session.'
       );
     }
-    
+
     // General protection for any hook type
     if (executionCount > 20) {
       throw new Error(
         `🚨 CIRCUIT BREAKER: ${hookType} hook executed ${executionCount} times!\n` +
-        `This is highly unusual and indicates a potential problem.\n` +
-        `Execution blocked to prevent system overload.`
+        'This is highly unusual and indicates a potential problem.\n' +
+        'Execution blocked to prevent system overload.'
       );
     }
-    
+
     // Log warnings for concerning patterns
     if (hookType === 'Stop' && executionCount > 1) {
       printWarning(`⚠️  Stop hook execution #${executionCount} detected. Monitor for recursion.`);
     }
-    
+
     return true;
   }
-  
+
   static reset() {
     executionTracker.reset();
     printSuccess('Circuit breaker reset successfully.');
   }
-  
+
   static getStatus() {
     return {
       sessionId: executionTracker.sessionId,
@@ -283,18 +283,18 @@ export class HookConfigValidator {
         path.join(process.cwd(), '.claude', 'settings.json'),
         path.join(process.cwd(), 'settings.json')
       ];
-      
+
       configPath = possiblePaths.find(p => existsSync(p));
-      
+
       if (!configPath) {
         return { safe: true, message: 'No Claude Code configuration found.' };
       }
     }
-    
+
     try {
       const config = JSON.parse(readFileSync(configPath, 'utf8'));
       const validation = this.validateHooksConfig(config.hooks || {});
-      
+
       return {
         safe: validation.errors.length === 0,
         configPath,
@@ -308,14 +308,14 @@ export class HookConfigValidator {
       };
     }
   }
-  
+
   /**
    * Validate hooks configuration object
    */
   static validateHooksConfig(hooksConfig) {
     const warnings = [];
     const errors = [];
-    
+
     // Check Stop hooks specifically
     if (hooksConfig.Stop) {
       for (const hookGroup of hooksConfig.Stop) {
@@ -328,7 +328,7 @@ export class HookConfigValidator {
         }
       }
     }
-    
+
     // Check other dangerous hook types
     const dangerousHookTypes = ['SubagentStop', 'PostToolUse'];
     for (const hookType of dangerousHookTypes) {
@@ -344,16 +344,16 @@ export class HookConfigValidator {
         }
       }
     }
-    
+
     return { warnings, errors };
   }
-  
+
   /**
    * Generate safe configuration recommendations
    */
   static generateSafeAlternatives(dangerousConfig) {
     const alternatives = [];
-    
+
     // Example: Stop hook calling claude
     if (dangerousConfig.includes('claude')) {
       alternatives.push({
@@ -378,7 +378,7 @@ export class HookConfigValidator {
 // Then manually run: claude -c -p "Update history" when needed
         `
       });
-      
+
       alternatives.push({
         pattern: 'PostToolUse hook alternative',
         problem: 'Stop hooks execute too frequently',
@@ -394,7 +394,7 @@ export class HookConfigValidator {
         `
       });
     }
-    
+
     return alternatives;
   }
 }
@@ -413,18 +413,18 @@ export class SafeHookExecutor {
         console.log(`⏭️  Skipping ${hookType} hook (hooks disabled)`);
         return { success: true, skipped: true };
       }
-      
+
       // Circuit breaker check
       HookCircuitBreaker.checkExecution(hookType);
-      
+
       // Command validation
       const validation = HookCommandValidator.validateCommand(command, hookType);
-      
+
       // Show warnings
       for (const warning of validation.warnings) {
         printWarning(warning.message);
       }
-      
+
       // Block on errors
       if (!validation.safe) {
         for (const error of validation.errors) {
@@ -432,17 +432,17 @@ export class SafeHookExecutor {
         }
         return { success: false, blocked: true, errors: validation.errors };
       }
-      
+
       // Set hook context for nested calls
       const currentContext = HookContextManager.getContext();
       const newDepth = currentContext.depth + 1;
       HookContextManager.setContext(hookType, newDepth);
-      
+
       // Execute the command with safety context
       const result = await this.executeCommand(command, options);
-      
+
       return { success: true, result };
-      
+
     } catch (err) {
       printError(`Hook execution failed: ${err.message}`);
       return { success: false, error: err.message };
@@ -451,15 +451,15 @@ export class SafeHookExecutor {
       HookContextManager.clearContext();
     }
   }
-  
+
   static async executeCommand(command, options = {}) {
     // This would integrate with the actual command execution system
     // For now, just log what would be executed
     console.log(`🔗 Executing hook command: ${command}`);
-    
+
     // Here you would actually execute the command
     // return await execCommand(command, options);
-    
+
     return { stdout: '', stderr: '', exitCode: 0 };
   }
 }
@@ -469,28 +469,28 @@ export class SafeHookExecutor {
  */
 export async function hookSafetyCommand(subArgs, flags) {
   const subcommand = subArgs[0];
-  
+
   switch (subcommand) {
-    case 'validate':
-      return await validateConfigCommand(subArgs, flags);
-    case 'status':
-      return await statusCommand(subArgs, flags);
-    case 'reset':
-      return await resetCommand(subArgs, flags);
-    case 'safe-mode':
-      return await safeModeCommand(subArgs, flags);
-    default:
-      showHookSafetyHelp();
+  case 'validate':
+    return await validateConfigCommand(subArgs, flags);
+  case 'status':
+    return await statusCommand(subArgs, flags);
+  case 'reset':
+    return await resetCommand(subArgs, flags);
+  case 'safe-mode':
+    return await safeModeCommand(subArgs, flags);
+  default:
+    showHookSafetyHelp();
   }
 }
 
 async function validateConfigCommand(subArgs, flags) {
   const configPath = flags.config || flags.c;
-  
+
   console.log('🔍 Validating hook configuration for safety...\n');
-  
+
   const result = HookConfigValidator.validateClaudeCodeConfig(configPath);
-  
+
   if (result.safe) {
     printSuccess('✅ Hook configuration is safe!');
     if (result.configPath) {
@@ -498,21 +498,21 @@ async function validateConfigCommand(subArgs, flags) {
     }
   } else {
     printError('❌ DANGEROUS hook configuration detected!');
-    
+
     if (result.errors) {
       console.log('\n🚨 CRITICAL ERRORS:');
       for (const error of result.errors) {
         console.log(`\n${error.message}`);
       }
     }
-    
+
     if (result.warnings) {
       console.log('\n⚠️  WARNINGS:');
       for (const warning of result.warnings) {
         console.log(`\n${warning.message}`);
       }
     }
-    
+
     console.log('\n💡 RECOMMENDATIONS:');
     console.log('1. Remove claude commands from Stop hooks');
     console.log('2. Use PostToolUse hooks for specific tools');
@@ -524,9 +524,9 @@ async function validateConfigCommand(subArgs, flags) {
 async function statusCommand(subArgs, flags) {
   const context = HookContextManager.getContext();
   const circuitStatus = HookCircuitBreaker.getStatus();
-  
+
   console.log('🔗 Hook Safety Status\n');
-  
+
   console.log('📊 Current Context:');
   if (context.type) {
     console.log(`  🔄 Hook Type: ${context.type}`);
@@ -537,10 +537,10 @@ async function statusCommand(subArgs, flags) {
   } else {
     console.log('  ✅ Not currently in hook context');
   }
-  
+
   console.log('\n⚡ Circuit Breaker Status:');
   console.log(`  🆔 Session: ${circuitStatus.sessionId}`);
-  
+
   if (circuitStatus.executions.length > 0) {
     console.log('  📊 Hook Executions:');
     for (const exec of circuitStatus.executions) {
@@ -553,17 +553,17 @@ async function statusCommand(subArgs, flags) {
 
 async function resetCommand(subArgs, flags) {
   console.log('🔄 Resetting hook safety systems...\n');
-  
+
   HookCircuitBreaker.reset();
   HookContextManager.clearContext();
-  
+
   printSuccess('✅ Hook safety systems reset successfully!');
   console.log('All execution counters and context cleared.');
 }
 
 async function safeModeCommand(subArgs, flags) {
   const enable = !flags.disable && !flags.off;
-  
+
   if (enable) {
     HookContextManager.setSafeMode(true);
     HookContextManager.setSkipHooks(true);
@@ -639,27 +639,27 @@ For more information: https://github.com/ruvnet/claude-flow/issues/166
 export function addSafetyFlags(command) {
   // Add safety flags to any claude command
   const context = HookContextManager.getContext();
-  
+
   if (context.type) {
     // Automatically add --skip-hooks if in hook context
     if (!command.includes('--skip-hooks')) {
       command += ' --skip-hooks';
     }
   }
-  
+
   if (context.safeMode) {
     // Add additional safety flags in safe mode
     if (!command.includes('--dry-run')) {
       command += ' --dry-run';
     }
   }
-  
+
   return command;
 }
 
 export default {
   HookContextManager,
-  HookCommandValidator, 
+  HookCommandValidator,
   HookCircuitBreaker,
   HookConfigValidator,
   SafeHookExecutor,

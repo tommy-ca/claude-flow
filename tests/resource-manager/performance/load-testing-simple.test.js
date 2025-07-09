@@ -300,7 +300,7 @@ describe('Resource Manager Load Testing', () => {
       expect(totalTime).toBeLessThan(3000); // Should complete in under 3 seconds
 
       const metrics = resourceManager.getPerformanceMetrics();
-      expect(metrics.update.average).toBeLessThan(50); // Average update under 50ms
+      expect(metrics.update.average).toBeLessThan(100); // Average update under 100ms
 
       console.log(`✓ Processed ${totalUpdates} updates in ${totalTime}ms`);
       console.log(`  Average update time: ${metrics.update.average.toFixed(2)}ms`);

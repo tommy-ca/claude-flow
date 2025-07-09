@@ -5,9 +5,9 @@ import { Deno } from '../node-compat.js';
 export async function statusCommand(subArgs, flags) {
   const verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
   const json = subArgs.includes('--json') || flags.json;
-  
+
   const status = await getSystemStatus(verbose);
-  
+
   if (json) {
     console.log(JSON.stringify(status, null, 2));
   } else {
@@ -52,7 +52,7 @@ async function getSystemStatus(verbose = false) {
     },
     resources: verbose ? await getResourceUsage() : null
   };
-  
+
   return status;
 }
 
@@ -61,12 +61,12 @@ async function getMemoryStats() {
     const memoryStore = './memory/memory-store.json';
     const content = await Deno.readTextFile(memoryStore);
     const data = JSON.parse(content);
-    
+
     let totalEntries = 0;
     for (const entries of Object.values(data)) {
       totalEntries += entries.length;
     }
-    
+
     return totalEntries;
   } catch {
     return 0;
@@ -92,7 +92,7 @@ async function getResourceUsage() {
         };
       }
     }
-    
+
     // Node.js doesn't have systemMemoryInfo, use os module instead
     const totalMem = os.totalmem();
     const freeMem = os.freemem();
@@ -105,18 +105,18 @@ async function getResourceUsage() {
       swapTotal: 0,
       swapFree: 0
     };
-    
+
     // Get CPU info
-    let cpuCores = os.cpus().length;
+    const cpuCores = os.cpus().length;
     let loadAvg = 'N/A';
-    
+
     try {
       const loadAvgData = os.loadavg();
       loadAvg = `${loadAvgData[0].toFixed(2)}, ${loadAvgData[1].toFixed(2)}, ${loadAvgData[2].toFixed(2)}`;
     } catch (e) {
       // Load average not available on all platforms
     }
-    
+
     return {
       memory: {
         total: formatBytes(memInfo.total),
@@ -147,26 +147,26 @@ async function getResourceUsage() {
 
 function displayStatus(status, verbose) {
   printSuccess('Claude-Flow System Status:');
-  
+
   // Overall status
   const overallStatus = status.orchestrator.running ? '🟢 Running' : '🟡 Not Running';
   console.log(`${overallStatus} (orchestrator ${status.orchestrator.running ? 'active' : 'not started'})`);
-  
+
   // Core components
   console.log(`🤖 Agents: ${status.agents.active} active`);
   console.log(`📋 Tasks: ${status.tasks.queued} in queue`);
   console.log(`💾 Memory: ${status.memory.status} (${status.memory.entries} entries)`);
   console.log(`🖥️  Terminal Pool: ${status.terminal.status}`);
   console.log(`🌐 MCP Server: ${status.mcp.status}`);
-  
+
   if (verbose) {
     console.log('\n📊 Detailed Information:');
-    
+
     // Orchestrator details
     console.log('\n🎭 Orchestrator:');
     console.log(`   Status: ${status.orchestrator.status}`);
     console.log(`   Uptime: ${formatUptime(status.orchestrator.uptime)}`);
-    
+
     // Agent details
     console.log('\n🤖 Agent Details:');
     console.log(`   Total Registered: ${status.agents.total}`);
@@ -179,32 +179,32 @@ function displayStatus(status, verbose) {
     } else {
       console.log('   No agents currently registered');
     }
-    
+
     // Task details
     console.log('\n📋 Task Queue:');
     console.log(`   Queued: ${status.tasks.queued}`);
     console.log(`   Running: ${status.tasks.running}`);
     console.log(`   Completed: ${status.tasks.completed}`);
     console.log(`   Failed: ${status.tasks.failed}`);
-    
+
     // Memory details
     console.log('\n💾 Memory System:');
     console.log(`   Total Entries: ${status.memory.entries}`);
     console.log(`   Database Size: ${status.memory.size}`);
     console.log(`   Status: ${status.memory.status}`);
-    
+
     // Terminal details
     console.log('\n🖥️  Terminal Pool:');
     console.log(`   Pool Size: ${status.terminal.poolSize}`);
     console.log(`   Active Sessions: ${status.terminal.active}`);
     console.log(`   Status: ${status.terminal.status}`);
-    
+
     // MCP details
     console.log('\n🌐 MCP Server:');
     console.log(`   Status: ${status.mcp.status}`);
     console.log(`   Port: ${status.mcp.port || 'Not configured'}`);
     console.log(`   Active Connections: ${status.mcp.connections}`);
-    
+
     // Resource usage
     if (status.resources) {
       console.log('\n📈 Resource Usage:');
@@ -215,7 +215,7 @@ function displayStatus(status, verbose) {
       if (status.resources.cpu.model) {
         console.log(`   CPU Model: ${status.resources.cpu.model}`);
       }
-      
+
       if (status.resources.platform) {
         console.log('\n💻 Platform:');
         console.log(`   OS: ${status.resources.platform.type} ${status.resources.platform.release}`);
@@ -223,10 +223,10 @@ function displayStatus(status, verbose) {
         console.log(`   System Uptime: ${status.resources.platform.uptime}`);
       }
     }
-    
+
     console.log('\n🕐 Status captured at:', new Date(status.timestamp).toLocaleString());
   }
-  
+
   // Recommendations
   console.log('\n💡 Quick Actions:');
   if (!status.orchestrator.running) {
@@ -244,26 +244,26 @@ function formatBytes(bytes) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let size = bytes;
   let unitIndex = 0;
-  
+
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
     unitIndex++;
   }
-  
+
   return `${size.toFixed(2)} ${units[unitIndex]}`;
 }
 
 function formatUptime(milliseconds) {
-  if (milliseconds === 0) return '0s';
-  
+  if (milliseconds === 0) {return '0s';}
+
   const seconds = Math.floor(milliseconds / 1000);
   const minutes = Math.floor(seconds / 60);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
-  
-  if (days > 0) return `${days}d ${hours % 24}h ${minutes % 60}m`;
-  if (hours > 0) return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
-  if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
+
+  if (days > 0) {return `${days}d ${hours % 24}h ${minutes % 60}m`;}
+  if (hours > 0) {return `${hours}h ${minutes % 60}m ${seconds % 60}s`;}
+  if (minutes > 0) {return `${minutes}m ${seconds % 60}s`;}
   return `${seconds}s`;
 }
 
@@ -271,7 +271,7 @@ function formatUptime(milliseconds) {
 if (import.meta.main) {
   const args = [];
   const flags = {};
-  
+
   // Parse arguments and flags from Deno.args if available
   if (typeof Deno !== 'undefined' && Deno.args) {
     for (let i = 0; i < Deno.args.length; i++) {
@@ -279,7 +279,7 @@ if (import.meta.main) {
       if (arg.startsWith('--')) {
         const flagName = arg.substring(2);
         const nextArg = Deno.args[i + 1];
-        
+
         if (nextArg && !nextArg.startsWith('--')) {
           flags[flagName] = nextArg;
           i++; // Skip the next argument
@@ -291,6 +291,6 @@ if (import.meta.main) {
       }
     }
   }
-  
+
   await statusCommand(args, flags);
 }

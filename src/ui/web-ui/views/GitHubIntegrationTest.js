@@ -18,7 +18,7 @@ export const GitHubViewMCPIntegration = {
         };
       }
     },
-    
+
     github_pr_manage: {
       handler: async (params) => {
         console.log('🔄 Managing PR:', params);
@@ -29,7 +29,7 @@ export const GitHubViewMCPIntegration = {
         };
       }
     },
-    
+
     github_issue_track: {
       handler: async (params) => {
         console.log('📋 Tracking issues:', params);
@@ -40,7 +40,7 @@ export const GitHubViewMCPIntegration = {
         };
       }
     },
-    
+
     github_release_coord: {
       handler: async (params) => {
         console.log('🚀 Coordinating release:', params);
@@ -51,7 +51,7 @@ export const GitHubViewMCPIntegration = {
         };
       }
     },
-    
+
     github_workflow_auto: {
       handler: async (params) => {
         console.log('🤖 Automating workflow:', params);
@@ -62,7 +62,7 @@ export const GitHubViewMCPIntegration = {
         };
       }
     },
-    
+
     github_code_review: {
       handler: async (params) => {
         console.log('🔍 Running code review:', params);
@@ -78,7 +78,7 @@ export const GitHubViewMCPIntegration = {
         };
       }
     },
-    
+
     github_sync_coord: {
       handler: async (params) => {
         console.log('🔄 Syncing repositories:', params);
@@ -88,7 +88,7 @@ export const GitHubViewMCPIntegration = {
         };
       }
     },
-    
+
     github_metrics: {
       handler: async (params) => {
         console.log('📊 Fetching metrics:', params);
@@ -101,18 +101,18 @@ export const GitHubViewMCPIntegration = {
       }
     }
   },
-  
+
   // Example usage
   testIntegration: async () => {
     console.log('🧪 Testing GitHub View MCP Integration');
-    
+
     // Test repository analysis
     const analysisResult = await GitHubViewMCPIntegration.tools.github_repo_analyze.handler({
       repo: 'ruvnet/claude-flow',
       analysis_type: 'code_quality'
     });
     console.log('Repository Analysis Result:', analysisResult);
-    
+
     // Test PR management
     const prResult = await GitHubViewMCPIntegration.tools.github_pr_manage.handler({
       repo: 'ruvnet/claude-flow',
@@ -120,7 +120,7 @@ export const GitHubViewMCPIntegration = {
       pr_number: 123
     });
     console.log('PR Management Result:', prResult);
-    
+
     // Test metrics
     const metricsResult = await GitHubViewMCPIntegration.tools.github_metrics.handler({
       repo: 'ruvnet/claude-flow'
@@ -135,7 +135,7 @@ export class GitHubMCPBridge {
     this.eventBus = eventBus;
     this.setupHandlers();
   }
-  
+
   setupHandlers() {
     // Listen for tool execution requests from the view
     this.eventBus.on('tool:execute', async (data) => {
@@ -146,7 +146,7 @@ export class GitHubMCPBridge {
           const handler = GitHubViewMCPIntegration.tools[data.tool]?.handler;
           if (handler) {
             const result = await handler(data.params);
-            
+
             // Emit result back to the view
             this.eventBus.emit('tool:executed', {
               tool: data.tool,
@@ -170,16 +170,16 @@ export class GitHubMCPBridge {
 export function runGitHubViewTest() {
   console.log('\n🐙 GitHub Integration View Test');
   console.log('═'.repeat(50));
-  
+
   // Test all tools
   GitHubViewMCPIntegration.testIntegration();
-  
+
   console.log('\n✅ GitHub View is ready for integration!');
   console.log('The view supports all 8 GitHub MCP tools:');
   Object.keys(GitHubViewMCPIntegration.tools).forEach(tool => {
     console.log(`  - ${tool}`);
   });
-  
+
   console.log('\n📋 Features implemented:');
   console.log('  - Repository browser and analysis');
   console.log('  - PR/Issue management dashboard');

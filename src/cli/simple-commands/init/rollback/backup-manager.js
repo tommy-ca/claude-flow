@@ -8,7 +8,7 @@ function ensureDirSync(dirPath) {
   try {
     fs.mkdirSync(dirPath, { recursive: true });
   } catch (error) {
-    if (error.code !== 'EEXIST') throw error;
+    if (error.code !== 'EEXIST') {throw error;}
   }
 }
 
@@ -121,7 +121,7 @@ export class BackupManager {
 
     try {
       const backupPath = `${this.backupDir}/${backupId}`;
-      
+
       // Check if backup exists
       try {
         await Deno.stat(backupPath);
@@ -175,16 +175,16 @@ export class BackupManager {
 
     try {
       await this.ensureBackupDir();
-      
+
       for await (const entry of Deno.readDir(this.backupDir)) {
         if (entry.isDirectory) {
           try {
             const metadataPath = `${this.backupDir}/${entry.name}/metadata.json`;
             const manifestPath = `${this.backupDir}/${entry.name}/manifest.json`;
-            
+
             const metadata = JSON.parse(await Deno.readTextFile(metadataPath));
             const manifest = JSON.parse(await Deno.readTextFile(manifestPath));
-            
+
             backups.push({
               id: entry.name,
               type: manifest.type,
@@ -239,10 +239,10 @@ export class BackupManager {
 
     try {
       const backups = await this.listBackups();
-      
+
       if (backups.length > keepCount) {
         const toDelete = backups.slice(keepCount);
-        
+
         for (const backup of toDelete) {
           const deleteResult = await this.deleteBackup(backup.id);
           if (deleteResult.success) {
@@ -274,7 +274,7 @@ export class BackupManager {
     try {
       // Check backup directory
       await this.ensureBackupDir();
-      
+
       // Test backup creation
       const testBackup = await this.createTestBackup();
       if (!testBackup.success) {
@@ -371,14 +371,14 @@ export class BackupManager {
     try {
       const sourcePath = `${this.workingDir}/${relativePath}`;
       const destPath = `${backupPath}/${relativePath}`;
-      
+
       // Ensure destination directory exists
       const destDir = destPath.split('/').slice(0, -1).join('/');
       await Deno.mkdir(destDir, { recursive: true });
-      
+
       // Copy file
       await Deno.copyFile(sourcePath, destPath);
-      
+
       // Get file info
       const stat = await Deno.stat(sourcePath);
       result.fileInfo = {
@@ -405,13 +405,13 @@ export class BackupManager {
     try {
       const sourcePath = `${this.workingDir}/${relativePath}`;
       const destPath = `${backupPath}/${relativePath}`;
-      
+
       // Create destination directory
       await Deno.mkdir(destPath, { recursive: true });
-      
+
       // Copy directory contents recursively
       await this.copyDirectoryRecursive(sourcePath, destPath);
-      
+
       result.dirInfo = {
         originalPath: relativePath,
         backupPath: destPath
@@ -429,7 +429,7 @@ export class BackupManager {
     for await (const entry of Deno.readDir(source)) {
       const sourcePath = `${source}/${entry.name}`;
       const destPath = `${dest}/${entry.name}`;
-      
+
       if (entry.isFile) {
         await Deno.copyFile(sourcePath, destPath);
       } else if (entry.isDirectory) {
@@ -447,11 +447,11 @@ export class BackupManager {
     try {
       const sourcePath = fileInfo.backupPath;
       const destPath = `${this.workingDir}/${fileInfo.originalPath}`;
-      
+
       // Ensure destination directory exists
       const destDir = destPath.split('/').slice(0, -1).join('/');
       await Deno.mkdir(destDir, { recursive: true });
-      
+
       // Copy file back
       await Deno.copyFile(sourcePath, destPath);
 
@@ -471,17 +471,17 @@ export class BackupManager {
     try {
       const sourcePath = dirInfo.backupPath;
       const destPath = `${this.workingDir}/${dirInfo.originalPath}`;
-      
+
       // Remove existing directory if it exists
       try {
         await Deno.remove(destPath, { recursive: true });
       } catch {
         // Directory might not exist
       }
-      
+
       // Create destination directory
       await Deno.mkdir(destPath, { recursive: true });
-      
+
       // Copy directory contents back
       await this.copyDirectoryRecursive(sourcePath, destPath);
 
@@ -500,7 +500,7 @@ export class BackupManager {
       for await (const entry of Deno.readDir(backupPath)) {
         const entryPath = `${backupPath}/${entry.name}`;
         const stat = await Deno.stat(entryPath);
-        
+
         if (stat.isFile) {
           totalSize += stat.size;
         } else if (stat.isDirectory) {
@@ -538,11 +538,11 @@ export class BackupManager {
       });
 
       const { stdout, success } = await command.output();
-      
+
       if (success) {
         const output = new TextDecoder().decode(stdout);
         const lines = output.trim().split('\n');
-        
+
         if (lines.length >= 2) {
           const parts = lines[1].split(/\s+/);
           if (parts.length >= 4) {

@@ -55,7 +55,7 @@ class GitHubAPIClient {
       const resetTime = new Date(this.rateLimitResetTime);
       const now = new Date();
       const waitTime = resetTime.getTime() - now.getTime();
-      
+
       if (waitTime > 0) {
         printWarning(`Rate limit exceeded. Waiting ${Math.ceil(waitTime / 1000)}s...`);
         await this.sleep(waitTime);
@@ -358,21 +358,21 @@ class GitHubAPIClient {
     }
 
     const eventData = JSON.parse(payload);
-    
+
     switch (event) {
-      case 'push':
-        return this.handlePushEvent(eventData);
-      case 'pull_request':
-        return this.handlePullRequestEvent(eventData);
-      case 'issues':
-        return this.handleIssuesEvent(eventData);
-      case 'release':
-        return this.handleReleaseEvent(eventData);
-      case 'workflow_run':
-        return this.handleWorkflowRunEvent(eventData);
-      default:
-        printInfo(`Unhandled event type: ${event}`);
-        return { handled: false, event };
+    case 'push':
+      return this.handlePushEvent(eventData);
+    case 'pull_request':
+      return this.handlePullRequestEvent(eventData);
+    case 'issues':
+      return this.handleIssuesEvent(eventData);
+    case 'release':
+      return this.handleReleaseEvent(eventData);
+    case 'workflow_run':
+      return this.handleWorkflowRunEvent(eventData);
+    default:
+      printInfo(`Unhandled event type: ${event}`);
+      return { handled: false, event };
     }
   }
 
@@ -386,7 +386,7 @@ class GitHubAPIClient {
     const hmac = crypto.createHmac('sha256', GITHUB_WEBHOOK_SECRET);
     hmac.update(payload);
     const expectedSignature = `sha256=${hmac.digest('hex')}`;
-    
+
     return crypto.timingSafeEqual(
       Buffer.from(signature),
       Buffer.from(expectedSignature)
@@ -452,12 +452,12 @@ class GitHubAPIClient {
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
     let unitIndex = 0;
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     return `${size.toFixed(2)} ${units[unitIndex]}`;
   }
 }

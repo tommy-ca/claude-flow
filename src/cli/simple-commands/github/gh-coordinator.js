@@ -20,7 +20,7 @@ class GitHubCoordinator {
    */
   async initialize(options = {}) {
     printInfo('🚀 Initializing GitHub Coordinator...');
-    
+
     // Authenticate with GitHub
     const authenticated = await this.api.authenticate(options.token);
     if (!authenticated) {
@@ -31,7 +31,7 @@ class GitHubCoordinator {
     try {
       const remoteUrl = execSync('git config --get remote.origin.url', { encoding: 'utf8' }).trim();
       const repoMatch = remoteUrl.match(/github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?$/);
-      
+
       if (repoMatch) {
         this.currentRepo = { owner: repoMatch[1], repo: repoMatch[2] };
         printSuccess(`Connected to repository: ${this.currentRepo.owner}/${this.currentRepo.repo}`);
@@ -53,11 +53,11 @@ class GitHubCoordinator {
     try {
       // Check if ruv-swarm is available
       execSync('npx ruv-swarm --version', { stdio: 'pipe' });
-      
+
       // Initialize swarm for GitHub coordination
-      const swarmInit = execSync('npx ruv-swarm hook pre-task --description "GitHub workflow coordination"', 
+      const swarmInit = execSync('npx ruv-swarm hook pre-task --description "GitHub workflow coordination"',
         { encoding: 'utf8' });
-      
+
       if (swarmInit.includes('continue')) {
         printSuccess('🐝 Swarm integration initialized for GitHub coordination');
         this.swarmEnabled = true;
@@ -73,7 +73,7 @@ class GitHubCoordinator {
    */
   async coordinateCIPipeline(options = {}) {
     printInfo('🔄 Coordinating CI/CD pipeline setup...');
-    
+
     if (!this.currentRepo) {
       throw new Error('No GitHub repository context available');
     }
@@ -116,21 +116,21 @@ class GitHubCoordinator {
    */
   async executeWithSwarm(coordinationPlan) {
     printInfo('🐝 Executing coordination with swarm...');
-    
+
     // Store coordination plan in swarm memory
     const memoryKey = `github-coordination/${coordinationPlan.id}`;
     execSync(`npx ruv-swarm hook notification --message "GitHub Coordination: ${coordinationPlan.type} started" --telemetry true`);
-    
+
     // Execute each step with swarm coordination
     for (const step of coordinationPlan.steps) {
       printInfo(`Executing step: ${step}`);
-      
+
       // Pre-step hook
       execSync(`npx ruv-swarm hook pre-task --description "GitHub step: ${step}"`);
-      
+
       // Execute step
       await this.executeCoordinationStep(coordinationPlan, step);
-      
+
       // Post-step hook
       execSync(`npx ruv-swarm hook post-edit --file "github-coordination" --memory-key "${memoryKey}/${step}"`);
     }
@@ -144,7 +144,7 @@ class GitHubCoordinator {
    */
   async executeCoordination(coordinationPlan) {
     printInfo('⚡ Executing coordination...');
-    
+
     for (const step of coordinationPlan.steps) {
       printInfo(`Executing step: ${step}`);
       await this.executeCoordinationStep(coordinationPlan, step);
@@ -156,28 +156,28 @@ class GitHubCoordinator {
    */
   async executeCoordinationStep(coordinationPlan, step) {
     const { owner, repo } = this.currentRepo;
-    
+
     switch (step) {
-      case 'analyze_repository_structure':
-        await this.analyzeRepositoryStructure(owner, repo);
-        break;
-      case 'create_workflow_files':
-        await this.createWorkflowFiles(owner, repo, coordinationPlan.pipeline);
-        break;
-      case 'setup_environment_secrets':
-        await this.setupEnvironmentSecrets(owner, repo);
-        break;
-      case 'configure_branch_protection':
-        await this.configureBranchProtection(owner, repo);
-        break;
-      case 'test_pipeline_execution':
-        await this.testPipelineExecution(owner, repo);
-        break;
-      case 'setup_notifications':
-        await this.setupNotifications(owner, repo);
-        break;
-      default:
-        printWarning(`Unknown coordination step: ${step}`);
+    case 'analyze_repository_structure':
+      await this.analyzeRepositoryStructure(owner, repo);
+      break;
+    case 'create_workflow_files':
+      await this.createWorkflowFiles(owner, repo, coordinationPlan.pipeline);
+      break;
+    case 'setup_environment_secrets':
+      await this.setupEnvironmentSecrets(owner, repo);
+      break;
+    case 'configure_branch_protection':
+      await this.configureBranchProtection(owner, repo);
+      break;
+    case 'test_pipeline_execution':
+      await this.testPipelineExecution(owner, repo);
+      break;
+    case 'setup_notifications':
+      await this.setupNotifications(owner, repo);
+      break;
+    default:
+      printWarning(`Unknown coordination step: ${step}`);
     }
   }
 
@@ -186,7 +186,7 @@ class GitHubCoordinator {
    */
   async analyzeRepositoryStructure(owner, repo) {
     printInfo('📊 Analyzing repository structure...');
-    
+
     const response = await this.api.getRepository(owner, repo);
     if (!response.success) {
       throw new Error(`Failed to get repository info: ${response.error}`);
@@ -225,10 +225,10 @@ class GitHubCoordinator {
    */
   async createWorkflowFiles(owner, repo, pipeline) {
     printInfo('📝 Creating workflow files...');
-    
+
     const workflowContent = this.generateWorkflowContent(pipeline);
     const workflowPath = `.github/workflows/${pipeline}-ci.yml`;
-    
+
     // Create workflow file content
     const createFileData = {
       message: `Add ${pipeline} CI workflow`,
@@ -309,7 +309,7 @@ jobs:
     - name: Check for vulnerabilities
       run: npm audit --audit-level high
 `,
-      
+
       python: `name: Python CI
 
 on:
@@ -348,7 +348,7 @@ jobs:
       with:
         file: ./coverage.xml
 `,
-      
+
       docker: `name: Docker CI
 
 on:
@@ -387,7 +387,7 @@ jobs:
    */
   async setupEnvironmentSecrets(owner, repo) {
     printInfo('🔐 Setting up environment secrets...');
-    
+
     const secrets = [
       { name: 'NODE_ENV', description: 'Node.js environment' },
       { name: 'DATABASE_URL', description: 'Database connection string' },
@@ -408,7 +408,7 @@ jobs:
    */
   async configureBranchProtection(owner, repo) {
     printInfo('🛡️  Configuring branch protection...');
-    
+
     const protectionConfig = {
       required_status_checks: {
         strict: true,
@@ -423,7 +423,7 @@ jobs:
     };
 
     const response = await this.api.updateBranchProtection(owner, repo, 'main', protectionConfig);
-    
+
     if (response.success) {
       printSuccess('✅ Branch protection configured for main branch');
     } else {
@@ -436,7 +436,7 @@ jobs:
    */
   async testPipelineExecution(owner, repo) {
     printInfo('🧪 Testing pipeline execution...');
-    
+
     const workflows = await this.api.listWorkflows(owner, repo);
     if (!workflows.success) {
       printWarning('No workflows found to test');
@@ -446,7 +446,7 @@ jobs:
     const recentRuns = await this.api.listWorkflowRuns(owner, repo, { per_page: 5 });
     if (recentRuns.success) {
       printInfo(`Found ${recentRuns.data.total_count} recent workflow runs`);
-      
+
       const latestRun = recentRuns.data.workflow_runs[0];
       if (latestRun) {
         printInfo(`Latest run: ${latestRun.conclusion} (${latestRun.status})`);
@@ -461,7 +461,7 @@ jobs:
    */
   async setupNotifications(owner, repo) {
     printInfo('📢 Setting up notifications...');
-    
+
     const webhookConfig = {
       name: 'web',
       active: true,
@@ -475,7 +475,7 @@ jobs:
 
     printInfo('Webhook configuration template:');
     console.log(JSON.stringify(webhookConfig, null, 2));
-    
+
     printWarning('Note: Webhook URL must be configured with your actual endpoint');
     printSuccess('✅ Notification setup guidance provided');
   }
@@ -485,7 +485,7 @@ jobs:
    */
   async coordinateRelease(options = {}) {
     printInfo('🚀 Coordinating release process...');
-    
+
     if (!this.currentRepo) {
       throw new Error('No GitHub repository context available');
     }
@@ -554,12 +554,12 @@ jobs:
 // Export coordination function
 export async function coordinateGitHubWorkflow(args, flags = {}) {
   const coordinator = new GitHubCoordinator();
-  
+
   try {
     await coordinator.initialize(flags);
-    
+
     const objective = args.join(' ').trim();
-    
+
     if (objective.includes('CI/CD') || objective.includes('pipeline')) {
       return await coordinator.coordinateCIPipeline(flags);
     } else if (objective.includes('release')) {
@@ -567,7 +567,7 @@ export async function coordinateGitHubWorkflow(args, flags = {}) {
     } else {
       // General coordination
       printInfo(`🎯 Coordinating: ${objective}`);
-      
+
       const coordinationPlan = {
         id: `general-${Date.now()}`,
         type: 'general_coordination',
@@ -577,7 +577,7 @@ export async function coordinateGitHubWorkflow(args, flags = {}) {
       };
 
       coordinator.activeCoordinations.set(coordinationPlan.id, coordinationPlan);
-      
+
       if (coordinator.swarmEnabled) {
         await coordinator.executeWithSwarm(coordinationPlan);
       } else {

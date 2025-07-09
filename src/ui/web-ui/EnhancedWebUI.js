@@ -20,31 +20,31 @@ export class EnhancedWebUI {
   async initialize(existingProcessUI = null) {
     try {
       console.log('🚀 Initializing Enhanced Web UI...');
-      
+
       // Store reference to existing process UI
       this.originalProcessUI = existingProcessUI;
-      
+
       // Try to initialize full UI manager
       try {
         this.uiManager = new UIManager();
         await this.uiManager.initialize();
-        
+
         console.log('✅ Enhanced Web UI initialized successfully');
         this.isInitialized = true;
-        
+
       } catch (error) {
         console.warn('⚠️ Full UI initialization failed, using fallback mode:', error);
         this.fallbackMode = true;
         await this.initializeFallbackMode();
       }
-      
+
       // Setup integration with existing UI if provided
       if (this.originalProcessUI) {
         this.integrateWithExistingUI();
       }
-      
+
       return this.isInitialized || this.fallbackMode;
-      
+
     } catch (error) {
       console.error('❌ Failed to initialize Enhanced Web UI:', error);
       throw error;
@@ -56,10 +56,10 @@ export class EnhancedWebUI {
    */
   async initializeFallbackMode() {
     console.log('🔄 Initializing fallback mode...');
-    
+
     // Create minimal UI structure
     this.createFallbackUI();
-    
+
     this.fallbackMode = true;
     console.log('✅ Fallback mode initialized');
   }
@@ -102,7 +102,7 @@ export class EnhancedWebUI {
     this.originalProcessUI.render = () => {
       // Call original render first
       originalRender();
-      
+
       // Add enhanced view handling
       this.handleEnhancedViews();
     };
@@ -114,7 +114,7 @@ export class EnhancedWebUI {
       if (await this.handleEnhancedInput(input)) {
         return; // Handled by enhanced UI
       }
-      
+
       // Fall back to original handling
       return originalHandleInput(input);
     };
@@ -124,33 +124,33 @@ export class EnhancedWebUI {
    * Handle enhanced views in fallback mode
    */
   handleEnhancedViews() {
-    if (!this.originalProcessUI.currentView) return;
+    if (!this.originalProcessUI.currentView) {return;}
 
     switch (this.originalProcessUI.currentView) {
-      case 'neural':
-        this.renderNeuralView();
-        break;
-      case 'memory_mgmt':
-        this.renderMemoryManagementView();
-        break;
-      case 'monitoring_adv':
-        this.renderAdvancedMonitoringView();
-        break;
-      case 'workflow_mgmt':
-        this.renderWorkflowManagementView();
-        break;
-      case 'github_int':
-        this.renderGitHubIntegrationView();
-        break;
-      case 'daa_control':
-        this.renderDAAControlView();
-        break;
-      case 'system_utils':
-        this.renderSystemUtilitiesView();
-        break;
-      case 'cli_bridge':
-        this.renderCLIBridgeView();
-        break;
+    case 'neural':
+      this.renderNeuralView();
+      break;
+    case 'memory_mgmt':
+      this.renderMemoryManagementView();
+      break;
+    case 'monitoring_adv':
+      this.renderAdvancedMonitoringView();
+      break;
+    case 'workflow_mgmt':
+      this.renderWorkflowManagementView();
+      break;
+    case 'github_int':
+      this.renderGitHubIntegrationView();
+      break;
+    case 'daa_control':
+      this.renderDAAControlView();
+      break;
+    case 'system_utils':
+      this.renderSystemUtilitiesView();
+      break;
+    case 'cli_bridge':
+      this.renderCLIBridgeView();
+      break;
     }
   }
 
@@ -159,7 +159,7 @@ export class EnhancedWebUI {
    */
   async handleEnhancedInput(input) {
     const currentView = this.originalProcessUI.currentView;
-    
+
     // Enhanced view shortcuts
     const enhancedShortcuts = {
       '7': () => this.originalProcessUI.currentView = 'neural',
@@ -175,16 +175,16 @@ export class EnhancedWebUI {
 
     // View-specific enhanced input handling
     switch (currentView) {
-      case 'neural':
-        return this.handleNeuralInput(input);
-      case 'memory_mgmt':
-        return this.handleMemoryInput(input);
-      case 'monitoring_adv':
-        return this.handleMonitoringInput(input);
-      case 'workflow_mgmt':
-        return this.handleWorkflowInput(input);
-      default:
-        return false;
+    case 'neural':
+      return this.handleNeuralInput(input);
+    case 'memory_mgmt':
+      return this.handleMemoryInput(input);
+    case 'monitoring_adv':
+      return this.handleMonitoringInput(input);
+    case 'workflow_mgmt':
+      return this.handleWorkflowInput(input);
+    default:
+      return false;
     }
   }
 
@@ -193,7 +193,7 @@ export class EnhancedWebUI {
    */
   createStandaloneUI() {
     console.log('🔧 Creating standalone enhanced UI...');
-    
+
     // This would create a complete standalone interface
     // For now, just log the available functionality
     console.log('\n🎨 Enhanced Web UI - Standalone Mode');
@@ -238,10 +238,10 @@ export class EnhancedWebUI {
     } else {
       // Fallback tool execution
       console.log(`🔧 Executing tool: ${toolName}`, params);
-      
+
       // Simulate tool execution
       await new Promise(resolve => setTimeout(resolve, 500));
-      
+
       const mockResult = {
         success: true,
         tool: toolName,
@@ -249,7 +249,7 @@ export class EnhancedWebUI {
         result: `Mock result for ${toolName}`,
         timestamp: Date.now()
       };
-      
+
       console.log(`✅ Tool ${toolName} completed:`, mockResult.result);
       return mockResult;
     }
@@ -278,13 +278,13 @@ export class EnhancedWebUI {
    */
   integrateWithExistingUI() {
     console.log('🔗 Integrating with existing process UI...');
-    
+
     // Add enhanced views to the header navigation
     this.addEnhancedNavigation();
-    
+
     // Add tool palette
     this.addToolPalette();
-    
+
     // Add quick actions
     this.addQuickActions();
   }
@@ -445,7 +445,7 @@ export class EnhancedWebUI {
       'm': () => this.executeTool('model_load'),
       'o': () => this.executeTool('wasm_optimize')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
       return true;
@@ -462,7 +462,7 @@ export class EnhancedWebUI {
       'y': () => this.executeTool('memory_sync'),
       'a': () => this.executeTool('memory_analytics')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
       return true;
@@ -479,7 +479,7 @@ export class EnhancedWebUI {
       'h': () => this.executeTool('health_check'),
       'e': () => this.executeTool('error_analysis')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
       return true;
@@ -501,7 +501,7 @@ export class EnhancedWebUI {
       'm': () => this.executeTool('sparc_mode'),
       'o': () => this.executeTool('task_orchestrate')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
       return true;
@@ -538,14 +538,14 @@ export class EnhancedWebUI {
    */
   async shutdown() {
     console.log('🔄 Shutting down Enhanced Web UI...');
-    
+
     if (this.uiManager && !this.fallbackMode) {
       await this.uiManager.shutdown();
     }
-    
+
     this.isInitialized = false;
     this.fallbackMode = false;
-    
+
     console.log('✅ Enhanced Web UI shutdown complete');
   }
 }

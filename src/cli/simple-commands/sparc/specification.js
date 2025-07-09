@@ -18,9 +18,9 @@ export class SparcSpecification extends SparcPhase {
    */
   async execute() {
     console.log('📋 Starting Specification Phase');
-    
+
     await this.initializePhase();
-    
+
     const result = {
       requirements: [],
       acceptanceCriteria: [],
@@ -48,34 +48,34 @@ export class SparcSpecification extends SparcPhase {
 
       // Extract requirements
       result.requirements = await this.extractRequirements(analysis);
-      
+
       // Define acceptance criteria
       result.acceptanceCriteria = await this.defineAcceptanceCriteria(result.requirements);
-      
+
       // Create user stories
       result.userStories = await this.createUserStories(result.requirements);
-      
+
       // Identify constraints
       result.constraints = await this.identifyConstraints();
-      
+
       // Document assumptions
       result.assumptions = await this.documentAssumptions();
-      
+
       // Identify stakeholders
       result.stakeholders = await this.identifyStakeholders();
-      
+
       // Define business value
       result.businessValue = await this.defineBusiness();
-      
+
       // Define scope
       result.scope = await this.defineScope(result.requirements);
-      
+
       // Estimate timeline
       result.timeline = await this.estimateTimeline(result.requirements);
-      
+
       // Identify risks
       result.risks = await this.identifyRisks(result.requirements);
-      
+
       // Identify dependencies
       result.dependencies = await this.identifyDependencies(result.requirements);
 
@@ -115,7 +115,7 @@ export class SparcSpecification extends SparcPhase {
    */
   categorizeTask() {
     const taskLower = this.taskDescription.toLowerCase();
-    
+
     if (taskLower.includes('api') || taskLower.includes('endpoint') || taskLower.includes('service')) {
       return 'api_development';
     } else if (taskLower.includes('ui') || taskLower.includes('frontend') || taskLower.includes('interface')) {
@@ -139,7 +139,7 @@ export class SparcSpecification extends SparcPhase {
   assessComplexity() {
     const wordCount = this.taskDescription.split(' ').length;
     const complexityKeywords = ['integrate', 'complex', 'multiple', 'advanced', 'enterprise', 'scalable'];
-    const hasComplexityKeywords = complexityKeywords.some(keyword => 
+    const hasComplexityKeywords = complexityKeywords.some(keyword =>
       this.taskDescription.toLowerCase().includes(keyword)
     );
 
@@ -167,7 +167,7 @@ export class SparcSpecification extends SparcPhase {
     };
 
     const taskLower = this.taskDescription.toLowerCase();
-    
+
     for (const [domain, keywords] of Object.entries(domains)) {
       if (keywords.some(keyword => taskLower.includes(keyword))) {
         return domain;
@@ -183,7 +183,7 @@ export class SparcSpecification extends SparcPhase {
   extractKeywords() {
     const words = this.taskDescription.toLowerCase().split(/\s+/);
     const stopWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by'];
-    
+
     return words
       .filter(word => word.length > 2 && !stopWords.includes(word))
       .filter((word, index, arr) => arr.indexOf(word) === index) // Remove duplicates
@@ -196,7 +196,7 @@ export class SparcSpecification extends SparcPhase {
   extractActionVerbs() {
     const verbs = ['create', 'build', 'develop', 'implement', 'design', 'setup', 'configure', 'deploy', 'test', 'optimize', 'refactor', 'integrate'];
     const taskLower = this.taskDescription.toLowerCase();
-    
+
     return verbs.filter(verb => taskLower.includes(verb));
   }
 
@@ -206,14 +206,14 @@ export class SparcSpecification extends SparcPhase {
   extractEntities() {
     const entities = [];
     const words = this.taskDescription.split(/\s+/);
-    
+
     // Look for capitalized words (potential entities)
     for (const word of words) {
       if (word.length > 2 && word[0] === word[0].toUpperCase() && word.slice(1) === word.slice(1).toLowerCase()) {
         entities.push(word);
       }
     }
-    
+
     return entities;
   }
 
@@ -222,57 +222,57 @@ export class SparcSpecification extends SparcPhase {
    */
   async extractRequirements(analysis) {
     const requirements = [];
-    
+
     // Functional requirements based on task type
     switch (analysis.type) {
-      case 'api_development':
-        requirements.push(
-          'System must provide REST API endpoints',
-          'API must handle authentication and authorization',
-          'API must return appropriate HTTP status codes',
-          'API must validate input data',
-          'API must handle errors gracefully'
-        );
-        break;
-        
-      case 'frontend_development':
-        requirements.push(
-          'Interface must be responsive and mobile-friendly',
-          'User interface must be intuitive and accessible',
-          'Application must handle user input validation',
-          'Interface must provide feedback for user actions',
-          'Application must be cross-browser compatible'
-        );
-        break;
-        
-      case 'data_management':
-        requirements.push(
-          'System must ensure data integrity',
-          'Data must be properly normalized',
-          'System must handle concurrent access',
-          'Data must be backed up regularly',
-          'System must provide data recovery mechanisms'
-        );
-        break;
-        
-      case 'testing':
-        requirements.push(
-          'Test suite must achieve minimum 80% code coverage',
-          'Tests must be automated and repeatable',
-          'Tests must validate all critical paths',
-          'Test data must be properly managed',
-          'Tests must run efficiently'
-        );
-        break;
-        
-      default:
-        requirements.push(
-          'System must be reliable and performant',
-          'Code must be maintainable and well-documented',
-          'System must handle edge cases gracefully',
-          'Implementation must follow best practices',
-          'System must be secure and robust'
-        );
+    case 'api_development':
+      requirements.push(
+        'System must provide REST API endpoints',
+        'API must handle authentication and authorization',
+        'API must return appropriate HTTP status codes',
+        'API must validate input data',
+        'API must handle errors gracefully'
+      );
+      break;
+
+    case 'frontend_development':
+      requirements.push(
+        'Interface must be responsive and mobile-friendly',
+        'User interface must be intuitive and accessible',
+        'Application must handle user input validation',
+        'Interface must provide feedback for user actions',
+        'Application must be cross-browser compatible'
+      );
+      break;
+
+    case 'data_management':
+      requirements.push(
+        'System must ensure data integrity',
+        'Data must be properly normalized',
+        'System must handle concurrent access',
+        'Data must be backed up regularly',
+        'System must provide data recovery mechanisms'
+      );
+      break;
+
+    case 'testing':
+      requirements.push(
+        'Test suite must achieve minimum 80% code coverage',
+        'Tests must be automated and repeatable',
+        'Tests must validate all critical paths',
+        'Test data must be properly managed',
+        'Tests must run efficiently'
+      );
+      break;
+
+    default:
+      requirements.push(
+        'System must be reliable and performant',
+        'Code must be maintainable and well-documented',
+        'System must handle edge cases gracefully',
+        'Implementation must follow best practices',
+        'System must be secure and robust'
+      );
     }
 
     // Add complexity-specific requirements
@@ -293,7 +293,7 @@ export class SparcSpecification extends SparcPhase {
    */
   async defineAcceptanceCriteria(requirements) {
     const criteria = [];
-    
+
     for (const requirement of requirements) {
       const criterion = {
         requirement: requirement,
@@ -303,10 +303,10 @@ export class SparcSpecification extends SparcPhase {
         priority: this.assessRequirementPriority(requirement),
         testable: true
       };
-      
+
       criteria.push(criterion);
     }
-    
+
     return criteria;
   }
 
@@ -357,9 +357,9 @@ export class SparcSpecification extends SparcPhase {
   assessRequirementPriority(requirement) {
     const highPriorityKeywords = ['must', 'critical', 'security', 'authentication', 'data integrity'];
     const mediumPriorityKeywords = ['should', 'performance', 'optimization', 'monitoring'];
-    
+
     const reqLower = requirement.toLowerCase();
-    
+
     if (highPriorityKeywords.some(keyword => reqLower.includes(keyword))) {
       return 'high';
     } else if (mediumPriorityKeywords.some(keyword => reqLower.includes(keyword))) {
@@ -374,7 +374,7 @@ export class SparcSpecification extends SparcPhase {
    */
   async createUserStories(requirements) {
     const stories = [];
-    
+
     for (const requirement of requirements) {
       const story = {
         title: this.generateStoryTitle(requirement),
@@ -383,10 +383,10 @@ export class SparcSpecification extends SparcPhase {
         priority: this.assessRequirementPriority(requirement),
         estimation: this.estimateStoryPoints(requirement)
       };
-      
+
       stories.push(story);
     }
-    
+
     return stories;
   }
 
@@ -397,7 +397,7 @@ export class SparcSpecification extends SparcPhase {
     const words = requirement.split(' ');
     const actionWord = words.find(word => ['provide', 'handle', 'ensure', 'validate'].includes(word.toLowerCase()));
     const objectWord = words.find(word => ['API', 'data', 'user', 'system'].includes(word));
-    
+
     return `${actionWord || 'Implement'} ${objectWord || 'functionality'}`;
   }
 
@@ -421,7 +421,7 @@ export class SparcSpecification extends SparcPhase {
   estimateStoryPoints(requirement) {
     const complexity = this.assessComplexity();
     const priority = this.assessRequirementPriority(requirement);
-    
+
     if (complexity === 'high' && priority === 'high') {
       return 8;
     } else if (complexity === 'high' || priority === 'high') {
@@ -484,18 +484,18 @@ export class SparcSpecification extends SparcPhase {
    */
   async defineBusiness() {
     const analysis = await this.analyzeTaskDescription();
-    
+
     switch (analysis.type) {
-      case 'api_development':
-        return 'Enables system integration and data exchange, improving operational efficiency';
-      case 'frontend_development':
-        return 'Improves user experience and engagement, potentially increasing user satisfaction';
-      case 'data_management':
-        return 'Ensures data integrity and availability, supporting business decisions';
-      case 'testing':
-        return 'Reduces bugs and improves software quality, minimizing support costs';
-      default:
-        return 'Addresses business requirements and improves system capabilities';
+    case 'api_development':
+      return 'Enables system integration and data exchange, improving operational efficiency';
+    case 'frontend_development':
+      return 'Improves user experience and engagement, potentially increasing user satisfaction';
+    case 'data_management':
+      return 'Ensures data integrity and availability, supporting business decisions';
+    case 'testing':
+      return 'Reduces bugs and improves software quality, minimizing support costs';
+    default:
+      return 'Addresses business requirements and improves system capabilities';
     }
   }
 
@@ -525,7 +525,7 @@ export class SparcSpecification extends SparcPhase {
     const totalStoryPoints = requirements.length * 3; // Average 3 points per requirement
     const developmentVelocity = 10; // Points per sprint
     const sprintsNeeded = Math.ceil(totalStoryPoints / developmentVelocity);
-    
+
     return {
       estimated: `${sprintsNeeded * 2} weeks`,
       phases: [
@@ -575,7 +575,7 @@ export class SparcSpecification extends SparcPhase {
    */
   async identifyDependencies(requirements) {
     const dependencies = [];
-    
+
     for (const requirement of requirements) {
       if (requirement.includes('API')) {
         dependencies.push('Database schema definition');
@@ -590,7 +590,7 @@ export class SparcSpecification extends SparcPhase {
         dependencies.push('Certificate management');
       }
     }
-    
+
     return [...new Set(dependencies)]; // Remove duplicates
   }
 

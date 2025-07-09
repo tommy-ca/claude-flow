@@ -15,7 +15,7 @@ export class MCPIntegrationLayer {
     this.retryQueue = new Map();
     this.maxRetries = 3;
     this.retryDelay = 1000;
-    
+
     // Tool categories for better organization
     this.toolCategories = {
       // Swarm Coordination Tools (12)
@@ -24,7 +24,7 @@ export class MCPIntegrationLayer {
         'agent_list', 'agent_metrics', 'swarm_monitor', 'topology_optimize',
         'load_balance', 'coordination_sync', 'swarm_scale', 'swarm_destroy'
       ],
-      
+
       // Neural Network Tools (15)
       neural: [
         'neural_status', 'neural_train', 'neural_patterns', 'neural_predict',
@@ -32,49 +32,49 @@ export class MCPIntegrationLayer {
         'pattern_recognize', 'cognitive_analyze', 'learning_adapt',
         'neural_compress', 'ensemble_create', 'transfer_learn', 'neural_explain'
       ],
-      
+
       // Memory & Persistence Tools (12)
       memory: [
         'memory_usage', 'memory_search', 'memory_persist', 'memory_namespace',
         'memory_backup', 'memory_restore', 'memory_compress', 'memory_sync',
         'cache_manage', 'state_snapshot', 'context_restore', 'memory_analytics'
       ],
-      
+
       // Analysis & Monitoring Tools (13)
       analysis: [
         'performance_report', 'bottleneck_analyze', 'token_usage', 'task_status',
         'task_results', 'benchmark_run', 'metrics_collect', 'trend_analysis',
         'cost_analysis', 'quality_assess', 'error_analysis', 'usage_stats', 'health_check'
       ],
-      
+
       // Workflow & Automation Tools (11)
       workflow: [
         'workflow_create', 'sparc_mode', 'workflow_execute', 'workflow_export',
         'automation_setup', 'pipeline_create', 'scheduler_manage', 'trigger_setup',
         'workflow_template', 'batch_process', 'parallel_execute'
       ],
-      
+
       // GitHub Integration Tools (8)
       github: [
         'github_repo_analyze', 'github_pr_manage', 'github_issue_track',
         'github_release_coord', 'github_workflow_auto', 'github_code_review',
         'github_sync_coord', 'github_metrics'
       ],
-      
+
       // DAA (Dynamic Agent Architecture) Tools (8)
       daa: [
         'daa_agent_create', 'daa_capability_match', 'daa_resource_alloc',
         'daa_lifecycle_manage', 'daa_communication', 'daa_consensus',
         'daa_fault_tolerance', 'daa_optimization'
       ],
-      
+
       // System & Utilities Tools (6+)
       system: [
         'terminal_execute', 'config_manage', 'features_detect', 'security_scan',
         'backup_create', 'restore_system', 'log_analysis', 'diagnostic_run'
       ]
     };
-    
+
     this.initializeIntegration();
   }
 
@@ -89,15 +89,15 @@ export class MCPIntegrationLayer {
         this.ui.addLog('warning', 'MCP tools not available - using mock implementations');
         this.useMockMode = true;
       }
-      
+
       // Initialize tool monitoring
       this.startToolMonitoring();
-      
+
       // Setup event handlers
       this.setupEventHandlers();
-      
+
       this.ui.addLog('success', 'MCP Integration Layer initialized successfully');
-      
+
     } catch (error) {
       this.ui.addLog('error', `Failed to initialize MCP integration: ${error.message}`);
       this.useMockMode = true;
@@ -122,7 +122,7 @@ export class MCPIntegrationLayer {
    */
   async executeTool(toolName, parameters = {}, options = {}) {
     const executionId = `exec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     try {
       // Store execution info
       this.activeTools.set(executionId, {
@@ -132,18 +132,18 @@ export class MCPIntegrationLayer {
         status: 'running',
         progress: 0
       });
-      
+
       // Notify UI of execution start
       this.notifyUI('tool_start', { executionId, toolName });
-      
+
       // Execute with retry logic
       const result = await this.executeWithRetry(toolName, parameters, options);
-      
+
       // Cache successful results
       if (result.success) {
         this.cacheResult(toolName, parameters, result);
       }
-      
+
       // Update execution status
       this.activeTools.set(executionId, {
         ...this.activeTools.get(executionId),
@@ -151,12 +151,12 @@ export class MCPIntegrationLayer {
         result,
         endTime: Date.now()
       });
-      
+
       // Notify UI of completion
       this.notifyUI('tool_complete', { executionId, toolName, result });
-      
+
       return { executionId, result };
-      
+
     } catch (error) {
       // Update execution status
       this.activeTools.set(executionId, {
@@ -165,10 +165,10 @@ export class MCPIntegrationLayer {
         error: error.message,
         endTime: Date.now()
       });
-      
+
       // Notify UI of error
       this.notifyUI('tool_error', { executionId, toolName, error: error.message });
-      
+
       throw error;
     }
   }
@@ -179,7 +179,7 @@ export class MCPIntegrationLayer {
   async executeWithRetry(toolName, parameters, options) {
     const maxRetries = options.maxRetries || this.maxRetries;
     let lastError;
-    
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         if (attempt > 0) {
@@ -187,16 +187,16 @@ export class MCPIntegrationLayer {
           await this.delay(this.retryDelay * Math.pow(2, attempt - 1));
           this.ui.addLog('info', `Retrying ${toolName} (attempt ${attempt + 1}/${maxRetries + 1})`);
         }
-        
+
         const result = await this.executeToolDirect(toolName, parameters);
         return result;
-        
+
       } catch (error) {
         lastError = error;
         this.ui.addLog('warning', `Tool ${toolName} failed on attempt ${attempt + 1}: ${error.message}`);
       }
     }
-    
+
     throw new Error(`Tool ${toolName} failed after ${maxRetries + 1} attempts: ${lastError.message}`);
   }
 
@@ -207,15 +207,15 @@ export class MCPIntegrationLayer {
     if (this.useMockMode) {
       return this.executeMockTool(toolName, parameters);
     }
-    
+
     try {
       // Use the mcp__claude-flow__ tools that are available
       const mcpToolName = `mcp__claude-flow__${toolName}`;
-      
+
       // Check if we have this tool available (would need to be passed from the calling context)
       // For now, simulate execution
       return this.executeMockTool(toolName, parameters);
-      
+
     } catch (error) {
       throw new Error(`MCP tool execution failed: ${error.message}`);
     }
@@ -227,80 +227,80 @@ export class MCPIntegrationLayer {
   async executeMockTool(toolName, parameters) {
     // Simulate processing time
     await this.delay(Math.random() * 1000 + 500);
-    
+
     // Generate realistic mock responses based on tool type
     switch (toolName) {
-      case 'swarm_init':
+    case 'swarm_init':
+      return {
+        success: true,
+        swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        topology: parameters.topology || 'hierarchical',
+        maxAgents: parameters.maxAgents || 8,
+        strategy: parameters.strategy || 'auto',
+        status: 'initialized',
+        timestamp: new Date().toISOString()
+      };
+
+    case 'neural_train':
+      const epochs = parameters.epochs || 50;
+      const accuracy = Math.min(0.65 + (epochs / 100) * 0.3 + Math.random() * 0.05, 0.98);
+      return {
+        success: true,
+        modelId: `model_${parameters.pattern_type || 'general'}_${Date.now()}`,
+        pattern_type: parameters.pattern_type || 'coordination',
+        epochs,
+        accuracy,
+        training_time: 2 + (epochs * 0.08),
+        status: 'completed',
+        timestamp: new Date().toISOString()
+      };
+
+    case 'memory_usage':
+      if (parameters.action === 'store') {
         return {
           success: true,
-          swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          topology: parameters.topology || 'hierarchical',
-          maxAgents: parameters.maxAgents || 8,
-          strategy: parameters.strategy || 'auto',
-          status: 'initialized',
+          action: 'store',
+          key: parameters.key,
+          namespace: parameters.namespace || 'default',
+          stored: true,
           timestamp: new Date().toISOString()
         };
-        
-      case 'neural_train':
-        const epochs = parameters.epochs || 50;
-        const accuracy = Math.min(0.65 + (epochs / 100) * 0.3 + Math.random() * 0.05, 0.98);
+      } else if (parameters.action === 'retrieve') {
         return {
           success: true,
-          modelId: `model_${parameters.pattern_type || 'general'}_${Date.now()}`,
-          pattern_type: parameters.pattern_type || 'coordination',
-          epochs,
-          accuracy,
-          training_time: 2 + (epochs * 0.08),
-          status: 'completed',
+          action: 'retrieve',
+          key: parameters.key,
+          value: `Mock value for ${parameters.key}`,
+          namespace: parameters.namespace || 'default',
           timestamp: new Date().toISOString()
         };
-        
-      case 'memory_usage':
-        if (parameters.action === 'store') {
-          return {
-            success: true,
-            action: 'store',
-            key: parameters.key,
-            namespace: parameters.namespace || 'default',
-            stored: true,
-            timestamp: new Date().toISOString()
-          };
-        } else if (parameters.action === 'retrieve') {
-          return {
-            success: true,
-            action: 'retrieve',
-            key: parameters.key,
-            value: `Mock value for ${parameters.key}`,
-            namespace: parameters.namespace || 'default',
-            timestamp: new Date().toISOString()
-          };
-        }
-        break;
-        
-      case 'performance_report':
-        return {
-          success: true,
-          timeframe: parameters.timeframe || '24h',
-          format: parameters.format || 'summary',
-          metrics: {
-            tasks_executed: Math.floor(Math.random() * 200) + 50,
-            success_rate: Math.random() * 0.2 + 0.8,
-            avg_execution_time: Math.random() * 10 + 5,
-            agents_spawned: Math.floor(Math.random() * 50) + 10,
-            memory_efficiency: Math.random() * 0.3 + 0.7,
-            neural_events: Math.floor(Math.random() * 100) + 20
-          },
-          timestamp: new Date().toISOString()
-        };
-        
-      default:
-        return {
-          success: true,
-          tool: toolName,
-          message: `Mock execution of ${toolName}`,
-          parameters,
-          timestamp: new Date().toISOString()
-        };
+      }
+      break;
+
+    case 'performance_report':
+      return {
+        success: true,
+        timeframe: parameters.timeframe || '24h',
+        format: parameters.format || 'summary',
+        metrics: {
+          tasks_executed: Math.floor(Math.random() * 200) + 50,
+          success_rate: Math.random() * 0.2 + 0.8,
+          avg_execution_time: Math.random() * 10 + 5,
+          agents_spawned: Math.floor(Math.random() * 50) + 10,
+          memory_efficiency: Math.random() * 0.3 + 0.7,
+          neural_events: Math.floor(Math.random() * 100) + 20
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    default:
+      return {
+        success: true,
+        tool: toolName,
+        message: `Mock execution of ${toolName}`,
+        parameters,
+        timestamp: new Date().toISOString()
+      };
     }
   }
 
@@ -311,7 +311,7 @@ export class MCPIntegrationLayer {
     const promises = toolExecutions.map(({ toolName, parameters, options }) =>
       this.executeTool(toolName, parameters, options)
     );
-    
+
     return Promise.allSettled(promises);
   }
 
@@ -321,14 +321,14 @@ export class MCPIntegrationLayer {
   async executeToolsBatch(toolExecutions, progressCallback) {
     const results = [];
     const total = toolExecutions.length;
-    
+
     for (let i = 0; i < total; i++) {
       const { toolName, parameters, options } = toolExecutions[i];
-      
+
       try {
         const result = await this.executeTool(toolName, parameters, options);
         results.push({ success: true, result });
-        
+
         if (progressCallback) {
           progressCallback({
             completed: i + 1,
@@ -337,12 +337,12 @@ export class MCPIntegrationLayer {
             currentTool: toolName
           });
         }
-        
+
       } catch (error) {
         results.push({ success: false, error: error.message });
       }
     }
-    
+
     return results;
   }
 
@@ -352,13 +352,13 @@ export class MCPIntegrationLayer {
   cacheResult(toolName, parameters, result) {
     const cacheKey = this.generateCacheKey(toolName, parameters);
     const ttl = this.getCacheTTL(toolName);
-    
+
     this.resultCache.set(cacheKey, {
       result,
       timestamp: Date.now(),
       ttl
     });
-    
+
     // Clean expired cache entries
     this.cleanExpiredCache();
   }
@@ -369,15 +369,15 @@ export class MCPIntegrationLayer {
   getCachedResult(toolName, parameters) {
     const cacheKey = this.generateCacheKey(toolName, parameters);
     const cached = this.resultCache.get(cacheKey);
-    
-    if (!cached) return null;
-    
+
+    if (!cached) {return null;}
+
     const age = Date.now() - cached.timestamp;
     if (age > cached.ttl) {
       this.resultCache.delete(cacheKey);
       return null;
     }
-    
+
     return cached.result;
   }
 
@@ -398,16 +398,16 @@ export class MCPIntegrationLayer {
       'swarm_status': 5000,
       'agent_metrics': 10000,
       'performance_report': 30000,
-      
+
       // Slow changing data - medium TTL
       'memory_usage': 60000,
       'system_status': 120000,
-      
+
       // Static data - long TTL
       'features_detect': 300000,
       'config_manage': 600000
     };
-    
+
     return ttlMap[toolName] || 60000; // Default 1 minute
   }
 
@@ -489,7 +489,7 @@ export class MCPIntegrationLayer {
       'swarm_init': 2000,
       'memory_backup': 10000
     };
-    
+
     return durationMap[toolName] || 3000; // Default 3 seconds
   }
 
@@ -538,7 +538,7 @@ export class MCPIntegrationLayer {
       const level = this.getEventLevel(eventType);
       this.ui.addLog(level, message);
     }
-    
+
     // Notify subscribers
     for (const callback of this.subscriptions) {
       try {
@@ -554,16 +554,16 @@ export class MCPIntegrationLayer {
    */
   formatEventMessage(eventType, data) {
     switch (eventType) {
-      case 'tool_start':
-        return `Started ${data.toolName} (ID: ${data.executionId})`;
-      case 'tool_complete':
-        return `Completed ${data.toolName} successfully`;
-      case 'tool_error':
-        return `Failed ${data.toolName}: ${data.error}`;
-      case 'tool_cancelled':
-        return `Cancelled execution ${data.executionId}`;
-      default:
-        return `Event: ${eventType}`;
+    case 'tool_start':
+      return `Started ${data.toolName} (ID: ${data.executionId})`;
+    case 'tool_complete':
+      return `Completed ${data.toolName} successfully`;
+    case 'tool_error':
+      return `Failed ${data.toolName}: ${data.error}`;
+    case 'tool_cancelled':
+      return `Cancelled execution ${data.executionId}`;
+    default:
+      return `Event: ${eventType}`;
     }
   }
 
@@ -572,14 +572,14 @@ export class MCPIntegrationLayer {
    */
   getEventLevel(eventType) {
     switch (eventType) {
-      case 'tool_complete':
-        return 'success';
-      case 'tool_error':
-        return 'error';
-      case 'tool_cancelled':
-        return 'warning';
-      default:
-        return 'info';
+    case 'tool_complete':
+      return 'success';
+    case 'tool_error':
+      return 'error';
+    case 'tool_cancelled':
+      return 'warning';
+    default:
+      return 'info';
     }
   }
 
@@ -598,7 +598,7 @@ export class MCPIntegrationLayer {
     const running = Array.from(this.activeTools.values()).filter(e => e.status === 'running').length;
     const completed = Array.from(this.activeTools.values()).filter(e => e.status === 'completed').length;
     const failed = Array.from(this.activeTools.values()).filter(e => e.status === 'failed').length;
-    
+
     return {
       mcpAvailable: !this.useMockMode,
       activeExecutions: running,

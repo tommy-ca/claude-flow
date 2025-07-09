@@ -55,19 +55,19 @@ export class PreInitValidator {
       });
 
       const { stdout, success } = await command.output();
-      
+
       if (success) {
         const output = new TextDecoder().decode(stdout);
         const lines = output.trim().split('\n');
-        
+
         if (lines.length >= 2) {
           const dataLine = lines[1];
           const parts = dataLine.split(/\s+/);
-          
+
           if (parts.length >= 4) {
             const availableKB = parseInt(parts[3]);
             const availableMB = availableKB / 1024;
-            
+
             // Require at least 100MB free space
             if (availableMB < 100) {
               result.success = false;
@@ -140,7 +140,7 @@ export class PreInitValidator {
           for await (const entry of Deno.readDir(`${this.workingDir}/${dir}`)) {
             entries.push(entry.name);
           }
-          
+
           if (entries.length > 0) {
             result.conflicts.push(`${dir}/ (${entries.length} items)`);
             if (!force) {
@@ -183,7 +183,7 @@ export class PreInitValidator {
         });
 
         const { stdout, success } = await command.output();
-        
+
         if (success) {
           const version = new TextDecoder().decode(stdout).trim();
           result.dependencies[dep.name] = {
@@ -232,12 +232,12 @@ export class PreInitValidator {
 
     for (const envVar of envVars) {
       const value = Deno.env.get(envVar.name);
-      
+
       if (value) {
         result.environment[envVar.name] = 'set';
       } else {
         result.environment[envVar.name] = 'not set';
-        
+
         if (envVar.required) {
           result.success = false;
           result.errors.push(`Required environment variable ${envVar.name} is not set`);
@@ -256,7 +256,7 @@ export class PreInitValidator {
 
       const { success } = await command.output();
       result.environment.gitRepo = success;
-      
+
       if (!success) {
         result.warnings.push('Not in a git repository - version control recommended');
       }

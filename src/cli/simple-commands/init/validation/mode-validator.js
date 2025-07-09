@@ -35,7 +35,7 @@ export class ModeValidator {
       for (const mode of availableModes) {
         const modeTest = await this.testMode(mode);
         result.modes[mode] = modeTest;
-        
+
         if (!modeTest.success) {
           result.success = false;
           result.errors.push(`Mode ${mode} failed testing: ${modeTest.error}`);
@@ -157,7 +157,7 @@ export class ModeValidator {
       // Fallback to common modes
       modes.push(
         'architect',
-        'code', 
+        'code',
         'tdd',
         'spec-pseudocode',
         'integration',
@@ -188,7 +188,7 @@ export class ModeValidator {
       });
 
       const { success, stdout, stderr } = await command.output();
-      
+
       if (success) {
         result.success = true;
       } else {
@@ -268,7 +268,7 @@ export class ModeValidator {
       });
 
       const { success, stdout, stderr } = await command.output();
-      
+
       if (success) {
         result.success = true;
       } else {
@@ -319,7 +319,7 @@ export class ModeValidator {
     try {
       // Check for workflow files
       const workflowDir = `${this.workingDir}/.roo/workflows`;
-      
+
       try {
         const entries = [];
         for await (const entry of Deno.readDir(workflowDir)) {
@@ -332,7 +332,7 @@ export class ModeValidator {
         for (const workflowFile of entries) {
           const workflowTest = await this.testWorkflowFile(workflowFile);
           result.workflows[workflowFile] = workflowTest;
-          
+
           if (!workflowTest.success) {
             result.warnings.push(`Workflow ${workflowFile} has issues: ${workflowTest.error}`);
           }
@@ -365,10 +365,10 @@ export class ModeValidator {
     try {
       const workflowPath = `${this.workingDir}/.roo/workflows/${filename}`;
       const content = await Deno.readTextFile(workflowPath);
-      
+
       // Parse JSON
       const workflow = JSON.parse(content);
-      
+
       // Basic validation
       if (typeof workflow !== 'object' || workflow === null) {
         result.success = false;

@@ -83,7 +83,7 @@ class ClaudeFlowMCPServer {
           }
         }
       },
-      
+
       // Neural Network Tools (15)
       neural_status: {
         name: 'neural_status',
@@ -122,7 +122,7 @@ class ClaudeFlowMCPServer {
           required: ['action']
         }
       },
-      
+
       // Memory & Persistence Tools (12)
       memory_usage: {
         name: 'memory_usage',
@@ -152,7 +152,7 @@ class ClaudeFlowMCPServer {
           required: ['pattern']
         }
       },
-      
+
       // Analysis & Monitoring Tools (13)
       performance_report: {
         name: 'performance_report',
@@ -187,7 +187,7 @@ class ClaudeFlowMCPServer {
           }
         }
       },
-      
+
       // GitHub Integration Tools (8)
       github_repo_analyze: {
         name: 'github_repo_analyze',
@@ -214,7 +214,7 @@ class ClaudeFlowMCPServer {
           required: ['repo', 'action']
         }
       },
-      
+
       // DAA Tools (8)
       daa_agent_create: {
         name: 'daa_agent_create',
@@ -241,7 +241,7 @@ class ClaudeFlowMCPServer {
           required: ['task_requirements']
         }
       },
-      
+
       // Workflow Tools (11)
       workflow_create: {
         name: 'workflow_create',
@@ -667,18 +667,18 @@ class ClaudeFlowMCPServer {
       const { id, method, params } = message;
 
       switch (method) {
-        case 'initialize':
-          return this.handleInitialize(id, params);
-        case 'tools/list':
-          return this.handleToolsList(id);
-        case 'tools/call':
-          return this.handleToolCall(id, params);
-        case 'resources/list':
-          return this.handleResourcesList(id);
-        case 'resources/read':
-          return this.handleResourceRead(id, params);
-        default:
-          return this.createErrorResponse(id, -32601, 'Method not found');
+      case 'initialize':
+        return this.handleInitialize(id, params);
+      case 'tools/list':
+        return this.handleToolsList(id);
+      case 'tools/call':
+        return this.handleToolCall(id, params);
+      case 'resources/list':
+        return this.handleResourcesList(id);
+      case 'resources/read':
+        return this.handleResourceRead(id, params);
+      default:
+        return this.createErrorResponse(id, -32601, 'Method not found');
       }
     } catch (error) {
       return this.createErrorResponse(message.id, -32603, 'Internal error', error.message);
@@ -687,7 +687,7 @@ class ClaudeFlowMCPServer {
 
   handleInitialize(id, params) {
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${this.sessionId}) 🔌 Connection established: ${this.sessionId}`);
-    
+
     return {
       jsonrpc: '2.0',
       id,
@@ -715,9 +715,9 @@ class ClaudeFlowMCPServer {
 
   async handleToolCall(id, params) {
     const { name, arguments: args } = params;
-    
+
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${this.sessionId}) 🔧 Tool called: ${name}`);
-    
+
     try {
       const result = await this.executeTool(name, args);
       return {
@@ -750,7 +750,7 @@ class ClaudeFlowMCPServer {
 
   async handleResourceRead(id, params) {
     const { uri } = params;
-    
+
     try {
       const content = await this.readResource(uri);
       return {
@@ -774,343 +774,343 @@ class ClaudeFlowMCPServer {
   async executeTool(name, args) {
     // Simulate tool execution based on the tool name
     switch (name) {
-      case 'swarm_init':
+    case 'swarm_init':
+      return {
+        success: true,
+        swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        topology: args.topology || 'hierarchical',
+        maxAgents: args.maxAgents || 8,
+        strategy: args.strategy || 'auto',
+        status: 'initialized',
+        timestamp: new Date().toISOString()
+      };
+
+    case 'agent_spawn':
+      return {
+        success: true,
+        agentId: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        type: args.type,
+        name: args.name || `${args.type}-${Date.now()}`,
+        status: 'active',
+        capabilities: args.capabilities || [],
+        timestamp: new Date().toISOString()
+      };
+
+    case 'neural_train':
+      const epochs = args.epochs || 50;
+      const baseAccuracy = 0.65;
+      const maxAccuracy = 0.98;
+
+      // Realistic training progression: more epochs = better accuracy but with diminishing returns
+      const epochFactor = Math.min(epochs / 100, 10); // Normalize epochs
+      const accuracyGain = (maxAccuracy - baseAccuracy) * (1 - Math.exp(-epochFactor / 3));
+      const finalAccuracy = baseAccuracy + accuracyGain + (Math.random() * 0.05 - 0.025); // Add some noise
+
+      // Training time increases with epochs but not linearly (parallel processing)
+      const baseTime = 2;
+      const timePerEpoch = 0.08;
+      const trainingTime = baseTime + (epochs * timePerEpoch) + (Math.random() * 2 - 1);
+
+      return {
+        success: true,
+        modelId: `model_${args.pattern_type || 'general'}_${Date.now()}`,
+        pattern_type: args.pattern_type || 'coordination',
+        epochs: epochs,
+        accuracy: Math.min(finalAccuracy, maxAccuracy),
+        training_time: Math.max(trainingTime, 1),
+        status: 'completed',
+        improvement_rate: epochFactor > 1 ? 'converged' : 'improving',
+        data_source: args.training_data || 'recent',
+        timestamp: new Date().toISOString()
+      };
+
+    case 'memory_usage':
+      if (args.action === 'store') {
         return {
           success: true,
-          swarmId: `swarm_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          topology: args.topology || 'hierarchical',
-          maxAgents: args.maxAgents || 8,
-          strategy: args.strategy || 'auto',
-          status: 'initialized',
+          action: 'store',
+          key: args.key,
+          namespace: args.namespace || 'default',
+          stored: true,
           timestamp: new Date().toISOString()
         };
-
-      case 'agent_spawn':
+      } else if (args.action === 'retrieve') {
         return {
           success: true,
-          agentId: `agent_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
-          type: args.type,
-          name: args.name || `${args.type}-${Date.now()}`,
-          status: 'active',
-          capabilities: args.capabilities || [],
+          action: 'retrieve',
+          key: args.key,
+          value: `Retrieved value for ${args.key}`,
+          namespace: args.namespace || 'default',
           timestamp: new Date().toISOString()
         };
+      }
+      break;
 
-      case 'neural_train':
-        const epochs = args.epochs || 50;
-        const baseAccuracy = 0.65;
-        const maxAccuracy = 0.98;
-        
-        // Realistic training progression: more epochs = better accuracy but with diminishing returns
-        const epochFactor = Math.min(epochs / 100, 10); // Normalize epochs
-        const accuracyGain = (maxAccuracy - baseAccuracy) * (1 - Math.exp(-epochFactor / 3));
-        const finalAccuracy = baseAccuracy + accuracyGain + (Math.random() * 0.05 - 0.025); // Add some noise
-        
-        // Training time increases with epochs but not linearly (parallel processing)
-        const baseTime = 2;
-        const timePerEpoch = 0.08;
-        const trainingTime = baseTime + (epochs * timePerEpoch) + (Math.random() * 2 - 1);
-        
-        return {
-          success: true,
-          modelId: `model_${args.pattern_type || 'general'}_${Date.now()}`,
-          pattern_type: args.pattern_type || 'coordination',
-          epochs: epochs,
-          accuracy: Math.min(finalAccuracy, maxAccuracy),
-          training_time: Math.max(trainingTime, 1),
-          status: 'completed',
-          improvement_rate: epochFactor > 1 ? 'converged' : 'improving',
-          data_source: args.training_data || 'recent',
-          timestamp: new Date().toISOString()
-        };
-
-      case 'memory_usage':
-        if (args.action === 'store') {
-          return {
-            success: true,
-            action: 'store',
-            key: args.key,
-            namespace: args.namespace || 'default',
-            stored: true,
-            timestamp: new Date().toISOString()
-          };
-        } else if (args.action === 'retrieve') {
-          return {
-            success: true,
-            action: 'retrieve',
-            key: args.key,
-            value: `Retrieved value for ${args.key}`,
-            namespace: args.namespace || 'default',
-            timestamp: new Date().toISOString()
-          };
-        }
-        break;
-
-      case 'performance_report':
-        return {
-          success: true,
-          timeframe: args.timeframe || '24h',
-          format: args.format || 'summary',
-          metrics: {
-            tasks_executed: Math.floor(Math.random() * 200) + 50,
-            success_rate: Math.random() * 0.2 + 0.8,
-            avg_execution_time: Math.random() * 10 + 5,
-            agents_spawned: Math.floor(Math.random() * 50) + 10,
-            memory_efficiency: Math.random() * 0.3 + 0.7,
-            neural_events: Math.floor(Math.random() * 100) + 20
-          },
-          timestamp: new Date().toISOString()
-        };
+    case 'performance_report':
+      return {
+        success: true,
+        timeframe: args.timeframe || '24h',
+        format: args.format || 'summary',
+        metrics: {
+          tasks_executed: Math.floor(Math.random() * 200) + 50,
+          success_rate: Math.random() * 0.2 + 0.8,
+          avg_execution_time: Math.random() * 10 + 5,
+          agents_spawned: Math.floor(Math.random() * 50) + 10,
+          memory_efficiency: Math.random() * 0.3 + 0.7,
+          neural_events: Math.floor(Math.random() * 100) + 20
+        },
+        timestamp: new Date().toISOString()
+      };
 
       // Enhanced Neural Tools with Real Metrics
-      case 'model_save':
-        return {
-          success: true,
-          modelId: args.modelId,
-          savePath: args.path,
-          modelSize: `${Math.floor(Math.random() * 50 + 10)}MB`,
-          version: `v${Math.floor(Math.random() * 10 + 1)}.${Math.floor(Math.random() * 20)}`,
-          saved: true,
-          timestamp: new Date().toISOString()
-        };
+    case 'model_save':
+      return {
+        success: true,
+        modelId: args.modelId,
+        savePath: args.path,
+        modelSize: `${Math.floor(Math.random() * 50 + 10)}MB`,
+        version: `v${Math.floor(Math.random() * 10 + 1)}.${Math.floor(Math.random() * 20)}`,
+        saved: true,
+        timestamp: new Date().toISOString()
+      };
 
-      case 'model_load':
-        return {
-          success: true,
-          modelPath: args.modelPath,
-          modelId: `loaded_${Date.now()}`,
-          modelType: 'coordination_neural_network',
-          version: `v${Math.floor(Math.random() * 10 + 1)}.${Math.floor(Math.random() * 20)}`,
-          parameters: Math.floor(Math.random() * 1000000 + 500000),
+    case 'model_load':
+      return {
+        success: true,
+        modelPath: args.modelPath,
+        modelId: `loaded_${Date.now()}`,
+        modelType: 'coordination_neural_network',
+        version: `v${Math.floor(Math.random() * 10 + 1)}.${Math.floor(Math.random() * 20)}`,
+        parameters: Math.floor(Math.random() * 1000000 + 500000),
+        accuracy: Math.random() * 0.15 + 0.85,
+        loaded: true,
+        timestamp: new Date().toISOString()
+      };
+
+    case 'neural_predict':
+      return {
+        success: true,
+        modelId: args.modelId,
+        input: args.input,
+        prediction: {
+          outcome: Math.random() > 0.5 ? 'success' : 'optimization_needed',
+          confidence: Math.random() * 0.3 + 0.7,
+          alternatives: ['parallel_strategy', 'sequential_strategy', 'hybrid_strategy'],
+          recommended_action: 'proceed_with_coordination'
+        },
+        inference_time_ms: Math.floor(Math.random() * 200 + 50),
+        timestamp: new Date().toISOString()
+      };
+
+    case 'pattern_recognize':
+      return {
+        success: true,
+        data: args.data,
+        patterns_detected: {
+          coordination_patterns: Math.floor(Math.random() * 5 + 3),
+          efficiency_patterns: Math.floor(Math.random() * 4 + 2),
+          success_indicators: Math.floor(Math.random() * 6 + 4)
+        },
+        pattern_confidence: Math.random() * 0.2 + 0.8,
+        recommendations: [
+          'optimize_agent_distribution',
+          'enhance_communication_channels',
+          'implement_predictive_scaling'
+        ],
+        processing_time_ms: Math.floor(Math.random() * 100 + 25),
+        timestamp: new Date().toISOString()
+      };
+
+    case 'cognitive_analyze':
+      return {
+        success: true,
+        behavior: args.behavior,
+        analysis: {
+          behavior_type: 'coordination_optimization',
+          complexity_score: Math.random() * 10 + 1,
+          efficiency_rating: Math.random() * 5 + 3,
+          improvement_potential: Math.random() * 100 + 20
+        },
+        insights: [
+          'Agent coordination shows high efficiency patterns',
+          'Task distribution demonstrates optimal load balancing',
+          'Communication overhead is within acceptable parameters'
+        ],
+        neural_feedback: {
+          pattern_strength: Math.random() * 0.4 + 0.6,
+          learning_rate: Math.random() * 0.1 + 0.05,
+          adaptation_score: Math.random() * 100 + 70
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    case 'learning_adapt':
+      return {
+        success: true,
+        experience: args.experience,
+        adaptation_results: {
+          model_version: `v${Math.floor(Math.random() * 10 + 1)}.${Math.floor(Math.random() * 50)}`,
+          performance_delta: `+${Math.floor(Math.random() * 25 + 5)}%`,
+          training_samples: Math.floor(Math.random() * 500 + 100),
+          accuracy_improvement: `+${Math.floor(Math.random() * 10 + 2)}%`,
+          confidence_increase: `+${Math.floor(Math.random() * 15 + 5)}%`
+        },
+        learned_patterns: [
+          'coordination_efficiency_boost',
+          'agent_selection_optimization',
+          'task_distribution_enhancement'
+        ],
+        next_learning_targets: [
+          'memory_usage_optimization',
+          'communication_latency_reduction',
+          'predictive_error_prevention'
+        ],
+        timestamp: new Date().toISOString()
+      };
+
+    case 'neural_compress':
+      return {
+        success: true,
+        modelId: args.modelId,
+        compression_ratio: args.ratio || 0.7,
+        compressed_model: {
+          original_size: `${Math.floor(Math.random() * 100 + 50)}MB`,
+          compressed_size: `${Math.floor(Math.random() * 35 + 15)}MB`,
+          size_reduction: `${Math.floor((1 - (args.ratio || 0.7)) * 100)}%`,
+          accuracy_retention: `${Math.floor(Math.random() * 5 + 95)}%`,
+          inference_speedup: `${Math.floor(Math.random() * 3 + 2)}x`
+        },
+        optimization_details: {
+          pruned_connections: Math.floor(Math.random() * 10000 + 5000),
+          quantization_applied: true,
+          wasm_optimized: true
+        },
+        timestamp: new Date().toISOString()
+      };
+
+    case 'ensemble_create':
+      return {
+        success: true,
+        models: args.models,
+        ensemble_id: `ensemble_${Date.now()}`,
+        strategy: args.strategy || 'weighted_voting',
+        ensemble_metrics: {
+          total_models: args.models.length,
+          combined_accuracy: Math.random() * 0.1 + 0.9,
+          inference_time: `${Math.floor(Math.random() * 300 + 100)}ms`,
+          memory_usage: `${Math.floor(Math.random() * 200 + 100)}MB`,
+          consensus_threshold: 0.75
+        },
+        model_weights: args.models.map(() => Math.random()),
+        performance_gain: `+${Math.floor(Math.random() * 15 + 10)}%`,
+        timestamp: new Date().toISOString()
+      };
+
+    case 'transfer_learn':
+      return {
+        success: true,
+        sourceModel: args.sourceModel,
+        targetDomain: args.targetDomain,
+        transfer_results: {
+          adaptation_rate: Math.random() * 0.3 + 0.7,
+          knowledge_retention: Math.random() * 0.2 + 0.8,
+          domain_fit_score: Math.random() * 0.25 + 0.75,
+          training_reduction: `${Math.floor(Math.random() * 60 + 40)}%`
+        },
+        transferred_features: [
+          'coordination_patterns',
+          'efficiency_heuristics',
+          'optimization_strategies'
+        ],
+        new_model_id: `transferred_${Date.now()}`,
+        performance_metrics: {
           accuracy: Math.random() * 0.15 + 0.85,
-          loaded: true,
-          timestamp: new Date().toISOString()
-        };
+          inference_speed: `${Math.floor(Math.random() * 150 + 50)}ms`,
+          memory_efficiency: `+${Math.floor(Math.random() * 20 + 10)}%`
+        },
+        timestamp: new Date().toISOString()
+      };
 
-      case 'neural_predict':
-        return {
-          success: true,
-          modelId: args.modelId,
-          input: args.input,
-          prediction: {
-            outcome: Math.random() > 0.5 ? 'success' : 'optimization_needed',
-            confidence: Math.random() * 0.3 + 0.7,
-            alternatives: ['parallel_strategy', 'sequential_strategy', 'hybrid_strategy'],
-            recommended_action: 'proceed_with_coordination'
-          },
-          inference_time_ms: Math.floor(Math.random() * 200 + 50),
-          timestamp: new Date().toISOString()
-        };
-
-      case 'pattern_recognize':
-        return {
-          success: true,
-          data: args.data,
-          patterns_detected: {
-            coordination_patterns: Math.floor(Math.random() * 5 + 3),
-            efficiency_patterns: Math.floor(Math.random() * 4 + 2),
-            success_indicators: Math.floor(Math.random() * 6 + 4)
-          },
-          pattern_confidence: Math.random() * 0.2 + 0.8,
-          recommendations: [
-            'optimize_agent_distribution',
-            'enhance_communication_channels',
-            'implement_predictive_scaling'
+    case 'neural_explain':
+      return {
+        success: true,
+        modelId: args.modelId,
+        prediction: args.prediction,
+        explanation: {
+          decision_factors: [
+            { factor: 'agent_availability', importance: Math.random() * 0.3 + 0.4 },
+            { factor: 'task_complexity', importance: Math.random() * 0.25 + 0.3 },
+            { factor: 'coordination_history', importance: Math.random() * 0.2 + 0.25 }
           ],
-          processing_time_ms: Math.floor(Math.random() * 100 + 25),
-          timestamp: new Date().toISOString()
-        };
+          feature_importance: {
+            topology_type: Math.random() * 0.3 + 0.5,
+            agent_capabilities: Math.random() * 0.25 + 0.4,
+            resource_availability: Math.random() * 0.2 + 0.3
+          },
+          reasoning_path: [
+            'Analyzed current swarm topology',
+            'Evaluated agent performance history',
+            'Calculated optimal task distribution',
+            'Applied coordination efficiency patterns'
+          ]
+        },
+        confidence_breakdown: {
+          model_certainty: Math.random() * 0.2 + 0.8,
+          data_quality: Math.random() * 0.15 + 0.85,
+          pattern_match: Math.random() * 0.25 + 0.75
+        },
+        timestamp: new Date().toISOString()
+      };
 
-      case 'cognitive_analyze':
-        return {
-          success: true,
-          behavior: args.behavior,
-          analysis: {
-            behavior_type: 'coordination_optimization',
-            complexity_score: Math.random() * 10 + 1,
-            efficiency_rating: Math.random() * 5 + 3,
-            improvement_potential: Math.random() * 100 + 20
-          },
-          insights: [
-            'Agent coordination shows high efficiency patterns',
-            'Task distribution demonstrates optimal load balancing',
-            'Communication overhead is within acceptable parameters'
-          ],
-          neural_feedback: {
-            pattern_strength: Math.random() * 0.4 + 0.6,
-            learning_rate: Math.random() * 0.1 + 0.05,
-            adaptation_score: Math.random() * 100 + 70
-          },
-          timestamp: new Date().toISOString()
-        };
-
-      case 'learning_adapt':
-        return {
-          success: true,
-          experience: args.experience,
-          adaptation_results: {
-            model_version: `v${Math.floor(Math.random() * 10 + 1)}.${Math.floor(Math.random() * 50)}`,
-            performance_delta: `+${Math.floor(Math.random() * 25 + 5)}%`,
-            training_samples: Math.floor(Math.random() * 500 + 100),
-            accuracy_improvement: `+${Math.floor(Math.random() * 10 + 2)}%`,
-            confidence_increase: `+${Math.floor(Math.random() * 15 + 5)}%`
-          },
-          learned_patterns: [
-            'coordination_efficiency_boost',
-            'agent_selection_optimization',
-            'task_distribution_enhancement'
-          ],
-          next_learning_targets: [
-            'memory_usage_optimization',
-            'communication_latency_reduction',
-            'predictive_error_prevention'
-          ],
-          timestamp: new Date().toISOString()
-        };
-
-      case 'neural_compress':
-        return {
-          success: true,
-          modelId: args.modelId,
-          compression_ratio: args.ratio || 0.7,
-          compressed_model: {
-            original_size: `${Math.floor(Math.random() * 100 + 50)}MB`,
-            compressed_size: `${Math.floor(Math.random() * 35 + 15)}MB`,
-            size_reduction: `${Math.floor((1 - (args.ratio || 0.7)) * 100)}%`,
-            accuracy_retention: `${Math.floor(Math.random() * 5 + 95)}%`,
-            inference_speedup: `${Math.floor(Math.random() * 3 + 2)}x`
-          },
-          optimization_details: {
-            pruned_connections: Math.floor(Math.random() * 10000 + 5000),
-            quantization_applied: true,
-            wasm_optimized: true
-          },
-          timestamp: new Date().toISOString()
-        };
-
-      case 'ensemble_create':
-        return {
-          success: true,
-          models: args.models,
-          ensemble_id: `ensemble_${Date.now()}`,
-          strategy: args.strategy || 'weighted_voting',
-          ensemble_metrics: {
-            total_models: args.models.length,
-            combined_accuracy: Math.random() * 0.1 + 0.9,
-            inference_time: `${Math.floor(Math.random() * 300 + 100)}ms`,
-            memory_usage: `${Math.floor(Math.random() * 200 + 100)}MB`,
-            consensus_threshold: 0.75
-          },
-          model_weights: args.models.map(() => Math.random()),
-          performance_gain: `+${Math.floor(Math.random() * 15 + 10)}%`,
-          timestamp: new Date().toISOString()
-        };
-
-      case 'transfer_learn':
-        return {
-          success: true,
-          sourceModel: args.sourceModel,
-          targetDomain: args.targetDomain,
-          transfer_results: {
-            adaptation_rate: Math.random() * 0.3 + 0.7,
-            knowledge_retention: Math.random() * 0.2 + 0.8,
-            domain_fit_score: Math.random() * 0.25 + 0.75,
-            training_reduction: `${Math.floor(Math.random() * 60 + 40)}%`
-          },
-          transferred_features: [
-            'coordination_patterns',
-            'efficiency_heuristics',
-            'optimization_strategies'
-          ],
-          new_model_id: `transferred_${Date.now()}`,
-          performance_metrics: {
-            accuracy: Math.random() * 0.15 + 0.85,
-            inference_speed: `${Math.floor(Math.random() * 150 + 50)}ms`,
-            memory_efficiency: `+${Math.floor(Math.random() * 20 + 10)}%`
-          },
-          timestamp: new Date().toISOString()
-        };
-
-      case 'neural_explain':
-        return {
-          success: true,
-          modelId: args.modelId,
-          prediction: args.prediction,
-          explanation: {
-            decision_factors: [
-              { factor: 'agent_availability', importance: Math.random() * 0.3 + 0.4 },
-              { factor: 'task_complexity', importance: Math.random() * 0.25 + 0.3 },
-              { factor: 'coordination_history', importance: Math.random() * 0.2 + 0.25 }
-            ],
-            feature_importance: {
-              topology_type: Math.random() * 0.3 + 0.5,
-              agent_capabilities: Math.random() * 0.25 + 0.4,
-              resource_availability: Math.random() * 0.2 + 0.3
-            },
-            reasoning_path: [
-              'Analyzed current swarm topology',
-              'Evaluated agent performance history',
-              'Calculated optimal task distribution',
-              'Applied coordination efficiency patterns'
-            ]
-          },
-          confidence_breakdown: {
-            model_certainty: Math.random() * 0.2 + 0.8,
-            data_quality: Math.random() * 0.15 + 0.85,
-            pattern_match: Math.random() * 0.25 + 0.75
-          },
-          timestamp: new Date().toISOString()
-        };
-
-      default:
-        return {
-          success: true,
-          tool: name,
-          message: `Tool ${name} executed successfully`,
-          args: args,
-          timestamp: new Date().toISOString()
-        };
+    default:
+      return {
+        success: true,
+        tool: name,
+        message: `Tool ${name} executed successfully`,
+        args: args,
+        timestamp: new Date().toISOString()
+      };
     }
   }
 
   async readResource(uri) {
     switch (uri) {
-      case 'claude-flow://swarms':
-        return {
-          active_swarms: 3,
-          total_agents: 15,
-          topologies: ['hierarchical', 'mesh', 'ring', 'star'],
-          performance: '2.8-4.4x speedup'
-        };
+    case 'claude-flow://swarms':
+      return {
+        active_swarms: 3,
+        total_agents: 15,
+        topologies: ['hierarchical', 'mesh', 'ring', 'star'],
+        performance: '2.8-4.4x speedup'
+      };
 
-      case 'claude-flow://agents':
-        return {
-          total_agents: 8,
-          types: ['researcher', 'coder', 'analyst', 'architect', 'tester', 'coordinator', 'reviewer', 'optimizer'],
-          active: 15,
-          capabilities: 127
-        };
+    case 'claude-flow://agents':
+      return {
+        total_agents: 8,
+        types: ['researcher', 'coder', 'analyst', 'architect', 'tester', 'coordinator', 'reviewer', 'optimizer'],
+        active: 15,
+        capabilities: 127
+      };
 
-      case 'claude-flow://models':
-        return {
-          total_models: 27,
-          wasm_enabled: true,
-          simd_support: true,
-          training_active: true,
-          accuracy_avg: 0.89
-        };
+    case 'claude-flow://models':
+      return {
+        total_models: 27,
+        wasm_enabled: true,
+        simd_support: true,
+        training_active: true,
+        accuracy_avg: 0.89
+      };
 
-      case 'claude-flow://performance':
-        return {
-          uptime: '99.9%',
-          token_reduction: '32.3%',
-          swe_bench_rate: '84.8%',
-          speed_improvement: '2.8-4.4x',
-          memory_efficiency: '78%'
-        };
+    case 'claude-flow://performance':
+      return {
+        uptime: '99.9%',
+        token_reduction: '32.3%',
+        swe_bench_rate: '84.8%',
+        speed_improvement: '2.8-4.4x',
+        memory_efficiency: '78%'
+      };
 
-      default:
-        throw new Error(`Unknown resource: ${uri}`);
+    default:
+      throw new Error(`Unknown resource: ${uri}`);
     }
   }
 
@@ -1120,7 +1120,7 @@ class ClaudeFlowMCPServer {
       id,
       error: { code, message }
     };
-    if (data) response.error.data = data;
+    if (data) {response.error.data = data;}
     return response;
   }
 }
@@ -1128,7 +1128,7 @@ class ClaudeFlowMCPServer {
 // Main server execution
 async function startMCPServer() {
   const server = new ClaudeFlowMCPServer();
-  
+
   console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) Claude-Flow MCP server starting in stdio mode`);
   console.error({
     arch: process.arch,
@@ -1156,14 +1156,14 @@ async function startMCPServer() {
 
   // Handle stdin messages
   let buffer = '';
-  
+
   process.stdin.on('data', async (chunk) => {
     buffer += chunk.toString();
-    
+
     // Process complete JSON messages
-    let lines = buffer.split('\n');
+    const lines = buffer.split('\n');
     buffer = lines.pop() || ''; // Keep incomplete line in buffer
-    
+
     for (const line of lines) {
       if (line.trim()) {
         try {

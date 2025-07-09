@@ -7,17 +7,17 @@ export async function launchUI(args = []) {
     // Parse arguments
     const portValue = getArgValue(args, '--port') || getArgValue(args, '-p');
     const port = portValue ? parseInt(portValue) : 3000;
-    
+
     const terminal = args.includes('--terminal') || args.includes('-t');
     const web = !terminal; // Default to web UI unless terminal is specified
-    
+
     if (web) {
       // Launch Web UI
       try {
         const { ClaudeCodeWebServer } = await import('./web-server.js');
         const webServer = new ClaudeCodeWebServer(port);
         await webServer.start();
-        
+
         printSuccess('🌐 Claude Flow Web UI is running!');
         console.log(`📍 Open your browser to: http://localhost:${port}/console`);
         console.log();
@@ -29,19 +29,19 @@ export async function launchUI(args = []) {
         console.log('  🐙 GitHub integration and DAA management');
         console.log();
         console.log('Press Ctrl+C to stop the server');
-        
+
         // Open browser if possible
         try {
           const openCommand = process.platform === 'darwin' ? 'open' :
-                            process.platform === 'win32' ? 'start' :
-                            'xdg-open';
-          
+            process.platform === 'win32' ? 'start' :
+              'xdg-open';
+
           const { exec } = await import('child_process');
           exec(`${openCommand} http://localhost:${port}/console`);
         } catch {
           // Browser opening failed, that's okay
         }
-        
+
         // Handle shutdown
         const shutdown = async () => {
           console.log('\n' + '⏹️  Shutting down Web UI...');
@@ -49,13 +49,13 @@ export async function launchUI(args = []) {
           printSuccess('✓ Shutdown complete');
           process.exit(0);
         };
-        
+
         process.on('SIGINT', shutdown);
         process.on('SIGTERM', shutdown);
-        
+
         // Keep process alive
         await new Promise(() => {});
-        
+
       } catch (err) {
         printError(`Failed to launch Web UI: ${err.message}`);
         console.error('Stack trace:', err.stack);
@@ -65,11 +65,11 @@ export async function launchUI(args = []) {
         await launchTerminalUI(port);
       }
     }
-    
+
     if (terminal) {
       await launchTerminalUI(port);
     }
-    
+
   } catch (err) {
     printError(`Failed to launch UI: ${err.message}`);
     console.error('Stack trace:', err.stack);
@@ -99,18 +99,18 @@ async function launchTerminalUI(port) {
         ProcessManager = pmModule.ProcessManager;
         ProcessUI = puiModule.ProcessUI;
       }
-      
+
       printSuccess('🚀 Claude-Flow Process Management UI');
       console.log('─'.repeat(60));
-      
+
       // Initialize process manager
       const processManager = new ProcessManager();
       await processManager.initialize();
-      
+
       // Start the UI
       const ui = new ProcessUI(processManager);
       await ui.start();
-      
+
       // Cleanup on exit
       await processManager.stopAll();
       console.log();
@@ -118,7 +118,7 @@ async function launchTerminalUI(port) {
     } catch (fallbackErr) {
       printError(`Failed to launch Terminal UI: ${fallbackErr.message}`);
       console.error('Stack trace:', fallbackErr.stack);
-      
+
       // Final fallback
       console.log();
       printWarning('UI launch failed. Use these commands instead:');

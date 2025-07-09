@@ -23,19 +23,19 @@ try {
     component: 'GitHubIntegrationView',
     toolCount: 8
   };
-  
+
   const githubView = new GitHubIntegrationView(null, eventBus, viewConfig);
   console.log('✅ GitHub view instantiated successfully');
-  
+
   // Test 2: View initialization
   console.log('\n2️⃣ Testing view initialization...');
   await githubView.initialize();
   console.log('✅ GitHub view initialized successfully');
-  
+
   // Test 3: Terminal mode rendering
   console.log('\n3️⃣ Testing terminal mode rendering...');
   await githubView.render({ mode: 'terminal' });
-  
+
   // Test 4: Tool availability
   console.log('\n4️⃣ Checking GitHub tools availability...');
   const tools = githubView.githubTools;
@@ -43,7 +43,7 @@ try {
   Object.entries(tools).forEach(([key, value]) => {
     console.log(`  ✓ ${key}: ${value}`);
   });
-  
+
   // Test 5: Event handling
   console.log('\n5️⃣ Testing event handling...');
   let eventReceived = false;
@@ -51,21 +51,21 @@ try {
     eventReceived = true;
     console.log('✅ Event received:', data.tool);
   });
-  
+
   // Trigger a test action
   await githubView.quickAction('github_repo_analyze', { repo: 'test/repo' });
-  
+
   if (eventReceived) {
     console.log('✅ Event handling working correctly');
   }
-  
+
   // Test 6: MCP Integration test
   console.log('\n6️⃣ Running MCP integration tests...');
   runGitHubViewTest();
-  
+
   console.log('\n🎉 All tests passed! GitHub Integration View is ready.');
   console.log('═'.repeat(60));
-  
+
 } catch (error) {
   console.error('❌ Test failed:', error);
   process.exit(1);

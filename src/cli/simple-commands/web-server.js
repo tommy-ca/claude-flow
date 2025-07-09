@@ -27,12 +27,12 @@ export class ClaudeCodeWebServer {
   async createAPIRoutes() {
     const express = await import('express');
     const router = express.Router();
-    
+
     // Health check endpoint
     router.get('/health', (req, res) => {
       res.json({ status: 'ok', uptime: process.uptime() });
     });
-    
+
     // System status endpoint
     router.get('/status', (req, res) => {
       res.json({
@@ -41,10 +41,10 @@ export class ClaudeCodeWebServer {
         port: this.port
       });
     });
-    
+
     return router;
   }
-  
+
   /**
    * Start the web server
    */
@@ -58,7 +58,7 @@ export class ClaudeCodeWebServer {
       // Create HTTP server with express
       const express = await import('express');
       const app = express.default();
-      
+
       // Enable CORS
       app.use((req, res, next) => {
         res.header('Access-Control-Allow-Origin', '*');
@@ -66,20 +66,20 @@ export class ClaudeCodeWebServer {
         res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
         next();
       });
-      
+
       // Serve static files
       app.use('/console', express.static(this.uiPath));
       app.use('/api', await this.createAPIRoutes());
-      
+
       // Default route redirects to console
       app.get('/', (req, res) => {
         res.redirect('/console');
       });
-      
+
       this.server = createServer(app);
 
       // Create WebSocket server
-      this.wss = new WebSocketServer({ 
+      this.wss = new WebSocketServer({
         server: this.server,
         path: '/ws'
       });
@@ -98,7 +98,7 @@ export class ClaudeCodeWebServer {
       });
 
       this.isRunning = true;
-      printSuccess(`🌐 Claude Code Web UI started successfully`);
+      printSuccess('🌐 Claude Code Web UI started successfully');
       console.log(`📍 Web Interface: http://localhost:${this.port}/console`);
       console.log(`🔗 WebSocket: ws://localhost:${this.port}/ws`);
       console.log(`📁 Serving UI from: ${this.uiPath}`);
@@ -114,7 +114,7 @@ export class ClaudeCodeWebServer {
    * Stop the web server
    */
   async stop() {
-    if (!this.isRunning) return;
+    if (!this.isRunning) {return;}
 
     // Close all WebSocket connections
     this.connections.forEach(ws => {
@@ -144,7 +144,7 @@ export class ClaudeCodeWebServer {
    */
   handleRequest(req, res) {
     const url = req.url;
-    
+
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -179,7 +179,7 @@ export class ClaudeCodeWebServer {
    */
   serveConsoleHTML(res) {
     const filePath = join(this.uiPath, 'index.html');
-    
+
     if (!existsSync(filePath)) {
       this.handle404(res);
       return;
@@ -187,11 +187,11 @@ export class ClaudeCodeWebServer {
 
     try {
       let content = readFileSync(filePath, 'utf8');
-      
+
       // Fix relative paths to be relative to /console/
       content = content.replace(/href="styles\//g, 'href="/console/styles/');
       content = content.replace(/src="js\//g, 'src="/console/js/');
-      
+
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(content);
     } catch (error) {
@@ -204,7 +204,7 @@ export class ClaudeCodeWebServer {
    */
   serveFile(res, filename, contentType) {
     const filePath = join(this.uiPath, filename);
-    
+
     if (!existsSync(filePath)) {
       this.handle404(res);
       return;
@@ -230,7 +230,7 @@ export class ClaudeCodeWebServer {
     }
 
     const filePath = join(this.uiPath, requestPath);
-    
+
     if (!existsSync(filePath)) {
       this.handle404(res);
       return;
@@ -238,7 +238,7 @@ export class ClaudeCodeWebServer {
 
     // Determine content type
     const contentType = this.getContentType(requestPath);
-    
+
     try {
       const content = readFileSync(filePath);
       res.writeHead(200, { 'Content-Type': contentType });
@@ -253,7 +253,7 @@ export class ClaudeCodeWebServer {
    */
   getContentType(filePath) {
     const ext = filePath.split('.').pop().toLowerCase();
-    
+
     const contentTypes = {
       'html': 'text/html',
       'css': 'text/css',
@@ -322,7 +322,7 @@ export class ClaudeCodeWebServer {
       <rect width="32" height="32" fill="#1f6feb"/>
       <text x="16" y="20" text-anchor="middle" fill="white" font-family="monospace" font-size="18">⚡</text>
     </svg>`;
-    
+
     res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
     res.end(favicon);
   }
@@ -371,7 +371,7 @@ export class ClaudeCodeWebServer {
   handleWebSocketConnection(ws, req) {
     const clientIP = req.socket.remoteAddress;
     console.log(`🔗 New WebSocket connection from ${clientIP}`);
-    
+
     this.connections.add(ws);
 
     // Send welcome message
@@ -415,31 +415,31 @@ export class ClaudeCodeWebServer {
     try {
       const message = JSON.parse(data.toString());
       console.log('Received WebSocket message:', message.method, message.id);
-      
+
       // Handle different message types
       switch (message.method) {
-        case 'initialize':
-          this.handleInitialize(ws, message);
-          break;
-          
-        case 'ping':
-          this.handlePing(ws, message);
-          break;
-          
-        case 'tools/call':
-          this.handleToolCall(ws, message);
-          break;
-          
-        case 'tools/list':
-          console.log('Handling tools/list request');
-          this.handleToolsList(ws, message);
-          break;
-          
-        default:
-          console.log('Unknown method:', message.method);
-          this.handleUnknownMethod(ws, message);
+      case 'initialize':
+        this.handleInitialize(ws, message);
+        break;
+
+      case 'ping':
+        this.handlePing(ws, message);
+        break;
+
+      case 'tools/call':
+        this.handleToolCall(ws, message);
+        break;
+
+      case 'tools/list':
+        console.log('Handling tools/list request');
+        this.handleToolsList(ws, message);
+        break;
+
+      default:
+        console.log('Unknown method:', message.method);
+        this.handleUnknownMethod(ws, message);
       }
-      
+
     } catch (error) {
       console.error('Error processing WebSocket message:', error);
       this.sendError(ws, null, 'Invalid JSON message');
@@ -490,10 +490,10 @@ export class ClaudeCodeWebServer {
    */
   handleToolCall(ws, message) {
     const { name, arguments: args } = message.params;
-    
+
     // Mock tool execution for demonstration
     const result = this.executeMockTool(name, args);
-    
+
     const response = {
       jsonrpc: '2.0',
       id: message.id,
@@ -622,51 +622,51 @@ export class ClaudeCodeWebServer {
    */
   executeMockTool(name, args) {
     switch (name) {
-      case 'claude-flow/execute':
-        return this.executeClaudeFlowCommand(args.command, args.args);
-        
-      case 'system/health':
-        const healthData = {
-          status: 'healthy',
-          uptime: Math.floor(process.uptime()),
-          memory: process.memoryUsage(),
-          connections: this.connections.size,
-          platform: compat.platform,
-          timestamp: new Date().toISOString()
+    case 'claude-flow/execute':
+      return this.executeClaudeFlowCommand(args.command, args.args);
+
+    case 'system/health':
+      const healthData = {
+        status: 'healthy',
+        uptime: Math.floor(process.uptime()),
+        memory: process.memoryUsage(),
+        connections: this.connections.size,
+        platform: compat.platform,
+        timestamp: new Date().toISOString()
+      };
+
+      if (args.detailed) {
+        healthData.detailed = {
+          nodeVersion: process.version,
+          architecture: process.arch,
+          pid: process.pid,
+          cpuUsage: process.cpuUsage(),
+          resourceUsage: process.resourceUsage ? process.resourceUsage() : 'N/A'
         };
-        
-        if (args.detailed) {
-          healthData.detailed = {
-            nodeVersion: process.version,
-            architecture: process.arch,
-            pid: process.pid,
-            cpuUsage: process.cpuUsage(),
-            resourceUsage: process.resourceUsage ? process.resourceUsage() : 'N/A'
-          };
-        }
-        
-        return JSON.stringify(healthData, null, 2);
-        
-      case 'swarm/orchestrate':
-        return this.executeSwarmCommand(args.action, args.args);
-        
-      case 'swarm/status':
-        return this.executeSwarmCommand('status', args.args);
-        
-      case 'memory/manage':
-        return this.executeMemoryCommand(args.operation, args.key, args.value);
-        
-      case 'agents/manage':
-        return this.executeAgentsCommand(args.action, args.agentType, args.agentId);
-        
-      case 'sparc/execute':
-        return this.executeSPARCCommand(args.mode, args.task, args.options);
-        
-      case 'benchmark/run':
-        return this.executeBenchmarkCommand(args.suite, args.iterations);
-        
-      default:
-        return `Tool '${name}' executed successfully with args: ${JSON.stringify(args)}`;
+      }
+
+      return JSON.stringify(healthData, null, 2);
+
+    case 'swarm/orchestrate':
+      return this.executeSwarmCommand(args.action, args.args);
+
+    case 'swarm/status':
+      return this.executeSwarmCommand('status', args.args);
+
+    case 'memory/manage':
+      return this.executeMemoryCommand(args.operation, args.key, args.value);
+
+    case 'agents/manage':
+      return this.executeAgentsCommand(args.action, args.agentType, args.agentId);
+
+    case 'sparc/execute':
+      return this.executeSPARCCommand(args.mode, args.task, args.options);
+
+    case 'benchmark/run':
+      return this.executeBenchmarkCommand(args.suite, args.iterations);
+
+    default:
+      return `Tool '${name}' executed successfully with args: ${JSON.stringify(args)}`;
     }
   }
 
@@ -675,31 +675,31 @@ export class ClaudeCodeWebServer {
    */
   executeClaudeFlowCommand(command, args = {}) {
     switch (command) {
-      case 'status':
-        return `Claude Flow Status:
+    case 'status':
+      return `Claude Flow Status:
   Version: 2.0.0
   Mode: Web Console
   Active Processes: 3
   Memory Usage: ${Math.round(process.memoryUsage().heapUsed / 1024 / 1024)}MB
   Uptime: ${Math.floor(process.uptime())}s`;
 
-      case 'init':
-        return `Claude Flow initialization complete:
+    case 'init':
+      return `Claude Flow initialization complete:
   ✅ Project structure created
   ✅ Configuration files generated
   ✅ Memory bank initialized
   ✅ Ready for development`;
 
-      case 'agents':
-        return `Active Agents:
+    case 'agents':
+      return `Active Agents:
   • Research Agent (idle) - 0 tasks
   • Code Developer (working) - 2 tasks  
   • Data Analyst (idle) - 0 tasks
   
   Total: 3 agents`;
 
-      default:
-        return `Claude Flow command '${command}' executed successfully`;
+    default:
+      return `Claude Flow command '${command}' executed successfully`;
     }
   }
 
@@ -708,8 +708,8 @@ export class ClaudeCodeWebServer {
    */
   executeSwarmCommand(action = 'status', args = []) {
     switch (action) {
-      case 'status':
-        return `Swarm Orchestration Status:
+    case 'status':
+      return `Swarm Orchestration Status:
   🐝 Swarm: ACTIVE
   🏗️ Topology: hierarchical
   👥 Agents: 5/8 active
@@ -718,31 +718,31 @@ export class ClaudeCodeWebServer {
   🧠 Memory: 15 coordination points stored
   📈 Efficiency: 78%`;
 
-      case 'init':
-        return `Swarm initialization complete:
+    case 'init':
+      return `Swarm initialization complete:
   ✅ Hierarchical topology established
   ✅ 5 agents spawned successfully
   ✅ Coordination protocols active
   ✅ Memory synchronization enabled`;
 
-      case 'agents':
-        return `Swarm Agent Status:
+    case 'agents':
+      return `Swarm Agent Status:
   🟢 architect: Designing system components...
   🟢 coder-1: Implementing user authentication...
   🟢 coder-2: Building API endpoints...
   🟡 analyst: Analyzing performance metrics...
   🔴 tester: Waiting for code completion...`;
 
-      case 'test':
-        return `Swarm Test Results:
+    case 'test':
+      return `Swarm Test Results:
   ✅ Agent communication: PASS
   ✅ Task distribution: PASS  
   ✅ Memory coordination: PASS
   ✅ Error handling: PASS
   📊 Overall health: 95%`;
 
-      default:
-        return `Swarm ${action} completed successfully`;
+    default:
+      return `Swarm ${action} completed successfully`;
     }
   }
 
@@ -751,20 +751,20 @@ export class ClaudeCodeWebServer {
    */
   executeMemoryCommand(operation, key, value) {
     switch (operation) {
-      case 'store':
-        return `Memory stored successfully:\n  Key: ${key}\n  Value: ${value}\n  Timestamp: ${new Date().toISOString()}`;
-      
-      case 'retrieve':
-        return `Memory retrieved:\n  Key: ${key}\n  Value: "example stored value"\n  Last Modified: ${new Date().toISOString()}`;
-      
-      case 'list':
-        return `Memory Keys:\n  • project/settings\n  • swarm/topology\n  • agents/coordination\n  • session/state\n  • benchmark/results\n  \n  Total: 5 entries`;
-      
-      case 'delete':
-        return `Memory deleted:\n  Key: ${key}\n  Status: Success`;
-      
-      default:
-        return `Memory operation '${operation}' completed`;
+    case 'store':
+      return `Memory stored successfully:\n  Key: ${key}\n  Value: ${value}\n  Timestamp: ${new Date().toISOString()}`;
+
+    case 'retrieve':
+      return `Memory retrieved:\n  Key: ${key}\n  Value: "example stored value"\n  Last Modified: ${new Date().toISOString()}`;
+
+    case 'list':
+      return 'Memory Keys:\n  • project/settings\n  • swarm/topology\n  • agents/coordination\n  • session/state\n  • benchmark/results\n  \n  Total: 5 entries';
+
+    case 'delete':
+      return `Memory deleted:\n  Key: ${key}\n  Status: Success`;
+
+    default:
+      return `Memory operation '${operation}' completed`;
     }
   }
 
@@ -773,23 +773,23 @@ export class ClaudeCodeWebServer {
    */
   executeAgentsCommand(action, agentType, agentId) {
     switch (action) {
-      case 'list':
-        return `Active Agents:\n  🟢 agent-001 (architect) - Designing system components\n  🟢 agent-002 (coder) - Implementing features\n  🟡 agent-003 (analyst) - Analyzing performance\n  🔴 agent-004 (tester) - Waiting for code\n  🟢 agent-005 (coordinator) - Managing workflow\n  \n  Total: 5 agents`;
-      
-      case 'create':
-        return `Agent created successfully:\n  Type: ${agentType}\n  ID: agent-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}\n  Status: Active\n  Capabilities: Full ${agentType} functionality`;
-      
-      case 'start':
-        return `Agent started:\n  ID: ${agentId}\n  Status: Running\n  Tasks: Ready to accept work`;
-      
-      case 'stop':
-        return `Agent stopped:\n  ID: ${agentId}\n  Status: Stopped\n  Tasks: Completed gracefully`;
-      
-      case 'status':
-        return `Agent Status:\n  ID: ${agentId}\n  Status: Active\n  Type: researcher\n  Current Task: Data analysis\n  Uptime: 2h 15m\n  Tasks Completed: 12\n  Efficiency: 92%`;
-      
-      default:
-        return `Agent ${action} completed for ${agentId || agentType}`;
+    case 'list':
+      return 'Active Agents:\n  🟢 agent-001 (architect) - Designing system components\n  🟢 agent-002 (coder) - Implementing features\n  🟡 agent-003 (analyst) - Analyzing performance\n  🔴 agent-004 (tester) - Waiting for code\n  🟢 agent-005 (coordinator) - Managing workflow\n  \n  Total: 5 agents';
+
+    case 'create':
+      return `Agent created successfully:\n  Type: ${agentType}\n  ID: agent-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}\n  Status: Active\n  Capabilities: Full ${agentType} functionality`;
+
+    case 'start':
+      return `Agent started:\n  ID: ${agentId}\n  Status: Running\n  Tasks: Ready to accept work`;
+
+    case 'stop':
+      return `Agent stopped:\n  ID: ${agentId}\n  Status: Stopped\n  Tasks: Completed gracefully`;
+
+    case 'status':
+      return `Agent Status:\n  ID: ${agentId}\n  Status: Active\n  Type: researcher\n  Current Task: Data analysis\n  Uptime: 2h 15m\n  Tasks Completed: 12\n  Efficiency: 92%`;
+
+    default:
+      return `Agent ${action} completed for ${agentId || agentType}`;
     }
   }
 
@@ -898,10 +898,10 @@ export class ClaudeCodeWebServer {
  */
 export async function startWebServer(port = 3000) {
   const server = new ClaudeCodeWebServer(port);
-  
+
   try {
     await server.start();
-    
+
     // Setup graceful shutdown
     const shutdown = async () => {
       console.log('\n⏹️  Shutting down web server...');
@@ -914,7 +914,7 @@ export async function startWebServer(port = 3000) {
 
     // Keep server running
     return server;
-    
+
   } catch (error) {
     printError(`Failed to start web server: ${error.message}`);
     process.exit(1);

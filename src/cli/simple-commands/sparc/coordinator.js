@@ -72,7 +72,7 @@ export class SparcCoordinator {
     const baseAgents = Object.keys(this.phases).length; // One per phase
     const complexityMultiplier = this.assessTaskComplexity();
     const parallelismFactor = this.options.parallelExecution ? 2 : 1;
-    
+
     return Math.min(20, Math.max(5, baseAgents * complexityMultiplier * parallelismFactor));
   }
 
@@ -82,12 +82,12 @@ export class SparcCoordinator {
   assessTaskComplexity() {
     const taskDescription = this.options.taskDescription || '';
     const complexityKeywords = ['complex', 'enterprise', 'scalable', 'distributed', 'microservice', 'integration'];
-    const matchedKeywords = complexityKeywords.filter(keyword => 
+    const matchedKeywords = complexityKeywords.filter(keyword =>
       taskDescription.toLowerCase().includes(keyword)
     );
-    
-    if (matchedKeywords.length >= 3) return 3; // High complexity
-    if (matchedKeywords.length >= 1) return 2; // Medium complexity
+
+    if (matchedKeywords.length >= 3) {return 3;} // High complexity
+    if (matchedKeywords.length >= 1) {return 2;} // Medium complexity
     return 1; // Low complexity
   }
 
@@ -150,7 +150,7 @@ export class SparcCoordinator {
       'sparc_completion': 2,
       'sparc_coordinator': 1
     };
-    
+
     return concurrencyMap[agentType] || 2;
   }
 
@@ -225,7 +225,7 @@ export class SparcCoordinator {
    * Pre-phase coordination
    */
   async prePhase(phaseName) {
-    if (!this.swarmEnabled) return;
+    if (!this.swarmEnabled) {return;}
 
     console.log(`🔄 Pre-phase coordination: ${phaseName}`);
 
@@ -286,13 +286,13 @@ export class SparcCoordinator {
   classifyTaskType() {
     const taskDescription = this.options.taskDescription || '';
     const taskLower = taskDescription.toLowerCase();
-    
-    if (taskLower.includes('api') || taskLower.includes('service')) return 'api_development';
-    if (taskLower.includes('ui') || taskLower.includes('frontend')) return 'frontend_development';
-    if (taskLower.includes('data') || taskLower.includes('database')) return 'data_management';
-    if (taskLower.includes('test') || taskLower.includes('testing')) return 'testing';
-    if (taskLower.includes('deploy') || taskLower.includes('infrastructure')) return 'deployment';
-    
+
+    if (taskLower.includes('api') || taskLower.includes('service')) {return 'api_development';}
+    if (taskLower.includes('ui') || taskLower.includes('frontend')) {return 'frontend_development';}
+    if (taskLower.includes('data') || taskLower.includes('database')) {return 'data_management';}
+    if (taskLower.includes('test') || taskLower.includes('testing')) {return 'testing';}
+    if (taskLower.includes('deploy') || taskLower.includes('infrastructure')) {return 'deployment';}
+
     return 'general_development';
   }
 
@@ -301,11 +301,11 @@ export class SparcCoordinator {
    */
   async assignAgentsToPhase(phaseName) {
     const phaseAgents = this.phaseAgents.get(phaseName) || [];
-    
+
     for (const agent of phaseAgents) {
       agent.currentPhase = phaseName;
       agent.status = 'assigned';
-      
+
       await this.executeSwarmHook('agent_assign', {
         agentId: agent.id,
         phase: phaseName,
@@ -320,7 +320,7 @@ export class SparcCoordinator {
       if (coordinator) {
         coordinator.currentPhase = phaseName;
         coordinator.status = 'assigned';
-        
+
         await this.executeSwarmHook('agent_assign', {
           agentId: coordinator.id,
           phase: phaseName,
@@ -342,7 +342,7 @@ export class SparcCoordinator {
       'refinement': 3,
       'completion': 2
     };
-    
+
     return priorities[phaseName] || 1;
   }
 
@@ -379,7 +379,7 @@ export class SparcCoordinator {
       'refinement': ['specification', 'pseudocode', 'architecture'],
       'completion': ['specification', 'pseudocode', 'architecture', 'refinement']
     };
-    
+
     return dependencies[phaseName] || [];
   }
 
@@ -387,7 +387,7 @@ export class SparcCoordinator {
    * Post-phase coordination
    */
   async postPhase(phaseName, result) {
-    if (!this.swarmEnabled) return;
+    if (!this.swarmEnabled) {return;}
 
     console.log(`✅ Post-phase coordination: ${phaseName}`);
 
@@ -498,20 +498,20 @@ export class SparcCoordinator {
    */
   async updateAgentPerformance(phaseName, result, validation) {
     const phaseAgents = this.phaseAgents.get(phaseName) || [];
-    
+
     for (const agent of phaseAgents) {
       agent.performance.tasksCompleted += 1;
-      
+
       // Update quality score based on validation
       const qualityScore = validation.score / 100;
       agent.performance.qualityScore = (agent.performance.qualityScore + qualityScore) / 2;
-      
+
       // Update efficiency based on execution time
       const executionTime = Date.now() - this.getPhaseStartTime(phaseName);
       const expectedTime = this.getExpectedPhaseTime(phaseName);
       const efficiency = Math.min(1, expectedTime / executionTime);
       agent.performance.efficiency = (agent.performance.efficiency + efficiency) / 2;
-      
+
       // Update average time
       agent.performance.averageTime = (agent.performance.averageTime + executionTime) / 2;
 
@@ -543,7 +543,7 @@ export class SparcCoordinator {
       'refinement': 20 * 60 * 1000,     // 20 minutes
       'completion': 10 * 60 * 1000      // 10 minutes
     };
-    
+
     return expectedTimes[phaseName] || 10 * 60 * 1000;
   }
 
@@ -575,7 +575,7 @@ export class SparcCoordinator {
       };
 
       await this.executeSwarmHook('neural_record_learning', learningData);
-      
+
       // Train neural patterns based on this execution
       await this.executeSwarmHook('neural_train', {
         data: learningData,
@@ -606,8 +606,8 @@ export class SparcCoordinator {
    */
   calculatePhaseEfficiency(phaseName) {
     const phaseAgents = this.phaseAgents.get(phaseName) || [];
-    if (phaseAgents.length === 0) return 0.5;
-    
+    if (phaseAgents.length === 0) {return 0.5;}
+
     const avgEfficiency = phaseAgents.reduce((sum, agent) => sum + agent.performance.efficiency, 0) / phaseAgents.length;
     return avgEfficiency;
   }
@@ -617,7 +617,7 @@ export class SparcCoordinator {
    */
   extractLearnings(phaseName, result, validation) {
     const learnings = [];
-    
+
     if (validation.passed) {
       learnings.push(`${phaseName} phase executed successfully`);
       if (validation.score > 90) {
@@ -626,11 +626,11 @@ export class SparcCoordinator {
     } else {
       learnings.push(`${phaseName} phase encountered issues: ${validation.issues.join(', ')}`);
     }
-    
+
     if (validation.recommendations.length > 0) {
       learnings.push(`Recommendations for ${phaseName}: ${validation.recommendations.join(', ')}`);
     }
-    
+
     return learnings;
   }
 
@@ -639,7 +639,7 @@ export class SparcCoordinator {
    */
   async preparePhaseHandoff(phaseName, result) {
     const nextPhase = this.getNextPhase(phaseName);
-    if (!nextPhase) return;
+    if (!nextPhase) {return;}
 
     // Prepare artifacts for next phase
     await this.executeSwarmHook('prepare_handoff', {
@@ -677,15 +677,15 @@ export class SparcCoordinator {
    */
   extractDecisions(result) {
     const decisions = [];
-    
+
     if (result.architecturalDecisions) {
       decisions.push(...result.architecturalDecisions);
     }
-    
+
     if (result.designDecisions) {
       decisions.push(...result.designDecisions);
     }
-    
+
     if (result.qualityGates) {
       decisions.push(...result.qualityGates.map(gate => ({
         decision: `Quality gate: ${gate.name}`,
@@ -693,7 +693,7 @@ export class SparcCoordinator {
         impact: gate.impact || 'process'
       })));
     }
-    
+
     return decisions;
   }
 
@@ -702,7 +702,7 @@ export class SparcCoordinator {
    */
   updateCoordinationMetrics(phaseName, result, validation) {
     this.metrics.phaseExecutions += 1;
-    
+
     // Update agent utilization
     const phaseAgents = this.phaseAgents.get(phaseName) || [];
     for (const agent of phaseAgents) {
@@ -712,11 +712,11 @@ export class SparcCoordinator {
       this.metrics.agentUtilization[agent.id].phases += 1;
       this.metrics.agentUtilization[agent.id].quality += validation.score;
     }
-    
+
     // Update coordination efficiency
     const efficiency = this.calculatePhaseEfficiency(phaseName);
     this.metrics.coordinationEfficiency = (this.metrics.coordinationEfficiency + efficiency) / 2;
-    
+
     // Record quality gate
     this.metrics.qualityGates.push({
       phase: phaseName,
@@ -724,7 +724,7 @@ export class SparcCoordinator {
       score: validation.score,
       timestamp: Date.now()
     });
-    
+
     // Record learning data
     if (validation.passed) {
       this.metrics.learningData.push({
@@ -740,7 +740,7 @@ export class SparcCoordinator {
    * Finalize coordination
    */
   async finalize() {
-    if (!this.swarmEnabled) return;
+    if (!this.swarmEnabled) {return;}
 
     console.log('🏁 Finalizing SPARC coordination');
 
@@ -804,7 +804,7 @@ export class SparcCoordinator {
    */
   calculateAgentPerformanceSummary() {
     const summary = {};
-    
+
     for (const agent of this.agents) {
       summary[agent.id] = {
         type: agent.type,
@@ -815,7 +815,7 @@ export class SparcCoordinator {
         averageTime: agent.performance.averageTime
       };
     }
-    
+
     return summary;
   }
 
@@ -824,7 +824,7 @@ export class SparcCoordinator {
    */
   analyzePhasePerformance() {
     const analysis = {};
-    
+
     for (const gate of this.metrics.qualityGates) {
       if (!analysis[gate.phase]) {
         analysis[gate.phase] = {
@@ -834,18 +834,18 @@ export class SparcCoordinator {
           totalScore: 0
         };
       }
-      
+
       analysis[gate.phase].executions += 1;
-      if (gate.passed) analysis[gate.phase].passed += 1;
+      if (gate.passed) {analysis[gate.phase].passed += 1;}
       analysis[gate.phase].totalScore += gate.score;
     }
-    
+
     // Calculate averages
     for (const phase of Object.keys(analysis)) {
       analysis[phase].averageScore = analysis[phase].totalScore / analysis[phase].executions;
       analysis[phase].successRate = analysis[phase].passed / analysis[phase].executions;
     }
-    
+
     return analysis;
   }
 
@@ -854,28 +854,28 @@ export class SparcCoordinator {
    */
   generateRecommendations() {
     const recommendations = [];
-    
+
     // Analyze agent utilization
-    const avgUtilization = Object.values(this.metrics.agentUtilization).reduce((sum, agent) => 
+    const avgUtilization = Object.values(this.metrics.agentUtilization).reduce((sum, agent) =>
       sum + agent.phases, 0) / Object.keys(this.metrics.agentUtilization).length;
-    
+
     if (avgUtilization < 2) {
       recommendations.push('Consider reducing agent count for better utilization');
     } else if (avgUtilization > 4) {
       recommendations.push('Consider increasing agent count to distribute load');
     }
-    
+
     // Analyze coordination efficiency
     if (this.metrics.coordinationEfficiency < 0.7) {
       recommendations.push('Improve coordination efficiency through better task decomposition');
     }
-    
+
     // Analyze quality gates
     const qualityGateSuccess = this.metrics.qualityGates.filter(g => g.passed).length / this.metrics.qualityGates.length;
     if (qualityGateSuccess < 0.8) {
       recommendations.push('Review quality gate criteria and provide additional agent training');
     }
-    
+
     return recommendations;
   }
 
@@ -884,13 +884,13 @@ export class SparcCoordinator {
    */
   extractNeuralInsights() {
     const insights = [];
-    
+
     // Pattern analysis
     const successfulPatterns = this.metrics.learningData.filter(d => d.success);
     if (successfulPatterns.length > 0) {
       insights.push(`${successfulPatterns.length} successful execution patterns identified`);
     }
-    
+
     // Quality analysis
     const avgQuality = this.metrics.learningData.reduce((sum, d) => sum + d.quality, 0) / this.metrics.learningData.length;
     if (avgQuality > 85) {
@@ -898,7 +898,7 @@ export class SparcCoordinator {
     } else if (avgQuality < 70) {
       insights.push('Quality improvements needed in execution');
     }
-    
+
     return insights;
   }
 
@@ -912,10 +912,10 @@ export class SparcCoordinator {
 
     try {
       const { spawn } = await import('child_process');
-      
+
       return new Promise((resolve, reject) => {
         const args = ['ruv-swarm', 'hook', hookName];
-        
+
         // Add data as JSON argument
         if (Object.keys(data).length > 0) {
           args.push('--data', JSON.stringify(data));
@@ -924,18 +924,18 @@ export class SparcCoordinator {
         const process = spawn('npx', args, {
           stdio: 'pipe'
         });
-        
+
         let output = '';
         let error = '';
-        
+
         process.stdout.on('data', (data) => {
           output += data.toString();
         });
-        
+
         process.stderr.on('data', (data) => {
           error += data.toString();
         });
-        
+
         process.on('close', (code) => {
           if (code === 0) {
             try {
@@ -962,7 +962,7 @@ export class SparcCoordinator {
    * Record learning from SPARC execution
    */
   async recordLearning(learningData) {
-    if (!this.options.neuralLearning) return;
+    if (!this.options.neuralLearning) {return;}
 
     try {
       await this.executeSwarmHook('neural_record_learning', {

@@ -89,7 +89,7 @@ for (const cmd of sparcCommands.slice(0, 3)) { // Test first 3 commands
   const filePath = path.join(TEMPLATE_DIR, cmd.destination);
   if (fs.existsSync(filePath)) {
     const content = fs.readFileSync(filePath, 'utf8');
-    test(`${cmd.destination} has proper structure`, 
+    test(`${cmd.destination} has proper structure`,
       content.includes('## Instructions') || content.includes('You are'));
   }
 }
@@ -101,7 +101,7 @@ for (const testFile of testFiles.slice(0, 3)) { // Test first 3 test files
   const filePath = path.join(TEMPLATE_DIR, testFile.destination);
   if (fs.existsSync(filePath)) {
     const content = fs.readFileSync(filePath, 'utf8');
-    test(`${testFile.destination} has test structure`, 
+    test(`${testFile.destination} has test structure`,
       content.includes('describe') || content.includes('test') || content.includes('it'));
   }
 }

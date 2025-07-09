@@ -123,8 +123,8 @@ export { existsSync };
 
 // Build information (Node.js equivalent of Deno.build)
 export const build = {
-  os: process.platform === 'win32' ? 'windows' : 
-      process.platform === 'darwin' ? 'darwin' :
+  os: process.platform === 'win32' ? 'windows' :
+    process.platform === 'darwin' ? 'darwin' :
       process.platform === 'linux' ? 'linux' : process.platform,
   arch: process.arch,
   target: `${process.arch}-${process.platform}`

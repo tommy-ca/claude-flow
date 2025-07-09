@@ -68,26 +68,26 @@ export class RollbackExecutor {
 
       // Determine rollback strategy based on phase
       let rollbackResult;
-      
+
       switch (phase) {
-        case 'sparc-init':
-          rollbackResult = await this.rollbackSparcInitialization();
-          break;
-        case 'claude-commands':
-          rollbackResult = await this.rollbackClaudeCommands();
-          break;
-        case 'memory-setup':
-          rollbackResult = await this.rollbackMemorySetup();
-          break;
-        case 'coordination-setup':
-          rollbackResult = await this.rollbackCoordinationSetup();
-          break;
-        case 'executable-creation':
-          rollbackResult = await this.rollbackExecutableCreation();
-          break;
-        default:
-          rollbackResult = await this.rollbackGenericPhase(phase, checkpoint);
-          break;
+      case 'sparc-init':
+        rollbackResult = await this.rollbackSparcInitialization();
+        break;
+      case 'claude-commands':
+        rollbackResult = await this.rollbackClaudeCommands();
+        break;
+      case 'memory-setup':
+        rollbackResult = await this.rollbackMemorySetup();
+        break;
+      case 'coordination-setup':
+        rollbackResult = await this.rollbackCoordinationSetup();
+        break;
+      case 'executable-creation':
+        rollbackResult = await this.rollbackExecutableCreation();
+        break;
+      default:
+        rollbackResult = await this.rollbackGenericPhase(phase, checkpoint);
+        break;
       }
 
       result.success = rollbackResult.success;
@@ -127,10 +127,10 @@ export class RollbackExecutor {
 
       for (const item of itemsToRemove) {
         const itemPath = `${this.workingDir}/${item}`;
-        
+
         try {
           const stat = await Deno.stat(itemPath);
-          
+
           if (stat.isFile) {
             await Deno.remove(itemPath);
             result.actions.push(`Removed file: ${item}`);
@@ -169,7 +169,7 @@ export class RollbackExecutor {
 
     try {
       const commandsDir = `${this.workingDir}/.claude/commands`;
-      
+
       try {
         // Remove all command files
         for await (const entry of Deno.readDir(commandsDir)) {
@@ -213,10 +213,10 @@ export class RollbackExecutor {
 
       for (const item of memoryItems) {
         const itemPath = `${this.workingDir}/${item}`;
-        
+
         try {
           const stat = await Deno.stat(itemPath);
-          
+
           if (stat.isFile) {
             await Deno.remove(itemPath);
             result.actions.push(`Removed memory file: ${item}`);
@@ -258,7 +258,7 @@ export class RollbackExecutor {
 
     try {
       const coordinationDir = `${this.workingDir}/coordination`;
-      
+
       try {
         await Deno.remove(coordinationDir, { recursive: true });
         result.actions.push('Removed coordination directory');
@@ -295,7 +295,7 @@ export class RollbackExecutor {
 
     try {
       const executablePath = `${this.workingDir}/claude-flow`;
-      
+
       try {
         await Deno.remove(executablePath);
         result.actions.push('Removed claude-flow executable');
@@ -326,7 +326,7 @@ export class RollbackExecutor {
       // Use checkpoint data to determine what to rollback
       if (checkpoint && checkpoint.data) {
         const actions = checkpoint.data.actions || [];
-        
+
         // Reverse the actions
         for (const action of actions.reverse()) {
           const rollbackResult = await this.reverseAction(action);
@@ -371,10 +371,10 @@ export class RollbackExecutor {
 
       for (const artifact of artifactsToRemove) {
         const artifactPath = `${this.workingDir}/${artifact}`;
-        
+
         try {
           const stat = await Deno.stat(artifactPath);
-          
+
           if (stat.isFile) {
             await Deno.remove(artifactPath);
             result.actions.push(`Removed file: ${artifact}`);
@@ -410,7 +410,7 @@ export class RollbackExecutor {
       // This would typically use the BackupManager
       // For now, we'll simulate the restoration
       result.actions.push(`Restored from backup: ${backupId}`);
-      
+
       // In a real implementation, this would:
       // 1. Read the backup manifest
       // 2. Restore each file and directory
@@ -476,10 +476,10 @@ export class RollbackExecutor {
   async removeSPARCContentFromClaudeMd() {
     try {
       const claudePath = `${this.workingDir}/CLAUDE.md`;
-      
+
       try {
         const content = await Deno.readTextFile(claudePath);
-        
+
         // Remove SPARC-specific sections
         const cleanedContent = content
           .replace(/## SPARC Development Commands[\s\S]*?(?=##|\n#|\n$)/g, '')
@@ -507,27 +507,27 @@ export class RollbackExecutor {
 
     try {
       switch (action.type) {
-        case 'file_created':
-          await Deno.remove(action.path);
-          result.description = `Removed created file: ${action.path}`;
-          break;
-          
-        case 'directory_created':
-          await Deno.remove(action.path, { recursive: true });
-          result.description = `Removed created directory: ${action.path}`;
-          break;
-          
-        case 'file_modified':
-          if (action.backup) {
-            await Deno.writeTextFile(action.path, action.backup);
-            result.description = `Restored modified file: ${action.path}`;
-          }
-          break;
-          
-        default:
-          result.success = false;
-          result.description = `Unknown action type: ${action.type}`;
-          break;
+      case 'file_created':
+        await Deno.remove(action.path);
+        result.description = `Removed created file: ${action.path}`;
+        break;
+
+      case 'directory_created':
+        await Deno.remove(action.path, { recursive: true });
+        result.description = `Removed created directory: ${action.path}`;
+        break;
+
+      case 'file_modified':
+        if (action.backup) {
+          await Deno.writeTextFile(action.path, action.backup);
+          result.description = `Restored modified file: ${action.path}`;
+        }
+        break;
+
+      default:
+        result.success = false;
+        result.description = `Unknown action type: ${action.type}`;
+        break;
       }
     } catch (error) {
       result.success = false;

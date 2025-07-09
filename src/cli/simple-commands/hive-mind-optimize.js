@@ -1,6 +1,6 @@
 /**
  * Hive Mind Database Optimization Command
- * 
+ *
  * Safe optimization of existing hive mind databases without breaking compatibility
  */
 
@@ -9,10 +9,10 @@ import path from 'path';
 import { existsSync } from 'fs';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-import { 
-  optimizeHiveMindDatabase, 
-  performMaintenance, 
-  generateOptimizationReport 
+import {
+  optimizeHiveMindDatabase,
+  performMaintenance,
+  generateOptimizationReport
 } from './hive-mind/db-optimizer.js';
 
 /**
@@ -78,7 +78,7 @@ export async function hiveMindOptimizeCommand(args, flags) {
   // Check if hive mind is initialized
   const hiveMindDir = path.join(cwd(), '.hive-mind');
   const dbPath = path.join(hiveMindDir, 'hive.db');
-  
+
   if (!existsSync(dbPath)) {
     console.error(chalk.red('Error: Hive Mind database not found'));
     console.log('Run "claude-flow hive-mind init" first');
@@ -112,35 +112,35 @@ export async function hiveMindOptimizeCommand(args, flags) {
  */
 async function interactiveOptimization(dbPath, flags) {
   console.log(chalk.yellow('\n🔧 Hive Mind Database Optimization Wizard\n'));
-  
+
   // Generate current report
   const report = await generateOptimizationReport(dbPath);
-  
+
   if (report) {
     console.log(chalk.cyan('Current Database Status:'));
     console.log(`  Schema Version: ${report.schemaVersion}`);
     console.log(`  Tables: ${Object.keys(report.tables).length}`);
     console.log(`  Indexes: ${report.indexes.length}`);
-    
+
     let totalSize = 0;
     let totalRows = 0;
     Object.entries(report.tables).forEach(([name, stats]) => {
       totalSize += stats.sizeBytes;
       totalRows += stats.rowCount;
     });
-    
+
     console.log(`  Total Size: ${(totalSize / 1024 / 1024).toFixed(2)} MB`);
     console.log(`  Total Rows: ${totalRows.toLocaleString()}`);
     console.log('');
   }
-  
+
   // Check what optimizations are needed
   const schemaVersion = report?.schemaVersion || 1.0;
   const needsOptimization = schemaVersion < 1.5;
-  
+
   if (!needsOptimization) {
     console.log(chalk.green('✓ Database is already fully optimized!\n'));
-    
+
     const { maintenance } = await inquirer.prompt([
       {
         type: 'confirm',
@@ -149,7 +149,7 @@ async function interactiveOptimization(dbPath, flags) {
         default: true
       }
     ]);
-    
+
     if (!maintenance) {
       console.log(chalk.gray('No changes made.'));
       return;
@@ -157,7 +157,7 @@ async function interactiveOptimization(dbPath, flags) {
   } else {
     console.log(chalk.yellow(`⚠ Database can be optimized from version ${schemaVersion} to 1.5\n`));
   }
-  
+
   // Ask for optimization options
   const answers = await inquirer.prompt([
     {
@@ -165,29 +165,29 @@ async function interactiveOptimization(dbPath, flags) {
       name: 'operations',
       message: 'Select operations to perform:',
       choices: [
-        { 
-          name: 'Apply performance optimizations', 
+        {
+          name: 'Apply performance optimizations',
           value: 'optimize',
           checked: needsOptimization,
           disabled: !needsOptimization
         },
-        { 
-          name: 'Clean old memory entries', 
+        {
+          name: 'Clean old memory entries',
           value: 'cleanMemory',
           checked: true
         },
-        { 
-          name: 'Archive completed tasks', 
+        {
+          name: 'Archive completed tasks',
           value: 'archiveTasks',
           checked: true
         },
-        { 
-          name: 'Vacuum database (requires exclusive access)', 
+        {
+          name: 'Vacuum database (requires exclusive access)',
           value: 'vacuum',
           checked: false
         },
-        { 
-          name: 'Check database integrity', 
+        {
+          name: 'Check database integrity',
           value: 'checkIntegrity',
           checked: true
         }
@@ -214,18 +214,18 @@ async function interactiveOptimization(dbPath, flags) {
       default: true
     }
   ]);
-  
+
   if (!answers.confirm) {
     console.log(chalk.gray('Optimization cancelled.'));
     return;
   }
-  
+
   // Create backup if doing major operations
   if (answers.operations.includes('optimize') || answers.operations.includes('vacuum')) {
     console.log(chalk.blue('\n📦 Creating backup...'));
     await createBackup(dbPath);
   }
-  
+
   // Run optimization
   const options = {
     vacuum: answers.operations.includes('vacuum'),
@@ -236,7 +236,7 @@ async function interactiveOptimization(dbPath, flags) {
     taskRetentionDays: answers.taskDays || 7,
     verbose: flags.verbose || false
   };
-  
+
   await runOptimization(dbPath, options);
 }
 
@@ -245,27 +245,27 @@ async function interactiveOptimization(dbPath, flags) {
  */
 async function runOptimization(dbPath, options) {
   console.log(chalk.blue('\n🚀 Starting optimization...\n'));
-  
+
   // Run schema optimization
   const result = await optimizeHiveMindDatabase(dbPath, options);
-  
+
   if (!result.success) {
     console.error(chalk.red('\n❌ Optimization failed:', result.error));
     exit(1);
   }
-  
+
   // Run maintenance tasks
   if (options.cleanMemory || options.archiveTasks || options.checkIntegrity) {
     console.log(chalk.blue('\n🧹 Running maintenance tasks...\n'));
     await performMaintenance(dbPath, options);
   }
-  
+
   // Generate final report
   console.log(chalk.blue('\n📊 Generating optimization report...\n'));
   await generateReport(dbPath);
-  
+
   console.log(chalk.green('\n✅ Optimization complete!\n'));
-  
+
   // Show tips
   console.log(chalk.bold('💡 Tips:'));
   console.log('  • Monitor performance with: claude-flow hive-mind metrics');
@@ -278,27 +278,27 @@ async function runOptimization(dbPath, options) {
  */
 async function generateReport(dbPath) {
   const report = await generateOptimizationReport(dbPath);
-  
+
   if (!report) {
     console.error(chalk.red('Failed to generate report'));
     return;
   }
-  
+
   console.log(chalk.bold('\n📊 Database Optimization Report\n'));
   console.log(chalk.cyan('Schema Version:'), report.schemaVersion);
   console.log(chalk.cyan('Indexes:'), report.indexes.length);
-  
+
   console.log(chalk.cyan('\nTable Statistics:'));
   Object.entries(report.tables).forEach(([name, stats]) => {
     const sizeMB = (stats.sizeBytes / 1024 / 1024).toFixed(2);
     console.log(`  ${name}: ${stats.rowCount.toLocaleString()} rows (${sizeMB} MB)`);
   });
-  
+
   if (report.performance.avgTaskCompletionMinutes > 0) {
     console.log(chalk.cyan('\nPerformance Metrics:'));
     console.log(`  Avg Task Completion: ${report.performance.avgTaskCompletionMinutes.toFixed(1)} minutes`);
   }
-  
+
   // Optimization suggestions
   console.log(chalk.cyan('\nOptimization Status:'));
   if (report.schemaVersion >= 1.5) {
@@ -307,11 +307,11 @@ async function generateReport(dbPath) {
     console.log(chalk.yellow(`  ⚠ Can be upgraded from v${report.schemaVersion} to v1.5`));
     console.log(chalk.gray('    Run: claude-flow hive-mind-optimize'));
   }
-  
+
   // Check for large tables
   const largeMemoryTable = report.tables.collective_memory?.rowCount > 10000;
   const largeTaskTable = report.tables.tasks?.rowCount > 50000;
-  
+
   if (largeMemoryTable || largeTaskTable) {
     console.log(chalk.cyan('\nMaintenance Recommendations:'));
     if (largeMemoryTable) {
@@ -331,10 +331,10 @@ async function createBackup(dbPath) {
     const { execSync } = await import('child_process');
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const backupPath = dbPath.replace('.db', `-backup-${timestamp}.db`);
-    
+
     execSync(`cp "${dbPath}" "${backupPath}"`);
     console.log(chalk.green(`✓ Backup created: ${path.basename(backupPath)}`));
-    
+
     return backupPath;
   } catch (error) {
     console.error(chalk.yellow('⚠ Backup failed:', error.message));
@@ -346,7 +346,7 @@ async function createBackup(dbPath) {
         default: false
       }
     ]);
-    
+
     if (!proceed) {
       exit(1);
     }

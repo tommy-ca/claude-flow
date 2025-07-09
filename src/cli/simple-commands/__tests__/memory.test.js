@@ -18,7 +18,7 @@ jest.mock('chalk', () => ({
     cyan: jest.fn(str => str),
     magenta: jest.fn(str => str),
     dim: jest.fn(str => str),
-    bold: jest.fn(str => str),
+    bold: jest.fn(str => str)
   }
 }));
 
@@ -45,13 +45,13 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['store', 'test-key', 'test-value'], {});
-      
+
       expect(fs.writeJson).toHaveBeenCalled();
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries).toHaveLength(1);
       expect(writeCall[1].entries[0].key).toBe('test-key');
       expect(writeCall[1].entries[0].value).toBe('test-value');
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Memory stored successfully')
       );
@@ -63,7 +63,7 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['store', 'key', 'value'], { tags: 'important,api' });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries[0].tags).toEqual(['important', 'api']);
     });
@@ -74,7 +74,7 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['store', 'key', 'value'], { ttl: 3600 });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries[0].expiresAt).toBeDefined();
     });
@@ -86,7 +86,7 @@ describe('Memory Command', () => {
 
       const jsonValue = '{"name":"test","count":42}';
       await memoryCommand(['store', 'json-key', jsonValue], {});
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries[0].value).toEqual({ name: 'test', count: 42 });
     });
@@ -97,7 +97,7 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['store', 'key', 'value'], {});
-      
+
       expect(fs.ensureDir).toHaveBeenCalledWith(path.dirname(memoryPath));
       expect(fs.writeJson).toHaveBeenCalled();
     });
@@ -114,7 +114,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue(mockMemory);
 
       await memoryCommand(['retrieve', 'test-key'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('test-value');
     });
@@ -124,7 +124,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue({ entries: [] });
 
       await memoryCommand(['retrieve', 'nonexistent'], {});
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('No memory found for key: nonexistent')
       );
@@ -141,7 +141,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue(mockMemory);
 
       await memoryCommand(['retrieve', 'expired'], {});
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('No memory found for key: expired')
       );
@@ -161,7 +161,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue(mockMemory);
 
       await memoryCommand(['list'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Memory Entries (3)');
       expect(output).toContain('key1');
@@ -182,7 +182,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue(mockMemory);
 
       await memoryCommand(['list'], { pattern: 'api/*' });
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('api/user');
       expect(output).toContain('api/product');
@@ -201,7 +201,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue(mockMemory);
 
       await memoryCommand(['list'], { tags: 'important' });
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('key1');
       expect(output).toContain('key3');
@@ -213,7 +213,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue({ entries: [] });
 
       await memoryCommand(['list'], {});
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('No memories stored')
       );
@@ -233,11 +233,11 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['delete', 'key1'], {});
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries).toHaveLength(1);
       expect(writeCall[1].entries[0].key).toBe('key2');
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Memory deleted: key1')
       );
@@ -248,7 +248,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue({ entries: [] });
 
       await memoryCommand(['delete', 'nonexistent'], {});
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Memory not found: nonexistent')
       );
@@ -261,10 +261,10 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['clear'], { force: true });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries).toEqual([]);
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('All memories cleared')
       );
@@ -272,7 +272,7 @@ describe('Memory Command', () => {
 
     test('should warn without force flag', async () => {
       await memoryCommand(['clear'], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Use --force to confirm')
       );
@@ -292,13 +292,13 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['export', 'backup.json'], {});
-      
+
       expect(fs.writeJson).toHaveBeenCalledWith(
         'backup.json',
         mockMemory,
         { spaces: 2 }
       );
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Memories exported to backup.json')
       );
@@ -320,10 +320,10 @@ describe('Memory Command', () => {
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['import', 'import.json'], {});
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries).toHaveLength(2);
-      
+
       expect(consoleLogSpy).toHaveBeenCalledWith(
         expect.stringContaining('Imported 2 memory entries')
       );
@@ -332,14 +332,14 @@ describe('Memory Command', () => {
     test('should merge with existing memories', async () => {
       const importData = { entries: [{ key: 'new', value: 'imported' }] };
       const existingData = { entries: [{ key: 'existing', value: 'original' }] };
-      
+
       fs.pathExists.mockResolvedValue(true);
       fs.readJson.mockResolvedValueOnce(importData)
         .mockResolvedValueOnce(existingData);
       fs.writeJson.mockResolvedValue(undefined);
 
       await memoryCommand(['import', 'import.json'], { merge: true });
-      
+
       const writeCall = fs.writeJson.mock.calls[0];
       expect(writeCall[1].entries).toHaveLength(2);
     });
@@ -359,7 +359,7 @@ describe('Memory Command', () => {
       fs.readJson.mockResolvedValue(mockMemory);
 
       await memoryCommand(['stats'], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Memory Statistics');
       expect(output).toContain('Total entries: 4');
@@ -372,7 +372,7 @@ describe('Memory Command', () => {
   describe('help subcommand', () => {
     test('should show help when no arguments', async () => {
       await memoryCommand([], {});
-      
+
       const output = consoleLogSpy.mock.calls.flat().join('\n');
       expect(output).toContain('Memory Management');
       expect(output).toContain('USAGE:');
@@ -385,7 +385,7 @@ describe('Memory Command', () => {
       fs.pathExists.mockRejectedValue(new Error('Permission denied'));
 
       await memoryCommand(['list'], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error:')
       );
@@ -396,7 +396,7 @@ describe('Memory Command', () => {
       fs.readJson.mockRejectedValue(new Error('Invalid JSON'));
 
       await memoryCommand(['import', 'bad.json'], {});
-      
+
       expect(consoleErrorSpy).toHaveBeenCalledWith(
         expect.stringContaining('Error:')
       );

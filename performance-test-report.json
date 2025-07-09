@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-07-09T20:32:07.257Z",
+  "timestamp": "2025-07-09T20:58:34.378Z",
   "platform": "linux",
   "arch": "x64",
   "nodeVersion": "v22.17.0",
@@ -26,7 +26,7 @@
       {
         "name": "Platform Detection",
         "status": "passed",
-        "duration": 1
+        "duration": 0
       },
       {
         "name": "Environment Variables",
@@ -41,7 +41,7 @@
       {
         "name": "Memory Usage Monitoring",
         "status": "passed",
-        "duration": 182
+        "duration": 175
       },
       {
         "name": "Garbage Collection Performance",

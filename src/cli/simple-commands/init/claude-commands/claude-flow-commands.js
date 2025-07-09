@@ -107,10 +107,10 @@ npx -y claude-flow@latest init --sparc
 - Examples: https://github.com/ruvnet/claude-code-flow/examples
 - Issues: https://github.com/ruvnet/claude-code-flow/issues
 `;
-  
+
   await Deno.writeTextFile(`${workingDir}/.claude/commands/claude-flow-help.md`, helpCommand);
   console.log('  ✓ Created slash command: /claude-flow-help');
-  
+
   // Memory command
   const memoryCommand = `---
 name: claude-flow-memory
@@ -220,10 +220,10 @@ The memory system provides persistent storage for cross-session and cross-agent 
 ./claude-flow memory export project-$(date +%Y%m%d).json --namespace project
 \`\`\`
 `;
-  
+
   await Deno.writeTextFile(`${workingDir}/.claude/commands/claude-flow-memory.md`, memoryCommand);
   console.log('  ✓ Created slash command: /claude-flow-memory');
-  
+
   // Swarm command
   const swarmCommand = `---
 name: claude-flow-swarm
@@ -431,7 +431,7 @@ Swarms automatically use distributed memory for collaboration:
 
 For detailed documentation, see: https://github.com/ruvnet/claude-code-flow/docs/swarm-system.md
 `;
-  
+
   await Deno.writeTextFile(`${workingDir}/.claude/commands/claude-flow-swarm.md`, swarmCommand);
   console.log('  ✓ Created slash command: /claude-flow-swarm');
 }

@@ -15,7 +15,7 @@ export class RuvSwarmWrapper {
       restartDelay: options.restartDelay || 1000,
       ...options
     };
-    
+
     this.process = null;
     this.restartCount = 0;
     this.isShuttingDown = false;
@@ -52,7 +52,7 @@ export class RuvSwarmWrapper {
         rlOut.on('line', (line) => {
           try {
             const message = JSON.parse(line);
-            
+
             // Check for initialization
             if (message.method === 'server.initialized' && !initialized) {
               initialized = true;
@@ -63,7 +63,7 @@ export class RuvSwarmWrapper {
                 stdin: this.process.stdin
               });
             }
-            
+
             // Forward JSON-RPC messages
             process.stdout.write(line + '\n');
           } catch (err) {
@@ -149,7 +149,7 @@ export class RuvSwarmWrapper {
     if (this.options.autoRestart && this.restartCount < this.options.maxRestarts) {
       this.restartCount++;
       console.log(`Attempting to restart RuvSwarm (attempt ${this.restartCount}/${this.options.maxRestarts})...`);
-      
+
       setTimeout(() => {
         this.start().catch(err => {
           console.error('Failed to restart RuvSwarm:', err);
@@ -160,7 +160,7 @@ export class RuvSwarmWrapper {
 
   async stop() {
     this.isShuttingDown = true;
-    
+
     if (!this.process) {
       return;
     }
@@ -190,7 +190,7 @@ export class RuvSwarmWrapper {
 // Export a function to start ruv-swarm with error handling
 export async function startRuvSwarmMCP(options = {}) {
   const wrapper = new RuvSwarmWrapper(options);
-  
+
   try {
     const result = await wrapper.start();
     console.log('✅ RuvSwarm MCP server started successfully');

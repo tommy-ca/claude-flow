@@ -2,30 +2,30 @@
 import { printSuccess, printError, printWarning, printInfo } from '../../utils.js';
 import { Deno, cwd, exit, existsSync } from '../../node-compat.js';
 import process from 'process';
-import { 
-  PerformanceMonitor, 
-  ResourceThresholdMonitor, 
-  BatchOptimizer 
+import {
+  PerformanceMonitor,
+  ResourceThresholdMonitor,
+  BatchOptimizer
 } from './performance-monitor.js';
 import { initCommand } from './index.js';
 import { createSparcStructureManually } from './sparc-structure.js';
 import { createClaudeSlashCommands } from './claude-commands/slash-commands.js';
-import { 
-  createSparcClaudeMd, 
-  createFullClaudeMd, 
-  createMinimalClaudeMd 
+import {
+  createSparcClaudeMd,
+  createFullClaudeMd,
+  createMinimalClaudeMd
 } from './templates/claude-md.js';
-import { 
-  createFullMemoryBankMd, 
-  createMinimalMemoryBankMd 
+import {
+  createFullMemoryBankMd,
+  createMinimalMemoryBankMd
 } from './templates/memory-bank-md.js';
-import { 
-  createFullCoordinationMd, 
-  createMinimalCoordinationMd 
+import {
+  createFullCoordinationMd,
+  createMinimalCoordinationMd
 } from './templates/coordination-md.js';
-import { 
-  createAgentsReadme, 
-  createSessionsReadme 
+import {
+  createAgentsReadme,
+  createSessionsReadme
 } from './templates/readme-files.js';
 
 // Progress tracking for batch operations
@@ -56,7 +56,7 @@ class BatchProgressTracker {
   updateDisplay() {
     const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
     const progress = Math.floor(((this.completed + this.failed) / this.totalProjects) * 100);
-    
+
     console.clear();
     console.log('🚀 Batch Initialization Progress');
     console.log('================================');
@@ -66,7 +66,7 @@ class BatchProgressTracker {
     console.log(`In Progress: ${this.inProgress.size} 🔄`);
     console.log(`Progress: ${progress}% [${this.getProgressBar(progress)}]`);
     console.log(`Elapsed Time: ${elapsed}s`);
-    
+
     if (this.inProgress.size > 0) {
       console.log('\nActive Projects:');
       for (const [project, startTime] of this.inProgress) {
@@ -330,10 +330,10 @@ async function initializeProject(projectPath, options = {}) {
     // Get absolute project path
     const currentDir = cwd();
     const absoluteProjectPath = projectPath.startsWith('/') ? projectPath : `${currentDir}/${projectPath}`;
-    
+
     // Create project directory
     await Deno.mkdir(absoluteProjectPath, { recursive: true });
-    
+
     // Change to project directory
     const originalDir = cwd();
     process.chdir(absoluteProjectPath);
@@ -362,7 +362,7 @@ async function initializeProject(projectPath, options = {}) {
     }
 
     // Create all directories in parallel
-    await Promise.all(directories.map(dir => 
+    await Promise.all(directories.map(dir =>
       Deno.mkdir(dir, { recursive: true }).catch(() => {})
     ));
 
@@ -370,8 +370,8 @@ async function initializeProject(projectPath, options = {}) {
     const fileCreationTasks = [];
 
     // CLAUDE.md
-    const claudeMd = sparc ? createSparcClaudeMd() : 
-                     minimal ? createMinimalClaudeMd() : createFullClaudeMd();
+    const claudeMd = sparc ? createSparcClaudeMd() :
+      minimal ? createMinimalClaudeMd() : createFullClaudeMd();
     fileCreationTasks.push(Deno.writeTextFile('CLAUDE.md', claudeMd));
 
     // memory-bank.md
@@ -415,15 +415,15 @@ async function initializeProject(projectPath, options = {}) {
       const templateConfig = PROJECT_TEMPLATES[template];
       if (templateConfig.extraFiles) {
         for (const [filePath, content] of Object.entries(templateConfig.extraFiles)) {
-          let fileContent = typeof content === 'object' ? 
+          let fileContent = typeof content === 'object' ?
             JSON.stringify(content, null, 2) : content;
-          
+
           // Replace template variables
           fileContent = fileContent
             .replace(/{{PROJECT_NAME}}/g, projectPath.split('/').pop())
             .replace(/{{PROJECT_DESCRIPTION}}/g, templateConfig.description)
             .replace(/{{ENVIRONMENT}}/g, environment);
-          
+
           fileCreationTasks.push(Deno.writeTextFile(filePath, fileContent));
         }
       }
@@ -469,27 +469,27 @@ export async function batchInitCommand(projects, options = {}) {
   const totalProjects = projects.length * environments.length;
   const tracker = progressTracking ? new BatchProgressTracker(totalProjects) : null;
   const resourceManager = new ResourceManager(parallel ? maxConcurrency : 1);
-  
+
   // Initialize performance monitoring
-  const perfMonitor = new PerformanceMonitor({ 
+  const perfMonitor = new PerformanceMonitor({
     enabled: performanceMonitoring,
     logLevel: 'info'
   });
-  
+
   const resourceMonitor = new ResourceThresholdMonitor({
     maxMemoryMB: 2048,
     ...ResourceThresholdMonitor.createDefaultCallbacks()
   });
-  
+
   // Calculate optimal settings
   const optimalConcurrency = BatchOptimizer.calculateOptimalConcurrency(totalProjects);
   const timeEstimate = BatchOptimizer.estimateCompletionTime(totalProjects, options);
   const recommendations = BatchOptimizer.generateRecommendations(totalProjects, options);
-  
+
   if (maxConcurrency > optimalConcurrency) {
     printWarning(`Concurrency ${maxConcurrency} may be too high. Optimal: ${optimalConcurrency}`);
   }
-  
+
   perfMonitor.start();
   resourceMonitor.start();
 
@@ -503,11 +503,11 @@ export async function batchInitCommand(projects, options = {}) {
 
   for (const project of projects) {
     for (const env of environments) {
-      const projectPath = environments.length > 1 ? 
+      const projectPath = environments.length > 1 ?
         `${project}-${env}` : project;
 
       const initTask = async () => {
-        if (tracker) tracker.startProject(projectPath);
+        if (tracker) {tracker.startProject(projectPath);}
         perfMonitor.recordOperation('project-init-start', { projectPath, template, environment: env });
 
         const result = await resourceManager.withResource(async () => {
@@ -526,7 +526,7 @@ export async function batchInitCommand(projects, options = {}) {
           perfMonitor.recordError(result.error, { projectPath, template, environment: env });
         }
 
-        if (tracker) tracker.completeProject(projectPath, result.success);
+        if (tracker) {tracker.completeProject(projectPath, result.success);}
         results.push(result);
       };
 
@@ -545,7 +545,7 @@ export async function batchInitCommand(projects, options = {}) {
   // Final report
   console.log('\n\n📊 Batch Initialization Report');
   console.log('================================');
-  
+
   if (tracker) {
     const report = tracker.getReport();
     console.log(`Total Projects: ${report.total}`);
@@ -569,14 +569,14 @@ export async function batchInitCommand(projects, options = {}) {
     console.log('\n❌ Failed to initialize:');
     failed.forEach(r => console.log(`  - ${r.projectPath}: ${r.error}`));
   }
-  
+
   // Stop monitoring and generate performance report
   perfMonitor.stop();
   resourceMonitor.stop();
-  
+
   if (performanceMonitoring) {
     console.log(perfMonitor.generateReport());
-    
+
     // Show recommendations
     if (recommendations.length > 0) {
       console.log('\n💡 Recommendations:');
@@ -601,7 +601,7 @@ export async function parseBatchConfig(configFile) {
 // Create batch initialization from config file
 export async function batchInitFromConfig(configFile, options = {}) {
   const config = await parseBatchConfig(configFile);
-  if (!config) return;
+  if (!config) {return;}
 
   const {
     projects = [],

@@ -18,9 +18,9 @@ export class SparcPseudocode extends SparcPhase {
    */
   async execute() {
     console.log('🔄 Starting Pseudocode Phase');
-    
+
     await this.initializePhase();
-    
+
     const result = {
       flowDiagram: null,
       pseudocode: [],
@@ -42,28 +42,28 @@ export class SparcPseudocode extends SparcPhase {
 
       // Generate flow diagram
       result.flowDiagram = await this.generateFlowDiagram(specification);
-      
+
       // Generate pseudocode
       result.pseudocode = await this.generatePseudocode(specification);
-      
+
       // Define algorithms
       result.algorithms = await this.defineAlgorithms(specification);
-      
+
       // Define data structures
       result.dataStructures = await this.defineDataStructures(specification);
-      
+
       // Define interfaces
       result.interfaces = await this.defineInterfaces(specification);
-      
+
       // Map logic flow
       result.logicFlow = await this.mapLogicFlow(specification);
-      
+
       // Identify edge cases
       result.edgeCases = await this.identifyEdgeCases(specification);
-      
+
       // Analyze complexity
       result.complexityAnalysis = await this.analyzeComplexity(result.pseudocode);
-      
+
       // Identify dependencies
       result.dependencies = await this.identifyDependencies(specification);
 
@@ -203,11 +203,11 @@ export class SparcPseudocode extends SparcPhase {
    */
   generateFlowEdges(nodes) {
     const edges = [];
-    
+
     for (let i = 0; i < nodes.length - 1; i++) {
       const current = nodes[i];
       const next = nodes[i + 1];
-      
+
       if (current.type === 'decision') {
         // Decision nodes have multiple paths
         edges.push({
@@ -216,7 +216,7 @@ export class SparcPseudocode extends SparcPhase {
           label: 'Yes',
           condition: true
         });
-        
+
         // Find alternative path (usually error handling)
         const errorNode = nodes.find(n => n.id.includes('error') || n.id.includes('handle'));
         if (errorNode) {
@@ -235,7 +235,7 @@ export class SparcPseudocode extends SparcPhase {
         });
       }
     }
-    
+
     return edges;
   }
 
@@ -245,7 +245,7 @@ export class SparcPseudocode extends SparcPhase {
   async generatePseudocode(specification) {
     const pseudocode = [];
     const requirements = specification.requirements || [];
-    
+
     // Main function
     pseudocode.push({
       function: 'main',
@@ -266,7 +266,7 @@ export class SparcPseudocode extends SparcPhase {
     for (const [index, requirement] of requirements.entries()) {
       const functionName = this.generateFunctionName(requirement);
       const steps = this.generatePseudocodeSteps(requirement);
-      
+
       pseudocode.push({
         function: functionName,
         description: requirement,
@@ -283,16 +283,16 @@ export class SparcPseudocode extends SparcPhase {
    */
   generateFunctionName(requirement) {
     const words = requirement.toLowerCase().split(' ');
-    const actionWords = words.filter(word => 
+    const actionWords = words.filter(word =>
       ['provide', 'handle', 'ensure', 'validate', 'process', 'manage', 'create', 'update', 'delete'].includes(word)
     );
     const objectWords = words.filter(word =>
       ['api', 'data', 'user', 'system', 'request', 'response', 'authentication', 'authorization'].includes(word)
     );
-    
+
     const action = actionWords[0] || 'execute';
     const object = objectWords[0] || 'operation';
-    
+
     return `${action}_${object}`;
   }
 
@@ -302,24 +302,24 @@ export class SparcPseudocode extends SparcPhase {
   generatePseudocodeSteps(requirement) {
     const steps = [];
     const reqLower = requirement.toLowerCase();
-    
+
     // Common patterns
     steps.push(`BEGIN ${this.generateFunctionName(requirement)}`);
-    
+
     if (reqLower.includes('validate')) {
       steps.push('  VALIDATE input_parameters');
       steps.push('  IF validation_fails THEN');
       steps.push('    RETURN error_response');
       steps.push('  END IF');
     }
-    
+
     if (reqLower.includes('authenticate')) {
       steps.push('  AUTHENTICATE user_credentials');
       steps.push('  IF authentication_fails THEN');
       steps.push('    RETURN unauthorized_error');
       steps.push('  END IF');
     }
-    
+
     if (reqLower.includes('data')) {
       steps.push('  CONNECT to_database');
       steps.push('  BEGIN transaction');
@@ -330,7 +330,7 @@ export class SparcPseudocode extends SparcPhase {
       steps.push('    ROLLBACK transaction');
       steps.push('  END IF');
     }
-    
+
     if (reqLower.includes('api')) {
       steps.push('  PARSE request_parameters');
       steps.push('  VALIDATE request_format');
@@ -338,7 +338,7 @@ export class SparcPseudocode extends SparcPhase {
       steps.push('  FORMAT response_data');
       steps.push('  RETURN api_response');
     }
-    
+
     // Generic steps if no specific patterns found
     if (steps.length === 1) {
       steps.push('  INITIALIZE operation_context');
@@ -346,9 +346,9 @@ export class SparcPseudocode extends SparcPhase {
       steps.push('  HANDLE potential_errors');
       steps.push('  RETURN operation_result');
     }
-    
+
     steps.push(`END ${this.generateFunctionName(requirement)}`);
-    
+
     return steps;
   }
 
@@ -358,7 +358,7 @@ export class SparcPseudocode extends SparcPhase {
   estimateComplexity(steps) {
     const decisionSteps = steps.filter(step => step.includes('IF') || step.includes('WHILE') || step.includes('FOR'));
     const operationSteps = steps.filter(step => step.includes('EXECUTE') || step.includes('CALL'));
-    
+
     return {
       cyclomatic: decisionSteps.length + 1,
       operations: operationSteps.length,
@@ -373,11 +373,11 @@ export class SparcPseudocode extends SparcPhase {
   async defineAlgorithms(specification) {
     const algorithms = [];
     const requirements = specification.requirements || [];
-    
+
     // Search for algorithmic requirements
     for (const requirement of requirements) {
       const reqLower = requirement.toLowerCase();
-      
+
       if (reqLower.includes('sort') || reqLower.includes('search') || reqLower.includes('optimize')) {
         algorithms.push({
           name: 'Search and Sort Algorithm',
@@ -386,7 +386,7 @@ export class SparcPseudocode extends SparcPhase {
           approach: 'Quick sort with binary search optimization'
         });
       }
-      
+
       if (reqLower.includes('cache') || reqLower.includes('performance')) {
         algorithms.push({
           name: 'Caching Algorithm',
@@ -395,7 +395,7 @@ export class SparcPseudocode extends SparcPhase {
           approach: 'LRU cache with time-based expiration'
         });
       }
-      
+
       if (reqLower.includes('validate') || reqLower.includes('check')) {
         algorithms.push({
           name: 'Validation Algorithm',
@@ -405,7 +405,7 @@ export class SparcPseudocode extends SparcPhase {
         });
       }
     }
-    
+
     // Default algorithms for common patterns
     if (algorithms.length === 0) {
       algorithms.push({
@@ -415,7 +415,7 @@ export class SparcPseudocode extends SparcPhase {
         approach: 'Linear processing with error handling'
       });
     }
-    
+
     return algorithms;
   }
 
@@ -425,11 +425,11 @@ export class SparcPseudocode extends SparcPhase {
   async defineDataStructures(specification) {
     const dataStructures = [];
     const requirements = specification.requirements || [];
-    
+
     // Analyze requirements for data structure needs
     for (const requirement of requirements) {
       const reqLower = requirement.toLowerCase();
-      
+
       if (reqLower.includes('list') || reqLower.includes('array') || reqLower.includes('collection')) {
         dataStructures.push({
           name: 'Dynamic Array',
@@ -438,7 +438,7 @@ export class SparcPseudocode extends SparcPhase {
           complexity: { access: 'O(1)', insertion: 'O(n)', deletion: 'O(n)' }
         });
       }
-      
+
       if (reqLower.includes('map') || reqLower.includes('dictionary') || reqLower.includes('key')) {
         dataStructures.push({
           name: 'Hash Map',
@@ -447,7 +447,7 @@ export class SparcPseudocode extends SparcPhase {
           complexity: { access: 'O(1)', insertion: 'O(1)', deletion: 'O(1)' }
         });
       }
-      
+
       if (reqLower.includes('queue') || reqLower.includes('fifo') || reqLower.includes('buffer')) {
         dataStructures.push({
           name: 'Queue',
@@ -456,7 +456,7 @@ export class SparcPseudocode extends SparcPhase {
           complexity: { access: 'O(n)', insertion: 'O(1)', deletion: 'O(1)' }
         });
       }
-      
+
       if (reqLower.includes('stack') || reqLower.includes('lifo') || reqLower.includes('undo')) {
         dataStructures.push({
           name: 'Stack',
@@ -466,7 +466,7 @@ export class SparcPseudocode extends SparcPhase {
         });
       }
     }
-    
+
     // Default data structures
     if (dataStructures.length === 0) {
       dataStructures.push({
@@ -476,7 +476,7 @@ export class SparcPseudocode extends SparcPhase {
         complexity: { access: 'O(1)', insertion: 'O(1)', deletion: 'O(1)' }
       });
     }
-    
+
     return dataStructures;
   }
 
@@ -486,7 +486,7 @@ export class SparcPseudocode extends SparcPhase {
   async defineInterfaces(specification) {
     const interfaces = [];
     const requirements = specification.requirements || [];
-    
+
     // API interfaces
     if (requirements.some(req => req.toLowerCase().includes('api'))) {
       interfaces.push({
@@ -500,7 +500,7 @@ export class SparcPseudocode extends SparcPhase {
         ]
       });
     }
-    
+
     // Database interfaces
     if (requirements.some(req => req.toLowerCase().includes('data'))) {
       interfaces.push({
@@ -514,7 +514,7 @@ export class SparcPseudocode extends SparcPhase {
         ]
       });
     }
-    
+
     // Service interfaces
     interfaces.push({
       name: 'ServiceInterface',
@@ -526,7 +526,7 @@ export class SparcPseudocode extends SparcPhase {
         { name: 'cleanup', purpose: 'Clean up resources', parameters: [], returns: 'void' }
       ]
     });
-    
+
     return interfaces;
   }
 
@@ -536,7 +536,7 @@ export class SparcPseudocode extends SparcPhase {
   async mapLogicFlow(specification) {
     const logicFlow = [];
     const requirements = specification.requirements || [];
-    
+
     // Main flow
     logicFlow.push({
       step: 1,
@@ -546,7 +546,7 @@ export class SparcPseudocode extends SparcPhase {
       outputs: ['initialized system'],
       conditions: ['valid configuration', 'available resources']
     });
-    
+
     // Process each requirement as a flow step
     for (const [index, requirement] of requirements.entries()) {
       logicFlow.push({
@@ -558,7 +558,7 @@ export class SparcPseudocode extends SparcPhase {
         conditions: this.identifyConditions(requirement)
       });
     }
-    
+
     // Final step
     logicFlow.push({
       step: requirements.length + 2,
@@ -568,7 +568,7 @@ export class SparcPseudocode extends SparcPhase {
       outputs: ['final status', 'cleanup confirmation'],
       conditions: ['all operations completed']
     });
-    
+
     return logicFlow;
   }
 
@@ -578,13 +578,13 @@ export class SparcPseudocode extends SparcPhase {
   identifyInputs(requirement) {
     const inputs = [];
     const reqLower = requirement.toLowerCase();
-    
-    if (reqLower.includes('api')) inputs.push('HTTP request', 'request parameters');
-    if (reqLower.includes('data')) inputs.push('data payload', 'database connection');
-    if (reqLower.includes('user')) inputs.push('user credentials', 'user input');
-    if (reqLower.includes('validate')) inputs.push('validation rules', 'input data');
-    if (reqLower.includes('authenticate')) inputs.push('authentication credentials');
-    
+
+    if (reqLower.includes('api')) {inputs.push('HTTP request', 'request parameters');}
+    if (reqLower.includes('data')) {inputs.push('data payload', 'database connection');}
+    if (reqLower.includes('user')) {inputs.push('user credentials', 'user input');}
+    if (reqLower.includes('validate')) {inputs.push('validation rules', 'input data');}
+    if (reqLower.includes('authenticate')) {inputs.push('authentication credentials');}
+
     return inputs.length > 0 ? inputs : ['system input'];
   }
 
@@ -594,12 +594,12 @@ export class SparcPseudocode extends SparcPhase {
   identifyOutputs(requirement) {
     const outputs = [];
     const reqLower = requirement.toLowerCase();
-    
-    if (reqLower.includes('api')) outputs.push('HTTP response', 'status code');
-    if (reqLower.includes('data')) outputs.push('processed data', 'transaction result');
-    if (reqLower.includes('validate')) outputs.push('validation result', 'error messages');
-    if (reqLower.includes('authenticate')) outputs.push('authentication token', 'user session');
-    
+
+    if (reqLower.includes('api')) {outputs.push('HTTP response', 'status code');}
+    if (reqLower.includes('data')) {outputs.push('processed data', 'transaction result');}
+    if (reqLower.includes('validate')) {outputs.push('validation result', 'error messages');}
+    if (reqLower.includes('authenticate')) {outputs.push('authentication token', 'user session');}
+
     return outputs.length > 0 ? outputs : ['operation result'];
   }
 
@@ -609,12 +609,12 @@ export class SparcPseudocode extends SparcPhase {
   identifyConditions(requirement) {
     const conditions = [];
     const reqLower = requirement.toLowerCase();
-    
-    if (reqLower.includes('validate')) conditions.push('data is valid', 'rules are satisfied');
-    if (reqLower.includes('authenticate')) conditions.push('credentials are valid', 'user exists');
-    if (reqLower.includes('data')) conditions.push('database is available', 'data integrity maintained');
-    if (reqLower.includes('api')) conditions.push('request format is valid', 'service is available');
-    
+
+    if (reqLower.includes('validate')) {conditions.push('data is valid', 'rules are satisfied');}
+    if (reqLower.includes('authenticate')) {conditions.push('credentials are valid', 'user exists');}
+    if (reqLower.includes('data')) {conditions.push('database is available', 'data integrity maintained');}
+    if (reqLower.includes('api')) {conditions.push('request format is valid', 'service is available');}
+
     return conditions.length > 0 ? conditions : ['preconditions met'];
   }
 
@@ -624,7 +624,7 @@ export class SparcPseudocode extends SparcPhase {
   async identifyEdgeCases(specification) {
     const edgeCases = [];
     const requirements = specification.requirements || [];
-    
+
     // Common edge cases
     edgeCases.push({
       case: 'Empty or null input',
@@ -632,32 +632,32 @@ export class SparcPseudocode extends SparcPhase {
       handling: 'Validate inputs and return appropriate error messages',
       severity: 'high'
     });
-    
+
     edgeCases.push({
       case: 'Network connectivity issues',
       description: 'External services are unavailable',
       handling: 'Implement retry logic with exponential backoff',
       severity: 'medium'
     });
-    
+
     edgeCases.push({
       case: 'Concurrent access',
       description: 'Multiple users access same resources simultaneously',
       handling: 'Implement proper locking and transaction management',
       severity: 'high'
     });
-    
+
     edgeCases.push({
       case: 'Resource exhaustion',
       description: 'System runs out of memory or disk space',
       handling: 'Monitor resources and implement graceful degradation',
       severity: 'high'
     });
-    
+
     // Requirement-specific edge cases
     for (const requirement of requirements) {
       const reqLower = requirement.toLowerCase();
-      
+
       if (reqLower.includes('api')) {
         edgeCases.push({
           case: 'API rate limiting',
@@ -666,7 +666,7 @@ export class SparcPseudocode extends SparcPhase {
           severity: 'medium'
         });
       }
-      
+
       if (reqLower.includes('data')) {
         edgeCases.push({
           case: 'Data corruption',
@@ -675,7 +675,7 @@ export class SparcPseudocode extends SparcPhase {
           severity: 'high'
         });
       }
-      
+
       if (reqLower.includes('authenticate')) {
         edgeCases.push({
           case: 'Authentication timeout',
@@ -685,7 +685,7 @@ export class SparcPseudocode extends SparcPhase {
         });
       }
     }
-    
+
     return edgeCases;
   }
 
@@ -698,10 +698,10 @@ export class SparcPseudocode extends SparcPhase {
       functions: {},
       recommendations: []
     };
-    
+
     let totalComplexity = 0;
     let functionCount = 0;
-    
+
     for (const func of pseudocode) {
       if (func.complexity) {
         analysis.functions[func.function] = func.complexity;
@@ -709,9 +709,9 @@ export class SparcPseudocode extends SparcPhase {
         functionCount++;
       }
     }
-    
+
     const averageComplexity = functionCount > 0 ? totalComplexity / functionCount : 1;
-    
+
     if (averageComplexity > 10) {
       analysis.overall = 'high';
       analysis.recommendations.push('Consider breaking down complex functions');
@@ -722,7 +722,7 @@ export class SparcPseudocode extends SparcPhase {
       analysis.overall = 'low';
       analysis.recommendations.push('Complexity is manageable');
     }
-    
+
     return analysis;
   }
 
@@ -732,34 +732,34 @@ export class SparcPseudocode extends SparcPhase {
   async identifyDependencies(specification) {
     const dependencies = [];
     const requirements = specification.requirements || [];
-    
+
     // Analyze requirements for dependencies
     for (const requirement of requirements) {
       const reqLower = requirement.toLowerCase();
-      
+
       if (reqLower.includes('api')) {
         dependencies.push('HTTP client library');
         dependencies.push('JSON parsing library');
         dependencies.push('Authentication middleware');
       }
-      
+
       if (reqLower.includes('data')) {
         dependencies.push('Database driver');
         dependencies.push('ORM or query builder');
         dependencies.push('Connection pooling');
       }
-      
+
       if (reqLower.includes('validate')) {
         dependencies.push('Validation library');
         dependencies.push('Schema definition');
       }
-      
+
       if (reqLower.includes('test')) {
         dependencies.push('Testing framework');
         dependencies.push('Mocking library');
       }
     }
-    
+
     // Remove duplicates
     return [...new Set(dependencies)];
   }

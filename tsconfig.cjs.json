@@ -3,7 +3,26 @@
   "compilerOptions": {
     "module": "CommonJS",
     "moduleResolution": "node",
+    "target": "ES2020",
     "outDir": "./dist-cjs",
     "verbatimModuleSyntax": false
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.test.js",
+    "**/*.spec.js",
+    "tests/**/*",
+    "deno_modules",
+    "bin",
+    "memory/**/*",
+    "benchmark/**/*",
+    "examples/**/*",
+    "src/core/event-bus.ts",
+    "src/memory/distributed-memory.ts",
+    "src/utils/errors.ts",
+    "src/utils/paths.ts"
+  ]
 }

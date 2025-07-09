@@ -41,11 +41,11 @@ export function createWrapperScript(type = 'unix') {
       return universalTemplate;
     }
   }
-  
-  const filename = type === 'unix' ? 'claude-flow' : 
-                   type === 'windows' ? 'claude-flow.bat' : 
-                   'claude-flow.ps1';
-  
+
+  const filename = type === 'unix' ? 'claude-flow' :
+    type === 'windows' ? 'claude-flow.bat' :
+      'claude-flow.ps1';
+
   const template = loadTemplate(filename);
   if (!template) {
     return createWrapperScriptFallback(type);
@@ -1061,7 +1061,7 @@ echo "  - npx claude-flow pr enhance"
 echo "  - npx claude-flow issue triage"
 `
   };
-  
+
   return scripts[name] || '';
 }
 
@@ -1226,80 +1226,80 @@ See full documentation in \`.claude/commands/\`
 function createEnhancedSettingsJsonFallback() {
   return JSON.stringify({
     env: {
-      CLAUDE_FLOW_AUTO_COMMIT: "false",
-      CLAUDE_FLOW_AUTO_PUSH: "false",
-      CLAUDE_FLOW_HOOKS_ENABLED: "true",
-      CLAUDE_FLOW_TELEMETRY_ENABLED: "true",
-      CLAUDE_FLOW_REMOTE_EXECUTION: "true",
-      CLAUDE_FLOW_GITHUB_INTEGRATION: "true"
+      CLAUDE_FLOW_AUTO_COMMIT: 'false',
+      CLAUDE_FLOW_AUTO_PUSH: 'false',
+      CLAUDE_FLOW_HOOKS_ENABLED: 'true',
+      CLAUDE_FLOW_TELEMETRY_ENABLED: 'true',
+      CLAUDE_FLOW_REMOTE_EXECUTION: 'true',
+      CLAUDE_FLOW_GITHUB_INTEGRATION: 'true'
     },
     permissions: {
       allow: [
-        "Bash(npx claude-flow *)",
-        "Bash(npm run lint)",
-        "Bash(npm run test:*)",
-        "Bash(npm test *)",
-        "Bash(git status)",
-        "Bash(git diff *)",
-        "Bash(git log *)",
-        "Bash(git add *)",
-        "Bash(git commit *)",
-        "Bash(git push)",
-        "Bash(git config *)",
-        "Bash(gh *)",
-        "Bash(node *)",
-        "Bash(which *)",
-        "Bash(pwd)",
-        "Bash(ls *)"
+        'Bash(npx claude-flow *)',
+        'Bash(npm run lint)',
+        'Bash(npm run test:*)',
+        'Bash(npm test *)',
+        'Bash(git status)',
+        'Bash(git diff *)',
+        'Bash(git log *)',
+        'Bash(git add *)',
+        'Bash(git commit *)',
+        'Bash(git push)',
+        'Bash(git config *)',
+        'Bash(gh *)',
+        'Bash(node *)',
+        'Bash(which *)',
+        'Bash(pwd)',
+        'Bash(ls *)'
       ],
       deny: [
-        "Bash(rm -rf /)",
-        "Bash(curl * | bash)",
-        "Bash(wget * | sh)",
-        "Bash(eval *)"
+        'Bash(rm -rf /)',
+        'Bash(curl * | bash)',
+        'Bash(wget * | sh)',
+        'Bash(eval *)'
       ]
     },
     hooks: {
       preEditHook: {
-        command: "npx",
-        args: ["claude-flow", "hook", "pre-edit", "--file", "${file}", "--auto-assign-agents", "true", "--load-context", "true"],
+        command: 'npx',
+        args: ['claude-flow', 'hook', 'pre-edit', '--file', '${file}', '--auto-assign-agents', 'true', '--load-context', 'true'],
         alwaysRun: false,
-        outputFormat: "json"
+        outputFormat: 'json'
       },
       postEditHook: {
-        command: "npx",
-        args: ["claude-flow", "hook", "post-edit", "--file", "${file}", "--format", "true", "--update-memory", "true", "--train-neural", "true"],
+        command: 'npx',
+        args: ['claude-flow', 'hook', 'post-edit', '--file', '${file}', '--format', 'true', '--update-memory', 'true', '--train-neural', 'true'],
         alwaysRun: true,
-        outputFormat: "json"
+        outputFormat: 'json'
       },
       preCommandHook: {
-        command: "npx",
-        args: ["claude-flow", "hook", "pre-command", "--command", "${command}", "--validate-safety", "true", "--prepare-resources", "true"],
+        command: 'npx',
+        args: ['claude-flow', 'hook', 'pre-command', '--command', '${command}', '--validate-safety', 'true', '--prepare-resources', 'true'],
         alwaysRun: false,
-        outputFormat: "json"
+        outputFormat: 'json'
       },
       postCommandHook: {
-        command: "npx",
-        args: ["claude-flow", "hook", "post-command", "--command", "${command}", "--track-metrics", "true", "--store-results", "true"],
+        command: 'npx',
+        args: ['claude-flow', 'hook', 'post-command', '--command', '${command}', '--track-metrics', 'true', '--store-results', 'true'],
         alwaysRun: false,
-        outputFormat: "json"
+        outputFormat: 'json'
       },
       sessionEndHook: {
-        command: "npx",
-        args: ["claude-flow", "hook", "session-end", "--generate-summary", "true", "--persist-state", "true", "--export-metrics", "true"],
+        command: 'npx',
+        args: ['claude-flow', 'hook', 'session-end', '--generate-summary', 'true', '--persist-state', 'true', '--export-metrics', 'true'],
         alwaysRun: true,
-        outputFormat: "json"
+        outputFormat: 'json'
       }
     },
     mcpServers: {
-      "claude-flow": {
-        command: "npx",
-        args: ["claude-flow", "mcp", "start"],
+      'claude-flow': {
+        command: 'npx',
+        args: ['claude-flow', 'mcp', 'start'],
         env: {
-          CLAUDE_FLOW_HOOKS_ENABLED: "true",
-          CLAUDE_FLOW_TELEMETRY_ENABLED: "true",
-          CLAUDE_FLOW_REMOTE_READY: "true",
-          CLAUDE_FLOW_GITHUB_INTEGRATION: "true"
+          CLAUDE_FLOW_HOOKS_ENABLED: 'true',
+          CLAUDE_FLOW_TELEMETRY_ENABLED: 'true',
+          CLAUDE_FLOW_REMOTE_READY: 'true',
+          CLAUDE_FLOW_GITHUB_INTEGRATION: 'true'
         }
       }
     },
@@ -1316,11 +1316,11 @@ function createEnhancedSettingsJsonFallback() {
     },
     performance: {
       maxAgents: 10,
-      defaultTopology: "hierarchical",
-      executionStrategy: "parallel",
+      defaultTopology: 'hierarchical',
+      executionStrategy: 'parallel',
       tokenOptimization: true,
       cacheEnabled: true,
-      telemetryLevel: "detailed"
+      telemetryLevel: 'detailed'
     }
   }, null, 2);
 }

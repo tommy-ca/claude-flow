@@ -90,16 +90,16 @@ export class EnhancedProcessUI {
       toolsAvailable: 71,
       enhancedMode: false
     };
-    
+
     // Enhanced UI integration
     this.enhancedWebUI = null;
     this.toolExecutions = new Map();
     this.recentTools = [];
     this.toolStats = new Map();
-    
+
     // Initialize integrations
     this.swarmIntegration = new SwarmWebUIIntegration(this);
-    
+
     // Initialize process states
     PROCESSES.forEach(p => {
       this.processes.set(p.id, {
@@ -111,16 +111,16 @@ export class EnhancedProcessUI {
         memory: Math.random() * 100
       });
     });
-    
+
     // Start system uptime counter
     setInterval(() => {
       this.systemStats.uptime++;
     }, 1000);
-    
+
     // Initialize enhanced features
     this.initializeEnhancedFeatures();
   }
-  
+
   /**
    * Initialize enhanced features
    */
@@ -129,29 +129,29 @@ export class EnhancedProcessUI {
       // Initialize enhanced web UI
       this.enhancedWebUI = new EnhancedWebUI();
       await this.enhancedWebUI.initialize(this);
-      
+
       this.systemStats.enhancedMode = true;
       this.addLog('success', 'Enhanced UI features initialized');
-      
+
       // Set enhanced UI process as running
       const enhancedUIProcess = this.processes.get('enhanced-ui');
       if (enhancedUIProcess) {
         enhancedUIProcess.status = 'running';
         enhancedUIProcess.pid = Math.floor(Math.random() * 10000) + 1000;
       }
-      
+
     } catch (error) {
       this.addLog('warning', 'Enhanced UI fallback mode enabled');
       console.warn('Enhanced UI initialization warning:', error);
     }
-    
+
     // Initialize swarm (this will create mock data)
     await this.initializeSwarm();
-    
+
     // Initialize tool statistics
     this.initializeToolStats();
   }
-  
+
   /**
    * Initialize tool statistics
    */
@@ -165,11 +165,11 @@ export class EnhancedProcessUI {
       });
     });
   }
-  
+
   async initializeSwarm() {
     // Initialize swarm with mock data
     await this.swarmIntegration.initializeSwarm('hierarchical', 8);
-    
+
     // Enhanced memory namespaces
     this.memoryStats = {
       totalEntries: 156,
@@ -183,7 +183,7 @@ export class EnhancedProcessUI {
         { name: 'monitoring', entries: 9, size: '245 KB' }
       ]
     };
-    
+
     // Enhanced initial logs
     this.logs = [
       { time: new Date(), level: 'info', message: 'System initialized with enhanced features' },
@@ -193,20 +193,20 @@ export class EnhancedProcessUI {
       { time: new Date(), level: 'success', message: 'Neural engine online' }
     ];
   }
-  
+
   async start() {
     // Clear screen
     console.clear();
-    
+
     // Show enhanced welcome
     printSuccess('🧠 Claude-Flow Enhanced UI v2.0.0');
     console.log(colors.dim('Enhanced with 71+ MCP tools and advanced features'));
     console.log('─'.repeat(80));
     console.log();
-    
+
     // Initial render
     this.render();
-    
+
     // Main UI loop
     while (this.running) {
       await this.handleInput();
@@ -215,72 +215,72 @@ export class EnhancedProcessUI {
       }
     }
   }
-  
+
   render() {
     // Clear screen and move cursor to top
     console.log('\x1b[2J\x1b[H');
-    
+
     // Header with enhanced navigation
     this.renderEnhancedHeader();
-    
+
     // Main content based on current view
     switch (this.currentView) {
-      case VIEWS.OVERVIEW:
-        this.renderOverviewView();
-        break;
-      case VIEWS.PROCESSES:
-        this.renderProcessView();
-        break;
-      case VIEWS.STATUS:
-        this.renderStatusView();
-        break;
-      case VIEWS.ORCHESTRATION:
-        this.renderOrchestrationView();
-        break;
-      case VIEWS.MEMORY:
-        this.renderMemoryView();
-        break;
-      case VIEWS.NEURAL:
-        this.renderNeuralView();
-        break;
-      case VIEWS.MONITORING:
-        this.renderMonitoringView();
-        break;
-      case VIEWS.WORKFLOW:
-        this.renderWorkflowView();
-        break;
-      case VIEWS.GITHUB:
-        this.renderGitHubView();
-        break;
-      case VIEWS.DAA:
-        this.renderDAAView();
-        break;
-      case VIEWS.SYSTEM:
-        this.renderSystemView();
-        break;
-      case VIEWS.CLI:
-        this.renderCLIView();
-        break;
-      case VIEWS.LOGS:
-        this.renderLogsView();
-        break;
-      case VIEWS.HELP:
-        this.renderEnhancedHelpView();
-        break;
+    case VIEWS.OVERVIEW:
+      this.renderOverviewView();
+      break;
+    case VIEWS.PROCESSES:
+      this.renderProcessView();
+      break;
+    case VIEWS.STATUS:
+      this.renderStatusView();
+      break;
+    case VIEWS.ORCHESTRATION:
+      this.renderOrchestrationView();
+      break;
+    case VIEWS.MEMORY:
+      this.renderMemoryView();
+      break;
+    case VIEWS.NEURAL:
+      this.renderNeuralView();
+      break;
+    case VIEWS.MONITORING:
+      this.renderMonitoringView();
+      break;
+    case VIEWS.WORKFLOW:
+      this.renderWorkflowView();
+      break;
+    case VIEWS.GITHUB:
+      this.renderGitHubView();
+      break;
+    case VIEWS.DAA:
+      this.renderDAAView();
+      break;
+    case VIEWS.SYSTEM:
+      this.renderSystemView();
+      break;
+    case VIEWS.CLI:
+      this.renderCLIView();
+      break;
+    case VIEWS.LOGS:
+      this.renderLogsView();
+      break;
+    case VIEWS.HELP:
+      this.renderEnhancedHelpView();
+      break;
     }
-    
+
     // Enhanced footer with tool information
     this.renderEnhancedFooter();
   }
-  
+
   renderEnhancedHeader() {
-    const enhancedStatus = this.systemStats.enhancedMode ? 
+    const enhancedStatus = this.systemStats.enhancedMode ?
       colors.green('ENHANCED') : colors.yellow('FALLBACK');
-    
+
     console.log(colors.cyan(colors.bold('🧠 Claude-Flow Enhanced Process Manager')));
     console.log(colors.dim(`Mode: ${enhancedStatus} | Tools: ${this.systemStats.toolsAvailable}+ | Uptime: ${this.formatUptime(this.systemStats.uptime)}`));
     console.log(colors.gray('─'.repeat(80)));
-    
+
     // Enhanced navigation tabs with tool counts
     const tabs = [
       { key: '0', view: VIEWS.OVERVIEW, label: 'Overview', icon: '🏠' },
@@ -295,28 +295,28 @@ export class EnhancedProcessUI {
       { key: '9', view: VIEWS.LOGS, label: 'Logs', icon: '📜' },
       { key: '?', view: VIEWS.HELP, label: 'Help', icon: '❓' }
     ];
-    
+
     let tabLine = '';
     tabs.forEach((tab, index) => {
       const isActive = this.currentView === tab.view;
       const label = isActive ? colors.yellow(`[${tab.icon} ${tab.label}]`) : colors.gray(`${tab.icon} ${tab.label}`);
       tabLine += `  ${colors.bold(tab.key)}:${label}`;
-      
+
       // Add line break every 4 tabs for better layout
       if ((index + 1) % 4 === 0 && index < tabs.length - 1) {
         tabLine += '\n';
       }
     });
-    
+
     console.log(tabLine);
     console.log(colors.gray('─'.repeat(80)));
     console.log();
   }
-  
+
   renderOverviewView() {
     console.log(colors.white(colors.bold('🏠 System Overview')));
     console.log();
-    
+
     // Quick stats grid
     const stats = [
       { label: 'Tools Available', value: this.systemStats.toolsAvailable + '+', icon: '🔧', color: colors.cyan },
@@ -324,34 +324,34 @@ export class EnhancedProcessUI {
       { label: 'Running Processes', value: Array.from(this.processes.values()).filter(p => p.status === 'running').length, icon: '⚙️', color: colors.blue },
       { label: 'Memory Namespaces', value: this.memoryStats.namespaces.length, icon: '💾', color: colors.magenta }
     ];
-    
-    const statsLine1 = stats.slice(0, 2).map(stat => 
+
+    const statsLine1 = stats.slice(0, 2).map(stat =>
       `${stat.icon} ${stat.color(stat.value)} ${colors.gray(stat.label)}`
     ).join('  |  ');
-    
-    const statsLine2 = stats.slice(2, 4).map(stat => 
+
+    const statsLine2 = stats.slice(2, 4).map(stat =>
       `${stat.icon} ${stat.color(stat.value)} ${colors.gray(stat.label)}`
     ).join('  |  ');
-    
+
     console.log(`  ${statsLine1}`);
     console.log(`  ${statsLine2}`);
     console.log();
-    
+
     // Tool categories overview
     console.log(colors.cyan('🔧 Tool Categories'));
     console.log();
-    
+
     const categories = Object.entries(TOOL_CATEGORIES);
-    categories.forEach(([ id, category ], index) => {
+    categories.forEach(([id, category], index) => {
       const stats = this.toolStats.get(id);
-      const usageInfo = stats && stats.executions > 0 ? 
+      const usageInfo = stats && stats.executions > 0 ?
         colors.dim(` (${stats.executions} uses)`) : colors.dim(' (unused)');
-      
+
       console.log(`  ${category.icon} ${category.color(category.name)}: ${colors.yellow(category.count)} tools${usageInfo}`);
     });
-    
+
     console.log();
-    
+
     // Recent activity
     console.log(colors.cyan('🔔 Recent Activity'));
     this.logs.slice(-5).forEach(log => {
@@ -360,19 +360,19 @@ export class EnhancedProcessUI {
       const color = log.level === 'success' ? colors.green : log.level === 'warning' ? colors.yellow : colors.blue;
       console.log(`  ${colors.gray(time)} ${color(icon)} ${log.message}`);
     });
-    
+
     console.log();
-    
+
     // Quick actions
     console.log(colors.cyan('⚡ Quick Actions'));
     console.log(`  ${colors.yellow('N')} Neural Tools  ${colors.yellow('M')} Memory Tools  ${colors.yellow('W')} Workflows  ${colors.yellow('G')} GitHub`);
     console.log(`  ${colors.yellow('D')} Diagnostics   ${colors.yellow('S')} Swarm Control ${colors.yellow('T')} Train Model ${colors.yellow('A')} Analytics`);
   }
-  
+
   renderNeuralView() {
     console.log(colors.white(colors.bold('🧠 Neural Network Operations')));
     console.log();
-    
+
     const neuralTools = [
       { key: 'T', name: 'neural_train', desc: 'Train neural patterns with WASM SIMD' },
       { key: 'P', name: 'neural_predict', desc: 'Make AI predictions' },
@@ -390,14 +390,14 @@ export class EnhancedProcessUI {
       { key: 'W', name: 'wasm_optimize', desc: 'WASM SIMD optimization' },
       { key: 'I', name: 'inference_run', desc: 'Run neural inference' }
     ];
-    
+
     console.log(colors.cyan('Available Neural Tools (15):'));
     neuralTools.forEach(tool => {
       const stats = this.getToolStats(tool.name);
       const usage = stats ? colors.dim(` (${stats.executions} uses)`) : '';
       console.log(`  ${colors.yellow(tool.key)}: ${colors.white(tool.name)} - ${colors.gray(tool.desc)}${usage}`);
     });
-    
+
     console.log();
     console.log(colors.cyan('🎯 Recent Neural Operations:'));
     const recentNeural = this.recentTools.filter(t => t.startsWith('neural_') || t.includes('model_'));
@@ -409,11 +409,11 @@ export class EnhancedProcessUI {
       console.log(`  ${colors.gray('No recent neural operations')}`);
     }
   }
-  
+
   renderMonitoringView() {
     console.log(colors.white(colors.bold('📊 Monitoring & Analysis')));
     console.log();
-    
+
     const monitoringTools = [
       { key: 'P', name: 'performance_report', desc: 'Generate performance reports' },
       { key: 'B', name: 'bottleneck_analyze', desc: 'Identify performance bottlenecks' },
@@ -429,16 +429,16 @@ export class EnhancedProcessUI {
       { key: 'S', name: 'swarm_monitor', desc: 'Real-time swarm monitoring' },
       { key: 'A', name: 'agent_metrics', desc: 'Agent performance metrics' }
     ];
-    
+
     console.log(colors.cyan('Available Monitoring Tools (13):'));
     monitoringTools.slice(0, 7).forEach(tool => {
       const stats = this.getToolStats(tool.name);
       const usage = stats ? colors.dim(` (${stats.executions} uses)`) : '';
       console.log(`  ${colors.yellow(tool.key)}: ${colors.white(tool.name)} - ${colors.gray(tool.desc)}${usage}`);
     });
-    
+
     console.log('  ' + colors.gray('... and 6 more tools'));
-    
+
     // Live system metrics
     console.log();
     console.log(colors.cyan('📈 Live System Metrics:'));
@@ -447,11 +447,11 @@ export class EnhancedProcessUI {
     console.log(`  Agents: ${colors.green(this.agents.filter(a => a.status === 'working').length)}/${this.agents.length} active`);
     console.log(`  Tasks: ${colors.yellow(this.tasks.filter(t => t.status === 'in_progress').length)} in progress`);
   }
-  
+
   renderWorkflowView() {
     console.log(colors.white(colors.bold('🔄 Workflow & Automation')));
     console.log();
-    
+
     const workflowTools = [
       { key: 'C', name: 'workflow_create', desc: 'Create custom workflows' },
       { key: 'E', name: 'workflow_execute', desc: 'Execute predefined workflows' },
@@ -465,14 +465,14 @@ export class EnhancedProcessUI {
       { key: 'R', name: 'sparc_mode', desc: 'Run SPARC development modes' },
       { key: 'O', name: 'task_orchestrate', desc: 'Orchestrate complex workflows' }
     ];
-    
+
     console.log(colors.cyan('Available Workflow Tools (11):'));
     workflowTools.forEach(tool => {
       const stats = this.getToolStats(tool.name);
       const usage = stats ? colors.dim(` (${stats.executions} uses)`) : '';
       console.log(`  ${colors.yellow(tool.key)}: ${colors.white(tool.name)} - ${colors.gray(tool.desc)}${usage}`);
     });
-    
+
     console.log();
     console.log(colors.cyan('🎯 Active Workflows:'));
     // Show active workflows/automations
@@ -480,18 +480,18 @@ export class EnhancedProcessUI {
     if (activeWorkflows.length > 0) {
       activeWorkflows.slice(-3).forEach(workflow => {
         const status = workflow.status === 'completed' ? colors.green('✓') :
-                     workflow.status === 'in_progress' ? colors.yellow('◐') : colors.gray('○');
+          workflow.status === 'in_progress' ? colors.yellow('◐') : colors.gray('○');
         console.log(`  ${status} ${workflow.description}`);
       });
     } else {
       console.log(`  ${colors.gray('No active workflows')}`);
     }
   }
-  
+
   renderGitHubView() {
     console.log(colors.white(colors.bold('🐙 GitHub Integration')));
     console.log();
-    
+
     const githubTools = [
       { key: 'A', name: 'github_repo_analyze', desc: 'Repository analysis' },
       { key: 'P', name: 'github_pr_manage', desc: 'Pull request management' },
@@ -502,14 +502,14 @@ export class EnhancedProcessUI {
       { key: 'S', name: 'github_sync_coord', desc: 'Multi-repo sync coordination' },
       { key: 'M', name: 'github_metrics', desc: 'Repository metrics' }
     ];
-    
+
     console.log(colors.cyan('Available GitHub Tools (8):'));
     githubTools.forEach(tool => {
       const stats = this.getToolStats(tool.name);
       const usage = stats ? colors.dim(` (${stats.executions} uses)`) : '';
       console.log(`  ${colors.yellow(tool.key)}: ${colors.white(tool.name)} - ${colors.gray(tool.desc)}${usage}`);
     });
-    
+
     console.log();
     console.log(colors.cyan('📊 GitHub Integration Status:'));
     console.log(`  Repository: ${colors.green('claude-code-flow')}`);
@@ -517,11 +517,11 @@ export class EnhancedProcessUI {
     console.log(`  Status: ${colors.green('Connected')}`);
     console.log(`  Last Sync: ${colors.gray('Recently')}`);
   }
-  
+
   renderDAAView() {
     console.log(colors.white(colors.bold('🤖 Dynamic Agent Architecture')));
     console.log();
-    
+
     const daaTools = [
       { key: 'C', name: 'daa_agent_create', desc: 'Create dynamic agents' },
       { key: 'M', name: 'daa_capability_match', desc: 'Match capabilities to tasks' },
@@ -532,14 +532,14 @@ export class EnhancedProcessUI {
       { key: 'F', name: 'daa_fault_tolerance', desc: 'Fault tolerance & recovery' },
       { key: 'P', name: 'daa_optimization', desc: 'Performance optimization' }
     ];
-    
+
     console.log(colors.cyan('Available DAA Tools (8):'));
     daaTools.forEach(tool => {
       const stats = this.getToolStats(tool.name);
       const usage = stats ? colors.dim(` (${stats.executions} uses)`) : '';
       console.log(`  ${colors.yellow(tool.key)}: ${colors.white(tool.name)} - ${colors.gray(tool.desc)}${usage}`);
     });
-    
+
     console.log();
     console.log(colors.cyan('🔗 Agent Network Status:'));
     console.log(`  Total Agents: ${colors.green(this.agents.length)}`);
@@ -547,11 +547,11 @@ export class EnhancedProcessUI {
     console.log(`  Idle: ${colors.gray(this.agents.filter(a => a.status === 'idle').length)}`);
     console.log(`  Consensus: ${colors.green('Healthy')}`);
   }
-  
+
   renderSystemView() {
     console.log(colors.white(colors.bold('🛠️ System Utilities')));
     console.log();
-    
+
     const systemTools = [
       { key: 'S', name: 'security_scan', desc: 'Security scanning' },
       { key: 'B', name: 'backup_create', desc: 'Create system backups' },
@@ -560,14 +560,14 @@ export class EnhancedProcessUI {
       { key: 'D', name: 'diagnostic_run', desc: 'System diagnostics' },
       { key: 'C', name: 'config_manage', desc: 'Configuration management' }
     ];
-    
+
     console.log(colors.cyan('Available System Tools (6):'));
     systemTools.forEach(tool => {
       const stats = this.getToolStats(tool.name);
       const usage = stats ? colors.dim(` (${stats.executions} uses)`) : '';
       console.log(`  ${colors.yellow(tool.key)}: ${colors.white(tool.name)} - ${colors.gray(tool.desc)}${usage}`);
     });
-    
+
     console.log();
     console.log(colors.cyan('🔧 System Health:'));
     console.log(`  Overall Status: ${colors.green('Healthy')}`);
@@ -575,11 +575,11 @@ export class EnhancedProcessUI {
     console.log(`  Last Backup: ${colors.gray('2 hours ago')}`);
     console.log(`  Disk Usage: ${this.getUsageBar(65, 100)} 65%`);
   }
-  
+
   renderCLIView() {
     console.log(colors.white(colors.bold('⌨️ CLI Command Bridge')));
     console.log();
-    
+
     const cliCommands = [
       { key: 'H', name: 'hive-mind', desc: 'Hive mind orchestration wizard' },
       { key: 'G', name: 'github', desc: 'GitHub operations' },
@@ -591,54 +591,54 @@ export class EnhancedProcessUI {
       { key: 'M', name: 'mcp', desc: 'MCP server control' },
       { key: 'F', name: 'config', desc: 'Configuration management' }
     ];
-    
+
     console.log(colors.cyan('Available CLI Commands (9):'));
     cliCommands.forEach(cmd => {
       console.log(`  ${colors.yellow(cmd.key)}: ${colors.white(cmd.name)} - ${colors.gray(cmd.desc)}`);
     });
-    
+
     console.log();
     console.log(colors.cyan('🎯 CLI Integration Status:'));
     console.log(`  Bridge Mode: ${colors.green('Active')}`);
     console.log(`  Commands Available: ${colors.yellow('All')}`);
     console.log(`  Last Command: ${colors.gray('N/A')}`);
   }
-  
+
   // Keep existing methods but add enhanced functionality
   renderProcessView() {
     console.log(colors.white(colors.bold('⚙️ Process Management')));
     console.log();
-    
+
     let index = 0;
     for (const [id, process] of this.processes) {
       const selected = index === this.selectedIndex;
       const prefix = selected ? colors.yellow('▶ ') : '  ';
       const status = this.getStatusIcon(process.status);
       const name = selected ? colors.yellow(process.name) : colors.white(process.name);
-      
+
       console.log(`${prefix}${status} ${name}`);
       console.log(`     ${colors.gray(process.description)}`);
-      
+
       if (process.status === 'running') {
         const stats = colors.dim(`PID: ${process.pid} | Uptime: ${this.formatUptime(process.uptime)} | CPU: ${process.cpu.toFixed(1)}% | Mem: ${process.memory.toFixed(0)}MB`);
         console.log(`     ${stats}`);
       }
       console.log();
-      
+
       index++;
     }
-    
+
     // Enhanced stats
     const running = Array.from(this.processes.values()).filter(p => p.status === 'running').length;
     console.log(colors.gray('─'.repeat(80)));
     console.log(colors.white(`Total: ${this.processes.size} | Running: ${colors.green(running)} | Stopped: ${colors.gray(this.processes.size - running)} | Enhanced: ${this.systemStats.enhancedMode ? colors.green('Yes') : colors.yellow('Fallback')}`));
   }
-  
+
   // Enhanced status view
   renderStatusView() {
     console.log(colors.white(colors.bold('📊 Enhanced System Status')));
     console.log();
-    
+
     // System overview
     console.log(colors.cyan('📊 System Overview'));
     console.log(`  Uptime: ${colors.green(this.formatUptime(this.systemStats.uptime))}`);
@@ -646,33 +646,33 @@ export class EnhancedProcessUI {
     console.log(`  Process Health: ${this.getHealthBar()}`);
     console.log(`  Tools Available: ${colors.cyan(this.systemStats.toolsAvailable + '+')}`);
     console.log();
-    
+
     // Resource usage
     console.log(colors.cyan('💻 Resource Usage'));
     console.log(`  CPU Usage: ${this.getUsageBar(this.systemStats.cpuUsage, 100)} ${this.systemStats.cpuUsage.toFixed(1)}%`);
     console.log(`  Memory: ${this.getUsageBar(this.systemStats.memoryUsage, 100)} ${this.systemStats.memoryUsage.toFixed(1)}%`);
     console.log(`  Memory Bank: ${colors.green(this.memoryStats.totalSize)} (${this.memoryStats.totalEntries} entries)`);
     console.log();
-    
+
     // Enhanced metrics
     console.log(colors.cyan('🔧 Tool Usage'));
     let totalToolUsage = 0;
     this.toolStats.forEach(stats => totalToolUsage += stats.executions);
     console.log(`  Total Executions: ${colors.yellow(totalToolUsage)}`);
-    
+
     const topCategories = Array.from(this.toolStats.entries())
       .sort((a, b) => b[1].executions - a[1].executions)
       .slice(0, 3);
-    
+
     topCategories.forEach(([category, stats]) => {
       const info = TOOL_CATEGORIES[category];
       if (info && stats.executions > 0) {
         console.log(`  ${info.icon} ${info.name}: ${colors.green(stats.executions)} uses`);
       }
     });
-    
+
     console.log();
-    
+
     // Activity metrics (existing code continues...)
     console.log(colors.cyan('📈 Activity Metrics'));
     console.log(`  Active Agents: ${colors.yellow(this.agents.filter(a => a.status === 'working').length)}/${this.agents.length}`);
@@ -681,7 +681,7 @@ export class EnhancedProcessUI {
     console.log(`  In Progress: ${colors.yellow(this.tasks.filter(t => t.status === 'in_progress').length)}`);
     console.log(`  Pending: ${colors.gray(this.tasks.filter(t => t.status === 'pending').length)}`);
     console.log();
-    
+
     // Recent events
     console.log(colors.cyan('🔔 Recent Events'));
     this.logs.slice(-3).forEach(log => {
@@ -691,12 +691,12 @@ export class EnhancedProcessUI {
       console.log(`  ${colors.gray(time)} ${color(icon)} ${log.message}`);
     });
   }
-  
+
   // Keep existing methods...
   renderOrchestrationView() {
     console.log(colors.white(colors.bold('🐝 Enhanced Swarm Orchestration')));
     console.log();
-    
+
     // Swarm metrics
     const metrics = this.swarmIntegration.getSwarmMetrics();
     if (metrics) {
@@ -708,10 +708,10 @@ export class EnhancedProcessUI {
       console.log(`  Enhanced Mode: ${this.systemStats.enhancedMode ? colors.green('Active') : colors.yellow('Fallback')}`);
       console.log();
     }
-    
+
     // Rest of orchestration view...
     // (Continue with existing orchestration code)
-    
+
     // Agents section
     console.log(colors.cyan('🤖 Active Agents'));
     console.log();
@@ -720,7 +720,7 @@ export class EnhancedProcessUI {
       const prefix = selected ? colors.yellow('▶ ') : '  ';
       const statusIcon = agent.status === 'working' ? colors.green('●') : colors.gray('○');
       const name = selected ? colors.yellow(agent.name) : colors.white(agent.name);
-      
+
       console.log(`${prefix}${statusIcon} ${name} (${agent.type})`);
       console.log(`     ID: ${agent.id} | Tasks: ${agent.tasks} | Status: ${agent.status}`);
       if (agent.capabilities && agent.capabilities.length > 0) {
@@ -728,47 +728,47 @@ export class EnhancedProcessUI {
       }
       console.log();
     });
-    
+
     if (this.agents.length > 5) {
       console.log(colors.gray(`  ... and ${this.agents.length - 5} more agents`));
     }
-    
+
     console.log(colors.gray('─'.repeat(40)));
-    
+
     // Tasks section
     console.log(colors.cyan('📋 Task Queue'));
     console.log();
     this.tasks.slice(0, 5).forEach(task => {
-      const statusColor = task.status === 'completed' ? colors.green : 
-                         task.status === 'in_progress' ? colors.yellow : colors.gray;
+      const statusColor = task.status === 'completed' ? colors.green :
+        task.status === 'in_progress' ? colors.yellow : colors.gray;
       const status = statusColor(`[${task.status}]`);
       const priority = task.priority === 'high' ? colors.red(`[${task.priority}]`) :
-                      task.priority === 'medium' ? colors.yellow(`[${task.priority}]`) :
-                      colors.gray(`[${task.priority}]`);
+        task.priority === 'medium' ? colors.yellow(`[${task.priority}]`) :
+          colors.gray(`[${task.priority}]`);
       console.log(`  ${status} ${priority} ${task.description}`);
       if (task.assignedTo) {
         const agent = this.agents.find(a => a.id === task.assignedTo);
         console.log(`       Assigned to: ${agent ? agent.name : task.assignedTo}`);
       }
     });
-    
+
     if (this.tasks.length > 5) {
       console.log(colors.gray(`  ... and ${this.tasks.length - 5} more tasks`));
     }
   }
-  
+
   // Enhanced memory view
   renderMemoryView() {
     console.log(colors.white(colors.bold('💾 Enhanced Memory Bank Management')));
     console.log();
-    
+
     // Overview
     console.log(colors.cyan('💾 Memory Overview'));
     console.log(`  Total Entries: ${colors.yellow(this.memoryStats.totalEntries)}`);
     console.log(`  Total Size: ${colors.yellow(this.memoryStats.totalSize)}`);
     console.log(`  Namespaces: ${colors.cyan(this.memoryStats.namespaces.length)}`);
     console.log();
-    
+
     // Enhanced namespaces
     console.log(colors.cyan('📁 Enhanced Namespaces'));
     console.log();
@@ -777,69 +777,69 @@ export class EnhancedProcessUI {
       const prefix = selected ? colors.yellow('▶ ') : '  ';
       const name = selected ? colors.yellow(ns.name) : colors.white(ns.name);
       const typeIcon = this.getNamespaceIcon(ns.name);
-      
+
       console.log(`${prefix}${typeIcon} ${name}`);
       console.log(`     Entries: ${colors.cyan(ns.entries)} | Size: ${colors.green(ns.size)}`);
       console.log();
     });
-    
+
     // Enhanced operations
     console.log(colors.gray('─'.repeat(40)));
     console.log(colors.cyan('🔄 Available Operations'));
     console.log(`  ${colors.yellow('S')} Store Data | ${colors.yellow('G')} Get Data | ${colors.yellow('B')} Backup | ${colors.yellow('R')} Restore`);
     console.log(`  ${colors.yellow('C')} Compress | ${colors.yellow('Y')} Sync | ${colors.yellow('A')} Analytics | ${colors.yellow('N')} Manage Namespaces`);
   }
-  
+
   renderLogsView() {
     console.log(colors.white(colors.bold('📜 Enhanced System Logs')));
     console.log();
-    
+
     // Enhanced log filters
     console.log(colors.cyan('🔍 Filters: ') + colors.gray('[A]ll [I]nfo [S]uccess [W]arning [E]rror [T]ools'));
     console.log(colors.gray('─'.repeat(80)));
     console.log();
-    
+
     // Display logs with enhanced formatting
     const displayLogs = this.logs.slice(-15);
     displayLogs.forEach(log => {
       const time = log.time.toLocaleTimeString();
       let icon, color;
-      
+
       switch (log.level) {
-        case 'success':
-          icon = '✓';
-          color = colors.green;
-          break;
-        case 'warning':
-          icon = '⚠';
-          color = colors.yellow;
-          break;
-        case 'error':
-          icon = '✗';
-          color = colors.red;
-          break;
-        case 'tool':
-          icon = '🔧';
-          color = colors.cyan;
-          break;
-        default:
-          icon = 'ℹ';
-          color = colors.blue;
+      case 'success':
+        icon = '✓';
+        color = colors.green;
+        break;
+      case 'warning':
+        icon = '⚠';
+        color = colors.yellow;
+        break;
+      case 'error':
+        icon = '✗';
+        color = colors.red;
+        break;
+      case 'tool':
+        icon = '🔧';
+        color = colors.cyan;
+        break;
+      default:
+        icon = 'ℹ';
+        color = colors.blue;
       }
-      
+
       console.log(`${colors.gray(time)} ${color(icon)} ${log.message}`);
     });
-    
+
     if (this.logs.length > 15) {
       console.log();
       console.log(colors.gray(`Showing last 15 of ${this.logs.length} logs`));
     }
   }
-  
+
   renderEnhancedHelpView() {
     console.log(colors.white(colors.bold('❓ Enhanced Help & Documentation')));
     console.log();
-    
+
     console.log(colors.cyan('🎯 Enhanced Navigation'));
     console.log(`  ${colors.yellow('0')}       Overview Dashboard`);
     console.log(`  ${colors.yellow('1-4')}     Core views (Processes, Status, Orchestration, Memory)`);
@@ -851,32 +851,32 @@ export class EnhancedProcessUI {
     console.log(`  ${colors.yellow('Tab')}     Cycle through views`);
     console.log(`  ${colors.yellow('↑/↓')}     Navigate items (when available)`);
     console.log();
-    
+
     console.log(colors.cyan('🔧 Enhanced Tool Categories'));
     Object.entries(TOOL_CATEGORIES).forEach(([id, category]) => {
       console.log(`  ${category.icon} ${category.color(category.name)}: ${colors.yellow(category.count)} tools`);
     });
     console.log();
-    
+
     console.log(colors.cyan('⚡ Process Controls'));
     console.log(`  ${colors.yellow('Space')}   Toggle selected process`);
     console.log(`  ${colors.yellow('A')}       Start all processes`);
     console.log(`  ${colors.yellow('Z')}       Stop all processes`);
     console.log(`  ${colors.yellow('R')}       Restart all processes`);
     console.log();
-    
+
     console.log(colors.cyan('🧠 Neural Network Quick Actions'));
     console.log(`  ${colors.yellow('N')}       Open Neural Tools`);
     console.log(`  ${colors.yellow('T')}       Train Model`);
     console.log(`  ${colors.yellow('P')}       Make Prediction`);
     console.log();
-    
+
     console.log(colors.cyan('🔄 Workflow & Automation'));
     console.log(`  ${colors.yellow('W')}       Open Workflow Tools`);
     console.log(`  ${colors.yellow('C')}       Create Workflow`);
     console.log(`  ${colors.yellow('E')}       Execute Workflow`);
     console.log();
-    
+
     console.log(colors.cyan('🔧 Other Enhanced Features'));
     console.log(`  ${colors.yellow('M')}       Memory Analytics`);
     console.log(`  ${colors.yellow('D')}       System Diagnostics`);
@@ -885,230 +885,230 @@ export class EnhancedProcessUI {
     console.log(`  ${colors.yellow('H/?')}     Show this help`);
     console.log(`  ${colors.yellow('Q')}       Quit`);
     console.log();
-    
+
     console.log(colors.cyan('💡 Tips'));
     console.log(`  • ${colors.gray('Enhanced mode provides 71+ MCP tools')}`);
     console.log(`  • ${colors.gray('Use keyboard shortcuts for quick access')}`);
     console.log(`  • ${colors.gray('Tool statistics track usage and performance')}`);
     console.log(`  • ${colors.gray('Memory bank supports multiple namespaces')}`);
   }
-  
+
   renderEnhancedFooter() {
     console.log();
     console.log(colors.gray('─'.repeat(80)));
-    
+
     // Context-sensitive controls with enhanced options
     let controls = '';
     switch (this.currentView) {
-      case VIEWS.OVERVIEW:
-        controls = `${colors.yellow('N')} Neural | ${colors.yellow('M')} Memory | ${colors.yellow('W')} Workflow | ${colors.yellow('G')} GitHub`;
-        break;
-      case VIEWS.PROCESSES:
-        controls = `${colors.yellow('Space')} Toggle | ${colors.yellow('A')} Start All | ${colors.yellow('Z')} Stop All | ${colors.yellow('R')} Restart`;
-        break;
-      case VIEWS.NEURAL:
-        controls = `${colors.yellow('T')} Train | ${colors.yellow('P')} Predict | ${colors.yellow('S')} Status | ${colors.yellow('A')} Analyze`;
-        break;
-      case VIEWS.MONITORING:
-        controls = `${colors.yellow('P')} Performance | ${colors.yellow('B')} Bottlenecks | ${colors.yellow('H')} Health | ${colors.yellow('M')} Metrics`;
-        break;
-      case VIEWS.WORKFLOW:
-        controls = `${colors.yellow('C')} Create | ${colors.yellow('E')} Execute | ${colors.yellow('A')} Automate | ${colors.yellow('S')} Schedule`;
-        break;
-      case VIEWS.GITHUB:
-        controls = `${colors.yellow('A')} Analyze | ${colors.yellow('P')} PR Mgmt | ${colors.yellow('I')} Issues | ${colors.yellow('M')} Metrics`;
-        break;
-      case VIEWS.ORCHESTRATION:
-        controls = `${colors.yellow('N')} New Agent | ${colors.yellow('T')} New Task | ${colors.yellow('D')} Complete | ${colors.yellow('S')} Metrics`;
-        break;
-      case VIEWS.MEMORY:
-        controls = `${colors.yellow('S')} Store | ${colors.yellow('G')} Get | ${colors.yellow('B')} Backup | ${colors.yellow('A')} Analytics`;
-        break;
-      case VIEWS.LOGS:
-        controls = `${colors.yellow('L')} Clear | ${colors.yellow('F')} Filter | ${colors.yellow('E')} Export`;
-        break;
-      default:
-        controls = `${colors.yellow('Tab')} Next View | ${colors.yellow('0')} Overview | ${colors.yellow('?')} Help`;
+    case VIEWS.OVERVIEW:
+      controls = `${colors.yellow('N')} Neural | ${colors.yellow('M')} Memory | ${colors.yellow('W')} Workflow | ${colors.yellow('G')} GitHub`;
+      break;
+    case VIEWS.PROCESSES:
+      controls = `${colors.yellow('Space')} Toggle | ${colors.yellow('A')} Start All | ${colors.yellow('Z')} Stop All | ${colors.yellow('R')} Restart`;
+      break;
+    case VIEWS.NEURAL:
+      controls = `${colors.yellow('T')} Train | ${colors.yellow('P')} Predict | ${colors.yellow('S')} Status | ${colors.yellow('A')} Analyze`;
+      break;
+    case VIEWS.MONITORING:
+      controls = `${colors.yellow('P')} Performance | ${colors.yellow('B')} Bottlenecks | ${colors.yellow('H')} Health | ${colors.yellow('M')} Metrics`;
+      break;
+    case VIEWS.WORKFLOW:
+      controls = `${colors.yellow('C')} Create | ${colors.yellow('E')} Execute | ${colors.yellow('A')} Automate | ${colors.yellow('S')} Schedule`;
+      break;
+    case VIEWS.GITHUB:
+      controls = `${colors.yellow('A')} Analyze | ${colors.yellow('P')} PR Mgmt | ${colors.yellow('I')} Issues | ${colors.yellow('M')} Metrics`;
+      break;
+    case VIEWS.ORCHESTRATION:
+      controls = `${colors.yellow('N')} New Agent | ${colors.yellow('T')} New Task | ${colors.yellow('D')} Complete | ${colors.yellow('S')} Metrics`;
+      break;
+    case VIEWS.MEMORY:
+      controls = `${colors.yellow('S')} Store | ${colors.yellow('G')} Get | ${colors.yellow('B')} Backup | ${colors.yellow('A')} Analytics`;
+      break;
+    case VIEWS.LOGS:
+      controls = `${colors.yellow('L')} Clear | ${colors.yellow('F')} Filter | ${colors.yellow('E')} Export`;
+      break;
+    default:
+      controls = `${colors.yellow('Tab')} Next View | ${colors.yellow('0')} Overview | ${colors.yellow('?')} Help`;
     }
-    
-    const enhancedStatus = this.systemStats.enhancedMode ? 
+
+    const enhancedStatus = this.systemStats.enhancedMode ?
       colors.green('Enhanced') : colors.yellow('Fallback');
-    
+
     console.log(`${controls} | ${colors.yellow('Q')} Quit | Mode: ${enhancedStatus}`);
     console.log(colors.gray('─'.repeat(80)));
   }
-  
+
   // Enhanced input handling
   async handleInput() {
     const terminal = compat.terminal;
-    
+
     await terminal.write('\nCommand: ');
-    
+
     const buf = new Uint8Array(1024);
     const n = await terminal.read(buf);
-    if (n === null) return;
-    
+    if (n === null) {return;}
+
     const rawInput = terminal.decoder.decode(buf.subarray(0, n)).trim();
     const input = rawInput.split('\n')[0].toLowerCase();
-    
+
     // Enhanced global commands
     switch (input) {
-      case 'q':
-      case 'quit':
-        await this.shutdown();
-        return;
-        
-      case '0':
-        this.currentView = VIEWS.OVERVIEW;
-        this.selectedIndex = 0;
-        break;
-        
-      case '1':
-        this.currentView = VIEWS.PROCESSES;
-        this.selectedIndex = 0;
-        break;
-        
-      case '2':
-        this.currentView = VIEWS.STATUS;
-        this.selectedIndex = 0;
-        break;
-        
-      case '3':
-        this.currentView = VIEWS.ORCHESTRATION;
-        this.selectedIndex = 0;
-        break;
-        
-      case '4':
-        this.currentView = VIEWS.MEMORY;
-        this.selectedIndex = 0;
-        break;
-        
-      case '5':
-        this.currentView = VIEWS.NEURAL;
-        this.selectedIndex = 0;
-        break;
-        
-      case '6':
-        this.currentView = VIEWS.MONITORING;
-        this.selectedIndex = 0;
-        break;
-        
-      case '7':
-        this.currentView = VIEWS.WORKFLOW;
-        this.selectedIndex = 0;
-        break;
-        
-      case '8':
-        this.currentView = VIEWS.GITHUB;
-        this.selectedIndex = 0;
-        break;
-        
-      case '9':
-        this.currentView = VIEWS.LOGS;
-        this.selectedIndex = 0;
-        break;
-        
-      case '?':
-      case 'h':
-      case 'help':
-        this.currentView = VIEWS.HELP;
-        break;
-        
-      case 'tab':
-      case '\t':
-        // Enhanced view cycling
-        const viewKeys = Object.values(VIEWS);
-        const currentIndex = viewKeys.indexOf(this.currentView);
-        this.currentView = viewKeys[(currentIndex + 1) % viewKeys.length];
-        this.selectedIndex = 0;
-        break;
-        
+    case 'q':
+    case 'quit':
+      await this.shutdown();
+      return;
+
+    case '0':
+      this.currentView = VIEWS.OVERVIEW;
+      this.selectedIndex = 0;
+      break;
+
+    case '1':
+      this.currentView = VIEWS.PROCESSES;
+      this.selectedIndex = 0;
+      break;
+
+    case '2':
+      this.currentView = VIEWS.STATUS;
+      this.selectedIndex = 0;
+      break;
+
+    case '3':
+      this.currentView = VIEWS.ORCHESTRATION;
+      this.selectedIndex = 0;
+      break;
+
+    case '4':
+      this.currentView = VIEWS.MEMORY;
+      this.selectedIndex = 0;
+      break;
+
+    case '5':
+      this.currentView = VIEWS.NEURAL;
+      this.selectedIndex = 0;
+      break;
+
+    case '6':
+      this.currentView = VIEWS.MONITORING;
+      this.selectedIndex = 0;
+      break;
+
+    case '7':
+      this.currentView = VIEWS.WORKFLOW;
+      this.selectedIndex = 0;
+      break;
+
+    case '8':
+      this.currentView = VIEWS.GITHUB;
+      this.selectedIndex = 0;
+      break;
+
+    case '9':
+      this.currentView = VIEWS.LOGS;
+      this.selectedIndex = 0;
+      break;
+
+    case '?':
+    case 'h':
+    case 'help':
+      this.currentView = VIEWS.HELP;
+      break;
+
+    case 'tab':
+    case '\t':
+      // Enhanced view cycling
+      const viewKeys = Object.values(VIEWS);
+      const currentIndex = viewKeys.indexOf(this.currentView);
+      this.currentView = viewKeys[(currentIndex + 1) % viewKeys.length];
+      this.selectedIndex = 0;
+      break;
+
       // Quick action shortcuts
-      case 'n':
-        if (this.currentView === VIEWS.OVERVIEW) {
-          this.currentView = VIEWS.NEURAL;
-        } else {
-          await this.handleViewSpecificInput(input);
-        }
-        break;
-        
-      case 'm':
-        if (this.currentView === VIEWS.OVERVIEW) {
-          this.currentView = VIEWS.MEMORY;
-        } else {
-          await this.handleViewSpecificInput(input);
-        }
-        break;
-        
-      case 'w':
-        if (this.currentView === VIEWS.OVERVIEW) {
-          this.currentView = VIEWS.WORKFLOW;
-        } else {
-          await this.handleViewSpecificInput(input);
-        }
-        break;
-        
-      case 'g':
-        if (this.currentView === VIEWS.OVERVIEW) {
-          this.currentView = VIEWS.GITHUB;
-        } else {
-          await this.handleViewSpecificInput(input);
-        }
-        break;
-        
-      default:
-        // View-specific commands
+    case 'n':
+      if (this.currentView === VIEWS.OVERVIEW) {
+        this.currentView = VIEWS.NEURAL;
+      } else {
         await this.handleViewSpecificInput(input);
+      }
+      break;
+
+    case 'm':
+      if (this.currentView === VIEWS.OVERVIEW) {
+        this.currentView = VIEWS.MEMORY;
+      } else {
+        await this.handleViewSpecificInput(input);
+      }
+      break;
+
+    case 'w':
+      if (this.currentView === VIEWS.OVERVIEW) {
+        this.currentView = VIEWS.WORKFLOW;
+      } else {
+        await this.handleViewSpecificInput(input);
+      }
+      break;
+
+    case 'g':
+      if (this.currentView === VIEWS.OVERVIEW) {
+        this.currentView = VIEWS.GITHUB;
+      } else {
+        await this.handleViewSpecificInput(input);
+      }
+      break;
+
+    default:
+      // View-specific commands
+      await this.handleViewSpecificInput(input);
     }
-    
+
     // Update system stats
     this.updateSystemStats();
   }
-  
+
   // Enhanced view-specific input handling
   async handleViewSpecificInput(input) {
     switch (this.currentView) {
-      case VIEWS.PROCESSES:
-        await this.handleProcessInput(input);
-        break;
-      case VIEWS.ORCHESTRATION:
-        await this.handleOrchestrationInput(input);
-        break;
-      case VIEWS.MEMORY:
-        await this.handleEnhancedMemoryInput(input);
-        break;
-      case VIEWS.NEURAL:
-        await this.handleNeuralInput(input);
-        break;
-      case VIEWS.MONITORING:
-        await this.handleMonitoringInput(input);
-        break;
-      case VIEWS.WORKFLOW:
-        await this.handleWorkflowInput(input);
-        break;
-      case VIEWS.GITHUB:
-        await this.handleGitHubInput(input);
-        break;
-      case VIEWS.DAA:
-        await this.handleDAAInput(input);
-        break;
-      case VIEWS.SYSTEM:
-        await this.handleSystemInput(input);
-        break;
-      case VIEWS.CLI:
-        await this.handleCLIInput(input);
-        break;
-      case VIEWS.LOGS:
-        await this.handleLogsInput(input);
-        break;
+    case VIEWS.PROCESSES:
+      await this.handleProcessInput(input);
+      break;
+    case VIEWS.ORCHESTRATION:
+      await this.handleOrchestrationInput(input);
+      break;
+    case VIEWS.MEMORY:
+      await this.handleEnhancedMemoryInput(input);
+      break;
+    case VIEWS.NEURAL:
+      await this.handleNeuralInput(input);
+      break;
+    case VIEWS.MONITORING:
+      await this.handleMonitoringInput(input);
+      break;
+    case VIEWS.WORKFLOW:
+      await this.handleWorkflowInput(input);
+      break;
+    case VIEWS.GITHUB:
+      await this.handleGitHubInput(input);
+      break;
+    case VIEWS.DAA:
+      await this.handleDAAInput(input);
+      break;
+    case VIEWS.SYSTEM:
+      await this.handleSystemInput(input);
+      break;
+    case VIEWS.CLI:
+      await this.handleCLIInput(input);
+      break;
+    case VIEWS.LOGS:
+      await this.handleLogsInput(input);
+      break;
     }
   }
-  
+
   // Enhanced tool execution with statistics
   async executeEnhancedTool(toolName, params = {}) {
     try {
       const startTime = Date.now();
-      
+
       // Execute through enhanced UI if available
       let result;
       if (this.enhancedWebUI) {
@@ -1117,35 +1117,35 @@ export class EnhancedProcessUI {
         // Fallback execution
         result = await this.mockToolExecution(toolName, params);
       }
-      
+
       const duration = Date.now() - startTime;
-      
+
       // Update statistics
       this.updateToolStats(toolName, duration, true);
-      
+
       // Add to recent tools
       this.recentTools.push(toolName);
       if (this.recentTools.length > 20) {
         this.recentTools = this.recentTools.slice(-20);
       }
-      
+
       // Log execution
       this.addLog('tool', `Executed ${toolName} (${duration}ms)`);
-      
+
       return result;
-      
+
     } catch (error) {
       this.updateToolStats(toolName, 0, false);
       this.addLog('error', `Failed to execute ${toolName}: ${error.message}`);
       throw error;
     }
   }
-  
+
   // Mock tool execution for fallback
   async mockToolExecution(toolName, params) {
     // Simulate execution delay
     await new Promise(resolve => setTimeout(resolve, 100 + Math.random() * 500));
-    
+
     return {
       success: true,
       tool: toolName,
@@ -1154,36 +1154,36 @@ export class EnhancedProcessUI {
       timestamp: Date.now()
     };
   }
-  
+
   // Update tool statistics
   updateToolStats(toolName, duration, success) {
     const category = this.getToolCategory(toolName);
-    if (!category) return;
-    
+    if (!category) {return;}
+
     const stats = this.toolStats.get(category) || {
       executions: 0,
       lastUsed: null,
       avgDuration: 0,
       successRate: 100
     };
-    
+
     stats.executions++;
     stats.lastUsed = Date.now();
-    
+
     if (success) {
       stats.avgDuration = ((stats.avgDuration * (stats.executions - 1)) + duration) / stats.executions;
     } else {
       stats.successRate = ((stats.successRate * (stats.executions - 1)) + 0) / stats.executions;
     }
-    
+
     this.toolStats.set(category, stats);
   }
-  
+
   // Get tool category
   getToolCategory(toolName) {
     for (const [category, info] of Object.entries(TOOL_CATEGORIES)) {
       // Simple pattern matching - in real implementation would be more sophisticated
-      if (toolName.includes(category) || 
+      if (toolName.includes(category) ||
           (category === 'neural' && (toolName.includes('neural_') || toolName.includes('model_'))) ||
           (category === 'memory' && toolName.includes('memory_')) ||
           (category === 'monitoring' && (toolName.includes('performance_') || toolName.includes('health_'))) ||
@@ -1196,13 +1196,13 @@ export class EnhancedProcessUI {
     }
     return null;
   }
-  
+
   // Get tool statistics
   getToolStats(toolName) {
     const category = this.getToolCategory(toolName);
     return category ? this.toolStats.get(category) : null;
   }
-  
+
   // Enhanced input handlers for new views
   async handleNeuralInput(input) {
     const actions = {
@@ -1222,12 +1222,12 @@ export class EnhancedProcessUI {
       'w': () => this.executeEnhancedTool('wasm_optimize'),
       'i': () => this.executeEnhancedTool('inference_run')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
     }
   }
-  
+
   async handleMonitoringInput(input) {
     const actions = {
       'p': () => this.executeEnhancedTool('performance_report'),
@@ -1244,12 +1244,12 @@ export class EnhancedProcessUI {
       's': () => this.executeEnhancedTool('swarm_monitor'),
       'a': () => this.executeEnhancedTool('agent_metrics')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
     }
   }
-  
+
   async handleWorkflowInput(input) {
     const actions = {
       'c': () => this.executeEnhancedTool('workflow_create'),
@@ -1264,12 +1264,12 @@ export class EnhancedProcessUI {
       'r': () => this.executeEnhancedTool('sparc_mode'),
       'o': () => this.executeEnhancedTool('task_orchestrate')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
     }
   }
-  
+
   async handleGitHubInput(input) {
     const actions = {
       'a': () => this.executeEnhancedTool('github_repo_analyze'),
@@ -1281,12 +1281,12 @@ export class EnhancedProcessUI {
       's': () => this.executeEnhancedTool('github_sync_coord'),
       'm': () => this.executeEnhancedTool('github_metrics')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
     }
   }
-  
+
   async handleDAAInput(input) {
     const actions = {
       'c': () => this.executeEnhancedTool('daa_agent_create'),
@@ -1298,12 +1298,12 @@ export class EnhancedProcessUI {
       'f': () => this.executeEnhancedTool('daa_fault_tolerance'),
       'p': () => this.executeEnhancedTool('daa_optimization')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
     }
   }
-  
+
   async handleSystemInput(input) {
     const actions = {
       's': () => this.executeEnhancedTool('security_scan'),
@@ -1313,12 +1313,12 @@ export class EnhancedProcessUI {
       'd': () => this.executeEnhancedTool('diagnostic_run'),
       'c': () => this.executeEnhancedTool('config_manage')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
     }
   }
-  
+
   async handleCLIInput(input) {
     const commands = {
       'h': 'hive-mind',
@@ -1331,7 +1331,7 @@ export class EnhancedProcessUI {
       'm': 'mcp',
       'f': 'config'
     };
-    
+
     if (commands[input]) {
       this.addLog('info', `Executing CLI command: ${commands[input]}`);
       // In real implementation, would bridge to actual CLI commands
@@ -1339,7 +1339,7 @@ export class EnhancedProcessUI {
       console.log('Command execution would be bridged to actual CLI...');
     }
   }
-  
+
   // Enhanced memory input handling
   async handleEnhancedMemoryInput(input) {
     const actions = {
@@ -1352,12 +1352,12 @@ export class EnhancedProcessUI {
       'a': () => this.executeEnhancedTool('memory_analytics'),
       'n': () => this.executeEnhancedTool('memory_namespace')
     };
-    
+
     if (actions[input]) {
       await actions[input]();
     }
   }
-  
+
   // Helper methods
   getNamespaceIcon(name) {
     const icons = {
@@ -1370,13 +1370,13 @@ export class EnhancedProcessUI {
     };
     return icons[name] || '📁';
   }
-  
+
   // Enhanced system stats update
   updateSystemStats() {
     // Update random stats for demo
     this.systemStats.cpuUsage = Math.min(100, Math.max(0, this.systemStats.cpuUsage + (Math.random() - 0.5) * 10));
     this.systemStats.memoryUsage = Math.min(100, Math.max(0, this.systemStats.memoryUsage + (Math.random() - 0.5) * 5));
-    
+
     // Update process stats
     for (const [id, process] of this.processes) {
       if (process.status === 'running') {
@@ -1385,39 +1385,39 @@ export class EnhancedProcessUI {
         process.memory = Math.min(200, Math.max(10, process.memory + (Math.random() - 0.5) * 5));
       }
     }
-    
+
     // Update enhanced stats
     this.systemStats.activeAgents = this.agents.filter(a => a.status === 'working').length;
     this.systemStats.totalTasks = this.tasks.length;
     this.systemStats.completedTasks = this.tasks.filter(t => t.status === 'completed').length;
   }
-  
+
   // Enhanced shutdown
   async shutdown() {
     this.running = false;
     console.clear();
-    
+
     if (this.enhancedWebUI) {
       await this.enhancedWebUI.shutdown();
     }
-    
+
     printSuccess('Enhanced UI shutdown complete. Goodbye!');
     compat.terminal.exit(0);
   }
-  
+
   // Keep all existing methods from original class...
   // (getStatusIcon, getHealthBar, getUsageBar, formatUptime, etc.)
-  
+
   getStatusIcon(status) {
     switch (status) {
-      case 'running': return colors.green('●');
-      case 'stopped': return colors.gray('○');
-      case 'error': return colors.red('✗');
-      case 'starting': return colors.yellow('◐');
-      default: return colors.gray('?');
+    case 'running': return colors.green('●');
+    case 'stopped': return colors.gray('○');
+    case 'error': return colors.red('✗');
+    case 'starting': return colors.yellow('◐');
+    default: return colors.gray('?');
     }
   }
-  
+
   getHealthBar() {
     const running = Array.from(this.processes.values()).filter(p => p.status === 'running').length;
     const total = this.processes.size;
@@ -1427,7 +1427,7 @@ export class EnhancedProcessUI {
     const color = percentage >= 80 ? colors.green : percentage >= 50 ? colors.yellow : colors.red;
     return color(bar) + ` ${percentage.toFixed(0)}%`;
   }
-  
+
   getUsageBar(value, max) {
     const percentage = (value / max) * 100;
     const filled = Math.round(percentage / 10);
@@ -1435,124 +1435,124 @@ export class EnhancedProcessUI {
     const color = percentage >= 80 ? colors.red : percentage >= 50 ? colors.yellow : colors.green;
     return color(bar);
   }
-  
+
   formatUptime(seconds) {
-    if (seconds < 60) return `${seconds}s`;
-    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+    if (seconds < 60) {return `${seconds}s`;}
+    if (seconds < 3600) {return `${Math.floor(seconds / 60)}m ${seconds % 60}s`;}
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     return `${hours}h ${minutes}m`;
   }
-  
+
   addLog(level, message) {
     this.logs.push({
       time: new Date(),
       level,
       message
     });
-    
+
     // Keep logs manageable
     if (this.logs.length > 100) {
       this.logs = this.logs.slice(-100);
     }
   }
-  
+
   // Continue with existing methods...
   async handleProcessInput(input) {
     switch (input) {
-      case 'a':
-        await this.startAll();
-        break;
-        
-      case 'z':
-        await this.stopAll();
-        break;
-        
-      case 'r':
-        await this.restartAll();
-        break;
-        
-      case ' ':
-      case 'space':
-      case 'enter':
-      case '':
-        await this.toggleSelected();
-        break;
-        
-      case 'up':
-      case 'k':
-        this.selectedIndex = Math.max(0, this.selectedIndex - 1);
-        break;
-        
-      case 'down':
-      case 'j':
-        this.selectedIndex = Math.min(this.processes.size - 1, this.selectedIndex + 1);
-        break;
+    case 'a':
+      await this.startAll();
+      break;
+
+    case 'z':
+      await this.stopAll();
+      break;
+
+    case 'r':
+      await this.restartAll();
+      break;
+
+    case ' ':
+    case 'space':
+    case 'enter':
+    case '':
+      await this.toggleSelected();
+      break;
+
+    case 'up':
+    case 'k':
+      this.selectedIndex = Math.max(0, this.selectedIndex - 1);
+      break;
+
+    case 'down':
+    case 'j':
+      this.selectedIndex = Math.min(this.processes.size - 1, this.selectedIndex + 1);
+      break;
     }
   }
-  
+
   async handleOrchestrationInput(input) {
     switch (input) {
-      case 'n':
-        // Spawn new agent
-        const agentTypes = ['researcher', 'coder', 'analyst', 'coordinator', 'tester'];
-        const randomType = agentTypes[Math.floor(Math.random() * agentTypes.length)];
-        await this.swarmIntegration.spawnAgent(randomType);
-        break;
-        
-      case 't':
-        // Create new task
-        const sampleTasks = [
-          'Implement neural network optimization',
-          'Analyze performance bottlenecks',
-          'Create workflow automation',
-          'Review GitHub integration',
-          'Test DAA consensus mechanism'
-        ];
-        const randomTask = sampleTasks[Math.floor(Math.random() * sampleTasks.length)];
-        await this.swarmIntegration.createTask(randomTask, 'medium');
-        break;
-        
-      case 'd':
-        // Complete selected task (simulate)
-        if (this.tasks.length > 0) {
-          const pendingTasks = this.tasks.filter(t => t.status === 'in_progress');
-          if (pendingTasks.length > 0) {
-            const taskToComplete = pendingTasks[0];
-            await this.swarmIntegration.completeTask(taskToComplete.id);
-          } else {
-            this.addLog('info', 'No in-progress tasks to complete');
-          }
+    case 'n':
+      // Spawn new agent
+      const agentTypes = ['researcher', 'coder', 'analyst', 'coordinator', 'tester'];
+      const randomType = agentTypes[Math.floor(Math.random() * agentTypes.length)];
+      await this.swarmIntegration.spawnAgent(randomType);
+      break;
+
+    case 't':
+      // Create new task
+      const sampleTasks = [
+        'Implement neural network optimization',
+        'Analyze performance bottlenecks',
+        'Create workflow automation',
+        'Review GitHub integration',
+        'Test DAA consensus mechanism'
+      ];
+      const randomTask = sampleTasks[Math.floor(Math.random() * sampleTasks.length)];
+      await this.swarmIntegration.createTask(randomTask, 'medium');
+      break;
+
+    case 'd':
+      // Complete selected task (simulate)
+      if (this.tasks.length > 0) {
+        const pendingTasks = this.tasks.filter(t => t.status === 'in_progress');
+        if (pendingTasks.length > 0) {
+          const taskToComplete = pendingTasks[0];
+          await this.swarmIntegration.completeTask(taskToComplete.id);
+        } else {
+          this.addLog('info', 'No in-progress tasks to complete');
         }
-        break;
-        
-      case 's':
-        // Show swarm metrics
-        const metrics = this.swarmIntegration.getSwarmMetrics();
-        if (metrics) {
-          this.addLog('info', `Swarm efficiency: ${metrics.efficiency}% (${metrics.tasks.completed}/${metrics.tasks.total} tasks completed)`);
-        }
-        break;
+      }
+      break;
+
+    case 's':
+      // Show swarm metrics
+      const metrics = this.swarmIntegration.getSwarmMetrics();
+      if (metrics) {
+        this.addLog('info', `Swarm efficiency: ${metrics.efficiency}% (${metrics.tasks.completed}/${metrics.tasks.total} tasks completed)`);
+      }
+      break;
     }
   }
-  
+
   async handleLogsInput(input) {
     switch (input) {
-      case 'l':
-        this.logs = [];
-        this.addLog('info', 'Logs cleared');
-        break;
-        
-      case 'f':
-        this.addLog('info', 'Log filtering not yet implemented');
-        break;
-        
-      case 'e':
-        this.addLog('info', 'Log export feature available in enhanced mode');
-        break;
+    case 'l':
+      this.logs = [];
+      this.addLog('info', 'Logs cleared');
+      break;
+
+    case 'f':
+      this.addLog('info', 'Log filtering not yet implemented');
+      break;
+
+    case 'e':
+      this.addLog('info', 'Log export feature available in enhanced mode');
+      break;
     }
   }
-  
+
   async toggleSelected() {
     const process = Array.from(this.processes.values())[this.selectedIndex];
     if (process.status === 'stopped') {
@@ -1561,36 +1561,36 @@ export class EnhancedProcessUI {
       await this.stopProcess(process.id);
     }
   }
-  
+
   async startProcess(id) {
     const process = this.processes.get(id);
-    if (!process) return;
-    
+    if (!process) {return;}
+
     this.addLog('info', `Starting ${process.name}...`);
     process.status = 'starting';
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    
+
     process.status = 'running';
     process.pid = Math.floor(Math.random() * 10000) + 1000;
     process.uptime = 0;
-    
+
     this.addLog('success', `${process.name} started successfully`);
   }
-  
+
   async stopProcess(id) {
     const process = this.processes.get(id);
-    if (!process) return;
-    
+    if (!process) {return;}
+
     this.addLog('info', `Stopping ${process.name}...`);
     process.status = 'stopped';
     process.pid = null;
     process.uptime = 0;
-    
+
     await new Promise(resolve => setTimeout(resolve, 300));
     this.addLog('success', `${process.name} stopped`);
   }
-  
+
   async startAll() {
     this.addLog('info', 'Starting all processes...');
     for (const [id, process] of this.processes) {
@@ -1600,7 +1600,7 @@ export class EnhancedProcessUI {
     }
     this.addLog('success', 'All processes started');
   }
-  
+
   async stopAll() {
     this.addLog('info', 'Stopping all processes...');
     for (const [id, process] of this.processes) {
@@ -1610,7 +1610,7 @@ export class EnhancedProcessUI {
     }
     this.addLog('success', 'All processes stopped');
   }
-  
+
   async restartAll() {
     await this.stopAll();
     await new Promise(resolve => setTimeout(resolve, 500));

@@ -9,30 +9,30 @@ export async function startCommand(subArgs, flags) {
     showStartHelp();
     return;
   }
-  
+
   // Parse start options
   const daemon = subArgs.includes('--daemon') || subArgs.includes('-d') || flags.daemon;
   const port = flags.port || getArgValue(subArgs, '--port') || getArgValue(subArgs, '-p') || 3000;
   const verbose = subArgs.includes('--verbose') || subArgs.includes('-v') || flags.verbose;
   const ui = subArgs.includes('--ui') || subArgs.includes('-u') || flags.ui;
   const web = subArgs.includes('--web') || subArgs.includes('-w') || flags.web;
-  
+
   try {
     printSuccess('Starting Claude-Flow Orchestration System...');
     console.log();
-    
+
     // Check if we should launch the web UI mode
     if (web) {
       try {
         // Launch the web server
         const { startWebServer } = await import('./web-server.js');
         const server = await startWebServer(port);
-        
-        printSuccess(`🌐 Web UI is running!`);
+
+        printSuccess('🌐 Web UI is running!');
         console.log(`📍 Open your browser to: http://localhost:${port}/console`);
         console.log('   Press Ctrl+C to stop the server');
         console.log();
-        
+
         // Keep process running
         await new Promise(() => {});
         return;
@@ -42,7 +42,7 @@ export async function startCommand(subArgs, flags) {
         return;
       }
     }
-    
+
     // Check if we should launch the UI mode (web UI by default)
     if (ui && !web) {
       try {
@@ -50,12 +50,12 @@ export async function startCommand(subArgs, flags) {
         const { ClaudeCodeWebServer } = await import('./web-server.js');
         const webServer = new ClaudeCodeWebServer(port);
         await webServer.start();
-        
+
         printSuccess('🌐 Claude Flow Web UI is running!');
         console.log(`📍 Open your browser to: http://localhost:${port}/console`);
         console.log('   Press Ctrl+C to stop the server');
         console.log();
-        
+
         // Keep process running
         await new Promise(() => {});
         return;
@@ -74,11 +74,11 @@ export async function startCommand(subArgs, flags) {
         }
       }
     }
-    
+
     // Check if required directories exist
     const requiredDirs = ['memory', 'coordination'];
-    let missingDirs = [];
-    
+    const missingDirs = [];
+
     for (const dir of requiredDirs) {
       try {
         await Deno.stat(dir);
@@ -86,53 +86,53 @@ export async function startCommand(subArgs, flags) {
         missingDirs.push(dir);
       }
     }
-    
+
     if (missingDirs.length > 0) {
       printWarning('Missing required directories: ' + missingDirs.join(', '));
       console.log('Run "claude-flow init" first to create the necessary structure');
       return;
     }
-    
+
     // Display startup information
     console.log('🚀 System Configuration:');
     console.log(`   Mode: ${daemon ? 'Daemon (background)' : 'Interactive'}`);
     console.log(`   MCP Port: ${port}`);
     console.log(`   Working Directory: ${cwd()}`);
-    console.log(`   Memory Backend: JSON (default)`);
-    console.log(`   Terminal Pool: 5 instances (default)`);
+    console.log('   Memory Backend: JSON (default)');
+    console.log('   Terminal Pool: 5 instances (default)');
     console.log();
-    
+
     // Initialize components
     console.log('📋 Initializing Components:');
-    
+
     // Memory system
     console.log('   ✓ Memory Bank: Ready');
     console.log('     - Backend: JSON file (memory/claude-flow-data.json)');
     console.log('     - Namespaces: Enabled');
-    
+
     // Terminal pool
     console.log('   ✓ Terminal Pool: Ready');
     console.log('     - Pool Size: 5');
     console.log('     - Shell: ' + (compat.platform.os === 'windows' ? 'cmd.exe' : '/bin/bash'));
-    
+
     // Task queue
     console.log('   ✓ Task Queue: Ready');
     console.log('     - Max Concurrent: 10');
     console.log('     - Priority Queue: Enabled');
-    
+
     // MCP Server
     console.log('   ✓ MCP Server: Ready');
     console.log(`     - Port: ${port}`);
     console.log('     - Transport: stdio/HTTP');
-    
+
     console.log();
-    
+
     if (daemon) {
       // Daemon mode - would normally fork process
       printInfo('Starting in daemon mode...');
       console.log('Note: Full daemon mode requires the TypeScript version');
       console.log('The orchestrator would run in the background on port ' + port);
-      
+
       // Create a simple PID file to simulate daemon
       const pid = compat.terminal.getPid();
       await compat.safeCall(async () => {
@@ -144,7 +144,7 @@ export async function startCommand(subArgs, flags) {
         }
       });
       console.log(`Process ID: ${pid} (saved to .claude-flow.pid)`);
-      
+
     } else {
       // Interactive mode
       printSuccess('Orchestration system started!');
@@ -164,25 +164,25 @@ export async function startCommand(subArgs, flags) {
       console.log();
       console.log('   • Press Ctrl+C to stop the orchestrator');
       console.log();
-      
+
       if (verbose) {
         console.log('📊 Verbose Mode - Showing system activity:');
         console.log('[' + new Date().toISOString() + '] System initialized');
         console.log('[' + new Date().toISOString() + '] Waiting for commands...');
       }
-      
+
       // Keep the process running
       console.log('🟢 System is running...');
-      
+
       // Set up signal handlers
       const abortController = new AbortController();
-      
-      compat.terminal.onSignal("SIGINT", () => {
+
+      compat.terminal.onSignal('SIGINT', () => {
         console.log('\n⏹️  Shutting down orchestrator...');
         cleanup();
         compat.terminal.exit(0);
       });
-      
+
       // Simple heartbeat to show system is alive
       if (!daemon) {
         const heartbeat = setInterval(() => {
@@ -190,12 +190,12 @@ export async function startCommand(subArgs, flags) {
             console.log('[' + new Date().toISOString() + '] Heartbeat - System healthy');
           }
         }, 30000); // Every 30 seconds
-        
+
         // Wait indefinitely (until Ctrl+C)
         await new Promise(() => {});
       }
     }
-    
+
   } catch (err) {
     printError(`Failed to start orchestration system: ${err.message}`);
     console.error('Stack trace:', err.stack);
@@ -224,7 +224,7 @@ async function cleanup() {
   } catch {
     // File might not exist
   }
-  
+
   console.log('✓ Terminal pool closed');
   console.log('✓ Task queue cleared');
   console.log('✓ Memory bank saved');
