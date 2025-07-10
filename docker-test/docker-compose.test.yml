@@ -1,0 +1,246 @@
+version: '3.8'
+
+services:
+  # Main test orchestrator
+  test-orchestrator:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: final
+    container_name: claude-flow-test-main
+    environment:
+      - NODE_ENV=test
+      - CLAUDE_FLOW_TEST=true
+      - TEST_MODE=integration
+    volumes:
+      - test-results:/test/results
+      - ../src:/test/src:ro
+    networks:
+      - test-network
+    depends_on:
+      - redis
+      - postgres
+
+  # NPX deployment test
+  npx-test:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: npx-test
+    container_name: claude-flow-npx-test
+    environment:
+      - TEST_MODE=npx
+    command: |
+      sh -c "
+        echo 'Testing NPX deployment...'
+        npx claude-flow --version
+        npx claude-flow features list
+        npx claude-flow config show
+      "
+    networks:
+      - test-network
+
+  # Feature discovery test
+  feature-discovery:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: integration-test
+    container_name: claude-flow-feature-test
+    environment:
+      - TEST_MODE=features
+    volumes:
+      - ../docker-test/features/discovery:/test/tests
+    command: |
+      sh -c "
+        echo 'Testing feature discovery...'
+        node /test/tests/feature-discovery.test.js
+      "
+    networks:
+      - test-network
+
+  # Configuration persistence test
+  config-test:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: integration-test
+    container_name: claude-flow-config-test
+    environment:
+      - TEST_MODE=config
+    volumes:
+      - config-data:/test/.claude-flow
+      - ../docker-test/features/configuration:/test/tests
+    command: |
+      sh -c "
+        echo 'Testing configuration persistence...'
+        node /test/tests/config-persistence.test.js
+      "
+    networks:
+      - test-network
+
+  # Transparency verification test
+  transparency-test:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: integration-test
+    container_name: claude-flow-transparency-test
+    environment:
+      - TEST_MODE=transparency
+      - CLAUDE_FLOW_TRANSPARENT=true
+    volumes:
+      - ../docker-test/features/transparency:/test/tests
+    command: |
+      sh -c "
+        echo 'Testing transparency features...'
+        node /test/tests/transparency.test.js
+      "
+    networks:
+      - test-network
+
+  # Performance benchmark
+  benchmark:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: benchmark
+    container_name: claude-flow-benchmark
+    environment:
+      - TEST_MODE=benchmark
+    volumes:
+      - benchmark-results:/test/benchmark-results
+      - ../docker-test/features/performance:/test/benchmarks
+    command: |
+      sh -c "
+        echo 'Running performance benchmarks...'
+        node /test/benchmarks/performance.bench.js
+      "
+    networks:
+      - test-network
+
+  # Multi-platform test (linux/amd64)
+  platform-amd64:
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: multiplatform-test
+      platforms:
+        - linux/amd64
+    container_name: claude-flow-platform-amd64
+    environment:
+      - TEST_PLATFORM=amd64
+    networks:
+      - test-network
+
+  # Multi-platform test (linux/arm64)
+  platform-arm64:
+    platform: linux/arm64
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: multiplatform-test
+      platforms:
+        - linux/arm64
+    container_name: claude-flow-platform-arm64
+    environment:
+      - TEST_PLATFORM=arm64
+    networks:
+      - test-network
+
+  # Workflow simulation
+  workflow-test:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: integration-test
+    container_name: claude-flow-workflow-test
+    environment:
+      - TEST_MODE=workflow
+    volumes:
+      - ../docker-test/features/workflows:/test/workflows
+    command: |
+      sh -c "
+        echo 'Testing user workflows...'
+        for workflow in /test/workflows/*.test.js; do
+          echo \"Running $workflow\"
+          node \"$workflow\"
+        done
+      "
+    networks:
+      - test-network
+
+  # Integration test runner
+  integration-runner:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: integration-test
+    container_name: claude-flow-integration
+    environment:
+      - TEST_MODE=integration
+      - CI=true
+    volumes:
+      - ../docker-test/features/integration:/test/integration
+      - test-results:/test/results
+    command: |
+      sh -c "
+        echo 'Running integration tests...'
+        npm run test:integration || true
+        npm run test:e2e || true
+      "
+    networks:
+      - test-network
+    depends_on:
+      - redis
+      - postgres
+
+  # Test dependencies
+  redis:
+    image: redis:7-alpine
+    container_name: claude-flow-test-redis
+    networks:
+      - test-network
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: claude-flow-test-postgres
+    environment:
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testpass
+      - POSTGRES_DB=claudeflow_test
+    networks:
+      - test-network
+
+  # Test report generator
+  report-generator:
+    build:
+      context: ..
+      dockerfile: docker-test/Dockerfile.test
+      target: integration-test
+    container_name: claude-flow-report
+    volumes:
+      - test-results:/test/results
+      - benchmark-results:/test/benchmark-results
+      - ./reports:/test/reports
+    command: |
+      sh -c "
+        echo 'Generating test reports...'
+        npm run test:report || true
+        echo 'Test reports generated in /test/reports'
+      "
+    networks:
+      - test-network
+    depends_on:
+      - test-orchestrator
+      - benchmark
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  test-results:
+  config-data:
+  benchmark-results:

@@ -22,6 +22,7 @@ import { hookSafetyCommand } from './simple-commands/hook-safety.js';
 import { hiveMindCommand } from './simple-commands/hive-mind.js';
 import hiveMindOptimizeCommand from './simple-commands/hive-mind-optimize.js';
 import { showUnifiedMetrics, fixTaskAttribution } from './simple-commands/swarm-metrics-integration.js';
+import { featuresCommand } from './simple-commands/features.js';
 // Note: TypeScript imports commented out for Node.js compatibility
 // import { ruvSwarmAction } from './commands/ruv-swarm.ts';
 // import { configIntegrationAction } from './commands/config-integration.ts';
@@ -142,6 +143,37 @@ First-time users should run: npx claude-flow@latest init --sparc`
       'config get orchestrator.maxConcurrentTasks',
       'config validate'
     ]
+  });
+
+  commandRegistry.set('features', {
+    handler: featuresCommand,
+    description: 'Manage feature flags and capabilities',
+    usage: 'features <subcommand> [options]',
+    examples: [
+      'features list',
+      'features list --category swarm --enabled true',
+      'features enable advanced-memory',
+      'features disable experimental-ui',
+      'features config swarm-coordination --set maxAgents=10',
+      'features status --health'
+    ],
+    details: `
+Feature management allows fine-grained control over system capabilities:
+  • Enable/disable features without code changes
+  • Configure feature-specific settings
+  • Track feature health and status
+  • Manage experimental features safely
+  • Control feature dependencies and conflicts
+  
+Feature Categories:
+  • core - Essential system features
+  • memory - Persistence and caching
+  • swarm - Multi-agent coordination
+  • agent - Agent management
+  • workflow - Automation features
+  • integration - External integrations
+  • performance - Optimization features
+  • experimental - Beta features`
   });
 
   commandRegistry.set('status', {

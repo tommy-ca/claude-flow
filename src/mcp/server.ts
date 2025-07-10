@@ -31,6 +31,9 @@ import { LoadBalancer, ILoadBalancer, RequestQueue } from './load-balancer.js';
 import { createClaudeFlowTools, ClaudeFlowToolContext } from './claude-flow-tools.js';
 import { createSwarmTools, SwarmToolContext } from './swarm-tools.js';
 import { createRuvSwarmTools, RuvSwarmToolContext, isRuvSwarmAvailable, initializeRuvSwarmIntegration } from './ruv-swarm-tools.js';
+import { createMcpFeatureTools } from './feature-tools.js';
+import { McpFeatureAdapter } from '../features/adapters/McpFeatureAdapter.js';
+import { featureRegistry } from '../features/core/FeatureRegistry.js';
 import { platform, arch } from 'node:os';
 import { performance } from 'node:perf_hooks';
 
@@ -554,6 +557,9 @@ export class MCPServer implements IMCPServer {
 
     // Register ruv-swarm MCP tools if available
     this.registerRuvSwarmTools();
+    
+    // Register Feature management tools
+    this.registerFeatureTools();
   }
 
   /**
@@ -605,6 +611,35 @@ export class MCPServer implements IMCPServer {
       
     } catch (error) {
       this.logger.error('Error registering ruv-swarm MCP tools', error);
+    }
+  }
+
+  /**
+   * Register feature management tools
+   */
+  private registerFeatureTools(): void {
+    try {
+      // Create feature tools
+      const featureTools = createMcpFeatureTools(this.logger, undefined); // No feature manager yet
+      
+      // Create feature adapter for enriching responses
+      const featureAdapter = new McpFeatureAdapter(
+        featureRegistry,
+        undefined, // No feature manager yet
+        this.logger
+      );
+      
+      // Register each tool
+      for (const tool of featureTools) {
+        this.registerTool(tool);
+      }
+      
+      this.logger.info('Registered Feature management tools', { count: featureTools.length });
+      
+      // Store adapter for response enrichment
+      (this as any).featureAdapter = featureAdapter;
+    } catch (error) {
+      this.logger.error('Failed to register feature tools', { error });
     }
   }
 
