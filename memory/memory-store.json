@@ -59,6 +59,54 @@
       "value": "Technical Stack: OS: Real-time Linux with PREEMPT_RT. Languages: C++17/20 for signal processing, Rust for memory-safe components, CUDA for GPU acceleration, Python for prototypes. Databases: InfluxDB for time-series neural data, PostgreSQL for patterns, Redis for caching. Communication: gRPC internal, WebRTC streaming, custom TCP for hive. Key Libraries: Eigen for linear algebra, TensorFlow C++ API for ML, OpenCL for cross-platform GPU.",
       "namespace": "default",
       "timestamp": 1752018192664
+    },
+    {
+      "key": "architecture/decisions",
+      "value": "{\"module\": \"shared-memory\", \"decisions\": [\"Use SQLite with better-sqlite3 for persistence\", \"Create unified module supporting both .swarm/ and .hive-mind/ directories\", \"Implement base SharedMemory class with core methods\", \"Extend with SwarmMemory for MCP-specific needs\", \"Design flexible schema with migration support\", \"Optimize for performance with caching and pooling\"]}",
+      "namespace": "default",
+      "timestamp": 1752116024819
+    },
+    {
+      "key": "test-key",
+      "value": "Test value for persistence",
+      "namespace": "default",
+      "timestamp": 1752116037136
+    },
+    {
+      "key": "restart-test",
+      "value": "Value before restart",
+      "namespace": "default",
+      "timestamp": 1752116074406
+    },
+    {
+      "key": "integration/architecture-found",
+      "value": "Found SharedMemory module at src/memory/shared-memory.js created by Architecture Agent",
+      "namespace": "default",
+      "timestamp": 1752116118573
+    },
+    {
+      "key": "integration/mcp-update-decision",
+      "value": "Updating MCP server to use SharedMemory class from src/memory/shared-memory.js for memory_usage tool implementation",
+      "namespace": "default",
+      "timestamp": 1752116136755
+    },
+    {
+      "key": "integration/completed-tasks",
+      "value": "Integrated SharedMemory into MCP server, updated init command to create .swarm directory and initialize SQLite database, incremented version to 1.0.44",
+      "namespace": "default",
+      "timestamp": 1752116309680
+    },
+    {
+      "key": "testing/complete",
+      "value": "Testing Agent has completed comprehensive testing. Results: Local persistence PASSED, NPM partially passed, Docker skipped, Regression PASSED. Full report at test-results/memory-persistence-test-report.md",
+      "namespace": "default",
+      "timestamp": 1752116402654
+    },
+    {
+      "key": "architecture/memory-module-completed",
+      "value": "{\"status\": \"completed\", \"files_created\": [\"shared-memory.js\", \"swarm-memory.js\", \"index.js\", \"migration.js\", \"test-example.js\", \"README.md\"], \"features\": [\"SQLite persistence\", \"LRU caching\", \"Migration support\", \"TTL support\", \"Swarm-specific features\", \"MCP integration\"], \"timestamp\": \"2025-07-10T03:00:19Z\"}",
+      "namespace": "default",
+      "timestamp": 1752116421782
     }
   ]
 }

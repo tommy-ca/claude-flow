@@ -8,6 +8,7 @@
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { createSharedMemory } from '../memory/shared-memory.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,6 +16,7 @@ const __dirname = path.dirname(__filename);
 class ClaudeFlowMCPServer {
   constructor() {
     this.version = '2.0.0';
+    this.sharedMemory = null;
     this.capabilities = {
       tools: {
         listChanged: true
@@ -27,6 +29,21 @@ class ClaudeFlowMCPServer {
     this.sessionId = `session-cf-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
     this.tools = this.initializeTools();
     this.resources = this.initializeResources();
+    
+    // Initialize shared memory
+    this.initializeMemory().catch(err => {
+      console.error(`[${new Date().toISOString()}] ERROR [claude-flow-mcp] Failed to initialize memory:`, err);
+    });
+  }
+  
+  async initializeMemory() {
+    this.sharedMemory = createSharedMemory('mcp', {
+      sessionId: this.sessionId,
+      gcInterval: 600000, // 10 minutes
+      retentionDays: 7
+    });
+    await this.sharedMemory.initialize();
+    console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${this.sessionId}) Memory system initialized`);
   }
 
   initializeTools() {
@@ -825,26 +842,7 @@ class ClaudeFlowMCPServer {
         };
 
       case 'memory_usage':
-        if (args.action === 'store') {
-          return {
-            success: true,
-            action: 'store',
-            key: args.key,
-            namespace: args.namespace || 'default',
-            stored: true,
-            timestamp: new Date().toISOString()
-          };
-        } else if (args.action === 'retrieve') {
-          return {
-            success: true,
-            action: 'retrieve',
-            key: args.key,
-            value: `Retrieved value for ${args.key}`,
-            namespace: args.namespace || 'default',
-            timestamp: new Date().toISOString()
-          };
-        }
-        break;
+        return await this.handleMemoryUsage(args);
 
       case 'performance_report':
         return {
@@ -1114,6 +1112,142 @@ class ClaudeFlowMCPServer {
     }
   }
 
+  async handleMemoryUsage(args) {
+    if (!this.sharedMemory) {
+      return {
+        success: false,
+        error: 'Memory system not initialized',
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    try {
+      switch (args.action) {
+        case 'store':
+          const storeResult = await this.sharedMemory.store(args.key, args.value, {
+            namespace: args.namespace || 'default',
+            ttl: args.ttl,
+            sessionId: this.sessionId,
+            type: 'knowledge'
+          });
+          return {
+            success: true,
+            action: 'store',
+            key: args.key,
+            namespace: args.namespace || 'default',
+            stored: true,
+            size: storeResult.size,
+            id: storeResult.id,
+            timestamp: new Date().toISOString()
+          };
+
+        case 'retrieve':
+          const value = await this.sharedMemory.retrieve(args.key, {
+            namespace: args.namespace || 'default'
+          });
+          return {
+            success: true,
+            action: 'retrieve',
+            key: args.key,
+            value: value,
+            found: value !== null,
+            namespace: args.namespace || 'default',
+            timestamp: new Date().toISOString()
+          };
+
+        case 'list':
+          const entries = await this.sharedMemory.list({
+            namespace: args.namespace || 'default',
+            limit: 100
+          });
+          return {
+            success: true,
+            action: 'list',
+            namespace: args.namespace || 'default',
+            entries: entries,
+            count: entries.length,
+            timestamp: new Date().toISOString()
+          };
+
+        case 'delete':
+          const deleted = await this.sharedMemory.delete(args.key, {
+            namespace: args.namespace || 'default'
+          });
+          return {
+            success: true,
+            action: 'delete',
+            key: args.key,
+            namespace: args.namespace || 'default',
+            deleted: deleted,
+            timestamp: new Date().toISOString()
+          };
+
+        case 'search':
+          const results = await this.sharedMemory.search(args.value || '', {
+            namespace: args.namespace || 'default',
+            limit: 50
+          });
+          return {
+            success: true,
+            action: 'search',
+            pattern: args.value,
+            namespace: args.namespace || 'default',
+            results: results,
+            count: results.length,
+            timestamp: new Date().toISOString()
+          };
+
+        default:
+          return {
+            success: false,
+            error: `Unknown memory action: ${args.action}`,
+            timestamp: new Date().toISOString()
+          };
+      }
+    } catch (error) {
+      console.error(`[${new Date().toISOString()}] ERROR [claude-flow-mcp] Memory operation failed:`, error);
+      return {
+        success: false,
+        error: error.message,
+        action: args.action,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
+  async handleMemorySearch(args) {
+    if (!this.sharedMemory) {
+      return {
+        success: false,
+        error: 'Memory system not initialized',
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    try {
+      const results = await this.sharedMemory.search(args.pattern, {
+        namespace: args.namespace || 'default',
+        limit: args.limit || 10
+      });
+      
+      return {
+        success: true,
+        pattern: args.pattern,
+        namespace: args.namespace || 'default',
+        results: results,
+        count: results.length,
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error(`[${new Date().toISOString()}] ERROR [claude-flow-mcp] Memory search failed:`, error);
+      return {
+        success: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
+    }
+  }
+
   createErrorResponse(id, code, message, data = null) {
     const response = {
       jsonrpc: '2.0',
@@ -1186,13 +1320,19 @@ async function startMCPServer() {
   });
 
   // Handle process termination
-  process.on('SIGINT', () => {
+  process.on('SIGINT', async () => {
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) Received SIGINT, shutting down gracefully...`);
+    if (server.sharedMemory) {
+      await server.sharedMemory.close();
+    }
     process.exit(0);
   });
 
-  process.on('SIGTERM', () => {
+  process.on('SIGTERM', async () => {
     console.error(`[${new Date().toISOString()}] INFO [claude-flow-mcp] (${server.sessionId}) Received SIGTERM, shutting down gracefully...`);
+    if (server.sharedMemory) {
+      await server.sharedMemory.close();
+    }
     process.exit(0);
   });
 }
