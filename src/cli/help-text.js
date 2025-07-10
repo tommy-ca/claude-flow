@@ -3,7 +3,7 @@
  * Provides clear, actionable command documentation
  */
 
-export const VERSION = '2.0.0-alpha.42';
+export const VERSION = '2.0.0-alpha.43';
 
 export const MAIN_HELP = `
 🌊 Claude-Flow v${VERSION} - Enterprise-Grade AI Agent Orchestration Platform
