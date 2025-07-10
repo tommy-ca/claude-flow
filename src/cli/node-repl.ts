@@ -444,6 +444,54 @@ export async function startNodeREPL(options: any = {}): Promise<void> {
     rl.prompt();
   };
 
+export async function startREPL(options: any = {}): Promise<void> {
+  displayBanner();
+  
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: '',
+    completer: async (line: string) => completeCommand(line, null as any)
+  });
+
+  const context: REPLContext = {
+    options,
+    history: [],
+    workingDirectory: process.cwd(),
+    connectionStatus: 'disconnected',
+    lastActivity: new Date(),
+    rl
+  };
+
+  rl.setPrompt(getPrompt(context));
+  (rl as any).completer = async (line: string) => completeCommand(line, context);
+
+  const showPrompt = () => {
+    rl.setPrompt(getPrompt(context));
+    rl.prompt();
+  };
+
+  const processCommand = async (input: string) => {
+    if (!input.trim()) {
+      return;
+    }
+
+    context.history.push(input);
+    const [commandName, ...args] = input.trim().split(/\s+/);
+    const command = commands.find(c => c.name === commandName || c.aliases?.includes(commandName));
+
+    if (command) {
+      await command.handler(args, context);
+    } else {
+      console.log(chalk.red(`Unknown command: ${commandName}`));
+      const similar = findSimilarCommands(commandName, commands);
+      if (similar.length > 0) {
+        console.log(chalk.gray(`Did you mean: ${similar.join(', ')}?`));
+      }
+      console.log(chalk.gray('Type "help" for available commands'));
+    }
+  };
+
   rl.on('line', async (input) => {
     try {
       await processCommand(input);
@@ -786,3 +834,6 @@ function findSimilarCommands(input: string, commands: REPLCommand[]): string[] {
     })
     .slice(0, 3); // Top 3 suggestions
 }
+
+// Export the startREPL function
+export { startREPL };

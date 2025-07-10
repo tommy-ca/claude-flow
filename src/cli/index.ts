@@ -186,7 +186,7 @@ function setupSignalHandlers(): void {
 }
 
 // Main entry point
-if (false // import.meta.main not available) {
+if (false) { // import.meta.main not available
   let globalOptions: any = {};
   
   try {
