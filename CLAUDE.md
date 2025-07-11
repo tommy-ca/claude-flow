@@ -8,25 +8,71 @@
 3. **File operations** → Batch ALL reads/writes together
 4. **NEVER** operate sequentially after swarm init
 
-## 🚀 IMPORTANT: Claude Flow AI-Driven Development
+## 🚀 CRITICAL: Claude Code Does ALL Real Work
 
-### Claude Code Handles:
-- ✅ **ALL file operations** (Read, Write, Edit, MultiEdit)
-- ✅ **ALL code generation** and development tasks
-- ✅ **ALL bash commands** and system operations
-- ✅ **ALL actual implementation** work
-- ✅ **Project navigation** and code analysis
+### 🎯 CLAUDE CODE IS THE ONLY EXECUTOR
 
-### Claude Flow MCP Tools Handle:
-- 🧠 **Coordination only** - Orchestrating Claude Code's actions
-- 💾 **Memory management** - Persistent state across sessions
-- 🤖 **Neural features** - Cognitive patterns and learning
-- 📊 **Performance tracking** - Monitoring and metrics
-- 🐝 **Swarm orchestration** - Multi-agent coordination
-- 🔗 **GitHub integration** - Advanced repository management
+**ABSOLUTE RULE**: Claude Code performs ALL actual work:
+
+### ✅ Claude Code ALWAYS Handles:
+- 🔧 **ALL file operations** (Read, Write, Edit, MultiEdit, Glob, Grep)
+- 💻 **ALL code generation** and programming tasks
+- 🖥️ **ALL bash commands** and system operations
+- 🏗️ **ALL actual implementation** work
+- 🔍 **ALL project navigation** and code analysis
+- 📝 **ALL TodoWrite** and task management
+- 🔄 **ALL git operations** (commit, push, merge)
+- 📦 **ALL package management** (npm, pip, etc.)
+- 🧪 **ALL testing** and validation
+- 🔧 **ALL debugging** and troubleshooting
+
+### 🧠 Claude Flow MCP Tools ONLY Handle:
+- 🎯 **Coordination only** - Planning Claude Code's actions
+- 💾 **Memory management** - Storing decisions and context
+- 🤖 **Neural features** - Learning from Claude Code's work
+- 📊 **Performance tracking** - Monitoring Claude Code's efficiency
+- 🐝 **Swarm orchestration** - Coordinating multiple Claude Code instances
+- 🔗 **GitHub integration** - Advanced repository coordination
+
+### 🚨 CRITICAL SEPARATION OF CONCERNS:
+
+**❌ MCP Tools NEVER:**
+- Write files or create content
+- Execute bash commands
+- Generate code
+- Perform file operations
+- Handle TodoWrite operations
+- Execute system commands
+- Do actual implementation work
+
+**✅ MCP Tools ONLY:**
+- Coordinate and plan
+- Store memory and context
+- Track performance
+- Orchestrate workflows
+- Provide intelligence insights
 
 ### ⚠️ Key Principle:
-**MCP tools DO NOT create content or write code.** They coordinate and enhance Claude Code's native capabilities. Think of them as an orchestration layer that helps Claude Code work more efficiently.
+**MCP tools coordinate, Claude Code executes.** Think of MCP tools as the "brain" that plans and coordinates, while Claude Code is the "hands" that do all the actual work.
+
+### 🔄 WORKFLOW EXECUTION PATTERN:
+
+**✅ CORRECT Workflow:**
+1. **MCP**: `mcp__claude-flow__swarm_init` (coordination setup)
+2. **MCP**: `mcp__claude-flow__agent_spawn` (planning agents)
+3. **MCP**: `mcp__claude-flow__task_orchestrate` (task coordination)
+4. **Claude Code**: `Read`, `Write`, `Edit`, `Bash` (actual work)
+5. **Claude Code**: `TodoWrite` (task management)
+6. **MCP**: `mcp__claude-flow__memory_usage` (store results)
+
+**❌ WRONG Workflow:**
+1. **MCP**: `mcp__claude-flow__terminal_execute` (DON'T DO THIS)
+2. **MCP**: File creation via MCP (DON'T DO THIS)
+3. **MCP**: Code generation via MCP (DON'T DO THIS)
+
+### 🚨 REMEMBER:
+- **MCP tools** = Coordination, planning, memory, intelligence
+- **Claude Code** = All actual execution, coding, file operations
 
 ## 🚀 CRITICAL: Parallel Execution & Batch Operations
 
