@@ -8,6 +8,60 @@
 3. **File operations** → Batch ALL reads/writes together
 4. **NEVER** operate sequentially after swarm init
 
+## 🚨 CRITICAL: CONCURRENT EXECUTION FOR ALL ACTIONS
+
+**ABSOLUTE RULE**: ALL operations MUST be concurrent/parallel in a single message:
+
+### 🔴 MANDATORY CONCURRENT PATTERNS:
+1. **TodoWrite**: ALWAYS batch ALL todos in ONE call (5-10+ todos minimum)
+2. **Task tool**: ALWAYS spawn ALL agents in ONE message with full instructions
+3. **File operations**: ALWAYS batch ALL reads/writes/edits in ONE message
+4. **Bash commands**: ALWAYS batch ALL terminal operations in ONE message
+5. **Memory operations**: ALWAYS batch ALL memory store/retrieve in ONE message
+
+### ⚡ GOLDEN RULE: "1 MESSAGE = ALL RELATED OPERATIONS"
+
+**Examples of CORRECT concurrent execution:**
+```javascript
+// ✅ CORRECT: Everything in ONE message
+[Single Message]:
+  - TodoWrite { todos: [10+ todos with all statuses/priorities] }
+  - Task("Agent 1 with full instructions and hooks")
+  - Task("Agent 2 with full instructions and hooks")
+  - Task("Agent 3 with full instructions and hooks")
+  - Read("file1.js")
+  - Read("file2.js")
+  - Read("file3.js")
+  - Write("output1.js", content)
+  - Write("output2.js", content)
+  - Bash("npm install")
+  - Bash("npm test")
+  - Bash("npm run build")
+```
+
+**Examples of WRONG sequential execution:**
+```javascript
+// ❌ WRONG: Multiple messages (NEVER DO THIS)
+Message 1: TodoWrite { todos: [single todo] }
+Message 2: Task("Agent 1")
+Message 3: Task("Agent 2")
+Message 4: Read("file1.js")
+Message 5: Write("output1.js")
+Message 6: Bash("npm install")
+// This is 6x slower and breaks coordination!
+```
+
+### 🎯 CONCURRENT EXECUTION CHECKLIST:
+
+Before sending ANY message, ask yourself:
+- ✅ Are ALL related TodoWrite operations batched together?
+- ✅ Are ALL Task spawning operations in ONE message?
+- ✅ Are ALL file operations (Read/Write/Edit) batched together?
+- ✅ Are ALL bash commands grouped in ONE message?
+- ✅ Are ALL memory operations concurrent?
+
+If ANY answer is "No", you MUST combine operations into a single message!
+
 ## 🚀 CRITICAL: Claude Code Does ALL Real Work
 
 ### 🎯 CLAUDE CODE IS THE ONLY EXECUTOR
@@ -61,14 +115,17 @@
 1. **MCP**: `mcp__claude-flow__swarm_init` (coordination setup)
 2. **MCP**: `mcp__claude-flow__agent_spawn` (planning agents)
 3. **MCP**: `mcp__claude-flow__task_orchestrate` (task coordination)
-4. **Claude Code**: `Read`, `Write`, `Edit`, `Bash` (actual work)
-5. **Claude Code**: `TodoWrite` (task management)
-6. **MCP**: `mcp__claude-flow__memory_usage` (store results)
+4. **Claude Code**: `Task` tool to spawn agents with coordination instructions
+5. **Claude Code**: `TodoWrite` with ALL todos batched (5-10+ in ONE call)
+6. **Claude Code**: `Read`, `Write`, `Edit`, `Bash` (actual work)
+7. **MCP**: `mcp__claude-flow__memory_usage` (store results)
 
 **❌ WRONG Workflow:**
 1. **MCP**: `mcp__claude-flow__terminal_execute` (DON'T DO THIS)
 2. **MCP**: File creation via MCP (DON'T DO THIS)
 3. **MCP**: Code generation via MCP (DON'T DO THIS)
+4. **Claude Code**: Sequential Task calls (DON'T DO THIS)
+5. **Claude Code**: Individual TodoWrite calls (DON'T DO THIS)
 
 ### 🚨 REMEMBER:
 - **MCP tools** = Coordination, planning, memory, intelligence
@@ -103,13 +160,22 @@ If you need to do X operations, they should be in 1 message, not X messages
 **✅ CORRECT - Everything in ONE Message:**
 ```javascript
 [Single Message with BatchTool]:
+  // MCP coordination setup
   mcp__claude-flow__swarm_init { topology: "mesh", maxAgents: 6 }
   mcp__claude-flow__agent_spawn { type: "researcher" }
   mcp__claude-flow__agent_spawn { type: "coder" }
   mcp__claude-flow__agent_spawn { type: "analyst" }
   mcp__claude-flow__agent_spawn { type: "tester" }
   mcp__claude-flow__agent_spawn { type: "coordinator" }
-  TodoWrite { todos: [todo1, todo2, todo3, todo4, todo5] }
+  
+  // Claude Code execution - ALL in parallel
+  Task("You are researcher agent. MUST coordinate via hooks...")
+  Task("You are coder agent. MUST coordinate via hooks...")
+  Task("You are analyst agent. MUST coordinate via hooks...")
+  Task("You are tester agent. MUST coordinate via hooks...")
+  TodoWrite { todos: [5-10 todos with all priorities and statuses] }
+  
+  // File operations in parallel
   Bash "mkdir -p app/{src,tests,docs}"
   Write "app/package.json" 
   Write "app/README.md"
@@ -119,9 +185,9 @@ If you need to do X operations, they should be in 1 message, not X messages
 **❌ WRONG - Multiple Messages (NEVER DO THIS):**
 ```javascript
 Message 1: mcp__claude-flow__swarm_init
-Message 2: mcp__claude-flow__agent_spawn 
-Message 3: mcp__claude-flow__agent_spawn
-Message 4: TodoWrite (one todo)
+Message 2: Task("researcher agent")
+Message 3: Task("coder agent")
+Message 4: TodoWrite({ todo: "single todo" })
 Message 5: Bash "mkdir src"
 Message 6: Write "package.json"
 // This is 6x slower and breaks parallel coordination!
@@ -130,10 +196,11 @@ Message 6: Write "package.json"
 ### 🎯 BATCH OPERATIONS BY TYPE
 
 **Todo and Task Operations (Single Message):**
-- TodoWrite? → ALWAYS include 5-10+ todos in ONE call
-- Task agents? → Spawn ALL agents in ONE message
-- Updates? → Update ALL todo statuses together
-- Never split todos or tasks across messages!
+- **TodoWrite** → ALWAYS include 5-10+ todos in ONE call
+- **Task agents** → Spawn ALL agents with full instructions in ONE message
+- **Agent coordination** → ALL Task calls must include coordination hooks
+- **Status updates** → Update ALL todo statuses together
+- **NEVER** split todos or Task calls across messages!
 
 **File Operations (Single Message):**
 - Read 10 files? → One message with 10 Read calls
@@ -484,22 +551,36 @@ Message 6: TodoWrite (another single todo)
 **THIS IS CORRECT ✅ (Parallel - ALWAYS DO THIS):**
 ```
 Message 1: [BatchTool]
+  // MCP coordination setup
   - mcp__claude-flow__swarm_init
   - mcp__claude-flow__agent_spawn (researcher)
-  - mcp__claude-flow__agent_spawn (coder)
+  - mcp__claude-flow__agent_spawn (coder)  
   - mcp__claude-flow__agent_spawn (analyst)
   - mcp__claude-flow__agent_spawn (tester)
   - mcp__claude-flow__agent_spawn (coordinator)
-  - TodoWrite { todos: [ALL 5-10 todos at once] }
 
-Message 2: [BatchTool]  
-  - Task (spawn agent 1 with full task)
-  - Task (spawn agent 2 with full task)
-  - Task (spawn agent 3 with full task)
-  - Write file1.js
-  - Write file2.js
-  - Write file3.js
-  - Bash mkdir commands
+Message 2: [BatchTool - Claude Code execution]
+  // Task agents with full coordination instructions
+  - Task("You are researcher agent. MANDATORY: Run hooks pre-task, post-edit, post-task. Task: Research API patterns")
+  - Task("You are coder agent. MANDATORY: Run hooks pre-task, post-edit, post-task. Task: Implement REST endpoints")
+  - Task("You are analyst agent. MANDATORY: Run hooks pre-task, post-edit, post-task. Task: Analyze performance")
+  - Task("You are tester agent. MANDATORY: Run hooks pre-task, post-edit, post-task. Task: Write comprehensive tests")
+  
+  // TodoWrite with ALL todos batched
+  - TodoWrite { todos: [
+      {id: "research", content: "Research API patterns", status: "in_progress", priority: "high"},
+      {id: "design", content: "Design database schema", status: "pending", priority: "high"},
+      {id: "implement", content: "Build REST endpoints", status: "pending", priority: "high"},
+      {id: "test", content: "Write unit tests", status: "pending", priority: "medium"},
+      {id: "docs", content: "Create API documentation", status: "pending", priority: "low"},
+      {id: "deploy", content: "Setup deployment", status: "pending", priority: "medium"}
+    ]}
+  
+  // File operations in parallel
+  - Write "api/package.json"
+  - Write "api/server.js"
+  - Write "api/routes/users.js"
+  - Bash "mkdir -p api/{routes,models,tests}"
 ```
 
 ### 🎯 MANDATORY SWARM PATTERN
