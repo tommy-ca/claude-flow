@@ -79,6 +79,26 @@ npx claude-flow@alpha hive-mind spawn "build enterprise system" --claude
 | **Agents** | Auto-spawned for task | Manual control with specializations |
 | **Use When** | "Build X", "Fix Y", "Analyze Z" | Multi-feature projects, team coordination |
 
+### **Introducing Maestro: Spec-Driven Orchestration**
+
+For the most complex projects requiring predictable, repeatable results, Maestro offers a declarative, spec-driven workflow.
+
+```bash
+# 1. Create a maestro.spec.yaml file (see docs for spec)
+# 2. Run the Maestro-driven workflow
+npx claude-flow@alpha maestro run
+```
+
+### **Swarm vs. Hive-Mind vs. Maestro: Which to Use?**
+
+| Feature | `swarm` Command | `hive-mind` Command | `maestro` Command |
+|---|---|---|---|
+| **Best For** | Quick tasks, single objectives | Complex projects, persistent sessions | Repeatable, multi-stage projects |
+| **Setup** | Instant - no configuration needed | Interactive wizard setup | Declarative `maestro.spec.yaml` file |
+| **Control** | Autonomous swarm | Interactive control | Fully automated based on spec |
+| **Use When** | You need a quick result for a single task. | You need to collaborate with the AI on a complex, evolving project. | You have a well-defined, multi-stage project that needs to be executed reliably. |
+
+
 **Quick Rule:** Start with `swarm` for most tasks. Use `hive-mind` when you need persistent sessions or complex multi-agent coordination.
 
 ## 🎯 **Typical Workflows - Your "Happy Path" Guide**

@@ -2,22 +2,22 @@
  * Comprehensive agent management system
  */
 
+import { type ChildProcess, spawn } from 'node:child_process';
 import { EventEmitter } from 'node:events';
-import { spawn, ChildProcess } from 'node:child_process';
-import type { ILogger } from '../core/logger.js';
 import type { IEventBus } from '../core/event-bus.js';
+import type { ILogger } from '../core/logger.js';
+import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
 import type {
-  AgentId,
-  AgentType,
-  AgentStatus,
-  AgentState,
   AgentCapabilities,
   AgentConfig,
   AgentEnvironment,
-  AgentMetrics,
   AgentError,
+  AgentId,
+  AgentMetrics,
+  AgentState,
+  AgentStatus,
+  AgentType,
 } from '../swarm/types.js';
-import type { DistributedMemorySystem } from '../memory/distributed-memory.js';
 import { generateId } from '../utils/helpers.js';
 
 export interface AgentManagerConfig {
@@ -142,7 +142,6 @@ export class AgentManager extends EventEmitter {
 
   // Scaling and policies
   private scalingPolicies = new Map<string, ScalingPolicy>();
-  private scalingOperations = new Map<string, { timestamp: Date; type: string }>();
 
   // Resource tracking
   private resourceUsage = new Map<string, { cpu: number; memory: number; disk: number }>();
@@ -152,7 +151,7 @@ export class AgentManager extends EventEmitter {
     config: Partial<AgentManagerConfig>,
     logger: ILogger,
     eventBus: IEventBus,
-    memory: DistributedMemorySystem,
+    memory: DistributedMemorySystem
   ) {
     super();
     this.logger = logger;
@@ -390,9 +389,9 @@ export class AgentManager extends EventEmitter {
     });
 
     // Requirements Engineer Agent Template
-    this.templates.set('requirements-engineer', {
+    this.templates.set('requirements_analyst', {
       name: 'Requirements Engineer Agent',
-      type: 'requirements-engineer',
+      type: 'requirements_analyst',
       capabilities: {
         codeGeneration: false,
         codeReview: false,
@@ -444,9 +443,9 @@ export class AgentManager extends EventEmitter {
     });
 
     // Design Architect Agent Template
-    this.templates.set('design-architect', {
+    this.templates.set('design_architect', {
       name: 'Design Architect Agent',
-      type: 'design-architect',
+      type: 'design_architect',
       capabilities: {
         codeGeneration: false,
         codeReview: true,
@@ -498,9 +497,9 @@ export class AgentManager extends EventEmitter {
     });
 
     // Task Planner Agent Template
-    this.templates.set('task-planner', {
+    this.templates.set('task_planner', {
       name: 'Task Planner Agent',
-      type: 'task-planner',
+      type: 'task_planner',
       capabilities: {
         codeGeneration: false,
         codeReview: false,
@@ -552,9 +551,9 @@ export class AgentManager extends EventEmitter {
     });
 
     // Developer Agent Template (already exists, but ensure it's aligned)
-    this.templates.set('developer', {
+    this.templates.set('implementation_coder', {
       name: 'Developer Agent',
-      type: 'developer',
+      type: 'implementation_coder',
       capabilities: {
         codeGeneration: true,
         codeReview: true,
@@ -605,10 +604,10 @@ export class AgentManager extends EventEmitter {
       startupScript: './scripts/start-developer.ts',
     });
 
-    // System Architect Agent Template  
-    this.templates.set('system-architect', {
+    // System Architect Agent Template
+    this.templates.set('architect', {
       name: 'System Architect Agent',
-      type: 'system-architect',
+      type: 'architect',
       capabilities: {
         codeGeneration: false,
         codeReview: true,
@@ -768,9 +767,9 @@ export class AgentManager extends EventEmitter {
     });
 
     // Steering Author Agent Template
-    this.templates.set('steering-author', {
+    this.templates.set('steering_documenter', {
       name: 'Steering Author Agent',
-      type: 'steering-author',
+      type: 'steering_documenter',
       capabilities: {
         codeGeneration: false,
         codeReview: true,
@@ -849,7 +848,7 @@ export class AgentManager extends EventEmitter {
 
     // Gracefully shutdown all agents
     const shutdownPromises = Array.from(this.agents.keys()).map((agentId) =>
-      this.stopAgent(agentId, 'shutdown'),
+      this.stopAgent(agentId, 'shutdown')
     );
 
     await Promise.all(shutdownPromises);
@@ -865,7 +864,7 @@ export class AgentManager extends EventEmitter {
       name?: string;
       config?: Partial<AgentConfig>;
       environment?: Partial<AgentEnvironment>;
-    } = {},
+    } = {}
   ): Promise<string> {
     if (this.agents.size >= this.config.maxAgents) {
       throw new Error('Maximum agent limit reached');
@@ -1086,7 +1085,7 @@ export class AgentManager extends EventEmitter {
       autoScale?: boolean;
       scaleUpThreshold?: number;
       scaleDownThreshold?: number;
-    },
+    }
   ): Promise<string> {
     const template = this.templates.get(templateName);
     if (!template) {
@@ -1140,7 +1139,7 @@ export class AgentManager extends EventEmitter {
 
     if (targetSize < pool.minSize || targetSize > pool.maxSize) {
       throw new Error(
-        `Target size ${targetSize} outside pool limits [${pool.minSize}, ${pool.maxSize}]`,
+        `Target size ${targetSize} outside pool limits [${pool.minSize}, ${pool.maxSize}]`
       );
     }
 
@@ -1200,7 +1199,7 @@ export class AgentManager extends EventEmitter {
 
   private async performHealthChecks(): Promise<void> {
     const healthPromises = Array.from(this.agents.keys()).map((agentId) =>
-      this.checkAgentHealth(agentId),
+      this.checkAgentHealth(agentId)
     );
 
     await Promise.allSettled(healthPromises);
@@ -1271,7 +1270,7 @@ export class AgentManager extends EventEmitter {
       } else {
         return 1.0; // Responsive
       }
-    } catch (error) {
+    } catch (_error) {
       return 0; // Failed to respond
     }
   }
@@ -1312,7 +1311,7 @@ export class AgentManager extends EventEmitter {
     return Math.max(0, (memoryScore + cpuScore + diskScore) / 3);
   }
 
-  private detectHealthIssues(agentId: string, health: AgentHealth): void {
+  private detectHealthIssues(_agentId: string, health: AgentHealth): void {
     const issues: HealthIssue[] = [];
 
     if (health.components.responsiveness < 0.5) {
@@ -1567,7 +1566,7 @@ export class AgentManager extends EventEmitter {
 
   private updateResourceUsage(
     agentId: string,
-    usage: { cpu: number; memory: number; disk: number },
+    usage: { cpu: number; memory: number; disk: number }
   ): void {
     this.resourceUsage.set(agentId, usage);
   }
