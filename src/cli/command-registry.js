@@ -17,7 +17,8 @@ import { trainingAction } from './simple-commands/training.js';
 import { analysisAction } from './simple-commands/analysis.js';
 import { automationAction } from './simple-commands/automation.js';
 import { coordinationAction } from './simple-commands/coordination.js';
-import { hooksAction } from './simple-commands/hooks.js';
+// Legacy hooks removed - use modern agentic-flow-hooks system
+// import { hooksAction } from './simple-commands/hooks.js';
 import { hookSafetyCommand } from './simple-commands/hook-safety.js';
 import { hiveMindCommand } from './simple-commands/hive-mind.js';
 import { HelpFormatter } from './help-formatter.js';
@@ -26,7 +27,8 @@ import {
   showUnifiedMetrics,
   fixTaskAttribution,
 } from './simple-commands/swarm-metrics-integration.js';
-import { migrateHooksCommand, migrateHooksCommandConfig } from './simple-commands/migrate-hooks.js';
+// Migration completed - hooks already migrated to agentic-flow-hooks
+// import { migrateHooksCommand, migrateHooksCommandConfig } from './simple-commands/migrate-hooks.js';
 import {
   fixHookVariablesCommand,
   fixHookVariablesCommandConfig,
@@ -445,17 +447,20 @@ Coordination commands:
 Enables intelligent task distribution, agent synchronization, and shared memory coordination.`,
   });
 
+  // Legacy hooks command removed - use modern agentic-flow-hooks system
+  // Access hooks via: import { agenticHookManager } from '../services/agentic-flow-hooks/index.js'
+  /*
   commandRegistry.set('hooks', {
     handler: hooksAction,
-    description: 'Lifecycle event management',
-    usage: 'hooks <command> [options]',
+    description: '[LEGACY] Lifecycle event management - Use agentic-flow-hooks system instead',
+    usage: 'hooks <command> [options] [DEPRECATED]',
     examples: [
       'hooks pre-task --description "Build API" --task-id task-123',
       'hooks post-task --task-id task-123 --analyze-performance --generate-insights',
       'hooks session-end --export-metrics --generate-summary',
     ],
     details: `
-Hooks commands:
+[DEPRECATED] Legacy hooks commands - Use modern agentic-flow-hooks system:
   • pre-task: Execute before task begins (preparation & setup)
   • post-task: Execute after task completion (analysis & cleanup)
   • pre-edit: Execute before file modifications (backup & validation)
@@ -464,6 +469,7 @@ Hooks commands:
   
 Enables automated preparation & cleanup, performance tracking, and coordination synchronization.`,
   });
+  */
 
   commandRegistry.set('hook-safety', {
     handler: hookSafetyCommand,
@@ -497,7 +503,8 @@ SAFE ALTERNATIVES:
 For more information: https://github.com/ruvnet/claude-flow/issues/166`,
   });
 
-  commandRegistry.set('migrate-hooks', migrateHooksCommandConfig);
+  // Migration completed - hooks already migrated to agentic-flow-hooks system
+  // commandRegistry.set('migrate-hooks', migrateHooksCommandConfig);
 
   commandRegistry.set('fix-hook-variables', {
     handler: fixHookVariablesCommand,
