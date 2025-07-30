@@ -125,26 +125,48 @@ First-time users should run: npx claude-flow@latest init --sparc`,
     ],
   });
 
-  // Note: Maestro commands are now handled by TypeScript module
-  // See src/cli/commands/maestro.ts for the clean implementation
+  // Maestro Bridge - Canonical implementation with swarm coordination
   commandRegistry.set('maestro', {
-    handler: () => {
-      console.log('⚠️  Maestro commands have been moved to TypeScript.');
-      console.log('Please use: npx claude-flow maestro help');
-      console.log('Or import from: ./commands/maestro.js after compilation');
+    handler: async (args, flags) => {
+      const { maestroUnifiedAction } = await import('./simple-commands/maestro.js');
+      return maestroUnifiedAction(args, flags);
     },
-    description: 'Maestro: Specs-Driven Development with Hive Mind Integration',
+    description: 'Maestro: Specs-Driven Development with Native Hive Mind Swarm Coordination',
     usage: 'maestro <subcommand> [options]',
     examples: [
-      'maestro create-spec my-feature --request "Implement user auth"',
+      'maestro workflow user-auth "JWT authentication" --swarm',
+      'maestro create-spec my-feature "Implement user auth"',
       'maestro generate-design my-feature',
       'maestro generate-tasks my-feature',
-      'maestro implement-task my-feature 1',
-      'maestro approve-phase my-feature',
-      'maestro status my-feature --detailed',
+      'maestro implement-task my-feature 1 --swarm',
+      'maestro status my-feature',
       'maestro init-steering api-design',
+      'maestro performance',
       'maestro help',
     ],
+    details: `
+Native Hive Mind Integration Features:
+  • MaestroSwarmCoordinator as primary entry point
+  • TypeScript architecture merged with JavaScript implementation
+  • Specs-driven topology with 8-agent capacity
+  • Consensus validation (66% threshold by default)
+  • Collective memory with 24-hour TTL
+  • Performance monitoring and real-time metrics
+  • Auto-spawning specialized agents
+  • Event-driven coordination with caching
+
+Swarm Options:
+  --swarm                   Enable native hive-mind coordination
+  --consensus               Enable/disable consensus validation (default: true)
+  --verbose                 Detailed output with performance metrics
+
+Advanced Features:
+  • Complete end-to-end workflow with swarm coordination
+  • File-based progress tracking with swarm context
+  • Seamless hive-mind system integration
+  • Quality gate validation through consensus
+  • Auto-spawning agent coordination
+  • Comprehensive error handling and recovery`,
   });
 
   commandRegistry.set('agent', {

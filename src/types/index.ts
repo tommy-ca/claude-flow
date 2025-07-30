@@ -40,17 +40,11 @@ export type {
 } from '../constants/agent-types.js';
 
 export {
-  AGENT_TYPES,
-  VALID_AGENT_TYPES,
-  AGENT_TYPE_CATEGORIES,
-  AGENT_TYPE_DESCRIPTIONS,
-  AGENT_TYPE_SCHEMA,
+  getValidAgentTypes,
   isValidAgentType,
-  getAgentTypeDescription,
-  isAgentTypeInCategory,
-  getAgentTypesByCategory,
-  SWARM_STRATEGIES,
-  ORCHESTRATION_STRATEGIES,
+  resolveLegacyAgentType,
+  getAgentTypeSchema,
+  LEGACY_AGENT_MAPPING,
 } from '../constants/agent-types.js';
 
 // ===== HIVE MIND TYPES =====
