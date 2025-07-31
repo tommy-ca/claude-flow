@@ -15,72 +15,16 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Import hive mind components for direct swarm coordination
-let MaestroSwarmCoordinator: any, SpecsDrivenAgentSelector: any, createEventBus: any, createLogger: any;
-let nativeComponentsAvailable: boolean = false;
+// Standard TypeScript imports without extensions - works with tsc/tsx compilation
+import { MaestroSwarmCoordinator } from '../../maestro/maestro-swarm-coordinator';
+import { SpecsDrivenAgentSelector } from '../../agents/specs-driven-agent-selector';
+import { EventBus } from '../../core/event-bus';
+import { Logger } from '../../core/logger';
+import { StandardizedSwarmCoordinator, createStandardizedCoordinator } from '../../maestro/standardized-coordinator';
+import { DatabaseOptimizer } from '../../maestro/database-optimizer';
 
-async function loadNativeComponents() {
-  try {
-    // Check if compiled JS versions exist
-    const fs = await import('fs/promises');
-    
-    // Try to load from dist directory first
-    const distPaths = [
-      '../../dist/maestro/maestro-swarm-coordinator.js',
-      '../../dist/agents/specs-driven-agent-selector.js',
-      '../../dist/core/event-bus.js',
-      '../../dist/core/logger.js'
-    ];
-    
-    let useDistPath = true;
-    for (const distPath of distPaths) {
-      try {
-        await fs.access(path.resolve(__dirname, distPath));
-      } catch {
-        useDistPath = false;
-        break;
-      }
-    }
-    
-    if (useDistPath) {
-      console.log(chalk.green('📦 Loading compiled components from dist/'));
-      const maestroModule = await import('../../dist/maestro/maestro-swarm-coordinator.js');
-      const agentsModule = await import('../../dist/agents/specs-driven-agent-selector.js');
-      const eventBusModule = await import('../../dist/core/event-bus.js');
-      const loggerModule = await import('../../dist/core/logger.js');
-      
-      MaestroSwarmCoordinator = maestroModule.MaestroSwarmCoordinator;
-      SpecsDrivenAgentSelector = agentsModule.SpecsDrivenAgentSelector;
-      createEventBus = eventBusModule.createEventBus;
-      createLogger = loggerModule.createLogger;
-      nativeComponentsAvailable = true;
-    } else {
-      // Try TypeScript files with ts-node
-      try {
-        console.log(chalk.blue('🔧 Attempting to load TypeScript components directly...'));
-        const maestroModule = await import('../../maestro/maestro-swarm-coordinator.ts');
-        const agentsModule = await import('../../agents/specs-driven-agent-selector.ts');
-        const eventBusModule = await import('../../core/event-bus.ts');
-        const loggerModule = await import('../../core/logger.ts');
-        
-        MaestroSwarmCoordinator = maestroModule.MaestroSwarmCoordinator;
-        SpecsDrivenAgentSelector = agentsModule.SpecsDrivenAgentSelector;
-        createEventBus = eventBusModule.createEventBus;
-        createLogger = loggerModule.createLogger;
-        nativeComponentsAvailable = true;
-        console.log(chalk.green('✅ TypeScript components loaded directly'));
-      } catch (tsError) {
-        console.log(chalk.yellow('⚠️  TypeScript components not available, using fallback mode'));
-        console.log(chalk.gray(`🔍 Reason: ${tsError.message}`));
-      }
-    }
-  } catch (error) {
-    console.log(chalk.yellow('⚠️  Native components unavailable, using fallback mode'));
-    console.log(chalk.gray(`🔍 Details: ${error.message}`));
-  }
-}
-
-// Initialize components
-await loadNativeComponents();
+// Native components are available through standard imports
+const nativeComponentsAvailable: boolean = true;
 
 // ===== INTERFACES =====
 
@@ -204,7 +148,7 @@ export class MaestroUnifiedBridge extends EventEmitter {
   private specsDir: string;
   private steeringDir: string;
   private performanceMonitor: IPerformanceMonitor;
-  private swarmCoordinator: ISwarmCoordinator | null = null;
+  private swarmCoordinator: StandardizedSwarmCoordinator | null = null;
   private initialized: boolean = false;
   private initializationCache: Map<string, any> = new Map();
   private logger: any;
@@ -223,8 +167,8 @@ export class MaestroUnifiedBridge extends EventEmitter {
     };
 
     this.baseDir = process.cwd();
-    this.specsDir = path.join(this.baseDir, 'docs', 'maestro', 'specs');
-    this.steeringDir = path.join(this.baseDir, 'docs', 'maestro', 'steering');
+    this.specsDir = join(this.baseDir, 'docs', 'maestro', 'specs');
+    this.steeringDir = join(this.baseDir, 'docs', 'maestro', 'steering');
     
     // Performance monitoring
     this.performanceMonitor = new PerformanceMonitor();
@@ -247,7 +191,7 @@ export class MaestroUnifiedBridge extends EventEmitter {
   /**
    * Initialize swarm coordinator with performance monitoring
    */
-  async initializeSwarmCoordinator(): Promise<ISwarmCoordinator> {
+  async initializeSwarmCoordinator(): Promise<StandardizedSwarmCoordinator> {
     if (this.swarmCoordinator && this.initialized) {
       console.log(chalk.gray('Using cached swarm coordinator'));
       return this.swarmCoordinator;
@@ -258,16 +202,13 @@ export class MaestroUnifiedBridge extends EventEmitter {
     try {
       console.log(chalk.blue('🚀 Initializing Maestro swarm coordinator...'));
 
-      // Check if TypeScript components are available
-      if (MaestroSwarmCoordinator && SpecsDrivenAgentSelector && createEventBus && createLogger) {
-        console.log(chalk.green('✅ Using native hive mind swarm coordinator'));
+      // TypeScript components are available through standard imports
+      if (nativeComponentsAvailable) {
+        console.log(chalk.green('✅ Using standardized hive mind swarm coordinator'));
         
         // Initialize real hive mind components
-        const eventBus = createEventBus();
-        const logger = createLogger({ 
-          level: this.config.logLevel || 'info',
-          component: 'maestro-swarm' 
-        });
+        const eventBus = EventBus.getInstance();
+        const logger = Logger.getInstance();
 
         // Configure hive mind for swarm coordination
         const maestroConfig = {
@@ -287,20 +228,27 @@ export class MaestroUnifiedBridge extends EventEmitter {
           enableLivingDocumentation: true,
           enableSteeringIntegration: true,
           specsDirectory: this.specsDir,
-          steeringDirectory: this.steeringDir
+          steeringDirectory: this.steeringDir,
+          databasePath: join(this.baseDir, 'data', 'hive-mind.db')
         };
 
-        // Create real MaestroSwarmCoordinator instance
-        this.swarmCoordinator = new MaestroSwarmCoordinator(
+        // Create native MaestroSwarmCoordinator instance
+        const nativeCoordinator = new MaestroSwarmCoordinator(
           maestroConfig,
           eventBus,
           logger
         );
 
-        // Initialize the coordinator
+        // Create standardized wrapper
+        this.swarmCoordinator = createStandardizedCoordinator(
+          nativeCoordinator,
+          maestroConfig
+        );
+
+        // Initialize the standardized coordinator
         await this.swarmCoordinator.initialize();
 
-        console.log(chalk.green('✅ Real hive mind swarm coordinator initialized'));
+        console.log(chalk.green('✅ Standardized hive mind coordinator initialized'));
         
         // Wrap with compatibility methods for the existing interface
         const originalCoordinator = this.swarmCoordinator;
@@ -336,7 +284,8 @@ export class MaestroUnifiedBridge extends EventEmitter {
             
             try {
               // Use the real hive mind's agent selection and coordination
-              const agents = await SpecsDrivenAgentSelector.getWorkflowAgents('implementation');
+              const agentSelector = new SpecsDrivenAgentSelector();
+              const agents = await agentSelector.getWorkflowAgents('implementation');
               
               // Create swarm task directly
               const swarmTask = {
@@ -406,100 +355,21 @@ export class MaestroUnifiedBridge extends EventEmitter {
         };
 
       } else {
-        // Fallback to native mock implementation
-        console.log(chalk.yellow('⚠️  Using fallback mode with native mock coordination'));
+        // Fallback to standardized coordinator without native implementation
+        console.log(chalk.yellow('⚠️  Using standardized coordinator without native implementation'));
         
-        this.swarmCoordinator = {
-          config: {
-            enableConsensusValidation: this.config.enableConsensusValidation,
-            enableSwarmCoordination: this.config.enableSwarmCoordination,
-            specsDirectory: this.specsDir,
-            steeringDirectory: this.steeringDir
-          },
-          
-          // Native hive mind coordination methods
-          async submitTask(taskDescription, options = {}) {
-            const task = {
-              id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              description: taskDescription,
-              phase: options.phase || 'implementation',
-              agents: options.agents || ['coder', 'tester'],
-              consensus: options.consensus || false,
-              ...options
-            };
-
-            console.log(chalk.blue(`🎯 Submitting task to fallback swarm: ${taskDescription}`));
-            return task;
-          },
-
-          async spawnSwarm(objective, options = {}) {
-            console.log(chalk.blue(`🐝 Spawning native hive-mind swarm: ${objective}`));
-            
-            try {
-              // Use pure native hive mind coordination - no subprocess required
-              const agents = await SpecsDrivenAgentSelector?.getWorkflowAgents?.('implementation') || [
-                { agentName: 'coder' },
-                { agentName: 'tester' },
-                { agentName: 'reviewer' },
-                { agentName: 'planner' }
-              ];
-              
-              // Create swarm task directly through native coordinator
-              const swarmTask = {
-                id: `native-swarm-${Date.now()}`,
-                objective: objective,
-                agents: agents.map(a => a.agentName || a),
-                status: 'active',
-                created: new Date(),
-                coordinator: 'native-hive-mind',
-                method: 'direct-native'
-              };
-
-              // Initialize native swarm coordination
-              if (originalCoordinator?.createSpec) {
-                await originalCoordinator.createSpec(objective, `Native swarm objective: ${objective}`);
-              }
-              
-              console.log(chalk.green(`✅ Native hive-mind swarm spawned successfully!`));
-              console.log(chalk.cyan(`🎯 Swarm ID: ${swarmTask.id}`));
-              console.log(chalk.cyan(`👥 Agents: ${swarmTask.agents.join(', ')}`));
-              console.log(chalk.blue(`🚀 Pure native coordination - no subprocess overhead!`));
-              
-              return {
-                swarmId: swarmTask.id,
-                agents: swarmTask.agents.length,
-                status: 'active',
-                objective: objective,
-                coordinator: 'native-hive-mind',
-                method: 'direct-native'
-              };
-            } catch (error) {
-              console.log(chalk.yellow(`⚠️  Native swarm spawn warning: ${error.message}`));
-              console.log(chalk.blue(`🔄 Falling back to mock coordination for development`));
-              
-              return { 
-                swarmId: `fallback-native-${Date.now()}`, 
-                agents: 4, 
-                status: 'fallback-native',
-                objective: objective,
-                method: 'native-fallback',
-                error: error.message 
-              };
-            }
-          },
-
-          async getWorkflowState(featureName) {
-            return {
-              featureName,
-              currentPhase: 'requirements',
-              status: 'active',
-              tasks: [],
-              lastActivity: new Date(),
-              swarmActive: this.config.enableSwarmCoordination,
-              coordinatorType: 'fallback'
-            };
-          }
+        const fallbackConfig = {
+          enableConsensusValidation: this.config.enableConsensusValidation,
+          enableSwarmCoordination: this.config.enableSwarmCoordination,
+          specsDirectory: this.specsDir,
+          steeringDirectory: this.steeringDir,
+          databasePath: join(this.baseDir, 'data', 'hive-mind.db')
         };
+        
+        this.swarmCoordinator = createStandardizedCoordinator(null, fallbackConfig);
+        await this.swarmCoordinator.initialize();
+        
+        console.log(chalk.green('✅ Standardized coordinator ready (fallback mode)'));
       }
 
       this.initialized = true;
@@ -578,7 +448,7 @@ export class MaestroUnifiedBridge extends EventEmitter {
     return this.executeWithSwarmCoordination('create_spec', async () => {
       await this.ensureDirectories();
       
-      const featureDir = path.join(this.specsDir, featureName);
+      const featureDir = join(this.specsDir, featureName);
       await fs.mkdir(featureDir, { recursive: true });
 
       // Submit to swarm coordinator
@@ -593,7 +463,7 @@ export class MaestroUnifiedBridge extends EventEmitter {
         }
       );
 
-      const requirementsFile = path.join(featureDir, 'requirements.md');
+      const requirementsFile = join(featureDir, 'requirements.md');
       const requirements = `# ${featureName} - Requirements Specification
 
 ## Feature Request
@@ -674,8 +544,8 @@ npx claude-flow memory query "${featureName} requirements"
    */
   async generateDesign(featureName: string, options: any = {}): Promise<ISpecResult | false> {
     return this.executeWithSwarmCoordination('generate_design', async () => {
-      const featureDir = path.join(this.specsDir, featureName);
-      const requirementsFile = path.join(featureDir, 'requirements.md');
+      const featureDir = join(this.specsDir, featureName);
+      const requirementsFile = join(featureDir, 'requirements.md');
       
       if (!await this.fileExists(requirementsFile)) {
         console.log(chalk.red(`❌ Requirements not found for ${featureName}`));
@@ -695,7 +565,7 @@ npx claude-flow memory query "${featureName} requirements"
         }
       );
 
-      const designFile = path.join(featureDir, 'design.md');
+      const designFile = join(featureDir, 'design.md');
       const design = `# ${featureName} - Technical Design
 
 ## Overview
@@ -793,8 +663,8 @@ npx claude-flow memory query "${featureName} design patterns"
    */
   async generateTasks(featureName: string, options: any = {}): Promise<ISpecResult | false> {
     return this.executeWithSwarmCoordination('generate_tasks', async () => {
-      const featureDir = path.join(this.specsDir, featureName);
-      const designFile = path.join(featureDir, 'design.md');
+      const featureDir = join(this.specsDir, featureName);
+      const designFile = join(featureDir, 'design.md');
       
       if (!await this.fileExists(designFile)) {
         console.log(chalk.red(`❌ Design not found for ${featureName}`));
@@ -814,7 +684,7 @@ npx claude-flow memory query "${featureName} design patterns"
         }
       );
 
-      const tasksFile = path.join(featureDir, 'tasks.md');
+      const tasksFile = join(featureDir, 'tasks.md');
       const tasks = `# ${featureName} - Implementation Tasks
 
 ## Overview
@@ -934,8 +804,8 @@ npx claude-flow maestro workflow ${featureName} "continue development" --swarm
    */
   async implementTask(featureName: string, taskId: string, options: any = {}): Promise<ISpecResult | false> {
     return this.executeWithSwarmCoordination('implement_task', async () => {
-      const featureDir = path.join(this.specsDir, featureName);
-      const tasksFile = path.join(featureDir, 'tasks.md');
+      const featureDir = join(this.specsDir, featureName);
+      const tasksFile = join(featureDir, 'tasks.md');
       
       if (!await this.fileExists(tasksFile)) {
         console.log(chalk.red(`❌ Tasks not found for ${featureName}`));
@@ -956,7 +826,7 @@ npx claude-flow maestro workflow ${featureName} "continue development" --swarm
         }
       );
 
-      const implementationFile = path.join(featureDir, `task-${taskId}-implementation.md`);
+      const implementationFile = join(featureDir, `task-${taskId}-implementation.md`);
       const implementation = `# ${featureName} - Task ${taskId} Implementation
 
 ## Overview
@@ -1082,7 +952,7 @@ Implementation performance tracked through swarm coordinator:
    */
   async showStatus(featureName: string, options: any = {}): Promise<any> {
     return this.executeWithSwarmCoordination('show_status', async () => {
-      const featureDir = path.join(this.specsDir, featureName);
+      const featureDir = join(this.specsDir, featureName);
       
       if (!await this.fileExists(featureDir)) {
         console.log(chalk.red(`❌ Feature ${featureName} not found`));
@@ -1207,7 +1077,7 @@ Implementation performance tracked through swarm coordinator:
 
         // Summary with performance metrics
         console.log(chalk.blue('🎉 Maestro workflow complete with swarm coordination!'));
-        console.log(chalk.cyan(`📁 Project location: ${path.join(this.specsDir, featureName)}`));
+        console.log(chalk.cyan(`📁 Project location: ${join(this.specsDir, featureName)}`));
         console.log(chalk.blue(`🐝 Swarm coordination: ${this.config.enableSwarmCoordination ? 'Active' : 'Inactive'}`));
         console.log(chalk.green(`🤝 Consensus validation: ${this.config.enableConsensusValidation ? 'Enabled' : 'Disabled'}`));
         
@@ -1252,7 +1122,7 @@ Implementation performance tracked through swarm coordinator:
     return this.executeWithSwarmCoordination('init_steering', async () => {
       await this.ensureDirectories();
       
-      const steeringFile = path.join(this.steeringDir, `${domain}-steering.md`);
+      const steeringFile = join(this.steeringDir, `${domain}-steering.md`);
       const steering = `# ${domain} - Steering Document (Swarm Coordinated)
 
 ## Overview
@@ -1485,4 +1355,13 @@ export async function maestroUnifiedAction(args: string[], flags?: any): Promise
       console.log(chalk.gray(error.stack));
     }
   }
+}
+
+// CLI entry point when running directly
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const args = process.argv.slice(2);
+  maestroUnifiedAction(args).catch(error => {
+    console.error(chalk.red(`❌ CLI Error: ${error.message}`));
+    process.exit(1);
+  });
 }
