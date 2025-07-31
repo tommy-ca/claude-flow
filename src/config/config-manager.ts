@@ -156,6 +156,7 @@ export class ConfigManager {
   private static instance: ConfigManager;
   private config: Config;
   private configPath?: string;
+  private userConfigDir: string;
   private logger: Logger;
 
   private constructor() {
