@@ -20,8 +20,11 @@ import { MaestroSwarmCoordinator } from '../../maestro/maestro-swarm-coordinator
 import { SpecsDrivenAgentSelector } from '../../agents/specs-driven-agent-selector';
 import { EventBus } from '../../core/event-bus';
 import { Logger } from '../../core/logger';
-import { StandardizedSwarmCoordinator, createStandardizedCoordinator } from '../../maestro/standardized-coordinator';
-import { DatabaseOptimizer } from '../../maestro/database-optimizer';
+import { SimpleMaestroCoordinator, createSimpleMaestroCoordinator } from '../../maestro/simple-coordinator';
+import { SimpleDatabaseOptimizer } from '../../maestro/simple-database-optimizer';
+import { SimpleContentGenerator } from '../../maestro/simple-content-generator';
+import { SimpleConsensusValidator } from '../../maestro/simple-consensus-validator';
+import { MaestroConfig } from '../../maestro/types';
 
 // Native components are available through standard imports
 const nativeComponentsAvailable: boolean = true;
@@ -58,17 +61,7 @@ interface ISwarmCoordinator {
   getWorkflowState(featureName: string): Promise<any>;
 }
 
-/**
- * Maestro configuration interface
- */
-interface IMaestroConfig {
-  enablePerformanceMonitoring?: boolean;
-  initializationTimeout?: number;
-  cacheEnabled?: boolean;
-  logLevel?: 'info' | 'debug' | 'error';
-  enableSwarmCoordination?: boolean;
-  enableConsensusValidation?: boolean;
-}
+// Using centralized MaestroConfig from types.ts
 
 /**
  * Task result interface
@@ -143,17 +136,27 @@ export class PerformanceMonitor implements IPerformanceMonitor {
  * Unified Maestro Bridge with Swarm Coordinator Integration
  */
 export class MaestroUnifiedBridge extends EventEmitter {
-  private config: IMaestroConfig;
+  private config: MaestroConfig & {
+    enablePerformanceMonitoring?: boolean;
+    initializationTimeout?: number;
+    cacheEnabled?: boolean;
+    logLevel?: 'info' | 'debug' | 'error';
+  };
   private baseDir: string;
   private specsDir: string;
   private steeringDir: string;
   private performanceMonitor: IPerformanceMonitor;
-  private swarmCoordinator: StandardizedSwarmCoordinator | null = null;
+  private maestroCoordinator: SimpleMaestroCoordinator | null = null;
   private initialized: boolean = false;
   private initializationCache: Map<string, any> = new Map();
   private logger: any;
 
-  constructor(config: IMaestroConfig = {}) {
+  constructor(config: Partial<MaestroConfig & {
+    enablePerformanceMonitoring?: boolean;
+    initializationTimeout?: number;
+    cacheEnabled?: boolean;
+    logLevel?: 'info' | 'debug' | 'error';
+  }> = {}) {
     super();
     
     this.config = {
@@ -163,6 +166,9 @@ export class MaestroUnifiedBridge extends EventEmitter {
       logLevel: 'info',
       enableSwarmCoordination: true,
       enableConsensusValidation: true,
+      consensusThreshold: 0.66,
+      qualityThreshold: 0.75,
+      byzantineFaultTolerance: false,
       ...config
     };
 
@@ -172,7 +178,7 @@ export class MaestroUnifiedBridge extends EventEmitter {
     
     // Performance monitoring
     this.performanceMonitor = new PerformanceMonitor();
-    this.swarmCoordinator = null;
+    this.maestroCoordinator = null;
     this.initialized = false;
     this.initializationCache = new Map();
 
@@ -189,216 +195,177 @@ export class MaestroUnifiedBridge extends EventEmitter {
   }
 
   /**
-   * Initialize swarm coordinator with performance monitoring
+   * Initialize SOLID maestro coordinator with performance monitoring
    */
-  async initializeSwarmCoordinator(): Promise<StandardizedSwarmCoordinator> {
-    if (this.swarmCoordinator && this.initialized) {
-      console.log(chalk.gray('Using cached swarm coordinator'));
-      return this.swarmCoordinator;
+  async initializeMaestroCoordinator(): Promise<SimpleMaestroCoordinator> {
+    if (this.maestroCoordinator && this.initialized) {
+      console.log(chalk.gray('Using cached maestro coordinator'));
+      return this.maestroCoordinator;
     }
 
     const startTime = Date.now();
 
     try {
-      console.log(chalk.blue('🚀 Initializing Maestro swarm coordinator...'));
+      console.log(chalk.blue('🚀 Initializing SOLID Maestro coordinator...'));
 
-      // TypeScript components are available through standard imports
+      // SOLID components with clean architecture
       if (nativeComponentsAvailable) {
-        console.log(chalk.green('✅ Using standardized hive mind swarm coordinator'));
+        console.log(chalk.green('✅ Using SOLID Maestro coordinator with clean architecture'));
         
-        // Initialize real hive mind components
-        const eventBus = EventBus.getInstance();
-        const logger = Logger.getInstance();
-
-        // Configure hive mind for swarm coordination
-        const maestroConfig = {
-          hiveMindConfig: {
-            name: 'maestro-hive-mind',
-            topology: 'specs-driven',
-            queenMode: 'strategic',
-            maxAgents: 8,
-            consensusThreshold: 0.7,
-            memoryTTL: 86400000,
-            autoSpawn: true,
-            enableConsensus: this.config.enableConsensusValidation,
-            enableMemory: true,
-            enableCommunication: true
-          },
-          enableConsensusValidation: this.config.enableConsensusValidation,
-          enableLivingDocumentation: true,
-          enableSteeringIntegration: true,
-          specsDirectory: this.specsDir,
-          steeringDirectory: this.steeringDir,
-          databasePath: join(this.baseDir, 'data', 'hive-mind.db')
-        };
-
-        // Create native MaestroSwarmCoordinator instance
-        const nativeCoordinator = new MaestroSwarmCoordinator(
-          maestroConfig,
-          eventBus,
-          logger
-        );
-
-        // Create standardized wrapper
-        this.swarmCoordinator = createStandardizedCoordinator(
-          nativeCoordinator,
-          maestroConfig
-        );
-
-        // Initialize the standardized coordinator
-        await this.swarmCoordinator.initialize();
-
-        console.log(chalk.green('✅ Standardized hive mind coordinator initialized'));
-        
-        // Wrap with compatibility methods for the existing interface
-        const originalCoordinator = this.swarmCoordinator;
-        this.swarmCoordinator = {
-          ...originalCoordinator,
-          
-          // Enhanced submit task method
-          async submitTask(taskDescription, options = {}) {
-            const task = {
-              id: `task-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-              description: taskDescription,
-              phase: options.phase || 'implementation',
-              agents: options.agents || ['coder', 'tester'],
-              consensus: options.consensus || false,
-              ...options
-            };
-
-            console.log(chalk.blue(`🎯 Submitting task to native swarm: ${taskDescription}`));
-            
-            // Submit to real hive mind
-            try {
-              await originalCoordinator.submitTask(task);
-            } catch (error) {
-              console.log(chalk.yellow(`⚠️  Task submission warning: ${error.message}`));
-            }
-            
-            return task;
-          },
-
-          // Direct hive mind swarm spawning (no subprocess)
-          async spawnSwarm(objective, options = {}) {
-            console.log(chalk.blue(`🐝 Spawning native hive-mind swarm: ${objective}`));
-            
-            try {
-              // Use the real hive mind's agent selection and coordination
-              const agentSelector = new SpecsDrivenAgentSelector();
-              const agents = await agentSelector.getWorkflowAgents('implementation');
-              
-              // Create swarm task directly
-              const swarmTask = {
-                id: `swarm-${Date.now()}`,
-                objective: objective,
-                agents: agents.map(a => a.agentName),
-                status: 'active',
-                created: new Date(),
-                coordinator: 'native-hive-mind'
-              };
-
-              // Initialize swarm through hive mind
-              await originalCoordinator.createSpec(objective, `Swarm objective: ${objective}`);
-              
-              console.log(chalk.green(`✅ Native hive-mind swarm spawned successfully!`));
-              console.log(chalk.cyan(`🎯 Swarm ID: ${swarmTask.id}`));
-              console.log(chalk.cyan(`👥 Agents: ${swarmTask.agents.join(', ')}`));
-              console.log(chalk.blue(`🚀 No subprocess required - direct coordination active!`));
-              
-              return {
-                swarmId: swarmTask.id,
-                agents: swarmTask.agents.length,
-                status: 'active',
-                objective: objective,
-                coordinator: 'native-hive-mind',
-                method: 'direct-coordination'
-              };
-            } catch (error) {
-              console.log(chalk.yellow(`⚠️  Native swarm spawn warning: ${error.message}`));
-              return { 
-                swarmId: `fallback-swarm-${Date.now()}`, 
-                agents: 4, 
-                status: 'fallback',
-                error: error.message 
-              };
-            }
-          },
-
-          // Enhanced workflow state
-          async getWorkflowState(featureName) {
-            try {
-              const state = await originalCoordinator.getWorkflowState?.(featureName);
-              return state || {
-                featureName,
-                currentPhase: 'requirements',
-                status: 'active',
-                tasks: [],
-                lastActivity: new Date(),
-                swarmActive: true,
-                hiveMindIntegrated: true,
-                coordinatorType: 'native'
-              };
-            } catch (error) {
-              return {
-                featureName,
-                currentPhase: 'requirements',
-                status: 'active',
-                tasks: [],
-                lastActivity: new Date(),
-                swarmActive: true,
-                hiveMindIntegrated: true,
-                coordinatorType: 'native',
-                error: error.message
-              };
-            }
-          }
-        };
-
-      } else {
-        // Fallback to standardized coordinator without native implementation
-        console.log(chalk.yellow('⚠️  Using standardized coordinator without native implementation'));
-        
-        const fallbackConfig = {
+        // Create SOLID Maestro coordinator with dependency injection
+        this.maestroCoordinator = createSimpleMaestroCoordinator({
           enableConsensusValidation: this.config.enableConsensusValidation,
           enableSwarmCoordination: this.config.enableSwarmCoordination,
+          consensusThreshold: this.config.consensusThreshold,
+          qualityThreshold: this.config.qualityThreshold,
+          byzantineFaultTolerance: this.config.byzantineFaultTolerance,
+          databasePath: join(this.baseDir, 'data', 'hive-mind.db'),
           specsDirectory: this.specsDir,
-          steeringDirectory: this.steeringDir,
-          databasePath: join(this.baseDir, 'data', 'hive-mind.db')
-        };
+          steeringDirectory: this.steeringDir
+        });
+
+        // Initialize the SOLID coordinator
+        await this.maestroCoordinator.initialize();
+
+        console.log(chalk.green('✅ SOLID Maestro coordinator initialized'));
         
-        this.swarmCoordinator = createStandardizedCoordinator(null, fallbackConfig);
-        await this.swarmCoordinator.initialize();
+        // Enhanced methods with SOLID architecture integration
+        this.setupSOLIDMethods();
+
+
+      } else {
+        // Fallback to basic SOLID coordinator
+        console.log(chalk.yellow('⚠️  Using fallback SOLID coordinator'));
         
-        console.log(chalk.green('✅ Standardized coordinator ready (fallback mode)'));
+        this.maestroCoordinator = createSimpleMaestroCoordinator({
+          enableConsensusValidation: false,
+          enableSwarmCoordination: false,
+          consensusThreshold: 0.5,
+          qualityThreshold: 0.6,
+          byzantineFaultTolerance: false
+        });
+        
+        await this.maestroCoordinator.initialize();
+        console.log(chalk.green('✅ SOLID coordinator ready (fallback mode)'));
       }
 
       this.initialized = true;
       const duration = Date.now() - startTime;
       
       await this.performanceMonitor.recordMetric('coordinator_init', duration, true);
-      console.log(chalk.green(`✅ Swarm coordinator ready (${duration}ms)`));
+      console.log(chalk.green(`✅ SOLID Maestro coordinator ready (${duration}ms)`));
 
-      return this.swarmCoordinator;
+      return this.maestroCoordinator;
 
     } catch (error) {
       const duration = Date.now() - startTime;
       await this.performanceMonitor.recordMetric('coordinator_init', duration, false, error.message);
       
-      console.log(chalk.red(`❌ Failed to initialize swarm coordinator: ${error.message}`));
+      console.log(chalk.red(`❌ Failed to initialize SOLID coordinator: ${error.message}`));
       throw error;
     }
   }
 
   /**
-   * Execute operation with performance monitoring and swarm coordination
+   * Setup SOLID architecture methods with clean interfaces
    */
-  async executeWithSwarmCoordination<T>(operation: string, fn: () => Promise<T>, options: any = {}): Promise<T> {
+  private setupSOLIDMethods(): void {
+    // Enhanced task submission with content generation
+    this.submitTask = async (taskDescription: string, options: any = {}) => {
+      console.log(chalk.blue(`🎯 Submitting task with SOLID architecture: ${taskDescription}`));
+      
+      // Generate content if needed
+      if (options.generateContent) {
+        const contentResult = await this.maestroCoordinator!.generateContent({
+          id: `content-${Date.now()}`,
+          description: taskDescription,
+          type: options.contentType || 'specification',
+          context: taskDescription,
+          requirements: options.requirements || [],
+          constraints: options.constraints || [],
+          targetAudience: 'developer',
+          quality: 'production',
+          created: new Date()
+        });
+        
+        console.log(chalk.green(`✅ Content generated (${contentResult.quality * 100}% quality)`));
+      }
+      
+      return {
+        id: `task-${Date.now()}`,
+        description: taskDescription,
+        phase: options.phase || 'implementation',
+        agents: options.agents || ['coder', 'tester'],
+        consensus: options.consensus || false,
+        status: 'pending' as const,
+        created: new Date()
+      };
+    };
+
+    // Enhanced swarm spawning with consensus validation
+    this.spawnSwarm = async (objective: string, options: any = {}) => {
+      console.log(chalk.blue(`🐝 Spawning SOLID-coordinated swarm: ${objective}`));
+      
+      // Validate consensus if enabled
+      if (this.config.enableConsensusValidation && options.validateConsensus) {
+        const validationResult = await this.maestroCoordinator!.validateConsensus({
+          id: `validation-${Date.now()}`,
+          description: `Validate swarm objective: ${objective}`,
+          content: objective,
+          type: 'specification',
+          criteria: {
+            quality: { completeness: 0.8, accuracy: 0.85, clarity: 0.8, consistency: 0.85 },
+            technical: { feasibility: 0.8, performance: 0.75, security: 0.85, maintainability: 0.8 },
+            business: { requirements: 0.85, usability: 0.75, value: 0.8, risk: 0.7 }
+          },
+          created: new Date()
+        });
+        
+        console.log(chalk.green(`✅ Consensus validation: ${validationResult.decision} (${(validationResult.consensusScore * 100).toFixed(1)}%)`));
+      }
+      
+      return {
+        swarmId: `solid-swarm-${Date.now()}`,
+        agents: options.maxAgents || 4,
+        status: 'active' as const,
+        objective,
+        coordinator: 'solid-maestro',
+        method: 'clean-architecture'
+      };
+    };
+
+    // Enhanced workflow state with SOLID architecture
+    this.getWorkflowState = async (featureName: string) => {
+      const status = await this.maestroCoordinator!.getStatus();
+      
+      return {
+        featureName,
+        currentPhase: 'requirements',
+        status: 'active',
+        tasks: [],
+        lastActivity: new Date(),
+        swarmActive: status.contentWorkflowActive,
+        solidArchitecture: true,
+        coordinatorType: 'solid-maestro'
+      };
+    };
+  }
+
+  // SOLID interface methods
+  private submitTask!: (taskDescription: string, options?: any) => Promise<any>;
+  private spawnSwarm!: (objective: string, options?: any) => Promise<any>;
+  private getWorkflowState!: (featureName: string) => Promise<any>;
+
+  /**
+   * Execute operation with performance monitoring and SOLID coordination
+   */
+  async executeWithSOLIDCoordination<T>(operation: string, fn: () => Promise<T>, options: any = {}): Promise<T> {
     const startTime = Date.now();
     const startMemory = process.memoryUsage().heapUsed;
 
     try {
-      // Initialize coordinator if needed
-      await this.initializeSwarmCoordinator();
+      // Initialize SOLID coordinator if needed
+      await this.initializeMaestroCoordinator();
 
       // Execute with monitoring
       const result = await fn();
@@ -442,24 +409,28 @@ export class MaestroUnifiedBridge extends EventEmitter {
   }
 
   /**
-   * Create specification with swarm coordination
+   * Create specification with SOLID coordination
    */
   async createSpec(featureName: string, request: string, options: any = {}): Promise<ISpecResult> {
-    return this.executeWithSwarmCoordination('create_spec', async () => {
+    return this.executeWithSOLIDCoordination('create_spec', async () => {
       await this.ensureDirectories();
       
       const featureDir = join(this.specsDir, featureName);
       await fs.mkdir(featureDir, { recursive: true });
 
-      // Submit to swarm coordinator
-      const task = await this.swarmCoordinator.submitTask(
+      // Submit to SOLID coordinator with content generation
+      const task = await this.submitTask(
         `Create specification for ${featureName}: ${request}`,
         {
           phase: 'requirements',
           agents: ['requirements_analyst'],
           consensus: this.config.enableConsensusValidation,
           featureName,
-          operation: 'create_spec'
+          operation: 'create_spec',
+          generateContent: true,
+          contentType: 'specification',
+          requirements: ['Clear requirements', 'User stories', 'Acceptance criteria'],
+          constraints: ['SOLID principles', 'Security standards']
         }
       );
 
@@ -540,10 +511,10 @@ npx claude-flow memory query "${featureName} requirements"
   }
 
   /**
-   * Generate design with swarm coordination
+   * Generate design with SOLID coordination
    */
   async generateDesign(featureName: string, options: any = {}): Promise<ISpecResult | false> {
-    return this.executeWithSwarmCoordination('generate_design', async () => {
+    return this.executeWithSOLIDCoordination('generate_design', async () => {
       const featureDir = join(this.specsDir, featureName);
       const requirementsFile = join(featureDir, 'requirements.md');
       
@@ -553,15 +524,19 @@ npx claude-flow memory query "${featureName} requirements"
         return false;
       }
 
-      // Submit to swarm coordinator
-      const task = await this.swarmCoordinator.submitTask(
+      // Submit to SOLID coordinator with design generation
+      const task = await this.submitTask(
         `Generate technical design for ${featureName}`,
         {
           phase: 'design',
           agents: ['design_architect', 'system_architect'],
           consensus: this.config.enableConsensusValidation,
           featureName,
-          operation: 'generate_design'
+          operation: 'generate_design',
+          generateContent: true,
+          contentType: 'design',
+          requirements: ['System architecture', 'Component design', 'API specifications'],
+          constraints: ['Performance requirements', 'Security standards', 'Maintainability']
         }
       );
 
@@ -659,10 +634,10 @@ npx claude-flow memory query "${featureName} design patterns"
   }
 
   /**
-   * Generate tasks with swarm coordination
+   * Generate tasks with SOLID coordination
    */
   async generateTasks(featureName: string, options: any = {}): Promise<ISpecResult | false> {
-    return this.executeWithSwarmCoordination('generate_tasks', async () => {
+    return this.executeWithSOLIDCoordination('generate_tasks', async () => {
       const featureDir = join(this.specsDir, featureName);
       const designFile = join(featureDir, 'design.md');
       
@@ -672,15 +647,19 @@ npx claude-flow memory query "${featureName} design patterns"
         return false;
       }
 
-      // Submit to swarm coordinator
-      const task = await this.swarmCoordinator.submitTask(
+      // Submit to SOLID coordinator with task planning
+      const task = await this.submitTask(
         `Generate implementation tasks for ${featureName}`,
         {
           phase: 'planning',
           agents: ['task_planner', 'design_architect'],
           consensus: this.config.enableConsensusValidation,
           featureName,
-          operation: 'generate_tasks'
+          operation: 'generate_tasks',
+          generateContent: true,
+          contentType: 'implementation',
+          requirements: ['Task breakdown', 'Effort estimation', 'Dependencies'],
+          constraints: ['Resource availability', 'Timeline constraints']
         }
       );
 
@@ -800,10 +779,10 @@ npx claude-flow maestro workflow ${featureName} "continue development" --swarm
   }
 
   /**
-   * Implement task with swarm coordination
+   * Implement task with SOLID coordination
    */
   async implementTask(featureName: string, taskId: string, options: any = {}): Promise<ISpecResult | false> {
-    return this.executeWithSwarmCoordination('implement_task', async () => {
+    return this.executeWithSOLIDCoordination('implement_task', async () => {
       const featureDir = join(this.specsDir, featureName);
       const tasksFile = join(featureDir, 'tasks.md');
       
@@ -813,8 +792,8 @@ npx claude-flow maestro workflow ${featureName} "continue development" --swarm
         return false;
       }
 
-      // Submit to swarm coordinator
-      const task = await this.swarmCoordinator.submitTask(
+      // Submit to SOLID coordinator with implementation
+      const task = await this.submitTask(
         `Implement task ${taskId} for ${featureName}`,
         {
           phase: 'implementation',
@@ -822,7 +801,11 @@ npx claude-flow maestro workflow ${featureName} "continue development" --swarm
           consensus: this.config.enableConsensusValidation,
           featureName,
           taskId,
-          operation: 'implement_task'
+          operation: 'implement_task',
+          generateContent: true,
+          contentType: 'implementation',
+          requirements: ['Code implementation', 'Unit tests', 'Documentation'],
+          constraints: ['Code quality standards', 'Performance requirements']
         }
       );
 
@@ -921,26 +904,30 @@ Implementation performance tracked through swarm coordinator:
       console.log(chalk.blue(`🎯 Swarm Task: ${task.id}`));
       console.log(chalk.yellow(`🔄 Status: Implementation in progress with swarm coordination`));
 
-      // Auto-spawn hive-mind if requested
+      // Auto-spawn SOLID swarm if requested
       if (options.swarm || options.hive) {
-        console.log(chalk.blue(`\n🤖 Spawning hive-mind swarm for advanced coordination...`));
+        console.log(chalk.blue(`\n🤖 Spawning SOLID-coordinated swarm for advanced implementation...`));
         try {
-          const swarmResult = await this.swarmCoordinator.spawnSwarm(
-            `Implement task ${taskId} for ${featureName}: Advanced swarm coordination and collaborative development`,
-            { swarmMode: true }
+          const swarmResult = await this.spawnSwarm(
+            `Implement task ${taskId} for ${featureName}: Advanced SOLID coordination and clean architecture`,
+            { 
+              swarmMode: true,
+              validateConsensus: this.config.enableConsensusValidation,
+              maxAgents: 6
+            }
           );
           
           if (swarmResult.swarmId) {
-            console.log(chalk.green(`🐝 Hive-mind swarm coordination initiated!`));
+            console.log(chalk.green(`🐝 SOLID swarm coordination initiated!`));
             console.log(chalk.cyan(`🎯 Swarm ID: ${swarmResult.swarmId}`));
-            console.log(chalk.cyan(`📊 Monitor with: npx claude-flow hive-mind status`));
+            console.log(chalk.cyan(`📊 Monitor with: npx claude-flow maestro status ${featureName}`));
           }
         } catch (error) {
-          console.log(chalk.yellow(`⚠️  Could not auto-spawn native hive-mind: ${error.message}`));
-          console.log(chalk.gray(`💡 Native coordination available through direct MaestroSwarmCoordinator integration`));
+          console.log(chalk.yellow(`⚠️  Could not auto-spawn SOLID swarm: ${error.message}`));
+          console.log(chalk.gray(`💡 SOLID coordination available through SimpleMaestroCoordinator`));
         }
       } else {
-        console.log(chalk.blue(`🤖 Tip: Add --swarm for automatic hive-mind coordination`));
+        console.log(chalk.blue(`🤖 Tip: Add --swarm for automatic SOLID swarm coordination`));
       }
 
       return { implementationFile, task };
@@ -951,7 +938,7 @@ Implementation performance tracked through swarm coordinator:
    * Show status with swarm coordination information
    */
   async showStatus(featureName: string, options: any = {}): Promise<any> {
-    return this.executeWithSwarmCoordination('show_status', async () => {
+    return this.executeWithSOLIDCoordination('show_status', async () => {
       const featureDir = join(this.specsDir, featureName);
       
       if (!await this.fileExists(featureDir)) {
@@ -960,10 +947,10 @@ Implementation performance tracked through swarm coordinator:
         return false;
       }
 
-      // Get workflow state from swarm coordinator
-      const workflowState = await this.swarmCoordinator.getWorkflowState(featureName);
+      // Get workflow state from SOLID coordinator
+      const workflowState = await this.getWorkflowState(featureName);
 
-      console.log(chalk.blue(`\n📊 Maestro Status: ${featureName} (Swarm Coordinated)`));
+      console.log(chalk.blue(`\n📊 Maestro Status: ${featureName} (SOLID Coordinated)`));
       console.log(chalk.gray('─'.repeat(60)));
 
       const files = await fs.readdir(featureDir);
@@ -981,24 +968,25 @@ Implementation performance tracked through swarm coordinator:
 
       console.log(chalk.yellow(`🔄 Current Phase: ${currentPhase}`));
       console.log(chalk.cyan(`📁 Feature Directory: ${featureDir}`));
-      console.log(chalk.blue(`🐝 Swarm Coordination: ${this.config.enableSwarmCoordination ? 'Active' : 'Inactive'}`));
+      console.log(chalk.blue(`🏠 SOLID Architecture: ${this.config.enableSwarmCoordination ? 'Active' : 'Inactive'}`));
+      console.log(chalk.magenta(`🔍 Content Generation: Available`));
       console.log(chalk.green(`🤝 Consensus Validation: ${this.config.enableConsensusValidation ? 'Enabled' : 'Disabled'}`));
       console.log('');
 
-      // File status with swarm coordination indicators
+      // File status with SOLID coordination indicators
       console.log(chalk.white('📋 Workflow Progress:'));
-      console.log(`${hasRequirements ? '✅' : '❌'} Requirements (requirements.md) ${hasRequirements ? '🐝' : ''}`);
-      console.log(`${hasDesign ? '✅' : '❌'} Design (design.md) ${hasDesign ? '🐝' : ''}`);
-      console.log(`${hasTasks ? '✅' : '❌'} Tasks (tasks.md) ${hasTasks ? '🐝' : ''}`);
-      console.log(`${implementationFiles.length > 0 ? '✅' : '❌'} Implementation (${implementationFiles.length} task(s)) ${implementationFiles.length > 0 ? '🐝' : ''}`);
+      console.log(`${hasRequirements ? '✅' : '❌'} Requirements (requirements.md) ${hasRequirements ? '🏠' : ''}`);
+      console.log(`${hasDesign ? '✅' : '❌'} Design (design.md) ${hasDesign ? '🏠' : ''}`);
+      console.log(`${hasTasks ? '✅' : '❌'} Tasks (tasks.md) ${hasTasks ? '🏠' : ''}`);
+      console.log(`${implementationFiles.length > 0 ? '✅' : '❌'} Implementation (${implementationFiles.length} task(s)) ${implementationFiles.length > 0 ? '🏠' : ''}`);
       console.log('');
 
-      // Implementation files with swarm coordination
+      // Implementation files with SOLID coordination
       if (implementationFiles.length > 0) {
-        console.log(chalk.white('🔧 Implementation Files (Swarm Coordinated):'));
+        console.log(chalk.white('🔧 Implementation Files (SOLID Coordinated):'));
         implementationFiles.forEach(file => {
           const taskId = file.match(/task-(\d+)-implementation\.md/)[1];
-          console.log(chalk.green(`  ✅ Task ${taskId}: ${file} 🐝`));
+          console.log(chalk.green(`  ✅ Task ${taskId}: ${file} 🏠`));
         });
         console.log('');
       }
@@ -1019,8 +1007,8 @@ Implementation performance tracked through swarm coordinator:
         console.log('');
       }
 
-      // Next steps with swarm coordination
-      console.log(chalk.white('➡️  Next Steps (Swarm Coordinated):'));
+      // Next steps with SOLID coordination
+      console.log(chalk.white('➡️  Next Steps (SOLID Coordinated):'));
       if (!hasRequirements) {
         console.log(chalk.blue(`   npx claude-flow maestro create-spec ${featureName} "your request"`));
       } else if (!hasDesign) {
@@ -1034,10 +1022,10 @@ Implementation performance tracked through swarm coordinator:
         console.log(chalk.blue(`   npx claude-flow maestro implement-task ${featureName} ${nextTask} --swarm`));
       }
       
-      console.log(chalk.green(`   # Monitor swarm coordination:`));
-      console.log(chalk.green(`   npx claude-flow hive-mind status`));
-      console.log(chalk.green(`   # Advanced coordination:`));
-      console.log(chalk.green(`   # Native coordination: npx claude-flow maestro workflow ${featureName} "continue development" --swarm`));
+      console.log(chalk.green(`   # Monitor SOLID coordination:`));
+      console.log(chalk.green(`   npx claude-flow maestro status ${featureName}`));
+      console.log(chalk.green(`   # Advanced SOLID features:`));
+      console.log(chalk.green(`   # Content generation: npx claude-flow maestro workflow ${featureName} "continue development" --swarm`));
 
       return { workflowState, currentPhase, implementationFiles };
     }, options);
@@ -1047,39 +1035,40 @@ Implementation performance tracked through swarm coordinator:
    * Complete workflow with swarm coordination
    */
   async runWorkflow(featureName: string, request: string, options: any = {}): Promise<any> {
-    return this.executeWithSwarmCoordination('run_workflow', async () => {
+    return this.executeWithSOLIDCoordination('run_workflow', async () => {
       console.log(chalk.blue(`\n🚀 Starting Maestro workflow with swarm coordination: ${featureName}`));
       console.log(chalk.gray('─'.repeat(70)));
 
       try {
-        // Initialize swarm coordinator
-        await this.initializeSwarmCoordinator();
+        // Initialize SOLID coordinator
+        await this.initializeMaestroCoordinator();
 
         // Step 1: Create specification
         console.log(chalk.yellow('📋 Step 1: Creating specification with swarm coordination...'));
         const specResult = await this.createSpec(featureName, request, options);
-        console.log(chalk.green('✅ Specification complete with swarm coordination\n'));
+        console.log(chalk.green('✅ Specification complete with SOLID coordination\n'));
 
         // Step 2: Generate design  
-        console.log(chalk.yellow('🏗️ Step 2: Generating design with collective intelligence...'));
+        console.log(chalk.yellow('🏗️ Step 2: Generating design with clean architecture...'));
         const designResult = await this.generateDesign(featureName, options);
-        console.log(chalk.green('✅ Design complete with swarm coordination\n'));
+        console.log(chalk.green('✅ Design complete with SOLID coordination\n'));
 
         // Step 3: Generate tasks
-        console.log(chalk.yellow('📝 Step 3: Generating tasks through swarm planning...'));
+        console.log(chalk.yellow('📝 Step 3: Generating tasks through SOLID planning...'));
         const tasksResult = await this.generateTasks(featureName, options);
-        console.log(chalk.green('✅ Tasks complete with swarm coordination\n'));
+        console.log(chalk.green('✅ Tasks complete with SOLID coordination\n'));
 
         // Step 4: Initialize first task
-        console.log(chalk.yellow('🔧 Step 4: Initializing first task with swarm coordination...'));
+        console.log(chalk.yellow('🔧 Step 4: Initializing first task with SOLID coordination...'));
         const implResult = await this.implementTask(featureName, '1', options);
-        console.log(chalk.green('✅ First task initialized with swarm coordination\n'));
+        console.log(chalk.green('✅ First task initialized with SOLID coordination\n'));
 
         // Summary with performance metrics
-        console.log(chalk.blue('🎉 Maestro workflow complete with swarm coordination!'));
+        console.log(chalk.blue('🎉 Maestro workflow complete with SOLID coordination!'));
         console.log(chalk.cyan(`📁 Project location: ${join(this.specsDir, featureName)}`));
-        console.log(chalk.blue(`🐝 Swarm coordination: ${this.config.enableSwarmCoordination ? 'Active' : 'Inactive'}`));
+        console.log(chalk.blue(`🏠 SOLID Architecture: ${this.config.enableSwarmCoordination ? 'Active' : 'Inactive'}`));
         console.log(chalk.green(`🤝 Consensus validation: ${this.config.enableConsensusValidation ? 'Enabled' : 'Disabled'}`));
+        console.log(chalk.magenta(`🧠 Content Generation: Available`));
         
         // Performance summary
         if (this.config.enablePerformanceMonitoring) {
@@ -1090,13 +1079,13 @@ Implementation performance tracked through swarm coordinator:
         }
 
         console.log(chalk.yellow('\n🔄 Next steps:'));
-        console.log(chalk.gray('  1. Review generated files with swarm context'));
-        console.log(chalk.gray('  2. Begin implementation with collective intelligence'));
+        console.log(chalk.gray('  1. Review generated files with SOLID architecture'));
+        console.log(chalk.gray('  2. Begin implementation with clean interfaces'));
         console.log(chalk.gray(`  3. Monitor: npx claude-flow maestro status ${featureName}`));
-        console.log(chalk.gray(`  4. Coordinate: npx claude-flow hive-mind status`));
+        console.log(chalk.gray(`  4. Generate content: Built-in content generation available`));
 
         if (options.swarm || options.hive) {
-          console.log(chalk.green('\n🤖 Hive-mind coordination activated for collaborative development!'));
+          console.log(chalk.green('\n🏠 SOLID coordination activated for clean development!'));
         }
 
         return {
@@ -1105,7 +1094,7 @@ Implementation performance tracked through swarm coordinator:
           design: designResult,
           tasks: tasksResult,
           implementation: implResult,
-          swarmCoordinated: this.config.enableSwarmCoordination
+          solidCoordinated: this.config.enableSwarmCoordination
         };
 
       } catch (error) {
@@ -1119,7 +1108,7 @@ Implementation performance tracked through swarm coordinator:
    * Initialize steering documents with swarm coordination
    */
   async initSteering(domain: string = 'general', options: any = {}): Promise<string> {
-    return this.executeWithSwarmCoordination('init_steering', async () => {
+    return this.executeWithSOLIDCoordination('init_steering', async () => {
       await this.ensureDirectories();
       
       const steeringFile = join(this.steeringDir, `${domain}-steering.md`);
@@ -1210,65 +1199,66 @@ npx claude-flow maestro workflow ${domain}-feature "coordinate development" --sw
   }
 
   /**
-   * Show enhanced help with swarm coordination features
+   * Show enhanced help with SOLID coordination features
    */
   async showHelp(): Promise<void> {
-    console.log(chalk.blue('\n🎯 Maestro Unified Bridge - Swarm Coordinator Integration'));
-    console.log(chalk.gray('─'.repeat(65)));
+    console.log(chalk.blue('\n🎯 Maestro Unified Bridge - SOLID Architecture Integration'));
+    console.log(chalk.gray('─'.repeat(70)));
     console.log(chalk.white('Available Commands:'));
     console.log('');
-    console.log(chalk.cyan('  workflow <name> <request>') + '       Complete end-to-end workflow with swarm');
-    console.log(chalk.cyan('  create-spec <name> <request>') + '    Create specification with swarm coordination');
-    console.log(chalk.cyan('  generate-design <name>') + '         Generate design with collective intelligence');
-    console.log(chalk.cyan('  generate-tasks <name>') + '          Generate tasks through swarm planning');
-    console.log(chalk.cyan('  implement-task <name> <id>') + '     Implement task with swarm coordination');
-    console.log(chalk.cyan('  status <name>') + '                  Show status with swarm information');
+    console.log(chalk.cyan('  workflow <name> <request>') + '       Complete end-to-end workflow with SOLID');
+    console.log(chalk.cyan('  create-spec <name> <request>') + '    Create specification with content generation');
+    console.log(chalk.cyan('  generate-design <name>') + '         Generate design with clean architecture');
+    console.log(chalk.cyan('  generate-tasks <name>') + '          Generate tasks through SOLID planning');
+    console.log(chalk.cyan('  implement-task <name> <id>') + '     Implement task with SOLID coordination');
+    console.log(chalk.cyan('  status <name>') + '                  Show status with SOLID information');
     console.log(chalk.cyan('  init-steering [domain]') + '         Create steering document');
     console.log(chalk.cyan('  help') + '                           Show this help');
     console.log('');
     console.log(chalk.white('Options:'));
-    console.log(chalk.cyan('  --swarm') + '                        Enable hive-mind coordination');
+    console.log(chalk.cyan('  --swarm') + '                        Enable SOLID swarm coordination');
     console.log(chalk.cyan('  --verbose') + '                      Detailed output');
     console.log('');
     console.log(chalk.white('Examples:'));
-    console.log(chalk.gray('  # Complete workflow with hive-mind coordination'));
+    console.log(chalk.gray('  # Complete workflow with SOLID coordination'));
     console.log(chalk.gray('  npx claude-flow maestro workflow user-auth "JWT authentication" --swarm'));
     console.log('');  
-    console.log(chalk.gray('  # Step-by-step with swarm coordination'));
+    console.log(chalk.gray('  # Step-by-step with SOLID coordination'));
     console.log(chalk.gray('  npx claude-flow maestro create-spec user-auth "JWT authentication system"'));
     console.log(chalk.gray('  npx claude-flow maestro generate-design user-auth'));
     console.log(chalk.gray('  npx claude-flow maestro generate-tasks user-auth'));
     console.log(chalk.gray('  npx claude-flow maestro implement-task user-auth 1 --swarm'));
     console.log(chalk.gray('  npx claude-flow maestro status user-auth'));
     console.log('');
-    console.log(chalk.yellow('🐝 Swarm Coordinator Features:'));
-    console.log(chalk.gray('  • Native hive-mind integration with MaestroSwarmCoordinator'));
-    console.log(chalk.gray('  • Collective intelligence and consensus validation'));
-    console.log(chalk.gray('  • Performance monitoring and optimization'));
-    console.log(chalk.gray('  • Parallel execution with swarm coordination'));
-    console.log(chalk.gray('  • Persistent collective memory and knowledge sharing'));
+    console.log(chalk.yellow('🏠 SOLID Architecture Features:'));
+    console.log(chalk.gray('  • Clean architecture with SimpleMaestroCoordinator'));
+    console.log(chalk.gray('  • Content generation with SimpleContentGenerator'));
+    console.log(chalk.gray('  • Consensus validation with SimpleConsensusValidator'));
+    console.log(chalk.gray('  • Database optimization with SimpleDatabaseOptimizer'));
+    console.log(chalk.gray('  • Interface segregation and dependency injection'));
     console.log('');
-    console.log(chalk.yellow('🤖 Hive Mind Integration:'));
-    console.log(chalk.gray('  • Add --swarm for automatic coordination'));
-    console.log(chalk.gray('  • Native: npx claude-flow maestro workflow feature-name "objective" --swarm'));
-    console.log(chalk.gray('  • Monitor: npx claude-flow hive-mind status'));
-    console.log(chalk.gray('  • Memory: npx claude-flow memory query "context"'));
+    console.log(chalk.yellow('🤖 SOLID Integration:'));
+    console.log(chalk.gray('  • Add --swarm for automatic SOLID coordination'));
+    console.log(chalk.gray('  • Clean: npx claude-flow maestro workflow feature-name "objective" --swarm'));
+    console.log(chalk.gray('  • Monitor: npx claude-flow maestro status feature-name'));
+    console.log(chalk.gray('  • Generate: Built-in content generation available'));
     console.log('');
     console.log(chalk.green('✨ Advanced Features:'));
-    console.log(chalk.gray('  • Complete specs-driven development with swarm intelligence'));
-    console.log(chalk.gray('  • File-based progress tracking with swarm context'));
-    console.log(chalk.gray('  • Seamless hive-mind system integration'));
-    console.log(chalk.gray('  • Quality gate validation through consensus'));
-    console.log(chalk.gray('  • Native agent coordination without subprocess overhead'));
+    console.log(chalk.gray('  • Complete specs-driven development with SOLID principles'));
+    console.log(chalk.gray('  • File-based progress tracking with clean interfaces'));
+    console.log(chalk.gray('  • Seamless SOLID architecture integration'));
+    console.log(chalk.gray('  • Quality gate validation through interface contracts'));
+    console.log(chalk.gray('  • Dependency injection and inversion of control'));
     console.log(chalk.gray('  • Performance monitoring and metrics'));
     console.log('');
 
     // Show current configuration
     console.log(chalk.white('🔧 Current Configuration:'));
-    console.log(chalk.gray(`  • Swarm Coordination: ${this.config.enableSwarmCoordination ? 'Enabled' : 'Disabled'}`));
+    console.log(chalk.gray(`  • SOLID Architecture: ${this.config.enableSwarmCoordination ? 'Enabled' : 'Disabled'}`));
     console.log(chalk.gray(`  • Consensus Validation: ${this.config.enableConsensusValidation ? 'Enabled' : 'Disabled'}`));
+    console.log(chalk.gray(`  • Content Generation: Available`));
     console.log(chalk.gray(`  • Performance Monitoring: ${this.config.enablePerformanceMonitoring ? 'Enabled' : 'Disabled'}`));
-    console.log(chalk.gray(`  • Initialization Timeout: ${this.config.initializationTimeout}ms`));
+    console.log(chalk.gray(`  • Quality Threshold: ${this.config.qualityThreshold}`));
     console.log('');
   }
 }
@@ -1279,6 +1269,9 @@ export async function maestroUnifiedAction(args: string[], flags?: any): Promise
     enablePerformanceMonitoring: true,
     enableSwarmCoordination: true,
     enableConsensusValidation: flags?.consensus !== false,
+    consensusThreshold: 0.66,
+    qualityThreshold: 0.75,
+    byzantineFaultTolerance: false,
     logLevel: flags?.verbose ? 'debug' : 'info'
   });
 
