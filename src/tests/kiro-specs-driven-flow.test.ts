@@ -14,7 +14,7 @@ import { join } from 'path';
 // Core components
 import { SpecsDrivenAgentSelector } from '../agents/specs-driven-agent-selector.js';
 import { CapabilityMapper } from '../agents/capability-mapper.js';
-import { MaestroSwarmCoordinator } from '../maestro/maestro-swarm-coordinator.js';
+import { SimpleMaestroCoordinator, createSimpleMaestroCoordinator } from '../maestro/simple-coordinator.js';
 import type { AgentRegistry } from '../agents/agent-registry.js';
 import type { 
   KiroEnhancedSpec,
@@ -122,7 +122,7 @@ const mockKiroAgentRegistry: AgentRegistry = {
 
 describe('Kiro-Inspired Specs-Driven Flow Tests', () => {
   let tempDir: string;
-  let maestroCoordinator: MaestroSwarmCoordinator;
+  let maestroCoordinator: SimpleMaestroCoordinator;
 
   beforeAll(async () => {
     // Create temporary directory for Kiro test artifacts
@@ -153,11 +153,7 @@ describe('Kiro-Inspired Specs-Driven Flow Tests', () => {
       steeringDirectory: join(tempDir, 'steering')
     };
 
-    maestroCoordinator = new MaestroSwarmCoordinator(
-      kiroConfig,
-      mockEventBus as any,
-      mockLogger as any
-    );
+    maestroCoordinator = createSimpleMaestroCoordinator(kiroConfig);
 
     maestroCoordinator.setAgentRegistry(mockKiroAgentRegistry);
   });

@@ -10,7 +10,7 @@ import { promises as fs } from 'fs';
 import { resolve } from 'path';
 import { SpecsDrivenAgentSelector } from '../agents/specs-driven-agent-selector.js';
 import { CapabilityMapper } from '../agents/capability-mapper.js';
-import { MaestroSwarmCoordinator } from '../maestro/maestro-swarm-coordinator.js';
+import { SimpleMaestroCoordinator, createSimpleMaestroCoordinator } from '../maestro/simple-coordinator.js';
 
 // Test configuration
 const PROJECT_ROOT = resolve(process.cwd());
@@ -59,7 +59,7 @@ describe('Cleanup Verification Tests', () => {
     });
 
     it('should have clean MaestroSwarmCoordinator implementation', async () => {
-      const filePath = resolve(SRC_PATH, 'maestro/maestro-swarm-coordinator.ts');
+      const filePath = resolve(SRC_PATH, 'maestro/simple-coordinator.ts');
       const content = await fs.readFile(filePath, 'utf-8');
 
       // Check for clean architecture
@@ -84,7 +84,7 @@ describe('Cleanup Verification Tests', () => {
       const cleanFiles = [
         'agents/specs-driven-agent-selector.ts',
         'agents/capability-mapper.ts',
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
 
       for (const file of cleanFiles) {
@@ -292,7 +292,7 @@ describe('Cleanup Verification Tests', () => {
       const cleanFiles = [
         'agents/specs-driven-agent-selector.ts',
         'agents/capability-mapper.ts',
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
 
       for (const file of cleanFiles) {
@@ -424,10 +424,8 @@ describe('Integration and Compatibility Tests', () => {
     const mockEventBus = { emit: jest.fn(), on: jest.fn(), off: jest.fn() };
     const mockLogger = { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() };
 
-    const coordinator = new MaestroSwarmCoordinator(
-      mockConfig,
-      mockEventBus as any,
-      mockLogger as any
+    const coordinator = createSimpleMaestroCoordinator(
+      mockConfig
     );
 
     expect(coordinator).toBeDefined();

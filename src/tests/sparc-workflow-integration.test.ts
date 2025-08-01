@@ -23,7 +23,7 @@ describe('SPARC Workflow Integration Tests', () => {
       const mainFiles = [
         'agents/specs-driven-agent-selector.ts',
         'agents/capability-mapper.ts',
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
       
       for (const file of mainFiles) {
@@ -70,7 +70,7 @@ describe('SPARC Workflow Integration Tests', () => {
       const fs = await import('fs/promises');
       const path = await import('path');
       
-      const maestroPath = path.resolve(process.cwd(), 'src/maestro/maestro-swarm-coordinator.ts');
+      const maestroPath = path.resolve(process.cwd(), 'src/maestro/simple-coordinator.ts');
       const content = await fs.readFile(maestroPath, 'utf-8');
       
       // Verify specs-driven integration
@@ -350,7 +350,7 @@ describe('SPARC Workflow Integration Tests', () => {
       // Verify simplified files replaced complex ones
       const simplifiedFiles = [
         'agents/capability-mapper.ts',
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
       
       for (const file of simplifiedFiles) {
@@ -385,7 +385,7 @@ describe('SPARC Workflow Integration Tests', () => {
           
           // Should import from consolidated files
           expect(content).toContain("from '../agents/capability-mapper.js'");
-          expect(content).toContain("from '../maestro/maestro-swarm-coordinator.js'");
+          expect(content).toContain("from '../maestro/simple-coordinator.js'");
           
           // Should use consolidated class names
           expect(content).toContain('CapabilityMapper');
@@ -425,7 +425,7 @@ describe('SPARC Workflow Integration Tests', () => {
       const coreFiles = [
         'agents/specs-driven-agent-selector.ts',
         'agents/capability-mapper.ts',
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
       
       for (const file of coreFiles) {
@@ -501,7 +501,7 @@ describe('SPARC Workflow Integration Tests', () => {
       const coreFiles = [
         'agents/specs-driven-agent-selector.ts',
         'agents/capability-mapper.ts',
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
       
       for (const file of coreFiles) {

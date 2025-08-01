@@ -22,7 +22,7 @@ describe('Simple Cleanup Verification', () => {
       const cleanFiles = [
         'agents/specs-driven-agent-selector.ts',
         'agents/capability-mapper.ts', 
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
       
       for (const file of cleanFiles) {
@@ -85,7 +85,7 @@ describe('Simple Cleanup Verification', () => {
       const fs = await import('fs/promises');
       const path = await import('path');
       
-      const maestroPath = path.resolve(process.cwd(), 'src/maestro/maestro-swarm-coordinator.ts');
+      const maestroPath = path.resolve(process.cwd(), 'src/maestro/simple-coordinator.ts');
       const content = await fs.readFile(maestroPath, 'utf-8');
       
       // Check for clean implementation
@@ -161,7 +161,7 @@ describe('Simple Cleanup Verification', () => {
       const cleanFiles = [
         'agents/specs-driven-agent-selector.ts',
         'agents/capability-mapper.ts',
-        'maestro/maestro-swarm-coordinator.ts'
+        'maestro/simple-coordinator.ts'
       ];
       
       for (const file of cleanFiles) {
@@ -202,7 +202,7 @@ describe('Simple Cleanup Verification', () => {
       expect(mapperContent).toContain('delegates to SpecsDrivenAgentSelector');
       
       // MaestroCoordinator should focus on workflow coordination
-      const maestroPath = path.resolve(process.cwd(), 'src/maestro/maestro-swarm-coordinator.ts');
+      const maestroPath = path.resolve(process.cwd(), 'src/maestro/simple-coordinator.ts');
       const maestroContent = await fs.readFile(maestroPath, 'utf-8');
       
       expect(maestroContent).toContain('MaestroSwarmCoordinator');
@@ -246,7 +246,7 @@ describe('Simple Cleanup Verification', () => {
       
       expect(selectorContent).toContain('setAgentRegistry');
       
-      const maestroPath = path.resolve(process.cwd(), 'src/maestro/maestro-swarm-coordinator.ts');
+      const maestroPath = path.resolve(process.cwd(), 'src/maestro/simple-coordinator.ts');
       const maestroContent = await fs.readFile(maestroPath, 'utf-8');
       
       expect(maestroContent).toContain('constructor');
@@ -322,7 +322,7 @@ describe('Functional Verification (Without Infrastructure)', () => {
     // Test basic class structure without instantiation
     expect(typeof import('../agents/specs-driven-agent-selector.js')).toBe('object');
     expect(typeof import('../agents/capability-mapper.js')).toBe('object');
-    expect(typeof import('../maestro/maestro-swarm-coordinator.js')).toBe('object');
+    expect(typeof import('../maestro/simple-coordinator.js')).toBe('object');
   });
   
   it('should preserve key constants and mappings', async () => {
@@ -358,7 +358,7 @@ describe('Functional Verification (Without Infrastructure)', () => {
     const fs = await import('fs/promises');
     const path = await import('path');
     
-    const maestroPath = path.resolve(process.cwd(), 'src/maestro/maestro-swarm-coordinator.ts');
+    const maestroPath = path.resolve(process.cwd(), 'src/maestro/simple-coordinator.ts');
     const content = await fs.readFile(maestroPath, 'utf-8');
     
     // Should have workflow phases

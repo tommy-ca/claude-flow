@@ -7,6 +7,8 @@
 import { EventEmitter } from 'events';
 import { IContentGenerator, ITemplateManager, IAgentManager } from './interfaces';
 import { ContentRequest, ContentResult, AgentSpec, ContentTemplate } from './types';
+import { agentLoader } from '../agents/agent-loader.js';
+import { resolveLegacyAgentType } from '../constants/agent-types.js';
 
 /**
  * Simple Template Manager - Single Responsibility
@@ -39,7 +41,7 @@ class TemplateManager implements ITemplateManager {
       {
         name: 'specification',
         type: 'specification',
-        template: '# {{name}}\n\n## Overview\n{{overview}}\n\n## Requirements\n{{requirements}}',
+        template: '# {{name}}\n\n## Overview\n{{overview}}\n\n## Steering Document References\n- Technical: steering/technical.md\n- Workflow: steering/workflow.md\n- Product: steering/product.md\n\n## Requirements\n{{requirements}}\n\nFollowing SPARC methodology and Per Technical Steering guidelines.',
         variables: ['name', 'overview', 'requirements'],
         quality: 'high',
         examples: ['user-auth', 'payment-system']
@@ -70,8 +72,22 @@ class AgentManager implements IAgentManager {
     this.initializeAgents();
   }
 
+  async initializeAgents(): Promise<void> {
+    const agentDefs = await agentLoader.getAllAgents();
+    agentDefs.forEach(agentDef => {
+      this.agents.set(agentDef.name, {
+        id: agentDef.name,
+        name: agentDef.name,
+        specialty: agentDef.capabilities || [],
+        experience: agentDef.priority === 'high' ? 0.9 : 0.8,
+        active: true,
+      });
+    });
+  }
+
   getAgent(id: string): AgentSpec | null {
-    return this.agents.get(id) || null;
+    const resolvedId = resolveLegacyAgentType(id);
+    return this.agents.get(resolvedId) || null;
   }
 
   listAgents(): AgentSpec[] {
@@ -79,47 +95,17 @@ class AgentManager implements IAgentManager {
   }
 
   activateAgent(id: string): void {
-    const agent = this.agents.get(id);
+    const agent = this.getAgent(id);
     if (agent) {
       agent.active = true;
     }
   }
 
   deactivateAgent(id: string): void {
-    const agent = this.agents.get(id);
+    const agent = this.getAgent(id);
     if (agent) {
       agent.active = false;
     }
-  }
-
-  private initializeAgents(): void {
-    const agents: AgentSpec[] = [
-      {
-        id: 'spec-writer',
-        name: 'Specification Writer',
-        specialty: ['requirements', 'user-stories', 'acceptance-criteria'],
-        experience: 0.92,
-        active: true
-      },
-      {
-        id: 'architect',
-        name: 'System Architect',
-        specialty: ['architecture', 'design-patterns', 'components'],
-        experience: 0.89,
-        active: true
-      },
-      {
-        id: 'documenter',
-        name: 'Technical Writer',
-        specialty: ['documentation', 'technical-writing', 'examples'],
-        experience: 0.87,
-        active: true
-      }
-    ];
-
-    agents.forEach(agent => {
-      this.agents.set(agent.id, agent);
-    });
   }
 }
 
@@ -200,22 +186,29 @@ export class SimpleContentGenerator extends EventEmitter implements IContentGene
 
   // Private helper methods - keep simple (KISS)
   private selectAgents(contentType: string): AgentSpec[] {
+    const resolvedContentType = resolveLegacyAgentType(contentType);
     const agents = this.agentManager.listAgents().filter(a => a.active);
     
     // Simple selection logic
-    switch (contentType) {
+    switch (resolvedContentType) {
       case 'specification':
         return agents.filter(a => a.specialty.includes('requirements'));
       case 'design':
         return agents.filter(a => a.specialty.includes('architecture'));
       case 'documentation':
         return agents.filter(a => a.specialty.includes('documentation'));
+      case 'code-analyzer':
+        return agents.filter(a => a.id === 'code-analyzer');
       default:
         return agents.slice(0, 2); // Default to first 2 agents
     }
   }
 
   private generateContentText(request: ContentRequest): string {
+    if (request.type === 'specification') {
+      return this.generateSpecificationContent(request);
+    }
+
     const template = this.templateManager.getTemplate(request.type);
     
     if (template) {
@@ -225,6 +218,19 @@ export class SimpleContentGenerator extends EventEmitter implements IContentGene
     
     // Fallback to simple content generation
     return this.generateSimpleContent(request);
+  }
+
+  private generateSpecificationContent(request: ContentRequest): string {
+    const template = this.templateManager.getTemplate('specification');
+    if (!template) return this.generateSimpleContent(request);
+
+    const variables = {
+      name: `${this.extractName(request.context)} Specification`,
+      overview: `This document outlines the specifications for the ${request.context}.`,
+      requirements: request.requirements.map(r => `- ${r}`).join('\n'),
+    };
+
+    return this.templateManager.applyTemplate(template, variables);
   }
 
   private extractVariables(request: ContentRequest): Record<string, string> {

@@ -3,10 +3,18 @@ export interface MaestroSpec {
   description: string;
   version: string;
   goals: string[];
-  workflow: WorkflowPhase[];
+  workflow: WorkflowStep[];
 }
 
-export interface WorkflowPhase {
+// Fixed: Removed duplicate WorkflowPhase type definition - using only the type union
+export type WorkflowPhase = 
+  | 'Requirements Clarification'
+  | 'Research & Design'
+  | 'Implementation Planning'
+  | 'Task Execution'
+  | 'Completed';
+
+export interface WorkflowStep {
   step: string;
   agent: string; // Name of the sub-agent
   input?: string;
@@ -44,13 +52,6 @@ export interface SteeringContext {
   constraints: string[];
   examples?: string[];
 }
-
-export type WorkflowPhase = 
-  | 'Requirements Clarification'
-  | 'Research & Design'
-  | 'Implementation Planning'
-  | 'Task Execution'
-  | 'Completed';
 
 export interface MaestroWorkflowState {
   featureName: string;
@@ -170,7 +171,7 @@ export interface SpecMetadata {
 
 // ===== ENHANCED WORKFLOW TYPES =====
 
-export interface EnhancedWorkflowPhase extends WorkflowPhase {
+export interface EnhancedWorkflowStep extends WorkflowStep {
   hooks: AgentHookConfig[];
   consensusRequired: boolean;
   livingDocSync: boolean;

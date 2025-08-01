@@ -8,7 +8,7 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import { SpecsDrivenAgentSelector } from '../agents/specs-driven-agent-selector.js';
 import { CapabilityMapper } from '../agents/capability-mapper.js';
-import { MaestroSwarmCoordinator } from '../maestro/maestro-swarm-coordinator.js';
+import { SimpleMaestroCoordinator, createSimpleMaestroCoordinator } from '../maestro/simple-coordinator.js';
 import { agentLoader } from '../agents/agent-loader.js';
 import type { AgentRegistry } from '../agents/agent-registry.js';
 
@@ -79,7 +79,7 @@ const mockAgentRegistry: AgentRegistry = {
 };
 
 describe('Specs-Driven Integration Tests - Cleaned Implementation', () => {
-  let maestroCoordinator: MaestroSwarmCoordinator;
+  let maestroCoordinator: SimpleMaestroCoordinator;
 
   beforeAll(async () => {
     // Set up mock registry
@@ -107,11 +107,7 @@ describe('Specs-Driven Integration Tests - Cleaned Implementation', () => {
       steeringDirectory: '/tmp/test-steering'
     };
 
-    maestroCoordinator = new MaestroSwarmCoordinator(
-      testConfig,
-      mockEventBus as any,
-      mockLogger as any
-    );
+    maestroCoordinator = createSimpleMaestroCoordinator(testConfig);
 
     maestroCoordinator.setAgentRegistry(mockAgentRegistry);
   });

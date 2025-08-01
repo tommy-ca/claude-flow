@@ -8,18 +8,19 @@
 import { describe, beforeAll, afterAll, beforeEach, afterEach, it, expect, jest } from '@jest/globals';
 import { EventBus } from '../../core/event-bus.js';
 import { Logger } from '../../core/logger.js';
-import { MaestroSwarmCoordinator, MaestroSwarmConfig } from '../maestro-swarm-coordinator.js';
+import { SimpleMaestroCoordinator, createSimpleMaestroCoordinator } from '../simple-coordinator.js';
+import { MaestroConfig } from '../types.js';
 import { HiveMindConfig } from '../../hive-mind/types.js';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { mkdtemp, rm, access } from 'fs/promises';
 
 describe('Native Hive Mind Integration Tests', () => {
-  let swarmCoordinator: MaestroSwarmCoordinator;
+  let swarmCoordinator: SimpleMaestroCoordinator;
   let eventBus: EventBus;
   let logger: Logger;
   let tempDir: string;
-  let config: MaestroSwarmConfig;
+  let config: MaestroConfig;
 
   beforeAll(async () => {
     // Setup test environment
@@ -61,7 +62,7 @@ describe('Native Hive Mind Integration Tests', () => {
 
   beforeEach(async () => {
     // Create fresh coordinator for each test
-    swarmCoordinator = new MaestroSwarmCoordinator(config, eventBus, logger);
+    swarmCoordinator = createSimpleMaestroCoordinator(config);
   });
 
   afterEach(async () => {
@@ -313,7 +314,7 @@ describe('Native Hive Mind Integration Tests', () => {
         }
       };
       
-      const limitedCoordinator = new MaestroSwarmCoordinator(limitedConfig, eventBus, logger);
+      const limitedCoordinator = createSimpleMaestroCoordinator(limitedConfig);
       await limitedCoordinator.initialize();
       
       const hiveMind = (limitedCoordinator as any).hiveMind;
@@ -406,7 +407,7 @@ describe('Performance Benchmarks', () => {
     eventBus = new EventBus();
     logger = new Logger({ level: 'warn' }); // Reduce logging for performance tests
     
-    const config: MaestroSwarmConfig = {
+    const config: MaestroConfig = {
       hiveMindConfig: {
         name: 'perf-test-swarm',
         topology: 'specs-driven',
@@ -426,7 +427,7 @@ describe('Performance Benchmarks', () => {
       steeringDirectory: join(tempDir, 'steering')
     };
     
-    coordinator = new MaestroSwarmCoordinator(config, eventBus, logger);
+    coordinator = createSimpleMaestroCoordinator(config);
     await coordinator.initialize();
   });
 
@@ -438,10 +439,8 @@ describe('Performance Benchmarks', () => {
   it('should initialize swarm within performance target (< 5 seconds)', async () => {
     const startTime = Date.now();
     
-    const testCoordinator = new MaestroSwarmCoordinator(
-      (coordinator as any).config,
-      eventBus,
-      logger
+    const testCoordinator = createSimpleMaestroCoordinator(
+      (coordinator as any).config
     );
     
     await testCoordinator.initialize();

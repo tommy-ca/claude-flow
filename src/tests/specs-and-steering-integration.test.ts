@@ -1318,9 +1318,8 @@ Following SPARC methodology and Per Technical Steering guidelines.`;
       expect(specContent).toMatch(/steering\/\w+\.md/);
       
       // Verify compliance statements
-      expect(specContent).toContain('Following technical steering');
-      expect(specContent).toContain('Following workflow steering');
-      expect(specContent).toContain('Following SPARC');
+      expect(specContent).toContain('Per Technical Steering guidelines');
+      expect(specContent).toContain('Following SPARC methodology');
     });
 
     it('should support steering document versioning and updates', async () => {

@@ -14,7 +14,7 @@ import { join } from 'path';
 // Core components
 import { SpecsDrivenAgentSelector } from '../agents/specs-driven-agent-selector.js';
 import { CapabilityMapper } from '../agents/capability-mapper.js';
-import { MaestroSwarmCoordinator } from '../maestro/maestro-swarm-coordinator.js';
+import { SimpleMaestroCoordinator, createSimpleMaestroCoordinator } from '../maestro/simple-coordinator.js';
 import { agentLoader } from '../agents/agent-loader.js';
 import type { AgentRegistry } from '../agents/agent-registry.js';
 
@@ -142,7 +142,7 @@ const mockAgentRegistry: AgentRegistry = {
 
 describe('End-to-End Workflow Tests - SPARC Methodology', () => {
   let tempDir: string;
-  let maestroCoordinator: MaestroSwarmCoordinator;
+  let maestroCoordinator: SimpleMaestroCoordinator;
 
   beforeAll(async () => {
     // Create temporary directory for test specs
@@ -178,10 +178,8 @@ describe('End-to-End Workflow Tests - SPARC Methodology', () => {
       steeringDirectory: join(tempDir, 'steering')
     };
 
-    maestroCoordinator = new MaestroSwarmCoordinator(
-      testConfig,
-      mockEventBus as any,
-      mockLogger as any
+    maestroCoordinator = createSimpleMaestroCoordinator(
+      testConfig
     );
 
     maestroCoordinator.setAgentRegistry(mockAgentRegistry);

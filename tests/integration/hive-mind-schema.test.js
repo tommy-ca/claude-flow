@@ -83,8 +83,8 @@ describe('Hive Mind Database Schema - Issue #403', () => {
       // First, create a swarm (required for foreign key)
       const swarmId = 'test-swarm-' + Date.now();
       db.prepare(`
-        INSERT INTO swarms (id, name, objective, topology, status)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO swarms (id, name, objective, status)
+        VALUES (?, ?, ?, ?)
       `).run(swarmId, 'Test Swarm', 'Test Objective', 'mesh', 'active');
       
       // Try to insert agent without role - this should NOT fail
@@ -120,8 +120,8 @@ describe('Hive Mind Database Schema - Issue #403', () => {
       // Create a swarm
       const swarmId = 'test-swarm-' + Date.now();
       db.prepare(`
-        INSERT INTO swarms (id, name, objective, topology, status)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO swarms (id, name, objective, status)
+        VALUES (?, ?, ?, ?)
       `).run(swarmId, 'Test Swarm', 'Test Objective', 'mesh', 'active');
       
       // Insert agent with role
@@ -229,8 +229,8 @@ describe('Hive Mind Database Schema - Issue #403', () => {
       // Check if we can now insert without role
       const swarmId = 'test-swarm-' + Date.now();
       db.prepare(`
-        INSERT INTO swarms (id, name, objective, topology, status)
-        VALUES (?, ?, ?, ?, ?)
+        INSERT INTO swarms (id, name, objective, status)
+        VALUES (?, ?, ?, ?)
       `).run(swarmId, 'Test Swarm', 'Test Objective', 'mesh', 'active');
       
       const agentId = 'test-agent-' + Date.now();
