@@ -1,0 +1,39 @@
+{
+  "id": "specs-workflow-1754169855392-9sesprt0e",
+  "name": "user-auth",
+  "description": "Implement JWT authentication system",
+  "status": "completed",
+  "assignedAgents": [],
+  "created": "2025-08-02T21:24:15.392Z",
+  "specificationPhase": {
+    "requirements": [
+      "Implement JWT authentication system"
+    ],
+    "stakeholders": [
+      "developer",
+      "stakeholder"
+    ]
+  },
+  "phases": {
+    "specification": {
+      "status": "completed",
+      "progress": 100
+    },
+    "pseudocode": {
+      "status": "completed",
+      "progress": 100
+    },
+    "architecture": {
+      "status": "completed",
+      "progress": 100
+    },
+    "refinement": {
+      "status": "completed",
+      "progress": 100
+    },
+    "completion": {
+      "status": "completed",
+      "progress": 100
+    }
+  }
+}

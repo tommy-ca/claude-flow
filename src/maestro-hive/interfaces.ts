@@ -7,7 +7,6 @@
 
 import type { 
   Task as HiveTask, 
-  Agent as HiveAgent, 
   TaskPriority, 
   TaskStrategy, 
   TaskStatus,
@@ -91,7 +90,7 @@ export interface MaestroCoordinator {
   // HiveMind integration
   initializeSwarm(config: MaestroHiveConfig): Promise<string>;
   getSwarmStatus(): Promise<MaestroSwarmStatus>;
-  spawnAgent(type: AgentType, capabilities?: AgentCapability[]): Promise<HiveAgent>;
+  spawnAgent(type: AgentType, capabilities?: AgentCapability[]): Promise<any>;
   
   // Status and cleanup
   getStatus(): Promise<{ active: boolean; tasks: number; workflows: number; agents: number }>;

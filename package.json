@@ -126,6 +126,7 @@
     "ora": "^7.0.1",
     "p-queue": "^8.1.0",
     "ruv-swarm": "^1.0.14",
+    "uuid": "^11.1.0",
     "ws": "^8.18.3",
     "yaml": "^2.8.0"
   },
@@ -189,5 +190,38 @@
     "doc": "docs",
     "example": "examples",
     "test": "tests"
+  },
+  "jest": {
+    "preset": "ts-jest/presets/default-esm",
+    "extensionsToTreatAsEsm": [
+      ".ts"
+    ],
+    "moduleNameMapping": {
+      "^(\\.{1,2}/.*)\\.js$": ""
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.js"
+    ],
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "useESM": true
+        }
+      ]
+    },
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.ts",
+      "**/tests/**/*.test.js"
+    ]
   }
 }

@@ -11,7 +11,7 @@ import { agentLoader } from './agent-loader.js';
 import { EnhancedAgentSelector } from './enhanced-agent-selector.js';
 import { AgentValidator } from './agent-validation.js';
 import { SpecsDrivenAgentSelector } from './specs-driven-agent-selector.js';
-import { createSimpleMaestroCoordinator } from '../simple-maestro.js';
+import { createSimpleMaestroCoordinator } from '../simple-maestro';
 import type { ILogger } from '../core/logger.js';
 
 export interface TestResult {

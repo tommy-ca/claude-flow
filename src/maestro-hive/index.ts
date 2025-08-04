@@ -8,6 +8,14 @@
 // Core exports
 export { MaestroHiveCoordinator, createMaestroHiveCoordinator } from './coordinator.js';
 
+// Specs-driven flow exports
+export { 
+  SpecsDrivenFlowOrchestrator, 
+  createSpecsDrivenFlowOrchestrator,
+  SpecsDrivenPhase,
+  SteeringDocumentType
+} from './specs-driven-flow.js';
+
 // Configuration exports  
 export {
   MaestroHiveConfigBuilder,

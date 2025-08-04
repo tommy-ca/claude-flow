@@ -33,6 +33,8 @@ export class DatabaseManager extends EventEmitter {
   private statements: Map<string, any>;
   private dbPath: string;
   private logger: Logger;
+  private isInMemory: boolean = false;
+  private memoryStore: any;
 
   private constructor() {
     super();
@@ -55,40 +57,44 @@ export class DatabaseManager extends EventEmitter {
    * Initialize database
    */
   async initialize(): Promise<void> {
-    // Load SQLite wrapper functions
-    await loadSQLiteWrapper();
-
-    // Check if SQLite is available
-    const sqliteAvailable = await isSQLiteAvailable();
-
-    if (!sqliteAvailable) {
-      this.logger.warn('SQLite not available, using in-memory storage for Hive Mind');
-      this.initializeInMemoryFallback();
-      return;
-    }
-
+    const initTimeout = 10000; // 10 seconds timeout for database initialization
+    
     try {
-      // Ensure data directory exists
-      const dataDir = path.join(process.cwd(), 'data');
-      await fs.mkdir(dataDir, { recursive: true });
+      console.log('[DatabaseManager] Starting database initialization...');
+      
+      // Load SQLite wrapper functions with timeout
+      await this.withTimeout(
+        loadSQLiteWrapper(),
+        3000,
+        'SQLite wrapper loading timeout'
+      );
+      console.log('[DatabaseManager] SQLite wrapper loaded');
 
-      // Set database path
-      this.dbPath = path.join(dataDir, 'hive-mind.db');
+      // Check if SQLite is available with timeout
+      const sqliteAvailable = await this.withTimeout(
+        isSQLiteAvailable(),
+        2000,
+        'SQLite availability check timeout'
+      );
 
-      // Open database
-      this.db = await createDatabase(this.dbPath);
+      if (!sqliteAvailable) {
+        console.log('[DatabaseManager] SQLite not available, using in-memory storage');
+        this.logger.warn('SQLite not available, using in-memory storage for Hive Mind');
+        this.initializeInMemoryFallback();
+        return;
+      }
 
-      // Enable foreign keys
-      this.db.pragma('foreign_keys = ON');
-
-      // Load schema
-      await this.loadSchema();
-
-      // Prepare statements
-      this.prepareStatements();
-
+      // Database initialization with timeout
+      await this.withTimeout(
+        this.initializeSQLiteDatabase(),
+        initTimeout,
+        'SQLite database initialization timeout'
+      );
+      
+      console.log('[DatabaseManager] Database initialization completed successfully');
       this.emit('initialized');
     } catch (error) {
+      console.error('[DatabaseManager] Database initialization failed:', error.message);
       this.logger.error('Failed to initialize SQLite database', {
         error: error.message,
         stack: error.stack,
@@ -98,6 +104,66 @@ export class DatabaseManager extends EventEmitter {
       });
       this.initializeInMemoryFallback();
     }
+  }
+
+  /**
+   * Initialize SQLite database with proper error handling
+   */
+  private async initializeSQLiteDatabase(): Promise<void> {
+    try {
+      console.log('[DatabaseManager] Creating data directory...');
+      // Ensure data directory exists
+      const dataDir = path.join(process.cwd(), 'data');
+      await fs.mkdir(dataDir, { recursive: true });
+
+      // Set database path
+      this.dbPath = path.join(dataDir, 'hive-mind.db');
+      console.log(`[DatabaseManager] Database path: ${this.dbPath}`);
+
+      // Open database with timeout
+      console.log('[DatabaseManager] Opening database...');
+      this.db = await this.withTimeout(
+        createDatabase(this.dbPath),
+        5000,
+        'Database file creation timeout'
+      );
+
+      // Enable foreign keys
+      console.log('[DatabaseManager] Enabling foreign keys...');
+      this.db.pragma('foreign_keys = ON');
+
+      // Load schema with timeout
+      console.log('[DatabaseManager] Loading schema...');
+      await this.withTimeout(
+        this.loadSchema(),
+        3000,
+        'Schema loading timeout'
+      );
+
+      // Prepare statements
+      console.log('[DatabaseManager] Preparing statements...');
+      this.prepareStatements();
+      
+      console.log('[DatabaseManager] SQLite database ready');
+    } catch (error) {
+      console.error('[DatabaseManager] SQLite initialization error:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Utility method to add timeout to any promise
+   */
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    errorMessage: string
+  ): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+    });
+
+    return Promise.race([promise, timeoutPromise]);
   }
 
   /**
@@ -115,8 +181,23 @@ export class DatabaseManager extends EventEmitter {
       consensus: new Map(),
     };
 
+    // Create mock database object with all required methods
+    this.db = {
+      prepare: (sql: string) => ({
+        run: (...args: any[]) => ({ lastInsertRowid: Date.now(), changes: 1 }),
+        get: (...args: any[]) => null,
+        all: (...args: any[]) => [],
+        finalize: () => {},
+      }),
+      exec: (sql: string) => {},
+      close: () => {},
+      inTransaction: false,
+      open: true,
+    };
+
     // Create mock statement methods
     this.statements = new Map();
+    this.prepareInMemoryStatements();
 
     if (isWindows?.()) {
       this.logger.info(
@@ -125,6 +206,31 @@ export class DatabaseManager extends EventEmitter {
     }
 
     this.emit('initialized');
+  }
+
+  private prepareInMemoryStatements(): void {
+    // Mock all prepared statements for in-memory mode
+    const mockStatement = {
+      run: (...args: any[]) => ({ lastInsertRowid: Date.now(), changes: 1 }),
+      get: (...args: any[]) => null,
+      all: (...args: any[]) => [],
+      finalize: () => {},
+    };
+
+    this.statements.set('createSwarm', mockStatement);
+    this.statements.set('getSwarm', mockStatement);
+    this.statements.set('getActiveSwarm', mockStatement);
+    this.statements.set('setActiveSwarm', mockStatement);
+    this.statements.set('createAgent', mockStatement);
+    this.statements.set('getAgents', mockStatement);
+    this.statements.set('updateAgent', mockStatement);
+    this.statements.set('createTask', mockStatement);
+    this.statements.set('getTasks', mockStatement);
+    this.statements.set('updateTask', mockStatement);
+    this.statements.set('storeMetric', mockStatement);
+    this.statements.set('createCommunication', mockStatement);
+    this.statements.set('createConsensus', mockStatement);
+    this.statements.set('updateConsensus', mockStatement);
   }
 
   /**
@@ -198,7 +304,9 @@ export class DatabaseManager extends EventEmitter {
     this.statements.set(
       'updateAgent',
       this.db.prepare(`
-      UPDATE agents SET ? WHERE id = ?
+      UPDATE agents SET status = @status, current_task_id = @currentTaskId, 
+                       last_active_at = CURRENT_TIMESTAMP, metadata = @metadata 
+      WHERE id = @id
     `)
     );
 
@@ -352,7 +460,18 @@ export class DatabaseManager extends EventEmitter {
         setClauses.push(`${key} = ${value._raw}`);
       } else {
         setClauses.push(`${key} = ?`);
-        values.push(value);
+        // Sanitize value for SQLite binding
+        let sanitizedValue = value;
+        if (value === undefined) {
+          sanitizedValue = null;
+        } else if (typeof value === 'object' && value !== null) {
+          // Serialize objects to JSON string
+          sanitizedValue = JSON.stringify(value);
+        } else if (typeof value === 'boolean') {
+          // Convert boolean to integer
+          sanitizedValue = value ? 1 : 0;
+        }
+        values.push(sanitizedValue);
       }
     }
 
@@ -737,7 +856,10 @@ export class DatabaseManager extends EventEmitter {
 
   async storePerformanceMetric(data: any): Promise<void> {
     this.statements.get('storeMetric')?.run({
-      ...data,
+      swarm_id: data.swarm_id,
+      agent_id: data.agent_id || null,
+      metric_type: data.metric_type,
+      metric_value: data.metric_value,
       metadata: data.metadata ? JSON.stringify(data.metadata) : null,
     });
   }

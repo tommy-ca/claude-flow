@@ -11,8 +11,8 @@ import { join, dirname } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
 // HiveMind imports
-import { HiveMind } from '../hive-mind/core/HiveMind.js';
-import { Agent } from '../hive-mind/core/Agent.js';
+import { HiveMind } from '../hive-mind/core/HiveMind';
+import { Agent } from '../hive-mind/core/Agent';
 import type { 
   AgentType, 
   AgentCapability, 
@@ -20,7 +20,7 @@ import type {
   TaskStrategy,
   HiveMindConfig,
   Task as HiveTask
-} from '../hive-mind/types.js';
+} from '../hive-mind/types';
 
 // Maestro Hive imports
 import type {
@@ -37,7 +37,7 @@ import type {
   ContentGenerationRequest,
   ContentGenerationResult,
   MaestroEvent
-} from './interfaces.js';
+} from './interfaces';
 
 /**
  * Simple file manager implementation
@@ -221,38 +221,98 @@ export class MaestroHiveCoordinator extends EventEmitter implements MaestroCoord
   // ===== HIVE MIND INTEGRATION =====
 
   async initializeSwarm(config?: MaestroHiveConfig): Promise<string> {
+    const swarmInitTimeout = 60000; // 60 seconds total timeout for swarm initialization
     const finalConfig = config || this.config;
     
-    // Convert MaestroHiveConfig to HiveMindConfig
-    const hiveMindConfig: HiveMindConfig = {
-      name: finalConfig.name,
+    this.logger.info('Starting Maestro Hive swarm initialization', { 
       topology: finalConfig.topology,
       maxAgents: finalConfig.maxAgents,
-      queenMode: finalConfig.queenMode,
-      memoryTTL: finalConfig.memoryTTL,
-      consensusThreshold: finalConfig.consensusThreshold,
-      autoSpawn: finalConfig.autoSpawn,
-      enableConsensus: finalConfig.enableConsensus,
-      enableMemory: finalConfig.enableMemory,
-      enableCommunication: finalConfig.enableCommunication,
-      enabledFeatures: finalConfig.enabledFeatures,
-      createdAt: new Date()
-    };
-
-    this.hiveMind = new HiveMind(hiveMindConfig);
-    this.swarmId = await this.hiveMind.initialize();
-    this.initialized = true;
-
-    // Setup event forwarding
-    this.setupEventForwarding();
-
-    this.logger.info('HiveMind swarm initialized', { 
-      swarmId: this.swarmId,
-      topology: finalConfig.topology 
+      timeout: swarmInitTimeout 
     });
 
-    this.emit('swarmInitialized', { swarmId: this.swarmId });
-    return this.swarmId;
+    try {
+      // Convert MaestroHiveConfig to HiveMindConfig
+      const hiveMindConfig: HiveMindConfig = {
+        name: finalConfig.name,
+        topology: finalConfig.topology,
+        maxAgents: finalConfig.maxAgents,
+        queenMode: finalConfig.queenMode,
+        memoryTTL: finalConfig.memoryTTL,
+        consensusThreshold: finalConfig.consensusThreshold,
+        autoSpawn: finalConfig.autoSpawn,
+        enableConsensus: finalConfig.enableConsensus,
+        enableMemory: finalConfig.enableMemory,
+        enableCommunication: finalConfig.enableCommunication,
+        enabledFeatures: finalConfig.enabledFeatures,
+        createdAt: new Date()
+      };
+
+      // Create HiveMind instance
+      this.logger.info('Creating HiveMind instance...');
+      this.hiveMind = new HiveMind(hiveMindConfig);
+
+      // Initialize with timeout
+      this.logger.info('Initializing HiveMind core systems...');
+      this.swarmId = await this.withTimeout(
+        this.hiveMind.initialize(),
+        swarmInitTimeout,
+        'HiveMind initialization timeout - consider increasing timeout or checking system resources'
+      );
+
+      this.initialized = true;
+      this.logger.info('HiveMind core initialization completed', { swarmId: this.swarmId });
+
+      // Setup event forwarding (non-blocking)
+      this.setupEventForwarding();
+
+      this.logger.info('HiveMind swarm initialized successfully', { 
+        swarmId: this.swarmId,
+        topology: finalConfig.topology 
+      });
+
+      this.emit('swarmInitialized', { swarmId: this.swarmId });
+      return this.swarmId;
+    } catch (error) {
+      this.logger.error('Swarm initialization failed', { 
+        error: error.message,
+        topology: finalConfig.topology,
+        timeout: swarmInitTimeout
+      });
+      
+      // Enhanced error details
+      if (error.message.includes('timeout')) {
+        this.logger.error('Initialization timeout suggestions:', {
+          suggestions: [
+            'Check database permissions and disk space',
+            'Verify SQLite dependencies are installed',
+            'Consider running with --debug for more details',
+            'Try initializing with fewer agents (reduce maxAgents)',
+            'Check system resources (RAM, CPU)'
+          ]
+        });
+      }
+      
+      throw this.createError('SWARM_INIT_FAILED', `Swarm initialization failed: ${error.message}`, {
+        originalError: error,
+        config: finalConfig,
+        timeout: swarmInitTimeout
+      });
+    }
+  }
+
+  /**
+   * Utility method to add timeout to any promise
+   */
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    errorMessage: string
+  ): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+    });
+
+    return Promise.race([promise, timeoutPromise]);
   }
 
   async getSwarmStatus(): Promise<MaestroSwarmStatus> {

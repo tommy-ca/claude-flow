@@ -163,32 +163,32 @@ CREATE TABLE IF NOT EXISTS session_history (
 );
 
 -- Indexes for performance
-CREATE INDEX idx_agents_swarm ON agents(swarm_id);
-CREATE INDEX idx_agents_status ON agents(status);
-CREATE INDEX idx_agents_type ON agents(type);
-CREATE INDEX idx_tasks_swarm ON tasks(swarm_id);
-CREATE INDEX idx_tasks_status ON tasks(status);
-CREATE INDEX idx_tasks_priority ON tasks(priority);
-CREATE INDEX idx_memory_namespace ON memory(namespace);
-CREATE INDEX idx_memory_expires ON memory(expires_at);
-CREATE INDEX idx_communications_swarm ON communications(swarm_id);
-CREATE INDEX idx_communications_timestamp ON communications(timestamp);
-CREATE INDEX idx_communications_from ON communications(from_agent_id);
-CREATE INDEX idx_communications_to ON communications(to_agent_id);
-CREATE INDEX idx_consensus_swarm ON consensus(swarm_id);
-CREATE INDEX idx_consensus_status ON consensus(status);
-CREATE INDEX idx_metrics_swarm ON performance_metrics(swarm_id);
-CREATE INDEX idx_metrics_timestamp ON performance_metrics(timestamp);
+CREATE INDEX IF NOT EXISTS idx_agents_swarm ON agents(swarm_id);
+CREATE INDEX IF NOT EXISTS idx_agents_status ON agents(status);
+CREATE INDEX IF NOT EXISTS idx_agents_type ON agents(type);
+CREATE INDEX IF NOT EXISTS idx_tasks_swarm ON tasks(swarm_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status);
+CREATE INDEX IF NOT EXISTS idx_tasks_priority ON tasks(priority);
+CREATE INDEX IF NOT EXISTS idx_memory_namespace ON memory(namespace);
+CREATE INDEX IF NOT EXISTS idx_memory_expires ON memory(expires_at);
+CREATE INDEX IF NOT EXISTS idx_communications_swarm ON communications(swarm_id);
+CREATE INDEX IF NOT EXISTS idx_communications_timestamp ON communications(timestamp);
+CREATE INDEX IF NOT EXISTS idx_communications_from ON communications(from_agent_id);
+CREATE INDEX IF NOT EXISTS idx_communications_to ON communications(to_agent_id);
+CREATE INDEX IF NOT EXISTS idx_consensus_swarm ON consensus(swarm_id);
+CREATE INDEX IF NOT EXISTS idx_consensus_status ON consensus(status);
+CREATE INDEX IF NOT EXISTS idx_metrics_swarm ON performance_metrics(swarm_id);
+CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON performance_metrics(timestamp);
 
 -- Triggers for updated_at
-CREATE TRIGGER update_swarms_timestamp 
+CREATE TRIGGER IF NOT EXISTS update_swarms_timestamp 
 AFTER UPDATE ON swarms
 BEGIN
     UPDATE swarms SET updated_at = CURRENT_TIMESTAMP WHERE id = NEW.id;
 END;
 
 -- Trigger for memory TTL
-CREATE TRIGGER set_memory_expiry
+CREATE TRIGGER IF NOT EXISTS set_memory_expiry
 AFTER INSERT ON memory
 WHEN NEW.ttl IS NOT NULL
 BEGIN
@@ -198,7 +198,7 @@ BEGIN
 END;
 
 -- Trigger for agent activity
-CREATE TRIGGER update_agent_activity
+CREATE TRIGGER IF NOT EXISTS update_agent_activity
 AFTER UPDATE OF status ON agents
 BEGIN
     UPDATE agents SET last_active_at = CURRENT_TIMESTAMP WHERE id = NEW.id;

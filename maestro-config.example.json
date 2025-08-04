@@ -1,0 +1,20 @@
+{
+  "_comment": "Maestro Specs-Driven Configuration - Hive mind enabled by default",
+  "baseDir": "/path/to/project",
+  "specsDir": "/path/to/project/docs/maestro/specs",
+  "steeringDir": "/path/to/project/docs/maestro/steering",
+  "enableHiveMind": true,
+  "maxAgents": 6,
+  "qualityThreshold": 0.85,
+  "hiveConfig": {
+    "maxAgents": 6,
+    "qualityThreshold": 0.85,
+    "workingDirectory": "/path/to/project/docs/maestro/specs",
+    "methodology": "specs-driven-flow",
+    "enableSpecsDriven": true,
+    "specsFramework": "kiro-ears-methodology",
+    "topology": "hierarchical",
+    "enableNeuralLearning": true,
+    "enablePerformanceOptimization": true
+  }
+}

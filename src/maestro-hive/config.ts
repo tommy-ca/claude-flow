@@ -23,9 +23,9 @@ import type {
 export const DEFAULT_MAESTRO_HIVE_CONFIG: MaestroHiveConfig = {
   // Core HiveMind settings
   name: 'MaestroHive',
-  topology: 'specs-driven',
+  topology: 'hierarchical',
   maxAgents: 8,
-  queenMode: 'strategic',
+  queenMode: 'centralized',
   memoryTTL: 86400, // 24 hours
   consensusThreshold: 0.7,
   autoSpawn: true,

@@ -51,23 +51,41 @@ export class HiveMind extends EventEmitter {
    * Initialize the Hive Mind and all subsystems
    */
   async initialize(): Promise<string> {
+    const initTimeout = 30000; // 30 seconds total timeout
+    const operationTimeout = 5000; // 5 seconds per operation
+    
     try {
-      // Initialize database
-      this.db = await DatabaseManager.getInstance();
+      console.log(`[HiveMind] Starting initialization for swarm ${this.id}`);
+      
+      // Initialize database with timeout
+      console.log('[HiveMind] Initializing database...');
+      this.db = await this.withTimeout(
+        DatabaseManager.getInstance(),
+        operationTimeout,
+        'Database initialization timeout'
+      );
+      console.log('[HiveMind] Database initialized successfully');
 
-      // Create swarm in database
-      await this.db.createSwarm({
-        id: this.id,
-        name: this.config.name,
-        topology: this.config.topology,
-        queenMode: this.config.queenMode,
-        maxAgents: this.config.maxAgents,
-        consensusThreshold: this.config.consensusThreshold,
-        memoryTTL: this.config.memoryTTL,
-        config: JSON.stringify(this.config),
-      });
+      // Create swarm in database with timeout
+      console.log('[HiveMind] Creating swarm record...');
+      await this.withTimeout(
+        this.db.createSwarm({
+          id: this.id,
+          name: this.config.name,
+          topology: this.config.topology,
+          queenMode: this.config.queenMode,
+          maxAgents: this.config.maxAgents,
+          consensusThreshold: this.config.consensusThreshold,
+          memoryTTL: this.config.memoryTTL,
+          config: JSON.stringify(this.config),
+        }),
+        operationTimeout,
+        'Swarm creation timeout'
+      );
+      console.log('[HiveMind] Swarm record created');
 
       // Initialize Queen
+      console.log('[HiveMind] Creating Queen...');
       this.queen = new Queen({
         swarmId: this.id,
         mode: this.config.queenMode,
@@ -75,35 +93,131 @@ export class HiveMind extends EventEmitter {
       });
 
       // Initialize subsystems
+      console.log('[HiveMind] Creating subsystems...');
       this.memory = new Memory(this.id);
       this.communication = new Communication(this.id);
       this.orchestrator = new SwarmOrchestrator(this);
       this.consensus = new ConsensusEngine(this.config.consensusThreshold);
 
-      // Initialize subsystems
-      await Promise.all([
-        this.queen.initialize(),
-        this.memory.initialize(),
-        this.communication.initialize(),
-        this.orchestrator.initialize(),
-      ]);
+      // Initialize subsystems with individual timeouts and fallbacks
+      console.log('[HiveMind] Initializing subsystems...');
+      const subsystemResults = await this.initializeSubsystemsWithFallbacks(operationTimeout);
+      
+      // Log results
+      console.log('[HiveMind] Subsystem initialization results:', {
+        queen: subsystemResults.queen ? 'success' : 'failed',
+        memory: subsystemResults.memory ? 'success' : 'failed', 
+        communication: subsystemResults.communication ? 'success' : 'failed',
+        orchestrator: subsystemResults.orchestrator ? 'success' : 'failed'
+      });
 
-      // Set as active swarm
-      await this.db.setActiveSwarm(this.id);
+      // Set as active swarm with timeout
+      console.log('[HiveMind] Setting active swarm...');
+      await this.withTimeout(
+        this.db.setActiveSwarm(this.id),
+        operationTimeout,
+        'Set active swarm timeout'
+      );
 
-      // Auto-spawn agents if configured
+      // Auto-spawn agents if configured (with timeout)
       if (this.config.autoSpawn) {
-        await this.autoSpawnAgents();
+        console.log('[HiveMind] Auto-spawning agents...');
+        try {
+          await this.withTimeout(
+            this.autoSpawnAgents(),
+            operationTimeout,
+            'Auto-spawn agents timeout'
+          );
+          console.log('[HiveMind] Agents auto-spawned successfully');
+        } catch (error) {
+          console.warn('[HiveMind] Auto-spawn failed, continuing without agents:', error.message);
+        }
       }
 
       this.started = true;
+      console.log(`[HiveMind] Initialization completed successfully for swarm ${this.id}`);
       this.emit('initialized', { swarmId: this.id });
 
       return this.id;
     } catch (error) {
+      console.error('[HiveMind] Initialization failed:', error);
       this.emit('error', error);
       throw error;
     }
+  }
+
+  /**
+   * Initialize subsystems with individual timeouts and fallbacks
+   */
+  private async initializeSubsystemsWithFallbacks(timeout: number): Promise<{
+    queen: boolean;
+    memory: boolean; 
+    communication: boolean;
+    orchestrator: boolean;
+  }> {
+    const results = {
+      queen: false,
+      memory: false,
+      communication: false,
+      orchestrator: false
+    };
+
+    // Initialize Queen (most critical)
+    try {
+      await this.withTimeout(this.queen.initialize(), timeout, 'Queen initialization timeout');
+      results.queen = true;
+      console.log('[HiveMind] Queen initialized successfully');
+    } catch (error) {
+      console.error('[HiveMind] Queen initialization failed:', error.message);
+      // Queen failure is critical, but we continue with limited functionality
+    }
+
+    // Initialize Memory (important for persistence)
+    try {
+      await this.withTimeout(this.memory.initialize(), timeout, 'Memory initialization timeout');
+      results.memory = true;
+      console.log('[HiveMind] Memory initialized successfully');
+    } catch (error) {
+      console.error('[HiveMind] Memory initialization failed:', error.message);
+      // Continue with in-memory only mode
+    }
+
+    // Initialize Communication (important for coordination)
+    try {
+      await this.withTimeout(this.communication.initialize(), timeout, 'Communication initialization timeout');
+      results.communication = true;
+      console.log('[HiveMind] Communication initialized successfully');
+    } catch (error) {
+      console.error('[HiveMind] Communication initialization failed:', error.message);
+      // Continue with limited messaging capabilities
+    }
+
+    // Initialize Orchestrator (can work with limited functionality)
+    try {
+      await this.withTimeout(this.orchestrator.initialize(), timeout, 'Orchestrator initialization timeout');
+      results.orchestrator = true;
+      console.log('[HiveMind] Orchestrator initialized successfully');
+    } catch (error) {
+      console.error('[HiveMind] Orchestrator initialization failed:', error.message);
+      // Continue with basic task management
+    }
+
+    return results;
+  }
+
+  /**
+   * Utility method to add timeout to any promise
+   */
+  private async withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    errorMessage: string
+  ): Promise<T> {
+    const timeoutPromise = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+    });
+
+    return Promise.race([promise, timeoutPromise]);
   }
 
   /**

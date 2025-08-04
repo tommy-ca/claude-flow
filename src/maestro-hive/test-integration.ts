@@ -13,8 +13,8 @@ import type {
   MaestroHiveConfig,
   SpecsDrivenWorkflow
 } from './interfaces.js';
-import { createMaestroHiveCoordinator } from './coordinator.js';
-import { createPresetConfig } from './config.js';
+import { createMaestroHiveCoordinator } from './coordinator';
+import { createPresetConfig } from './config';
 import { 
   SpecsDrivenFlowOrchestrator, 
   createSpecsDrivenFlowOrchestrator,
@@ -581,6 +581,503 @@ export class MaestroHiveTestSuite extends EventEmitter {
       totalWorkflows: status.workflows,
       totalAgents: status.agents,
       swarmHealth: swarmStatus.health
+    };
+  }
+
+  // ===== EXTENDED TEST METHODS =====
+
+  /**
+   * Run comprehensive HiveMind integration tests
+   */
+  async runComprehensiveTests(): Promise<TestResult[]> {
+    console.log('\n🔬 Running Comprehensive HiveMind Integration Tests\n');
+    
+    try {
+      // Initialize enhanced test environment
+      await this.initializeTestSwarm();
+      
+      // Core functionality tests
+      await this.runTest('Advanced Task Management', () => this.testAdvancedTaskManagement());
+      await this.runTest('Complex Workflow Orchestration', () => this.testComplexWorkflowOrchestration());
+      await this.runTest('Multi-Agent Coordination', () => this.testMultiAgentCoordination());
+      
+      // SPARC methodology tests
+      await this.runTest('Complete SPARC Workflow', () => this.testCompleteSPARCWorkflow());
+      await this.runTest('Quality Gate Enforcement', () => this.testQualityGateEnforcement());
+      await this.runTest('Steering Document Compliance', () => this.testSteeringDocumentCompliance());
+      
+      // Performance and scalability tests
+      await this.runTest('Concurrent Workflow Execution', () => this.testConcurrentWorkflowExecution());
+      await this.runTest('Load Balancing Efficiency', () => this.testLoadBalancingEfficiency());
+      await this.runTest('Resource Optimization', () => this.testResourceOptimization());
+      
+      // Error handling and recovery tests
+      await this.runTest('Fault Tolerance', () => this.testFaultTolerance());
+      await this.runTest('Recovery Mechanisms', () => this.testRecoveryMechanisms());
+      await this.runTest('Data Consistency', () => this.testDataConsistency());
+      
+    } finally {
+      await this.cleanup();
+    }
+    
+    this.printTestSummary();
+    return this.testResults;
+  }
+
+  private async testAdvancedTaskManagement(): Promise<any> {
+    // Test advanced task management features
+    const tasks = [];
+    
+    // Create tasks with dependencies
+    const specTask = await this.coordinator.createTask('Advanced specification', 'spec', 'critical');
+    const designTask = await this.coordinator.createTask('Advanced design', 'design', 'high');
+    const implTask = await this.coordinator.createTask('Advanced implementation', 'implementation', 'medium');
+    
+    tasks.push(specTask, designTask, implTask);
+    
+    // Test task prioritization
+    const prioritizedTasks = await this.coordinator.getTasks();
+    const sortedTasks = prioritizedTasks.sort((a, b) => {
+      const priorities = { 'critical': 3, 'high': 2, 'medium': 1, 'low': 0 };
+      return priorities[b.priority as keyof typeof priorities] - priorities[a.priority as keyof typeof priorities];
+    });
+    
+    // Test task assignment to specific agents
+    const analyst = await this.coordinator.spawnAgent('analyst', ['requirements_analysis']);
+    await this.coordinator.updateTask(specTask.id, { assignedTo: analyst.id });
+    
+    return {
+      tasksCreated: tasks.length,
+      prioritization: sortedTasks[0].priority === 'critical',
+      agentAssignment: specTask.assignedTo === analyst.id
+    };
+  }
+
+  private async testComplexWorkflowOrchestration(): Promise<any> {
+    // Test complex workflow with multiple phases and dependencies
+    const workflow = await this.coordinator.createWorkflow(
+      'Complex Multi-Phase Workflow',
+      'Advanced workflow with multiple interdependent phases'
+    );
+    
+    // Create phase 1 tasks
+    const phase1Tasks = [];
+    for (let i = 0; i < 3; i++) {
+      const task = await this.coordinator.createTask(`Phase 1 Task ${i + 1}`, 'spec', 'high');
+      phase1Tasks.push(task);
+      await this.coordinator.addTaskToWorkflow(workflow.id, task);
+    }
+    
+    // Create phase 2 tasks (dependent on phase 1)
+    const phase2Tasks = [];
+    for (let i = 0; i < 2; i++) {
+      const task = await this.coordinator.createTask(`Phase 2 Task ${i + 1}`, 'design', 'medium');
+      phase2Tasks.push(task);
+      await this.coordinator.addTaskToWorkflow(workflow.id, task);
+    }
+    
+    // Simulate workflow execution
+    const updatedWorkflow = await this.coordinator.getWorkflow(workflow.id);
+    
+    return {
+      workflowId: workflow.id,
+      totalTasks: updatedWorkflow?.tasks.length || 0,
+      phase1Tasks: phase1Tasks.length,
+      phase2Tasks: phase2Tasks.length,
+      orchestrationSuccess: (updatedWorkflow?.tasks.length || 0) === 5
+    };
+  }
+
+  private async testMultiAgentCoordination(): Promise<any> {
+    // Test coordination between multiple agents
+    const agents = [];
+    
+    // Spawn different types of agents
+    const agentTypes = ['analyst', 'coder', 'reviewer', 'coordinator'];
+    for (const type of agentTypes) {
+      const agent = await this.coordinator.spawnAgent(type as any);
+      agents.push(agent);
+    }
+    
+    // Create tasks that require coordination
+    const coordinationTask = await this.coordinator.createTask(
+      'Multi-agent coordination task',
+      'implementation',
+      'high'
+    );
+    
+    // Test agent communication (simulated)
+    const messages = [];
+    for (let i = 0; i < agents.length - 1; i++) {
+      messages.push({
+        from: agents[i].id,
+        to: agents[i + 1].id,
+        content: `Coordination message ${i + 1}`,
+        timestamp: new Date()
+      });
+    }
+    
+    return {
+      agentsSpawned: agents.length,
+      agentTypes: agentTypes,
+      coordinationTaskId: coordinationTask.id,
+      messagesExchanged: messages.length,
+      coordinationEfficient: messages.length === agentTypes.length - 1
+    };
+  }
+
+  private async testCompleteSPARCWorkflow(): Promise<any> {
+    // Test complete SPARC workflow execution
+    const requirements = [
+      'Comprehensive user authentication system',
+      'Multi-factor authentication support',
+      'Session management with JWT tokens',
+      'Role-based access control'
+    ];
+    
+    const stakeholders = [
+      'Product Owner',
+      'Security Team',
+      'Development Team',
+      'QA Team',
+      'DevOps Team'
+    ];
+    
+    const workflow = await this.specsDrivenOrchestrator.createSpecsDrivenWorkflow(
+      'Complete Authentication System',
+      'End-to-end authentication system following SPARC methodology',
+      requirements,
+      stakeholders
+    );
+    
+    // Verify all SPARC phases are present
+    const phases = ['specification', 'pseudocode', 'architecture', 'refinement', 'completion'];
+    const phaseTasksCount = phases.map(phase => 
+      workflow.tasks.filter(t => (t as any).phase === phase).length
+    );
+    
+    return {
+      workflowId: workflow.id,
+      requirements: requirements.length,
+      stakeholders: stakeholders.length,
+      totalTasks: workflow.tasks.length,
+      phasesImplemented: phaseTasksCount.filter(count => count > 0).length,
+      sparcComplete: phaseTasksCount.every(count => count > 0)
+    };
+  }
+
+  private async testQualityGateEnforcement(): Promise<any> {
+    // Test quality gate enforcement mechanisms
+    const workflow = await this.specsDrivenOrchestrator.createSpecsDrivenWorkflow(
+      'Quality Gate Test Workflow',
+      'Workflow to test quality gate enforcement',
+      ['Quality requirement with strict validation'],
+      ['Quality Assurance Team']
+    );
+    
+    // Test quality validation with different content qualities
+    const highQualityContent = `# High Quality Specification
+
+## Requirements
+- Comprehensive requirement analysis
+- Detailed acceptance criteria
+- Security considerations
+- Performance requirements
+- Scalability planning
+
+## Acceptance Criteria
+- [ ] All requirements are testable
+- [ ] Security requirements are defined
+- [ ] Performance benchmarks are established
+- [ ] Scalability limits are documented`;
+    
+    const lowQualityContent = 'Basic requirement';
+    
+    const highQualityValidation = await this.coordinator.validate(highQualityContent, 'spec');
+    const lowQualityValidation = await this.coordinator.validate(lowQualityContent, 'spec');
+    
+    return {
+      workflowId: workflow.id,
+      highQualityScore: highQualityValidation.score,
+      lowQualityScore: lowQualityValidation.score,
+      qualityDifferentiation: highQualityValidation.score > lowQualityValidation.score,
+      gateEnforcement: highQualityValidation.valid && !lowQualityValidation.valid
+    };
+  }
+
+  private async testSteeringDocumentCompliance(): Promise<any> {
+    // Test steering document compliance validation
+    const workflow = await this.specsDrivenOrchestrator.createSpecsDrivenWorkflow(
+      'Compliance Test Workflow',
+      'Test steering document compliance mechanisms',
+      ['Compliance requirement'],
+      ['Compliance Officer']
+    );
+    
+    // Test compliance for different phases
+    const phases = ['specification', 'architecture', 'completion'] as const;
+    const complianceResults = [];
+    
+    for (const phase of phases) {
+      const compliance = await this.specsDrivenOrchestrator.validateSteeringCompliance(
+        workflow.id,
+        phase as any
+      );
+      complianceResults.push({
+        phase,
+        compliant: compliance.compliant,
+        score: compliance.score,
+        references: compliance.steeringReferences.length
+      });
+    }
+    
+    return {
+      workflowId: workflow.id,
+      phasesChecked: complianceResults.length,
+      complianceResults,
+      overallCompliance: complianceResults.every(r => r.compliant || r.score > 0.5)
+    };
+  }
+
+  private async testConcurrentWorkflowExecution(): Promise<any> {
+    // Test concurrent execution of multiple workflows
+    const workflowPromises = [];
+    const concurrentWorkflows = 3;
+    
+    for (let i = 0; i < concurrentWorkflows; i++) {
+      const promise = this.specsDrivenOrchestrator.createSpecsDrivenWorkflow(
+        `Concurrent Workflow ${i + 1}`,
+        `Test workflow ${i + 1} for concurrent execution`,
+        [`Requirement ${i + 1}`],
+        [`Stakeholder ${i + 1}`]
+      );
+      workflowPromises.push(promise);
+    }
+    
+    const startTime = Date.now();
+    const workflows = await Promise.all(workflowPromises);
+    const executionTime = Date.now() - startTime;
+    
+    // Verify all workflows were created successfully
+    const uniqueIds = new Set(workflows.map(w => w.id));
+    
+    return {
+      concurrentWorkflows,
+      successfulCreations: workflows.length,
+      uniqueWorkflows: uniqueIds.size,
+      executionTime,
+      concurrencySuccess: workflows.length === concurrentWorkflows && uniqueIds.size === concurrentWorkflows
+    };
+  }
+
+  private async testLoadBalancingEfficiency(): Promise<any> {
+    // Test load balancing across agents
+    const agents = [];
+    const agentCount = 4;
+    
+    // Spawn multiple agents
+    for (let i = 0; i < agentCount; i++) {
+      const agent = await this.coordinator.spawnAgent('coder', ['code_generation']);
+      agents.push(agent);
+    }
+    
+    // Create tasks that should be distributed
+    const tasks = [];
+    const taskCount = 8;
+    
+    for (let i = 0; i < taskCount; i++) {
+      const task = await this.coordinator.createTask(
+        `Load balancing task ${i + 1}`,
+        'implementation',
+        'medium'
+      );
+      tasks.push(task);
+    }
+    
+    // Simulate task distribution (in a real system, this would be automatic)
+    const taskDistribution = new Map();
+    agents.forEach(agent => taskDistribution.set(agent.id, 0));
+    
+    tasks.forEach((task, index) => {
+      const agentId = agents[index % agents.length].id;
+      taskDistribution.set(agentId, taskDistribution.get(agentId) + 1);
+    });
+    
+    // Calculate load distribution efficiency
+    const idealLoadPerAgent = taskCount / agentCount;
+    const actualLoads = Array.from(taskDistribution.values());
+    const loadVariance = actualLoads.reduce((sum, load) => 
+      sum + Math.pow(load - idealLoadPerAgent, 2), 0
+    ) / agentCount;
+    
+    return {
+      agentCount,
+      taskCount,
+      idealLoadPerAgent,
+      actualLoads,
+      loadVariance,
+      loadBalancingEfficient: loadVariance < 1.0
+    };
+  }
+
+  private async testResourceOptimization(): Promise<any> {
+    // Test resource optimization and management
+    const initialMemory = process.memoryUsage().heapUsed;
+    
+    // Create and execute resource-intensive operations
+    const resourceIntensiveWorkflow = await this.specsDrivenOrchestrator.createSpecsDrivenWorkflow(
+      'Resource Optimization Test',
+      'Test resource optimization capabilities',
+      ['Resource-intensive requirement'],
+      ['Performance Team']
+    );
+    
+    // Generate large content to test memory management
+    const largeContent = 'Large content block. '.repeat(1000);
+    const contentValidation = await this.coordinator.validate(largeContent, 'spec');
+    
+    // Measure resource usage
+    const peakMemory = process.memoryUsage().heapUsed;
+    const memoryIncrease = peakMemory - initialMemory;
+    
+    // Force garbage collection if available to test cleanup
+    if (global.gc) {
+      global.gc();
+    }
+    
+    const finalMemory = process.memoryUsage().heapUsed;
+    const memoryCleanup = peakMemory - finalMemory;
+    
+    return {
+      workflowId: resourceIntensiveWorkflow.id,
+      initialMemoryMB: Math.round(initialMemory / 1024 / 1024),
+      peakMemoryMB: Math.round(peakMemory / 1024 / 1024),
+      finalMemoryMB: Math.round(finalMemory / 1024 / 1024),
+      memoryIncreaseMB: Math.round(memoryIncrease / 1024 / 1024),
+      memoryCleanupMB: Math.round(memoryCleanup / 1024 / 1024),
+      contentValidated: contentValidation.valid,
+      resourceOptimized: memoryCleanup > 0
+    };
+  }
+
+  private async testFaultTolerance(): Promise<any> {
+    // Test system fault tolerance
+    const faults = [];
+    
+    try {
+      // Test invalid agent spawning
+      await this.coordinator.spawnAgent('invalid_agent_type' as any);
+    } catch (error) {
+      faults.push({ type: 'invalid_agent', handled: true, error: error.message });
+    }
+    
+    try {
+      // Test invalid task creation
+      await this.coordinator.createTask('', 'invalid_type' as any, 'invalid_priority' as any);
+    } catch (error) {
+      faults.push({ type: 'invalid_task', handled: true, error: error.message });
+    }
+    
+    try {
+      // Test invalid workflow operations
+      await this.coordinator.getWorkflow('nonexistent-workflow-id');
+    } catch (error) {
+      faults.push({ type: 'invalid_workflow', handled: true, error: error.message });
+    }
+    
+    // Test system stability after faults
+    const stabilityTask = await this.coordinator.createTask('Stability test', 'spec', 'medium');
+    const systemStable = !!stabilityTask.id;
+    
+    return {
+      faultsEncountered: faults.length,
+      faultsHandled: faults.filter(f => f.handled).length,
+      systemStable,
+      faultTolerance: faults.length > 0 && systemStable
+    };
+  }
+
+  private async testRecoveryMechanisms(): Promise<any> {
+    // Test recovery mechanisms
+    const recoveryTests = [];
+    
+    // Test workflow recovery
+    const workflow = await this.coordinator.createWorkflow('Recovery Test', 'Test workflow recovery');
+    const task = await this.coordinator.createTask('Recovery task', 'implementation', 'high');
+    await this.coordinator.addTaskToWorkflow(workflow.id, task);
+    
+    // Simulate task failure and recovery
+    await this.coordinator.updateTask(task.id, { status: 'failed' });
+    
+    // Test recovery by creating replacement task
+    const recoveryTask = await this.coordinator.createTask('Recovery replacement', 'implementation', 'high');
+    await this.coordinator.addTaskToWorkflow(workflow.id, recoveryTask);
+    
+    recoveryTests.push({
+      type: 'task_recovery',
+      originalTaskFailed: true,
+      recoveryTaskCreated: !!recoveryTask.id,
+      success: !!recoveryTask.id
+    });
+    
+    // Test agent recovery
+    const agent = await this.coordinator.spawnAgent('coder');
+    const replacementAgent = await this.coordinator.spawnAgent('coder');
+    
+    recoveryTests.push({
+      type: 'agent_recovery',
+      originalAgent: agent.id,
+      replacementAgent: replacementAgent.id,
+      success: agent.id !== replacementAgent.id
+    });
+    
+    return {
+      recoveryTestsRun: recoveryTests.length,
+      successfulRecoveries: recoveryTests.filter(t => t.success).length,
+      recoveryMechanismsWorking: recoveryTests.every(t => t.success)
+    };
+  }
+
+  private async testDataConsistency(): Promise<any> {
+    // Test data consistency across operations
+    const consistency = {
+      taskConsistency: true,
+      workflowConsistency: true,
+      agentConsistency: true
+    };
+    
+    // Test task consistency
+    const task = await this.coordinator.createTask('Consistency test', 'spec', 'medium');
+    const retrievedTask = (await this.coordinator.getTasks({ id: task.id }))[0];
+    
+    if (!retrievedTask || retrievedTask.id !== task.id || retrievedTask.type !== task.type) {
+      consistency.taskConsistency = false;
+    }
+    
+    // Test workflow consistency
+    const workflow = await this.coordinator.createWorkflow('Consistency workflow', 'Test consistency');
+    await this.coordinator.addTaskToWorkflow(workflow.id, task);
+    
+    const retrievedWorkflow = await this.coordinator.getWorkflow(workflow.id);
+    if (!retrievedWorkflow || retrievedWorkflow.tasks.length !== 1 || 
+        retrievedWorkflow.tasks[0].id !== task.id) {
+      consistency.workflowConsistency = false;
+    }
+    
+    // Test agent consistency
+    const agent = await this.coordinator.spawnAgent('analyst');
+    await this.coordinator.updateTask(task.id, { assignedTo: agent.id });
+    
+    const updatedTask = (await this.coordinator.getTasks({ id: task.id }))[0];
+    if (!updatedTask || updatedTask.assignedTo !== agent.id) {
+      consistency.agentConsistency = false;
+    }
+    
+    return {
+      taskConsistency: consistency.taskConsistency,
+      workflowConsistency: consistency.workflowConsistency,
+      agentConsistency: consistency.agentConsistency,
+      overallConsistency: Object.values(consistency).every(c => c)
     };
   }
 

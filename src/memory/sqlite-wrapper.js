@@ -15,30 +15,57 @@ let sqliteAvailable = false;
 let loadError = null;
 
 /**
- * Try to load better-sqlite3 with comprehensive error handling
+ * Try to load better-sqlite3 with comprehensive error handling and timeout
  */
 async function tryLoadSQLite() {
+  const loadTimeout = 5000; // 5 second timeout for loading SQLite
+  
   try {
+    console.log('[SQLiteWrapper] Attempting to load SQLite module...');
+    
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('SQLite module loading timeout')), loadTimeout);
+    });
+
     // Try CommonJS require first (more reliable in Node.js)
-    const require = createRequire(import.meta.url);
-    Database = require('better-sqlite3');
-    sqliteAvailable = true;
+    const loadPromise = (async () => {
+      try {
+        console.log('[SQLiteWrapper] Trying CommonJS require...');
+        const require = createRequire(import.meta.url);
+        Database = require('better-sqlite3');
+        console.log('[SQLiteWrapper] CommonJS require successful');
+        sqliteAvailable = true;
+        return true;
+      } catch (requireErr) {
+        console.log('[SQLiteWrapper] CommonJS require failed, trying ES module import...');
+        // Fallback to ES module import
+        try {
+          const module = await import('better-sqlite3');
+          Database = module.default;
+          console.log('[SQLiteWrapper] ES module import successful');
+          sqliteAvailable = true;
+          return true;
+        } catch (importErr) {
+          console.log('[SQLiteWrapper] ES module import failed');
+          loadError = importErr;
+          throw importErr;
+        }
+      }
+    })();
+
+    // Race between loading and timeout
+    await Promise.race([loadPromise, timeoutPromise]);
     return true;
-  } catch (requireErr) {
-    // Fallback to ES module import
-    try {
-      const module = await import('better-sqlite3');
-      Database = module.default;
-      sqliteAvailable = true;
-      return true;
-    } catch (importErr) {
-      loadError = importErr;
-      
-      // Check for specific Windows errors
-      if (requireErr.message.includes('was compiled against a different Node.js version') ||
-          requireErr.message.includes('Could not locate the bindings file') ||
-          requireErr.message.includes('The specified module could not be found') ||
-          requireErr.code === 'MODULE_NOT_FOUND') {
+  } catch (error) {
+    console.error('[SQLiteWrapper] Failed to load SQLite:', error.message);
+    loadError = error;
+    
+    // Check for specific Windows errors
+    if (error.message.includes('was compiled against a different Node.js version') ||
+        error.message.includes('Could not locate the bindings file') ||
+        error.message.includes('The specified module could not be found') ||
+        error.message.includes('timeout') ||
+        error.code === 'MODULE_NOT_FOUND') {
         
         console.warn(`
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -70,7 +97,6 @@ async function tryLoadSQLite() {
       return false;
     }
   }
-}
 
 /**
  * Check if SQLite is available

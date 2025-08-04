@@ -1,0 +1,39 @@
+{
+  "id": "specs-workflow-1754176663256-1c7r8llh6",
+  "name": "ai-coordination",
+  "description": "Implement AI-powered coordination system with consensus mechanisms",
+  "status": "completed",
+  "assignedAgents": [],
+  "created": "2025-08-02T23:17:43.256Z",
+  "specificationPhase": {
+    "requirements": [
+      "Implement AI-powered coordination system with consensus mechanisms"
+    ],
+    "stakeholders": [
+      "developer",
+      "stakeholder"
+    ]
+  },
+  "phases": {
+    "specification": {
+      "status": "completed",
+      "progress": 100
+    },
+    "pseudocode": {
+      "status": "completed",
+      "progress": 100
+    },
+    "architecture": {
+      "status": "completed",
+      "progress": 100
+    },
+    "refinement": {
+      "status": "completed",
+      "progress": 100
+    },
+    "completion": {
+      "status": "completed",
+      "progress": 100
+    }
+  }
+}
