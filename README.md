@@ -80,41 +80,32 @@ npx claude-flow@alpha hive-mind spawn "build enterprise system" --claude
 | **Agents** | Auto-spawned for task | Manual control with specializations |
 | **Use When** | "Build X", "Fix Y", "Analyze Z" | Multi-feature projects, team coordination |
 
-### **Introducing Maestro: Spec-Driven Orchestration (Development Status)**
+### **Introducing Maestro: Spec-Driven Orchestration**
 
-⚠️ **Current Status: Implementation Complete, CLI Access Blocked by Build Issues**
+For the most complex projects requiring predictable, repeatable results, Maestro offers a declarative, spec-driven workflow.
 
-Maestro is Claude-Flow's specifications-driven development framework with native hive mind integration. While the core implementation is complete, CLI access is currently blocked by TypeScript compilation issues.
-
-**What's Working:**
-- ✅ Complete MaestroSwarmCoordinator implementation with native hive mind
-- ✅ Specs-driven topology with 6 specialized agent types  
-- ✅ Full workflow phases: Requirements → Design → Tasks → Implementation → Review
-- ✅ Byzantine fault-tolerant consensus validation
-- ✅ Swarm memory integration for steering documents
-
-**What's Blocked:**
-- ❌ CLI commands (TypeScript compilation fails)
-- ❌ Direct user access via `npx claude-flow@alpha maestro`
-- ❌ Interactive workflow execution
-
-**Temporary Workaround:**
 ```bash
-# Maestro functionality can be accessed programmatically:
-# 1. Import MaestroSwarmCoordinator directly in Node.js
-# 2. Use existing hive-mind commands for similar workflows
-npx claude-flow@alpha hive-mind spawn "Create feature specification for user auth"
+# 1. Create a maestro.spec.yaml file (see docs for spec)
+# 2. Run the Maestro-driven workflow
+npx claude-flow@alpha maestro run
 ```
 
 ### **Swarm vs. Hive-Mind vs. Maestro: Which to Use?**
 
 | Feature | `swarm` Command | `hive-mind` Command | `maestro` Command |
 |---|---|---|---|
+<<<<<<< HEAD
 | **Availability** | ✅ Fully Available | ✅ Fully Available | ❌ Build Issues |
 | **Best For** | Quick tasks, single objectives | Complex projects, persistent sessions | Specs-driven development |
 | **Setup** | Instant - no configuration needed | Interactive wizard setup | **Currently unavailable** |
 | **Control** | Autonomous swarm | Interactive control | **Blocked by build system** |
 | **Use When** | You need a quick result for a single task. | You need to collaborate with the AI on a complex, evolving project. | **Use hive-mind as alternative** |
+=======
+| **Best For** | Quick tasks, single objectives | Complex projects, persistent sessions | Repeatable, multi-stage projects |
+| **Setup** | Instant - no configuration needed | Interactive wizard setup | Declarative `maestro.spec.yaml` file |
+| **Control** | Autonomous swarm | Interactive control | Fully automated based on spec |
+| **Use When** | You need a quick result for a single task. | You need to collaborate with the AI on a complex, evolving project. | You have a well-defined, multi-stage project that needs to be executed reliably. |
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
 
 
 **Quick Rule:** Start with `swarm` for most tasks. Use `hive-mind` when you need persistent sessions or complex multi-agent coordination.
