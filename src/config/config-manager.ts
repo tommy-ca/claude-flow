@@ -156,7 +156,10 @@ export class ConfigManager {
   private static instance: ConfigManager;
   private config: Config;
   private configPath?: string;
+<<<<<<< HEAD
   private userConfigDir: string;
+=======
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
   private logger: Logger;
 
   private constructor() {

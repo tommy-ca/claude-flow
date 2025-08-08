@@ -33,8 +33,11 @@ export class DatabaseManager extends EventEmitter {
   private statements: Map<string, any>;
   private dbPath: string;
   private logger: Logger;
+<<<<<<< HEAD
   private isInMemory: boolean = false;
   private memoryStore: any;
+=======
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
 
   private constructor() {
     super();
@@ -57,8 +60,23 @@ export class DatabaseManager extends EventEmitter {
    * Initialize database
    */
   async initialize(): Promise<void> {
+<<<<<<< HEAD
     const initTimeout = 10000; // 10 seconds timeout for database initialization
     
+=======
+    // Load SQLite wrapper functions
+    await loadSQLiteWrapper();
+
+    // Check if SQLite is available
+    const sqliteAvailable = await isSQLiteAvailable();
+
+    if (!sqliteAvailable) {
+      this.logger.warn('SQLite not available, using in-memory storage for Hive Mind');
+      this.initializeInMemoryFallback();
+      return;
+    }
+
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
     try {
       console.log('[DatabaseManager] Starting database initialization...');
       
@@ -146,8 +164,19 @@ export class DatabaseManager extends EventEmitter {
       
       console.log('[DatabaseManager] SQLite database ready');
     } catch (error) {
+<<<<<<< HEAD
       console.error('[DatabaseManager] SQLite initialization error:', error.message);
       throw error;
+=======
+      this.logger.error('Failed to initialize SQLite database', {
+        error: error.message,
+        stack: error.stack,
+      });
+      this.logger.warn('Falling back to in-memory storage', {
+        reason: 'SQLite initialization failed',
+      });
+      this.initializeInMemoryFallback();
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
     }
   }
 
@@ -179,6 +208,7 @@ export class DatabaseManager extends EventEmitter {
       communications: new Map(),
       performance_metrics: new Map(),
       consensus: new Map(),
+<<<<<<< HEAD
     };
 
     // Create mock database object with all required methods
@@ -193,11 +223,16 @@ export class DatabaseManager extends EventEmitter {
       close: () => {},
       inTransaction: false,
       open: true,
+=======
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
     };
 
     // Create mock statement methods
     this.statements = new Map();
+<<<<<<< HEAD
     this.prepareInMemoryStatements();
+=======
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
 
     if (isWindows?.()) {
       this.logger.info(
@@ -304,9 +339,13 @@ export class DatabaseManager extends EventEmitter {
     this.statements.set(
       'updateAgent',
       this.db.prepare(`
+<<<<<<< HEAD
       UPDATE agents SET status = @status, current_task_id = @currentTaskId, 
                        last_active_at = CURRENT_TIMESTAMP, metadata = @metadata 
       WHERE id = @id
+=======
+      UPDATE agents SET ? WHERE id = ?
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
     `)
     );
 
@@ -856,10 +895,14 @@ export class DatabaseManager extends EventEmitter {
 
   async storePerformanceMetric(data: any): Promise<void> {
     this.statements.get('storeMetric')?.run({
+<<<<<<< HEAD
       swarm_id: data.swarm_id,
       agent_id: data.agent_id || null,
       metric_type: data.metric_type,
       metric_value: data.metric_value,
+=======
+      ...data,
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
       metadata: data.metadata ? JSON.stringify(data.metadata) : null,
     });
   }

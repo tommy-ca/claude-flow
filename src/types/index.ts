@@ -40,11 +40,25 @@ export type {
 } from '../constants/agent-types.js';
 
 export {
+<<<<<<< HEAD
   getValidAgentTypes,
   isValidAgentType,
   resolveLegacyAgentType,
   getAgentTypeSchema,
   LEGACY_AGENT_MAPPING,
+=======
+  AGENT_TYPES,
+  VALID_AGENT_TYPES,
+  AGENT_TYPE_CATEGORIES,
+  AGENT_TYPE_DESCRIPTIONS,
+  AGENT_TYPE_SCHEMA,
+  isValidAgentType,
+  getAgentTypeDescription,
+  isAgentTypeInCategory,
+  getAgentTypesByCategory,
+  SWARM_STRATEGIES,
+  ORCHESTRATION_STRATEGIES,
+>>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
 } from '../constants/agent-types.js';
 
 // ===== HIVE MIND TYPES =====
