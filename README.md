@@ -94,13 +94,6 @@ npx claude-flow@alpha maestro run
 
 | Feature | `swarm` Command | `hive-mind` Command | `maestro` Command |
 |---|---|---|---|
-<<<<<<< HEAD
-| **Availability** | ✅ Fully Available | ✅ Fully Available | ❌ Build Issues |
-| **Best For** | Quick tasks, single objectives | Complex projects, persistent sessions | Specs-driven development |
-| **Setup** | Instant - no configuration needed | Interactive wizard setup | **Currently unavailable** |
-| **Control** | Autonomous swarm | Interactive control | **Blocked by build system** |
-| **Use When** | You need a quick result for a single task. | You need to collaborate with the AI on a complex, evolving project. | **Use hive-mind as alternative** |
-=======
 | **Best For** | Quick tasks, single objectives | Complex projects, persistent sessions | Repeatable, multi-stage projects |
 | **Setup** | Instant - no configuration needed | Interactive wizard setup | Declarative `maestro.spec.yaml` file |
 | **Control** | Autonomous swarm | Interactive control | Fully automated based on spec |
