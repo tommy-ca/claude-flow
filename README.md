@@ -98,8 +98,6 @@ npx claude-flow@alpha maestro run
 | **Setup** | Instant - no configuration needed | Interactive wizard setup | Declarative `maestro.spec.yaml` file |
 | **Control** | Autonomous swarm | Interactive control | Fully automated based on spec |
 | **Use When** | You need a quick result for a single task. | You need to collaborate with the AI on a complex, evolving project. | You have a well-defined, multi-stage project that needs to be executed reliably. |
->>>>>>> 071485a7 (🎯 Maestro Code Quality: Cherry-pick Agent Types & Biome Integration)
-
 
 **Quick Rule:** Start with `swarm` for most tasks. Use `hive-mind` when you need persistent sessions or complex multi-agent coordination.
 
