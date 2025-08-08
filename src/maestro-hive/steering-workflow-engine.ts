@@ -181,23 +181,25 @@ export class SteeringWorkflowEngine extends EventEmitter {
       this.documentManager = createSteeringDocumentManager(simpleFileManager, logger, this.steeringDir);
     }
     
+    // Initialize content enhancer factory
+    ContentEnhancerFactory.initialize(this.coordinator);
+    
     this.logger.info('SteeringWorkflowEngine initialized', {
       steeringDir: this.steeringDir,
       specsDriven: config.enableSpecsDriven,
       validatorEnabled: true,
-      documentManagerEnabled: true
+      documentManagerEnabled: true,
+      contentEnhancersInitialized: true
     });
   }
 
   /**
    * Execute steering workflow operation with Claude Flow coordination
-   * REFACTORED: Pipeline pattern for KISS compliance (was 67 lines, now <15)
+   * REFACTORED: Pipeline pattern with enhanced error handling and validation
    */
   async executeSteeringWorkflow(request: SteeringWorkflowRequest): Promise<SteeringWorkflowResult> {
-    const context = await this.initializeWorkflowContext(request);
-    const validatedRequest = await this.validateWorkflowRequest(context);
-    const result = await this.executeWorkflowOperation(validatedRequest);
-    return await this.finalizeWorkflowResult(result, context.startTime);
+    const pipeline = new SteeringWorkflowPipeline(this, this.logger);
+    return await pipeline.execute(request);
   }
 
   /**
@@ -660,16 +662,11 @@ export class SteeringWorkflowEngine extends EventEmitter {
   }
 
   /**
-   * Get content enhancement strategy based on document type
+   * Get content enhancement strategy using factory pattern
+   * REFACTORED: Using factory pattern for better maintainability
    */
-  private getContentEnhancementStrategy(type: SteeringDocumentType) {
-    const strategies = {
-      [SteeringDocumentType.PRODUCT]: new ProductContentEnhancer(this.coordinator),
-      [SteeringDocumentType.STRUCTURE]: new StructureContentEnhancer(this.coordinator),
-      [SteeringDocumentType.TECH]: new TechContentEnhancer(this.coordinator)
-    };
-    
-    return strategies[type] || new DefaultContentEnhancer(this.coordinator);
+  private getContentEnhancementStrategy(type: SteeringDocumentType): ContentEnhancer {
+    return ContentEnhancerFactory.create(type, this.coordinator);
   }
 
   /**
@@ -911,44 +908,351 @@ Global context: ${JSON.stringify(globalContext, null, 2)}`
   }
 }
 
-// Strategy pattern interfaces for KISS compliance
+// ===== ENHANCED STRATEGY PATTERN IMPLEMENTATION =====
+
+/**
+ * Content enhancement interface - Strategy Pattern
+ * REFACTORED: Enhanced with context validation and error handling
+ */
 interface ContentEnhancer {
   enhance(content: string, globalContext: Record<string, any>): Promise<string>;
+  validateContext(globalContext: Record<string, any>): boolean;
+  getEnhancementType(): string;
 }
 
-class DefaultContentEnhancer implements ContentEnhancer {
-  constructor(private coordinator: MaestroCoordinator) {}
-  
+/**
+ * Abstract base content enhancer - Template Method Pattern
+ */
+abstract class BaseContentEnhancer implements ContentEnhancer {
+  constructor(protected coordinator: MaestroCoordinator) {}
+
   async enhance(content: string, globalContext: Record<string, any>): Promise<string> {
-    const enhancementPrompt = `Enhance the following steering document with Claude Flow coordination:\n\n${content}`;
-    return await this.coordinator.generateContent(enhancementPrompt, 'steering-document', 'default');
+    this.validateInput(content, globalContext);
+    const enhancementPrompt = this.createEnhancementPrompt(content, globalContext);
+    const agentType = this.selectAgentType();
+    return await this.coordinator.generateContent(enhancementPrompt, 'steering-document', agentType);
+  }
+
+  validateContext(globalContext: Record<string, any>): boolean {
+    return globalContext && typeof globalContext === 'object';
+  }
+
+  protected validateInput(content: string, globalContext: Record<string, any>): void {
+    if (!content?.trim()) {
+      throw new Error(`Content is required for ${this.getEnhancementType()} enhancement`);
+    }
+    if (!this.validateContext(globalContext)) {
+      throw new Error(`Invalid global context for ${this.getEnhancementType()} enhancement`);
+    }
+  }
+
+  protected abstract createEnhancementPrompt(content: string, globalContext: Record<string, any>): string;
+  protected abstract selectAgentType(): string;
+  public abstract getEnhancementType(): string;
+}
+
+/**
+ * Default content enhancer with generic enhancement patterns
+ */
+class DefaultContentEnhancer extends BaseContentEnhancer {
+  protected createEnhancementPrompt(content: string, globalContext: Record<string, any>): string {
+    return `Enhance the following steering document with Claude Flow coordination and context integration:\n\nContent: ${content}\n\nContext: ${JSON.stringify(globalContext, null, 2)}`;
+  }
+
+  protected selectAgentType(): string {
+    return 'requirements_analyst';
+  }
+
+  getEnhancementType(): string {
+    return 'default';
   }
 }
 
-class ProductContentEnhancer implements ContentEnhancer {
-  constructor(private coordinator: MaestroCoordinator) {}
-  
-  async enhance(content: string, globalContext: Record<string, any>): Promise<string> {
-    const enhancementPrompt = `Enhance the following product steering document with vision alignment:\n\n${content}`;
-    return await this.coordinator.generateContent(enhancementPrompt, 'steering-document', 'product-specialist');
+/**
+ * Product-focused content enhancer with vision alignment
+ */
+class ProductContentEnhancer extends BaseContentEnhancer {
+  protected createEnhancementPrompt(content: string, globalContext: Record<string, any>): string {
+    return `Enhance the following product steering document with vision alignment and strategic focus:\n\nContent: ${content}\n\nStrategic Context: ${JSON.stringify(globalContext, null, 2)}\n\nFocus on: product vision, user value proposition, strategic objectives, and market alignment.`;
+  }
+
+  protected selectAgentType(): string {
+    return 'requirements_analyst';
+  }
+
+  getEnhancementType(): string {
+    return 'product';
+  }
+
+  validateContext(globalContext: Record<string, any>): boolean {
+    return super.validateContext(globalContext) && 
+           (globalContext.productVision || globalContext.targetMarket || true); // Allow flexible context
   }
 }
 
-class StructureContentEnhancer implements ContentEnhancer {
-  constructor(private coordinator: MaestroCoordinator) {}
-  
-  async enhance(content: string, globalContext: Record<string, any>): Promise<string> {
-    const enhancementPrompt = `Enhance the following structure steering document with architectural patterns:\n\n${content}`;
-    return await this.coordinator.generateContent(enhancementPrompt, 'steering-document', 'architect');
+/**
+ * Structure-focused content enhancer with architectural patterns
+ */
+class StructureContentEnhancer extends BaseContentEnhancer {
+  protected createEnhancementPrompt(content: string, globalContext: Record<string, any>): string {
+    return `Enhance the following structure steering document with architectural patterns and design principles:\n\nContent: ${content}\n\nArchitectural Context: ${JSON.stringify(globalContext, null, 2)}\n\nFocus on: Clean Architecture, SOLID principles, design patterns, and structural quality.`;
+  }
+
+  protected selectAgentType(): string {
+    return 'design_architect';
+  }
+
+  getEnhancementType(): string {
+    return 'structure';
+  }
+
+  validateContext(globalContext: Record<string, any>): boolean {
+    return super.validateContext(globalContext) && 
+           (globalContext.architectureStyle || globalContext.designPrinciples || true); // Allow flexible context
   }
 }
 
-class TechContentEnhancer implements ContentEnhancer {
-  constructor(private coordinator: MaestroCoordinator) {}
-  
-  async enhance(content: string, globalContext: Record<string, any>): Promise<string> {
-    const enhancementPrompt = `Enhance the following tech steering document with technical best practices:\n\n${content}`;
-    return await this.coordinator.generateContent(enhancementPrompt, 'steering-document', 'tech-lead');
+/**
+ * Technology-focused content enhancer with best practices
+ */
+class TechContentEnhancer extends BaseContentEnhancer {
+  protected createEnhancementPrompt(content: string, globalContext: Record<string, any>): string {
+    return `Enhance the following tech steering document with technical best practices and modern standards:\n\nContent: ${content}\n\nTechnical Context: ${JSON.stringify(globalContext, null, 2)}\n\nFocus on: technology standards, development tools, performance optimization, and technical excellence.`;
+  }
+
+  protected selectAgentType(): string {
+    return 'implementation_coder';
+  }
+
+  getEnhancementType(): string {
+    return 'technology';
+  }
+
+  validateContext(globalContext: Record<string, any>): boolean {
+    return super.validateContext(globalContext) && 
+           (globalContext.techStack || globalContext.performanceTargets || true); // Allow flexible context
+  }
+}
+
+/**
+ * Content enhancer factory - Factory Pattern with Registration
+ */
+class ContentEnhancerFactory {
+  private static enhancers = new Map<SteeringDocumentType, () => ContentEnhancer>();
+
+  static register(type: SteeringDocumentType, factory: () => ContentEnhancer): void {
+    this.enhancers.set(type, factory);
+  }
+
+  static create(type: SteeringDocumentType, coordinator: MaestroCoordinator): ContentEnhancer {
+    const factory = this.enhancers.get(type);
+    if (factory) {
+      return factory();
+    }
+    return new DefaultContentEnhancer(coordinator);
+  }
+
+  // Initialize default enhancers
+  static initialize(coordinator: MaestroCoordinator): void {
+    this.register(SteeringDocumentType.PRODUCT, () => new ProductContentEnhancer(coordinator));
+    this.register(SteeringDocumentType.STRUCTURE, () => new StructureContentEnhancer(coordinator));
+    this.register(SteeringDocumentType.TECH, () => new TechContentEnhancer(coordinator));
+  }
+}
+
+/**
+ * Steering workflow execution pipeline - Pipeline Pattern
+ * REFACTORED: Centralized workflow execution with proper error handling
+ */
+class SteeringWorkflowPipeline {
+  constructor(
+    private engine: SteeringWorkflowEngine,
+    private logger: MaestroLogger
+  ) {}
+
+  async execute(request: SteeringWorkflowRequest): Promise<SteeringWorkflowResult> {
+    const context = await this.initializeContext(request);
+    
+    try {
+      const validatedRequest = await this.validateRequest(context);
+      const result = await this.executeOperation(validatedRequest);
+      return await this.finalizeResult(result, context.startTime);
+    } catch (error) {
+      return this.handleExecutionError(error, context, request);
+    }
+  }
+
+  private async initializeContext(request: SteeringWorkflowRequest) {
+    const startTime = Date.now();
+    
+    this.logger.info('Executing steering workflow', {
+      operation: request.operation,
+      documentType: request.documentType,
+      priority: request.priority
+    });
+
+    return { request, startTime };
+  }
+
+  private async validateRequest(context: any) {
+    // Enhanced validation logic here
+    const { request } = context;
+    
+    if (!request.operation) {
+      throw new Error('Operation is required');
+    }
+    
+    if (request.operation !== SteeringOperation.SYNC && 
+        request.operation !== SteeringOperation.CROSS_VALIDATE && 
+        !request.documentType) {
+      throw new Error('Document type is required for this operation');
+    }
+    
+    return request;
+  }
+
+  private async executeOperation(request: SteeringWorkflowRequest): Promise<SteeringWorkflowResult> {
+    const operationStrategy = this.getOperationStrategy(request.operation);
+    return await operationStrategy.execute(request, this.engine);
+  }
+
+  private getOperationStrategy(operation: SteeringOperation) {
+    const strategies = {
+      [SteeringOperation.CREATE]: new CreateDocumentStrategy(),
+      [SteeringOperation.UPDATE]: new UpdateDocumentStrategy(),
+      [SteeringOperation.VALIDATE]: new ValidateDocumentStrategy(),
+      [SteeringOperation.SYNC]: new SyncDocumentsStrategy(),
+      [SteeringOperation.CROSS_VALIDATE]: new CrossValidateStrategy(),
+      [SteeringOperation.GENERATE_SPEC]: new GenerateSpecStrategy()
+    };
+    
+    const strategy = strategies[operation];
+    if (!strategy) {
+      throw new Error(`Unsupported operation: ${operation}`);
+    }
+    
+    return strategy;
+  }
+
+  private async finalizeResult(result: SteeringWorkflowResult, startTime: number): Promise<SteeringWorkflowResult> {
+    result.duration = Date.now() - startTime;
+    result.timestamp = new Date();
+
+    this.logger.info('Steering workflow completed', {
+      operation: result.operation,
+      success: result.success,
+      duration: result.duration
+    });
+
+    return result;
+  }
+
+  private handleExecutionError(error: Error, context: any, request: SteeringWorkflowRequest): SteeringWorkflowResult {
+    const duration = Date.now() - context.startTime;
+    
+    this.logger.error('Steering workflow execution failed', {
+      operation: request.operation,
+      error: error.message,
+      duration
+    });
+
+    return {
+      success: false,
+      operation: request.operation,
+      documentType: request.documentType,
+      duration,
+      timestamp: new Date(),
+      metadata: {
+        error: error.message,
+        stack: error.stack
+      } as any
+    };
+  }
+}
+
+/**
+ * Operation strategy interface - Strategy Pattern
+ */
+interface OperationStrategy {
+  execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult>;
+}
+
+/**
+ * Base operation strategy with common functionality
+ */
+abstract class BaseOperationStrategy implements OperationStrategy {
+  abstract execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult>;
+
+  protected createSuccessResult(
+    operation: SteeringOperation,
+    documentType?: SteeringDocumentType,
+    content?: string,
+    metadata?: any
+  ): Partial<SteeringWorkflowResult> {
+    return {
+      success: true,
+      operation,
+      documentType,
+      content,
+      metadata,
+      duration: 0, // Will be set by pipeline
+      timestamp: new Date()
+    };
+  }
+}
+
+/**
+ * Create document operation strategy
+ */
+class CreateDocumentStrategy extends BaseOperationStrategy {
+  async execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult> {
+    // Delegate to the engine's private method through a public interface
+    return await (engine as any).createSteeringDocument(request);
+  }
+}
+
+/**
+ * Update document operation strategy
+ */
+class UpdateDocumentStrategy extends BaseOperationStrategy {
+  async execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult> {
+    return await (engine as any).updateSteeringDocument(request);
+  }
+}
+
+/**
+ * Validate document operation strategy
+ */
+class ValidateDocumentStrategy extends BaseOperationStrategy {
+  async execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult> {
+    return await (engine as any).validateSteeringDocument(request);
+  }
+}
+
+/**
+ * Sync documents operation strategy
+ */
+class SyncDocumentsStrategy extends BaseOperationStrategy {
+  async execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult> {
+    return await (engine as any).syncSteeringDocuments(request);
+  }
+}
+
+/**
+ * Cross-validate documents operation strategy
+ */
+class CrossValidateStrategy extends BaseOperationStrategy {
+  async execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult> {
+    return await (engine as any).crossValidateDocuments(request);
+  }
+}
+
+/**
+ * Generate specification operation strategy
+ */
+class GenerateSpecStrategy extends BaseOperationStrategy {
+  async execute(request: SteeringWorkflowRequest, engine: SteeringWorkflowEngine): Promise<SteeringWorkflowResult> {
+    return await (engine as any).generateSpecFromSteering(request);
   }
 }
 

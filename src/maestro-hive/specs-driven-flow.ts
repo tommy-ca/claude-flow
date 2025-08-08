@@ -709,13 +709,23 @@ export class SpecsDrivenFlowOrchestrator extends EventEmitter {
 }
 
 // Strategy classes for KISS compliance - Method extraction support
+/**
+ * Enhanced workflow progress analyzer - Single Responsibility Principle
+ * REFACTORED: Extracted status analysis strategies for better maintainability
+ */
 class WorkflowProgressAnalyzer {
-  constructor(private workflow: SpecsDrivenWorkflow) {}
+  private readonly statusAnalyzer: PhaseStatusAnalyzer;
+  private readonly progressCalculator: ProgressCalculator;
+
+  constructor(private workflow: SpecsDrivenWorkflow) {
+    this.statusAnalyzer = new PhaseStatusAnalyzer();
+    this.progressCalculator = new ProgressCalculator();
+  }
   
   async analyze() {
     const phaseProgress = this.analyzePhaseProgress();
-    const currentPhase = this.determineCurrentPhase(phaseProgress);
-    const overallProgress = this.calculateOverallProgress(phaseProgress);
+    const currentPhase = this.progressCalculator.determineCurrentPhase(phaseProgress);
+    const overallProgress = this.progressCalculator.calculateOverallProgress(phaseProgress);
     
     return {
       workflow: this.workflow,
@@ -730,76 +740,115 @@ class WorkflowProgressAnalyzer {
     
     for (const phase of Object.values(SpecsDrivenPhase)) {
       const phaseTasks = this.workflow.tasks.filter(t => (t as any).phase === phase);
-      phaseProgress[phase] = this.analyzePhaseTaskStatus(phaseTasks);
+      phaseProgress[phase] = this.statusAnalyzer.analyzePhaseTaskStatus(phaseTasks);
     }
     
     return phaseProgress;
   }
-  
-  private analyzePhaseTaskStatus(phaseTasks: MaestroTask[]) {
+}
+
+/**
+ * Phase status analysis service - Single Responsibility Principle
+ */
+class PhaseStatusAnalyzer {
+  analyzePhaseTaskStatus(phaseTasks: MaestroTask[]) {
     if (phaseTasks.length === 0) return { status: 'pending' };
     
-    const completedTasks = phaseTasks.filter(t => t.status === 'completed');
-    const inProgressTasks = phaseTasks.filter(t => t.status === 'in_progress');
-    const failedTasks = phaseTasks.filter(t => t.status === 'failed');
-    
-    if (failedTasks.length > 0) {
-      return { status: 'failed', issues: failedTasks.map(t => `Task ${t.id} failed`) };
-    } else if (completedTasks.length === phaseTasks.length) {
-      return { status: 'completed', score: 85, deliverables: phaseTasks.map(t => `${t.id}`) };
-    } else if (inProgressTasks.length > 0) {
+    const taskCounts = this.categorizeTasksByStatus(phaseTasks);
+    return this.determinePhaseStatus(taskCounts, phaseTasks);
+  }
+
+  private categorizeTasksByStatus(phaseTasks: MaestroTask[]) {
+    return {
+      completed: phaseTasks.filter(t => t.status === 'completed'),
+      inProgress: phaseTasks.filter(t => t.status === 'in_progress'),
+      failed: phaseTasks.filter(t => t.status === 'failed'),
+      total: phaseTasks.length
+    };
+  }
+
+  private determinePhaseStatus(taskCounts: any, phaseTasks: MaestroTask[]) {
+    if (taskCounts.failed.length > 0) {
+      return { 
+        status: 'failed', 
+        issues: taskCounts.failed.map((t: MaestroTask) => `Task ${t.id} failed`) 
+      };
+    } else if (taskCounts.completed.length === taskCounts.total) {
+      return { 
+        status: 'completed', 
+        score: 85, 
+        deliverables: phaseTasks.map(t => `${t.id}`) 
+      };
+    } else if (taskCounts.inProgress.length > 0) {
       return { status: 'in_progress' };
     } else {
       return { status: 'pending' };
     }
   }
-  
-  private determineCurrentPhase(phaseProgress: Record<SpecsDrivenPhase, any>): SpecsDrivenPhase | null {
+}
+
+/**
+ * Progress calculation service - Single Responsibility Principle
+ */
+class ProgressCalculator {
+  determineCurrentPhase(phaseProgress: Record<SpecsDrivenPhase, any>): SpecsDrivenPhase | null {
     for (const phase of Object.values(SpecsDrivenPhase)) {
-      if (phaseProgress[phase].status === 'in_progress' || phaseProgress[phase].status === 'pending') {
+      const status = phaseProgress[phase].status;
+      if (status === 'in_progress' || status === 'pending') {
         return phase;
       }
     }
     return null;
   }
   
-  private calculateOverallProgress(phaseProgress: Record<SpecsDrivenPhase, any>): number {
+  calculateOverallProgress(phaseProgress: Record<SpecsDrivenPhase, any>): number {
     const completedPhases = Object.values(phaseProgress)
       .filter(progress => progress.status === 'completed').length;
-    return (completedPhases / Object.keys(SpecsDrivenPhase).length) * 100;
+    const totalPhases = Object.keys(SpecsDrivenPhase).length;
+    return (completedPhases / totalPhases) * 100;
   }
 }
 
+/**
+ * Enhanced specs-driven workflow builder - Builder Pattern with Validation
+ * REFACTORED: Added validation, error handling, and phase initialization strategies
+ */
 class SpecsDrivenWorkflowBuilder {
-  private name: string = '';
-  private description: string = '';
-  private requirements: string[] = [];
-  private stakeholders: string[] = [];
-  private customQualityGates?: Partial<Record<SpecsDrivenPhase, Partial<PhaseQualityGate>>>;
+  private workflowData: WorkflowBuilderData;
+  private readonly phaseInitializer: PhaseInitializer;
+  private readonly workflowValidator: WorkflowValidator;
   
-  constructor(private coordinator: MaestroCoordinator, private logger: MaestroLogger) {}
+  constructor(private coordinator: MaestroCoordinator, private logger: MaestroLogger) {
+    this.workflowData = new WorkflowBuilderData();
+    this.phaseInitializer = new PhaseInitializer();
+    this.workflowValidator = new WorkflowValidator();
+  }
   
   setBasicInfo(name: string, description: string): this {
-    this.name = name;
-    this.description = description;
+    this.workflowData.setBasicInfo(name, description);
     return this;
   }
   
   setRequirements(requirements: string[], stakeholders: string[]): this {
-    this.requirements = requirements;
-    this.stakeholders = stakeholders;
+    this.workflowData.setRequirements(requirements, stakeholders);
     return this;
   }
   
   setCustomQualityGates(customQualityGates?: Partial<Record<SpecsDrivenPhase, Partial<PhaseQualityGate>>>): this {
-    this.customQualityGates = customQualityGates;
+    this.workflowData.setCustomQualityGates(customQualityGates);
     return this;
   }
   
   async build(): Promise<SpecsDrivenWorkflow> {
-    this.logger.info('Building specs-driven workflow', { name: this.name });
+    this.workflowValidator.validateBuilder(this.workflowData);
     
-    const baseWorkflow = await this.coordinator.createWorkflow(this.name, this.description);
+    this.logger.info('Building specs-driven workflow', { name: this.workflowData.name });
+    
+    const baseWorkflow = await this.coordinator.createWorkflow(
+      this.workflowData.name, 
+      this.workflowData.description
+    );
+    
     const specsDrivenWorkflow = this.createEnhancedWorkflow(baseWorkflow);
     
     this.logger.info('Specs-driven workflow built', { workflowId: specsDrivenWorkflow.id });
@@ -809,27 +858,99 @@ class SpecsDrivenWorkflowBuilder {
   private createEnhancedWorkflow(baseWorkflow: MaestroWorkflow): SpecsDrivenWorkflow {
     return {
       ...baseWorkflow,
-      specificationPhase: {
-        requirements: this.requirements,
-        acceptanceCriteria: [],
-        stakeholders: this.stakeholders
-      },
-      designPhase: {
-        architecture: '',
-        components: [],
-        interfaces: []
-      },
-      implementationPhase: {
-        technologies: [],
-        patterns: [],
-        testStrategy: ''
-      },
-      validationPhase: {
-        qualityGates: [],
-        reviewCriteria: [],
-        acceptanceTests: []
-      }
+      ...this.phaseInitializer.initializeAllPhases(this.workflowData)
     };
+  }
+}
+
+/**
+ * Workflow builder data container - Data Transfer Object
+ */
+class WorkflowBuilderData {
+  public name: string = '';
+  public description: string = '';
+  public requirements: string[] = [];
+  public stakeholders: string[] = [];
+  public customQualityGates?: Partial<Record<SpecsDrivenPhase, Partial<PhaseQualityGate>>>;
+
+  setBasicInfo(name: string, description: string): void {
+    this.name = name;
+    this.description = description;
+  }
+
+  setRequirements(requirements: string[], stakeholders: string[]): void {
+    this.requirements = requirements;
+    this.stakeholders = stakeholders;
+  }
+
+  setCustomQualityGates(customQualityGates?: Partial<Record<SpecsDrivenPhase, Partial<PhaseQualityGate>>>): void {
+    this.customQualityGates = customQualityGates;
+  }
+}
+
+/**
+ * Phase initialization service - Single Responsibility Principle
+ */
+class PhaseInitializer {
+  initializeAllPhases(data: WorkflowBuilderData) {
+    return {
+      specificationPhase: this.initializeSpecificationPhase(data),
+      designPhase: this.initializeDesignPhase(),
+      implementationPhase: this.initializeImplementationPhase(),
+      validationPhase: this.initializeValidationPhase()
+    };
+  }
+
+  private initializeSpecificationPhase(data: WorkflowBuilderData) {
+    return {
+      requirements: data.requirements,
+      acceptanceCriteria: [],
+      stakeholders: data.stakeholders
+    };
+  }
+
+  private initializeDesignPhase() {
+    return {
+      architecture: '',
+      components: [],
+      interfaces: []
+    };
+  }
+
+  private initializeImplementationPhase() {
+    return {
+      technologies: [],
+      patterns: [],
+      testStrategy: ''
+    };
+  }
+
+  private initializeValidationPhase() {
+    return {
+      qualityGates: [],
+      reviewCriteria: [],
+      acceptanceTests: []
+    };
+  }
+}
+
+/**
+ * Workflow validation service - Single Responsibility Principle
+ */
+class WorkflowValidator {
+  validateBuilder(data: WorkflowBuilderData): void {
+    if (!data.name?.trim()) {
+      throw new Error('Workflow name is required');
+    }
+    if (!data.description?.trim()) {
+      throw new Error('Workflow description is required');
+    }
+    if (!data.requirements || data.requirements.length === 0) {
+      throw new Error('At least one requirement is required');
+    }
+    if (!data.stakeholders || data.stakeholders.length === 0) {
+      throw new Error('At least one stakeholder is required');
+    }
   }
 }
 

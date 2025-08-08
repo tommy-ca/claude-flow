@@ -1,8 +1,15 @@
 /**
- * Maestro Hive Mind Interfaces
+ * Maestro Hive Mind Interfaces - Enhanced & Standardized
  * 
  * Unified interfaces that bridge SimpleMaestro functionality with HiveMind architecture
  * Following specs-driven flow and KISS/SOLID principles
+ * 
+ * REFACTORED: Standardized interface structure, enhanced documentation,
+ * improved type safety, and added validation interfaces
+ * 
+ * @version 2.0.0
+ * @author Claude Flow Refactoring Specialist Agent
+ * @since 2025-08-05
  */
 
 import type { 
@@ -20,18 +27,68 @@ import type {
 // ===== MAESTRO CORE INTERFACES =====
 
 /**
- * Enhanced Task interface that extends HiveMind Task with Maestro-specific properties
+ * Enhanced Task interface with strict typing and validation
+ * REFACTORED: Added validation, better type safety, and performance metrics
  */
 export interface MaestroTask extends Omit<HiveTask, 'id' | 'swarmId'> {
-  id: string;
-  swarmId?: string; // Optional for compatibility
-  type: 'spec' | 'design' | 'implementation' | 'test' | 'review';
+  readonly id: string;
+  swarmId?: string;
+  type: TaskType;
   assignedTo?: string;
   created: Date;
   completed?: Date;
-  workflow?: string; // Link to workflow
-  quality?: number; // Quality score 0-1
-  improvements?: string[]; // Suggested improvements
+  workflow?: string;
+  quality?: QualityScore;
+  improvements?: readonly string[];
+  
+  // Enhanced properties for better tracking
+  estimatedDuration?: number; // milliseconds
+  actualDuration?: number; // milliseconds
+  complexity?: TaskComplexity;
+  tags?: readonly string[];
+  parentTask?: string;
+  subtasks?: readonly string[];
+  
+  // Validation and error tracking
+  validationErrors?: readonly ValidationError[];
+  retryCount?: number;
+  lastRetryReason?: string;
+}
+
+/**
+ * Task type enumeration for better type safety
+ */
+export type TaskType = 'spec' | 'design' | 'implementation' | 'test' | 'review';
+
+/**
+ * Task complexity levels
+ */
+export type TaskComplexity = 'trivial' | 'simple' | 'moderate' | 'complex' | 'critical';
+
+/**
+ * Quality score with validation
+ */
+export type QualityScore = number & { readonly __brand: 'QualityScore' };
+
+/**
+ * Helper function to create quality score with validation
+ */
+export function createQualityScore(value: number): QualityScore {
+  if (value < 0 || value > 1) {
+    throw new Error('Quality score must be between 0 and 1');
+  }
+  return value as QualityScore;
+}
+
+/**
+ * Validation error interface
+ */
+export interface ValidationError {
+  readonly code: string;
+  readonly message: string;
+  readonly field?: string;
+  readonly severity: 'error' | 'warning' | 'info';
+  readonly timestamp: Date;
 }
 
 /**
@@ -52,17 +109,48 @@ export interface MaestroWorkflow {
 }
 
 /**
- * Enhanced ValidationResult with HiveMind consensus integration
+ * Enhanced ValidationResult with comprehensive validation tracking
+ * REFACTORED: Added detailed validation metrics and consensus tracking
  */
 export interface MaestroValidationResult {
-  valid: boolean;
-  score: number; // 0-1
-  errors: string[];
-  warnings: string[];
-  suggestions: string[];
-  consensusAchieved?: boolean;
-  agentValidations?: Record<string, number>; // Agent ID -> score
-  timestamp: Date;
+  readonly valid: boolean;
+  readonly score: QualityScore;
+  readonly errors: readonly ValidationError[];
+  readonly warnings: readonly ValidationError[];
+  readonly suggestions: readonly string[];
+  readonly consensusAchieved?: boolean;
+  readonly agentValidations?: ReadonlyMap<string, ValidationAgentResult>;
+  readonly timestamp: Date;
+  
+  // Enhanced validation metrics
+  readonly validationDuration: number; // milliseconds
+  readonly rulesApplied: readonly string[];
+  readonly passedRules: readonly string[];
+  readonly failedRules: readonly string[];
+  readonly validationContext?: ValidationContext;
+}
+
+/**
+ * Agent validation result details
+ */
+export interface ValidationAgentResult {
+  readonly agentId: string;
+  readonly agentType: AgentType;
+  readonly score: QualityScore;
+  readonly confidence: number; // 0-1
+  readonly validationTime: number; // milliseconds
+  readonly specificFindings: readonly string[];
+}
+
+/**
+ * Validation context for better traceability
+ */
+export interface ValidationContext {
+  readonly validationType: string;
+  readonly requiredStandards: readonly string[];
+  readonly businessRules: readonly string[];
+  readonly technicalConstraints: readonly string[];
+  readonly stakeholderRequirements: readonly string[];
 }
 
 /**
@@ -298,16 +386,73 @@ export interface MaestroLogger {
 }
 
 /**
- * Error types for the Maestro Hive system
+ * Enhanced error system with categorization and recovery suggestions
+ * REFACTORED: Added error categorization, severity levels, and recovery guidance
  */
 export interface MaestroError extends Error {
-  code: string;
-  taskId?: string;
-  workflowId?: string;
-  agentId?: string;
-  swarmId?: string;
-  context?: Record<string, any>;
-  timestamp: Date;
+  readonly code: string;
+  readonly category: ErrorCategory;
+  readonly severity: ErrorSeverity;
+  readonly taskId?: string;
+  readonly workflowId?: string;
+  readonly agentId?: string;
+  readonly swarmId?: string;
+  readonly context?: Readonly<Record<string, any>>;
+  readonly timestamp: Date;
+  
+  // Enhanced error information
+  readonly recoverable: boolean;
+  readonly recoverySuggestions: readonly string[];
+  readonly relatedErrors: readonly string[]; // Related error IDs
+  readonly userFriendlyMessage: string;
+  readonly technicalDetails?: Readonly<Record<string, any>>;
+}
+
+/**
+ * Error categories for better error handling
+ */
+export type ErrorCategory = 
+  | 'validation'
+  | 'network'
+  | 'authentication'
+  | 'authorization'
+  | 'resource'
+  | 'business_logic'
+  | 'system'
+  | 'configuration'
+  | 'data'
+  | 'external_service';
+
+/**
+ * Error severity levels
+ */
+export type ErrorSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+/**
+ * Error factory for creating standardized errors
+ */
+export class MaestroErrorFactory {
+  static create(
+    code: string,
+    message: string,
+    category: ErrorCategory,
+    severity: ErrorSeverity,
+    options: Partial<MaestroError> = {}
+  ): MaestroError {
+    const error = new Error(message) as MaestroError;
+    Object.assign(error, {
+      code,
+      category,
+      severity,
+      timestamp: new Date(),
+      recoverable: severity !== 'critical',
+      recoverySuggestions: [],
+      relatedErrors: [],
+      userFriendlyMessage: message,
+      ...options
+    });
+    return error;
+  }
 }
 
 /**

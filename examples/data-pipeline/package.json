@@ -1,1 +1,7 @@
-Package configuration
+{
+  "name": "data-pipeline-example",
+  "version": "1.0.0",
+  "description": "Data pipeline example",
+  "main": "index.js",
+  "private": true
+}
