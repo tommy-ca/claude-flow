@@ -1,0 +1,402 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claude-flow.io/schemas/a2a/error-codes.json",
+  "title": "A2A Error Codes",
+  "description": "Error codes and handling for A2A protocol",
+  "type": "object",
+  "properties": {
+    "errorCodes": {
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "type": "object",
+          "description": "Protocol-level errors",
+          "properties": {
+            "A2A-P-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-P-001" },
+                "message": { "const": "Invalid protocol version" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-P-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-P-002" },
+                "message": { "const": "Unsupported message type" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-P-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-P-003" },
+                "message": { "const": "Message validation failed" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-P-004": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-P-004" },
+                "message": { "const": "Message too large" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-P-005": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-P-005" },
+                "message": { "const": "Message expired" },
+                "severity": { "const": "warning" },
+                "retryable": { "const": true }
+              }
+            }
+          }
+        },
+        "routing": {
+          "type": "object",
+          "description": "Routing and addressing errors",
+          "properties": {
+            "A2A-R-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-R-001" },
+                "message": { "const": "Agent not found" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-R-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-R-002" },
+                "message": { "const": "Agent unreachable" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-R-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-R-003" },
+                "message": { "const": "Invalid agent address" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-R-004": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-R-004" },
+                "message": { "const": "No route to agent" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            }
+          }
+        },
+        "capability": {
+          "type": "object",
+          "description": "Capability-related errors",
+          "properties": {
+            "A2A-C-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-C-001" },
+                "message": { "const": "Capability not found" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-C-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-C-002" },
+                "message": { "const": "Capability version mismatch" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-C-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-C-003" },
+                "message": { "const": "No agents with required capability" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            }
+          }
+        },
+        "task": {
+          "type": "object",
+          "description": "Task execution errors",
+          "properties": {
+            "A2A-T-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-T-001" },
+                "message": { "const": "Task not found" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-T-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-T-002" },
+                "message": { "const": "Task timeout" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-T-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-T-003" },
+                "message": { "const": "Task cancelled" },
+                "severity": { "const": "warning" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-T-004": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-T-004" },
+                "message": { "const": "Task execution failed" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-T-005": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-T-005" },
+                "message": { "const": "Invalid task input" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-T-006": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-T-006" },
+                "message": { "const": "Task queue full" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            }
+          }
+        },
+        "memory": {
+          "type": "object",
+          "description": "Memory protocol errors",
+          "properties": {
+            "A2A-M-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-M-001" },
+                "message": { "const": "Namespace not found" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-M-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-M-002" },
+                "message": { "const": "Key not found" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-M-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-M-003" },
+                "message": { "const": "Permission denied" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-M-004": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-M-004" },
+                "message": { "const": "Version mismatch (optimistic lock)" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-M-005": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-M-005" },
+                "message": { "const": "Lock timeout" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-M-006": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-M-006" },
+                "message": { "const": "Transaction aborted" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-M-007": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-M-007" },
+                "message": { "const": "Quota exceeded" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            }
+          }
+        },
+        "registry": {
+          "type": "object",
+          "description": "Service registry errors",
+          "properties": {
+            "A2A-REG-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-REG-001" },
+                "message": { "const": "Registration failed" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-REG-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-REG-002" },
+                "message": { "const": "Agent already registered" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-REG-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-REG-003" },
+                "message": { "const": "Heartbeat timeout" },
+                "severity": { "const": "warning" },
+                "retryable": { "const": true }
+              }
+            }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "description": "Authentication and authorization errors",
+          "properties": {
+            "A2A-AUTH-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-AUTH-001" },
+                "message": { "const": "Authentication required" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-AUTH-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-AUTH-002" },
+                "message": { "const": "Invalid credentials" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-AUTH-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-AUTH-003" },
+                "message": { "const": "Authorization failed" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            },
+            "A2A-AUTH-004": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-AUTH-004" },
+                "message": { "const": "Token expired" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true }
+              }
+            }
+          }
+        },
+        "rateLimit": {
+          "type": "object",
+          "description": "Rate limiting errors",
+          "properties": {
+            "A2A-RL-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-RL-001" },
+                "message": { "const": "Rate limit exceeded" },
+                "severity": { "const": "error" },
+                "retryable": { "const": true },
+                "retryAfterMs": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "A2A-RL-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-RL-002" },
+                "message": { "const": "Quota exceeded" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            }
+          }
+        },
+        "system": {
+          "type": "object",
+          "description": "System-level errors",
+          "properties": {
+            "A2A-SYS-001": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-SYS-001" },
+                "message": { "const": "Internal server error" },
+                "severity": { "const": "critical" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-SYS-002": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-SYS-002" },
+                "message": { "const": "Service unavailable" },
+                "severity": { "const": "critical" },
+                "retryable": { "const": true }
+              }
+            },
+            "A2A-SYS-003": {
+              "type": "object",
+              "properties": {
+                "code": { "const": "A2A-SYS-003" },
+                "message": { "const": "Not implemented" },
+                "severity": { "const": "error" },
+                "retryable": { "const": false }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

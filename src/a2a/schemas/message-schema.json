@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://claude-flow.io/schemas/a2a/message-envelope.json",
+  "title": "A2A Message Envelope",
+  "description": "Message envelope for Agent-to-Agent communication in Claude Flow",
+  "type": "object",
+  "required": [
+    "version",
+    "type",
+    "messageId",
+    "from",
+    "to",
+    "priority",
+    "timestamp",
+    "payload"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Protocol version (semantic versioning)"
+    },
+    "type": {
+      "type": "string",
+      "pattern": "^a2a\\.",
+      "description": "Message type identifier"
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique message identifier"
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Correlation ID for request/response pairing"
+    },
+    "replyTo": {
+      "type": "string",
+      "description": "Return address for responses"
+    },
+    "from": {
+      "$ref": "#/definitions/AgentAddress"
+    },
+    "to": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/AgentAddress"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AgentAddress"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "description": "Message priority (0=critical, 4=bulk)"
+    },
+    "ttl": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Time-to-live in milliseconds"
+    },
+    "expiresAt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Absolute expiration timestamp (Unix ms)"
+    },
+    "timestamp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Message creation timestamp (Unix ms)"
+    },
+    "spanId": {
+      "type": "string",
+      "description": "Distributed tracing span ID"
+    },
+    "traceId": {
+      "type": "string",
+      "description": "Distributed tracing trace ID"
+    },
+    "parentSpanId": {
+      "type": "string",
+      "description": "Parent span ID for nested operations"
+    },
+    "payload": {
+      "description": "Message payload (type-specific)"
+    },
+    "headers": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Custom headers"
+    },
+    "signature": {
+      "type": "string",
+      "description": "Message signature for verification"
+    },
+    "encryptedPayload": {
+      "type": "boolean",
+      "description": "Indicates if payload is encrypted"
+    }
+  },
+  "definitions": {
+    "AgentAddress": {
+      "type": "object",
+      "required": ["agentId"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "swarmId": {
+          "type": "string"
+        },
+        "nodeId": {
+          "type": "string"
+        },
+        "namespace": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
