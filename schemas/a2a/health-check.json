@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/health-check.json",
+  "title": "Health Check Messages",
+  "description": "Schemas for agent health check and heartbeat messages",
+  "$defs": {
+    "healthCheckRequest": {
+      "type": "object",
+      "properties": {
+        "checkType": {
+          "type": "string",
+          "enum": ["liveness", "readiness", "full"],
+          "description": "Type of health check",
+          "default": "full"
+        },
+        "includeMetrics": {
+          "type": "boolean",
+          "description": "Include performance metrics",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "healthCheckResponse": {
+      "type": "object",
+      "required": ["agentId", "healthy", "state"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent identifier"
+        },
+        "healthy": {
+          "type": "boolean",
+          "description": "Overall health status"
+        },
+        "state": {
+          "type": "string",
+          "enum": ["initializing", "idle", "busy", "waiting", "error", "shutting_down", "offline"],
+          "description": "Agent state"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/healthCheck"
+          },
+          "description": "Individual health checks"
+        },
+        "metrics": {
+          "$ref": "#/$defs/healthMetrics",
+          "description": "Health metrics"
+        },
+        "message": {
+          "type": "string",
+          "description": "Additional health message"
+        }
+      },
+      "additionalProperties": false
+    },
+    "healthCheck": {
+      "type": "object",
+      "required": ["name", "status"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Health check name"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pass", "fail", "warn"],
+          "description": "Check status"
+        },
+        "message": {
+          "type": "string",
+          "description": "Check message"
+        },
+        "observedValue": {
+          "description": "Observed value"
+        },
+        "observedUnit": {
+          "type": "string",
+          "description": "Unit of observed value"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "healthMetrics": {
+      "type": "object",
+      "properties": {
+        "cpuUsage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "CPU usage (0.0 to 1.0)"
+        },
+        "memoryUsage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Memory usage (0.0 to 1.0)"
+        },
+        "avgResponseTimeMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Average response time in milliseconds"
+        },
+        "p95ResponseTimeMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "P95 response time in milliseconds"
+        },
+        "p99ResponseTimeMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "P99 response time in milliseconds"
+        },
+        "successRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Success rate (0.0 to 1.0)"
+        },
+        "errorRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Error rate (0.0 to 1.0)"
+        },
+        "custom": {
+          "type": "object",
+          "description": "Custom metrics",
+          "additionalProperties": {
+            "type": "number"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "heartbeatMessage": {
+      "type": "object",
+      "required": ["agentId", "state", "currentLoad", "activeTasks", "queuedTasks", "availableSlots", "uptime"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent identifier"
+        },
+        "state": {
+          "type": "string",
+          "enum": ["initializing", "idle", "busy", "waiting", "error", "shutting_down", "offline"],
+          "description": "Current agent state"
+        },
+        "currentLoad": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Current load (0.0 to 1.0)"
+        },
+        "activeTasks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of active tasks"
+        },
+        "queuedTasks": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of queued tasks"
+        },
+        "availableSlots": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Available task slots"
+        },
+        "uptime": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Uptime in seconds"
+        },
+        "lastTaskCompletedAt": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Unix timestamp of last task completion"
+        },
+        "metrics": {
+          "$ref": "#/$defs/healthMetrics",
+          "description": "Health metrics"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "healthCheckRequest": {
+        "checkType": "full",
+        "includeMetrics": true
+      },
+      "healthCheckResponse": {
+        "agentId": "agent-researcher-001",
+        "healthy": true,
+        "state": "idle",
+        "checks": [
+          {
+            "name": "memory",
+            "status": "pass",
+            "observedValue": 1024,
+            "observedUnit": "MB"
+          },
+          {
+            "name": "disk",
+            "status": "pass",
+            "observedValue": 50,
+            "observedUnit": "percent"
+          }
+        ],
+        "metrics": {
+          "cpuUsage": 0.25,
+          "memoryUsage": 0.4,
+          "avgResponseTimeMs": 150,
+          "p95ResponseTimeMs": 300,
+          "p99ResponseTimeMs": 500,
+          "successRate": 0.98,
+          "errorRate": 0.02
+        }
+      },
+      "heartbeatMessage": {
+        "agentId": "agent-researcher-001",
+        "state": "idle",
+        "currentLoad": 0.3,
+        "activeTasks": 2,
+        "queuedTasks": 0,
+        "availableSlots": 3,
+        "uptime": 86400,
+        "lastTaskCompletedAt": 1696118400000,
+        "metrics": {
+          "cpuUsage": 0.25,
+          "memoryUsage": 0.4,
+          "successRate": 0.98
+        }
+      }
+    }
+  ]
+}

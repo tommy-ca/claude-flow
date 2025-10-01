@@ -17,7 +17,7 @@ This document provides a comprehensive gap analysis between the **A2A (Agent-to-
 - **Critical Gaps**: 12 identified
 - **High Priority Gaps**: 18 identified
 - **Medium Priority Gaps**: 23 identified
-- **Estimated Total Effort**: 320-480 person-hours (8-12 weeks for 2 developers)
+- **Estimated Total Effort**: 590-780 person-hours (13 weeks for 2 developers, includes design & contingency)
 - **Breaking Changes**: 6 areas requiring API modifications
 - **Migration Complexity**: High - Requires phased rollout
 
@@ -32,6 +32,25 @@ This document provides a comprehensive gap analysis between the **A2A (Agent-to-
 | Agent Discovery | 30% | 100% | 70% |
 | Platform Adapters | 0% | 100% | 100% |
 | Event System | 60% | 100% | 40% |
+
+---
+
+## Related Documents
+
+### A2A Protocol Specification Suite
+- [A2A Specification](./a2a/01-specification.md) - Core protocol requirements and message schemas
+- [A2A Architecture](./a2a/02-architecture.md) - System architecture and component design
+- [A2A Interface Contracts](./a2a/03-interface-contracts.md) - TypeScript interfaces and contracts
+
+### Implementation Guidance
+- **This Document**: Gap Analysis - Current state vs. required state analysis
+- [A2A Refactoring Guide](./A2A-REFACTORING-GUIDE.md) - Step-by-step refactoring instructions
+- [A2A Implementation Roadmap](./a2a/04-implementation-roadmap.md) - Phased implementation approach
+- [A2A Compliance Checklist](./A2A-COMPLIANCE-CHECKLIST.md) - Verification and acceptance criteria
+
+### Review & Quality
+- [A2A Review Report](./A2A-REVIEW-REPORT.md) - Comprehensive documentation review findings
+- [A2A Consistency Fixes](./A2A-CONSISTENCY-FIXES.md) - Documentation consistency improvements
 
 ---
 
@@ -466,7 +485,7 @@ interface IMemoryManager {
 
 ### 1.6 Event System Gaps
 
-#### 1.6.1 Event Bus Enhancement ⚠️ **MEDIUM**
+#### 1.6.1 Event Bus Enhancement ⚠️ **CRITICAL**
 
 **Current State**:
 - Event bus exists (`/src/core/event-bus.ts`)
@@ -496,8 +515,8 @@ interface IMemoryManager {
 // New: src/a2a/infrastructure/event-bus/subscription-manager.ts
 ```
 
-**Risk**: **MEDIUM**
-**Effort**: 30-40 hours
+**Risk**: **HIGH** - Required for cross-platform event-driven workflows
+**Effort**: 40-50 hours
 
 ---
 
@@ -845,6 +864,8 @@ async readMemory(key: string, namespace: string, options: MemoryReadRequest): Pr
 
 ## 4. Migration Roadmap
 
+**Standardized 4-Phase Approach** (aligned with Refactoring Guide and Implementation Roadmap):
+
 ### Phase 1: Foundation (Weeks 1-3, 80-120 hours)
 
 **Objective**: Build core A2A protocol infrastructure
@@ -874,25 +895,26 @@ Day 14-15: Version negotiation
 
 ---
 
-### Phase 2: Infrastructure (Weeks 4-6, 100-140 hours)
+### Phase 2: Platform Integration (Weeks 4-6, 100-140 hours)
 
-**Objective**: Build shared infrastructure
+**Objective**: Implement adapter framework and platform support
 
 **Deliverables**:
-1. ⏳ Service registry with agent catalog
-2. ⏳ Health monitoring system
-3. ⏳ Enhanced event bus with A2A features
-4. ⏳ Resource coordinator for cross-platform
-5. ⏳ Memory manager with A2A protocol
-6. ⏳ Conflict resolution engine
-7. ⏳ Lock manager for distributed state
+1. ⏳ Agent adapter framework (`IAgent` interface)
+2. ⏳ Claude Flow adapter (self-hosting)
+3. ⏳ Service registry with agent catalog
+4. ⏳ Capability mapping system
+5. ⏳ Agent discovery service
+6. ⏳ Lifecycle management
+7. ⏳ Platform integration hooks
 
 **Critical Path**:
 ```
-Day 1-4:   Service registry
-Day 5-7:   Health monitoring
-Day 8-11:  Event bus enhancements
-Day 12-15: Memory manager A2A layer
+Day 1-3:   IAgent interface + base class
+Day 4-6:   Claude Flow adapter
+Day 7-9:   Service registry
+Day 10-12: Capability mapper
+Day 13-15: Discovery service
 ```
 
 **Dependencies**: Phase 1 complete
@@ -901,85 +923,56 @@ Day 12-15: Memory manager A2A layer
 
 ---
 
-### Phase 3: Platform Adapters (Weeks 7-9, 100-120 hours)
+### Phase 3: Advanced Features (Weeks 7-9, 100-120 hours)
 
-**Objective**: Build platform adapter framework
+**Objective**: Add infrastructure and cross-platform features
 
 **Deliverables**:
-1. ⏳ `IAgent` abstract interface
-2. ⏳ Claude Flow adapter (wrap existing)
-3. ⏳ Codex adapter
-4. ⏳ Gemini adapter
-5. ⏳ OpenCode adapter
-6. ⏳ Capability mapper with registry
-7. ⏳ Lifecycle manager with hooks
+1. ⏳ Enhanced event bus with A2A features (P0 - Critical)
+2. ⏳ Memory manager with A2A protocol
+3. ⏳ Cross-platform memory sync
+4. ⏳ Resource coordinator
+5. ⏳ Security hardening (encryption, audit logging)
+6. ⏳ Conflict resolution engine
+7. ⏳ Health monitoring system
 
 **Critical Path**:
 ```
-Day 1-3:   IAgent interface + base class
-Day 4-6:   Claude Flow adapter
-Day 7-9:   Codex adapter
-Day 10-12: Gemini adapter
-Day 13-15: Capability mapper
+Day 1-4:   Event bus enhancements (P0)
+Day 5-8:   Memory manager A2A layer
+Day 9-11:  Resource coordinator
+Day 12-15: Security hardening
 ```
 
 **Dependencies**: Phase 2 complete
-**Risk**: **HIGH** - Requires external platform APIs
-**Testing**: Platform-specific integration tests
+**Risk**: **MEDIUM** - Complex distributed systems
+**Testing**: Integration tests, security tests
 
 ---
 
-### Phase 4: Integration (Weeks 10-11, 60-80 hours)
+### Phase 4: Production (Weeks 10-12, 110-220 hours)
 
-**Objective**: Integrate A2A with existing Claude Flow
+**Objective**: Production readiness, testing, and deployment
 
 **Deliverables**:
-1. ⏳ Agent manager A2A integration
-2. ⏳ Memory system A2A layer
-3. ⏳ Coordination manager routing
-4. ⏳ MCP server A2A tools
-5. ⏳ Hook system integration
-6. ⏳ Configuration management
-7. ⏳ Migration utilities
+1. ⏳ Comprehensive test suite (>90% coverage)
+2. ⏳ Integration tests (cross-platform scenarios)
+3. ⏳ Performance benchmarks and optimization
+4. ⏳ User documentation and API docs
+5. ⏳ Deployment automation
+6. ⏳ Monitoring and observability setup
+7. ⏳ Security audit and hardening
 
 **Critical Path**:
 ```
-Day 1-3:   Agent manager integration
-Day 4-6:   Memory integration
-Day 7-8:   MCP tools
-Day 9-10:  Configuration & migration
+Week 1:    Complete test suite + integration tests
+Week 2:    Documentation + benchmarking
+Week 3:    Security audit + deployment automation
 ```
 
 **Dependencies**: Phase 3 complete
-**Risk**: **HIGH** - Integration points
-**Testing**: End-to-end tests
-
----
-
-### Phase 5: Production Readiness (Week 12, 40-60 hours)
-
-**Objective**: Production hardening and deployment
-
-**Deliverables**:
-1. ⏳ Comprehensive test suite
-2. ⏳ Observability (metrics, tracing, logging)
-3. ⏳ Documentation
-4. ⏳ Migration guides
-5. ⏳ Performance testing
-6. ⏳ Security audit
-7. ⏳ Deployment scripts
-
-**Critical Path**:
-```
-Day 1-2:   Complete test coverage
-Day 3:     Observability setup
-Day 4:     Documentation
-Day 5:     Performance & security review
-```
-
-**Dependencies**: Phase 4 complete
-**Risk**: **MEDIUM**
-**Testing**: Load testing, security testing
+**Risk**: **MEDIUM** - Final validation and hardening
+**Testing**: Unit, integration, E2E, performance, security tests
 
 ---
 
@@ -1427,31 +1420,40 @@ await memory.remember('agent1', 'knowledge', { fact: 'B' }, {
 
 | Component | Hours | Complexity | Risk |
 |-----------|-------|------------|------|
+| Design & Architecture | 40-60 | Medium | Low |
 | Message Protocol | 40-60 | High | High |
 | Transport Layer | 60-80 | High | High |
 | Security & Auth | 90-120 | Very High | Critical |
 | Service Registry | 50-60 | High | High |
 | Memory Protocol | 60-80 | High | Medium |
-| Event Bus | 30-40 | Medium | Medium |
+| Event Bus | 40-50 | High | High |
 | Resource Coordinator | 40-50 | Medium | Medium |
 | Platform Adapters | 100-120 | Very High | Critical |
 | Integration | 60-80 | High | High |
-| Testing & QA | 40-60 | Medium | Medium |
-| Documentation | 20-30 | Low | Low |
+| Testing & QA | 80-120 | Medium | Medium |
+| Documentation | 40-60 | Low | Low |
+| Deployment & DevOps | 30-40 | Medium | Medium |
+| Contingency Buffer (15%) | 80-120 | - | - |
 | **TOTAL** | **590-780** | **-** | **-** |
 
 ### 9.2 By Phase
 
-| Phase | Weeks | Hours | Blockers |
-|-------|-------|-------|----------|
-| Phase 1: Foundation | 3 | 80-120 | None |
-| Phase 2: Infrastructure | 3 | 100-140 | Phase 1 |
-| Phase 3: Adapters | 3 | 100-120 | Phase 2 |
-| Phase 4: Integration | 2 | 60-80 | Phase 3 |
-| Phase 5: Production | 1 | 40-60 | Phase 4 |
-| **TOTAL** | **12** | **380-520** | **Sequential** |
+**Standardized 4-Phase Approach** (aligned across all A2A documents):
 
-**Note**: Estimates assume 2 developers working full-time.
+| Phase | Name | Weeks | Hours | Dependencies |
+|-------|------|-------|-------|--------------|
+| **Design** | Architecture & Planning | 1 | 40-60 | None |
+| **Phase 1** | Foundation | 3 | 80-120 | Design |
+| **Phase 2** | Platform Integration | 3 | 100-140 | Phase 1 |
+| **Phase 3** | Advanced Features | 3 | 100-120 | Phase 2 |
+| **Phase 4** | Production | 3 | 110-220 | Phase 3 |
+| **Buffer** | Contingency (15%) | - | 80-120 | - |
+| **TOTAL** | | **13** | **590-780** | **Sequential** |
+
+**Note**:
+- Estimates assume 2 developers working full-time
+- Includes 15% contingency buffer for unknowns
+- Design phase covers requirements analysis, API contracts, architecture diagrams
 
 ---
 

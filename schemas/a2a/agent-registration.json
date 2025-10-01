@@ -1,0 +1,222 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/agent-registration.json",
+  "title": "Agent Registration Message",
+  "description": "Schema for agent registration request messages",
+  "type": "object",
+  "required": ["agent", "capabilities"],
+  "properties": {
+    "agent": {
+      "$ref": "#/$defs/agentMetadata",
+      "description": "Agent metadata and identification"
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/agentCapability"
+      },
+      "minItems": 1,
+      "description": "List of agent capabilities"
+    },
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/agentEndpoint"
+      },
+      "description": "Network endpoints for agent communication"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "agentMetadata": {
+      "type": "object",
+      "required": ["agentId", "agentType", "name", "version"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique agent identifier"
+        },
+        "agentType": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent type (e.g., 'coder', 'reviewer', 'researcher')",
+          "examples": ["coder", "reviewer", "researcher", "tester", "analyst"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable agent name"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Agent version (semantic versioning)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Agent description"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Agent tags for categorization"
+        },
+        "maxConcurrentTasks": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of concurrent tasks"
+        },
+        "maxMemoryMb": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum memory in megabytes"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Extended metadata",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "agentCapability": {
+      "type": "object",
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Capability name"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Capability version"
+        },
+        "description": {
+          "type": "string",
+          "description": "Capability description"
+        },
+        "inputSchema": {
+          "type": "object",
+          "description": "JSON Schema for inputs"
+        },
+        "outputSchema": {
+          "type": "object",
+          "description": "JSON Schema for outputs"
+        },
+        "averageLatencyMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Average latency in milliseconds"
+        },
+        "maxLatencyMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Maximum latency in milliseconds"
+        },
+        "successRate": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Success rate (0.0 to 1.0)"
+        },
+        "requires": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Required capabilities"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Capability tags"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Extended metadata",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "agentEndpoint": {
+      "type": "object",
+      "required": ["protocol", "address"],
+      "properties": {
+        "protocol": {
+          "type": "string",
+          "enum": ["http", "https", "ws", "wss", "grpc", "ipc"],
+          "description": "Communication protocol"
+        },
+        "address": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Endpoint address"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Port number"
+        },
+        "path": {
+          "type": "string",
+          "description": "URL path"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "agent": {
+        "agentId": "agent-researcher-001",
+        "agentType": "researcher",
+        "name": "Research Agent Alpha",
+        "version": "2.5.0",
+        "description": "Specialized research and analysis agent",
+        "tags": ["research", "analysis", "academic"],
+        "maxConcurrentTasks": 5,
+        "maxMemoryMb": 2048
+      },
+      "capabilities": [
+        {
+          "name": "research",
+          "version": "1.0.0",
+          "description": "Research and information gathering",
+          "averageLatencyMs": 5000,
+          "maxLatencyMs": 30000,
+          "successRate": 0.95,
+          "tags": ["core", "research"]
+        },
+        {
+          "name": "analysis",
+          "version": "1.0.0",
+          "description": "Data analysis and insights",
+          "successRate": 0.92
+        }
+      ],
+      "endpoints": [
+        {
+          "protocol": "https",
+          "address": "api.example.com",
+          "port": 443,
+          "path": "/agents/researcher-001"
+        },
+        {
+          "protocol": "wss",
+          "address": "ws.example.com",
+          "port": 443,
+          "path": "/agents/researcher-001/stream"
+        }
+      ]
+    }
+  ]
+}

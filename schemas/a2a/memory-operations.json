@@ -1,0 +1,518 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/memory-operations.json",
+  "title": "Memory Operations Schemas",
+  "description": "Schemas for all memory operation messages in A2A protocol",
+  "$defs": {
+    "consistencyModel": {
+      "type": "string",
+      "enum": ["strong", "sequential", "causal", "eventual", "weak"],
+      "description": "Memory consistency model"
+    },
+    "isolationLevel": {
+      "type": "string",
+      "enum": ["serializable", "repeatable_read", "read_committed", "read_uncommitted"],
+      "description": "Transaction isolation level"
+    },
+    "memoryError": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "namespace_not_found",
+            "key_not_found",
+            "permission_denied",
+            "version_mismatch",
+            "key_exists",
+            "key_not_exists",
+            "quota_exceeded",
+            "size_limit_exceeded",
+            "lock_timeout",
+            "lock_conflict",
+            "invalid_lock",
+            "transaction_aborted",
+            "transaction_timeout",
+            "invalid_transaction",
+            "consistency_violation",
+            "replication_failure",
+            "internal_error",
+            "unavailable"
+          ],
+          "description": "Memory error code"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Error message"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Related namespace"
+        },
+        "key": {
+          "type": "string",
+          "description": "Related key"
+        },
+        "details": {
+          "type": "object",
+          "description": "Additional error details",
+          "additionalProperties": true
+        }
+      }
+    },
+    "memoryReadRequest": {
+      "type": "object",
+      "required": ["namespace", "key"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Memory namespace"
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Memory key"
+        },
+        "consistencyModel": {
+          "$ref": "#/$defs/consistencyModel"
+        },
+        "readVersion": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Read specific version"
+        },
+        "allowStale": {
+          "type": "boolean",
+          "description": "Allow stale reads",
+          "default": false
+        },
+        "maxStalenessMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Maximum acceptable staleness in milliseconds"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "memoryReadResponse": {
+      "type": "object",
+      "required": ["namespace", "key", "found", "version", "timestamp"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "found": {
+          "type": "boolean"
+        },
+        "value": {
+          "description": "Value (present when found=true)"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestamp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cachedAt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expiresAt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "memoryWriteRequest": {
+      "type": "object",
+      "required": ["namespace", "key", "value"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "description": "Value to write"
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Optimistic locking version"
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time-to-live in milliseconds"
+        },
+        "expiresAt": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Absolute expiration timestamp"
+        },
+        "createOnly": {
+          "type": "boolean",
+          "description": "Fail if key exists",
+          "default": false
+        },
+        "updateOnly": {
+          "type": "boolean",
+          "description": "Fail if key doesn't exist",
+          "default": false
+        },
+        "consistencyModel": {
+          "$ref": "#/$defs/consistencyModel"
+        },
+        "replicationFactor": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of replicas"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "memoryWriteResponse": {
+      "type": "object",
+      "required": ["namespace", "key", "success", "version", "timestamp"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "timestamp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "conflict": {
+          "type": "boolean",
+          "description": "Version conflict occurred"
+        },
+        "conflictingVersion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "$ref": "#/$defs/memoryError"
+        }
+      },
+      "additionalProperties": false
+    },
+    "memoryUpdateRequest": {
+      "type": "object",
+      "required": ["namespace", "key", "operations"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "operations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/updateOperation"
+          },
+          "minItems": 1
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "consistencyModel": {
+          "$ref": "#/$defs/consistencyModel"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "updateOperation": {
+      "type": "object",
+      "required": ["op", "path"],
+      "properties": {
+        "op": {
+          "type": "string",
+          "enum": ["set", "unset", "increment", "decrement", "append", "prepend", "merge"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "JSON path"
+        },
+        "value": {
+          "description": "Operation value"
+        }
+      },
+      "additionalProperties": false
+    },
+    "memoryDeleteRequest": {
+      "type": "object",
+      "required": ["namespace", "key"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expectedVersion": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "softDelete": {
+          "type": "boolean",
+          "description": "Mark as deleted but keep data",
+          "default": false
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "memoryDeleteResponse": {
+      "type": "object",
+      "required": ["namespace", "key", "success", "deleted"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "success": {
+          "type": "boolean"
+        },
+        "deleted": {
+          "type": "boolean",
+          "description": "False if already deleted"
+        },
+        "error": {
+          "$ref": "#/$defs/memoryError"
+        }
+      },
+      "additionalProperties": false
+    },
+    "transactionBeginRequest": {
+      "type": "object",
+      "required": ["isolationLevel"],
+      "properties": {
+        "transactionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "isolationLevel": {
+          "$ref": "#/$defs/isolationLevel"
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "readOnly": {
+          "type": "boolean",
+          "default": false
+        },
+        "namespaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Limit transaction scope"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "transactionBeginResponse": {
+      "type": "object",
+      "required": ["transactionId", "startedAt"],
+      "properties": {
+        "transactionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "startedAt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "expiresAt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "lockAcquireRequest": {
+      "type": "object",
+      "required": ["namespace", "key", "lockType", "ownerId"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "lockType": {
+          "type": "string",
+          "enum": ["shared", "exclusive"]
+        },
+        "timeoutMs": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How long to wait for lock"
+        },
+        "leaseDurationMs": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "How long to hold lock"
+        },
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent ID"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "lockAcquireResponse": {
+      "type": "object",
+      "required": ["namespace", "key", "acquired"],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1
+        },
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "acquired": {
+          "type": "boolean"
+        },
+        "lockId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "expiresAt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currentOwner": {
+          "type": "string",
+          "description": "Current owner if not acquired"
+        },
+        "estimatedWaitMs": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "error": {
+          "$ref": "#/$defs/memoryError"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "readRequest": {
+        "namespace": "project/ml-optimization",
+        "key": "research/findings",
+        "consistencyModel": "strong",
+        "allowStale": false
+      },
+      "readResponse": {
+        "namespace": "project/ml-optimization",
+        "key": "research/findings",
+        "found": true,
+        "value": {
+          "summary": "Latest ML optimization techniques",
+          "details": {}
+        },
+        "version": 3,
+        "timestamp": 1696118400000
+      },
+      "writeRequest": {
+        "namespace": "project/ml-optimization",
+        "key": "research/findings",
+        "value": {
+          "summary": "Updated findings"
+        },
+        "expectedVersion": 3,
+        "ttl": 3600000,
+        "consistencyModel": "strong"
+      },
+      "writeResponse": {
+        "namespace": "project/ml-optimization",
+        "key": "research/findings",
+        "success": true,
+        "version": 4,
+        "timestamp": 1696118700000
+      }
+    }
+  ]
+}

@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/task-response.json",
+  "title": "Task Response Message",
+  "description": "Schema for agent task response messages",
+  "type": "object",
+  "required": ["taskId", "status", "executedBy", "startedAt"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Task identifier (matches request)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "assigned", "in_progress", "completed", "failed", "cancelled"],
+      "description": "Task execution status"
+    },
+    "output": {
+      "description": "Task output data (present when completed)"
+    },
+    "error": {
+      "$ref": "#/$defs/errorDetail",
+      "description": "Error details (present when failed)"
+    },
+    "executedBy": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Agent ID that executed the task"
+    },
+    "startedAt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in milliseconds when task started"
+    },
+    "completedAt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in milliseconds when task completed"
+    },
+    "durationMs": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Task execution duration in milliseconds"
+    },
+    "resourceUsage": {
+      "$ref": "#/$defs/resourceUsage",
+      "description": "Resource usage statistics"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "errorDetail": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Error code",
+          "pattern": "^A2A-[A-Z]-\\d{3}$",
+          "examples": ["A2A-P-001", "A2A-R-404", "A2A-S-500"]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Error message"
+        },
+        "field": {
+          "type": "string",
+          "description": "Field that caused the error"
+        },
+        "stack": {
+          "type": "string",
+          "description": "Stack trace"
+        },
+        "cause": {
+          "$ref": "#/$defs/errorDetail",
+          "description": "Underlying cause"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional error metadata",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "resourceUsage": {
+      "type": "object",
+      "properties": {
+        "cpuMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "CPU time in milliseconds"
+        },
+        "memoryBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Memory used in bytes"
+        },
+        "diskIoBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Disk I/O in bytes"
+        },
+        "networkIoBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Network I/O in bytes"
+        },
+        "apiCalls": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of API calls made"
+        },
+        "tokensUsed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of tokens used"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional resource metrics",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "taskId": "550e8400-e29b-41d4-a716-446655440000",
+      "status": "completed",
+      "output": {
+        "findings": [
+          {
+            "title": "Neural Architecture Search",
+            "description": "Latest advances in NAS",
+            "confidence": 0.95
+          }
+        ],
+        "citations": ["paper1", "paper2"],
+        "summary": "Research completed successfully"
+      },
+      "executedBy": "agent-researcher-001",
+      "startedAt": 1696118400000,
+      "completedAt": 1696118700000,
+      "durationMs": 300000,
+      "resourceUsage": {
+        "cpuMs": 15000,
+        "memoryBytes": 524288000,
+        "apiCalls": 12,
+        "tokensUsed": 45000
+      }
+    },
+    {
+      "taskId": "550e8400-e29b-41d4-a716-446655440001",
+      "status": "failed",
+      "error": {
+        "code": "A2A-R-500",
+        "message": "External API timeout",
+        "field": "apiCall",
+        "metadata": {
+          "api": "research-service",
+          "endpoint": "/search"
+        }
+      },
+      "executedBy": "agent-researcher-002",
+      "startedAt": 1696118400000,
+      "completedAt": 1696118430000,
+      "durationMs": 30000
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/message-envelope.json",
+  "title": "A2A Message Envelope",
+  "description": "Message envelope for all A2A communications providing routing, tracing, and QoS information",
+  "type": "object",
+  "required": [
+    "version",
+    "type",
+    "messageId",
+    "from",
+    "to",
+    "priority",
+    "timestamp",
+    "payload"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Protocol version using semantic versioning",
+      "examples": ["1.0.0", "2.1.3"]
+    },
+    "type": {
+      "type": "string",
+      "description": "Message type identifier",
+      "enum": [
+        "a2a.register",
+        "a2a.deregister",
+        "a2a.register.ack",
+        "a2a.capability.advertise",
+        "a2a.capability.query",
+        "a2a.capability.response",
+        "a2a.task.request",
+        "a2a.task.response",
+        "a2a.task.status",
+        "a2a.task.cancel",
+        "a2a.state.sync",
+        "a2a.state.query",
+        "a2a.state.update",
+        "a2a.event.notify",
+        "a2a.event.subscribe",
+        "a2a.event.unsubscribe",
+        "a2a.heartbeat",
+        "a2a.health.check",
+        "a2a.health.response",
+        "a2a.error",
+        "a2a.custom"
+      ]
+    },
+    "messageId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique message ID (UUID v4)",
+      "examples": ["550e8400-e29b-41d4-a716-446655440000"]
+    },
+    "correlationId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "For request/response correlation"
+    },
+    "replyTo": {
+      "type": "string",
+      "description": "Return address for responses"
+    },
+    "from": {
+      "$ref": "#/$defs/agentAddress",
+      "description": "Source agent address"
+    },
+    "to": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/agentAddress"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/agentAddress"
+          },
+          "minItems": 1
+        }
+      ],
+      "description": "Single or multicast destination"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "description": "Message priority level (0=CRITICAL, 1=HIGH, 2=MEDIUM, 3=LOW, 4=BULK)",
+      "examples": [0, 1, 2, 3, 4]
+    },
+    "ttl": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Time-to-live in milliseconds"
+    },
+    "expiresAt": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in milliseconds when message expires"
+    },
+    "timestamp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Unix timestamp in milliseconds when message was created"
+    },
+    "spanId": {
+      "type": "string",
+      "description": "Distributed tracing span ID"
+    },
+    "traceId": {
+      "type": "string",
+      "description": "Distributed tracing trace ID"
+    },
+    "parentSpanId": {
+      "type": "string",
+      "description": "Parent span for nested calls"
+    },
+    "payload": {
+      "description": "Message payload (type depends on message type)"
+    },
+    "headers": {
+      "type": "object",
+      "description": "Extension point for custom headers",
+      "additionalProperties": true
+    },
+    "signature": {
+      "type": "string",
+      "description": "Message signature for verification"
+    },
+    "encryptedPayload": {
+      "type": "boolean",
+      "description": "Indicates if payload is encrypted",
+      "default": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "agentAddress": {
+      "type": "object",
+      "required": ["agentId"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "description": "Unique agent identifier",
+          "minLength": 1
+        },
+        "swarmId": {
+          "type": "string",
+          "description": "Swarm/group identifier"
+        },
+        "nodeId": {
+          "type": "string",
+          "description": "Physical node/instance ID"
+        },
+        "namespace": {
+          "type": "string",
+          "description": "Logical namespace/tenant"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "version": "1.0.0",
+      "type": "a2a.task.request",
+      "messageId": "550e8400-e29b-41d4-a716-446655440000",
+      "correlationId": "660e8400-e29b-41d4-a716-446655440001",
+      "from": {
+        "agentId": "agent-001",
+        "swarmId": "swarm-alpha",
+        "namespace": "production"
+      },
+      "to": {
+        "agentId": "agent-002",
+        "swarmId": "swarm-beta"
+      },
+      "priority": 1,
+      "ttl": 30000,
+      "timestamp": 1696118400000,
+      "traceId": "trace-xyz123",
+      "spanId": "span-abc456",
+      "payload": {
+        "taskId": "task-001",
+        "taskType": "research",
+        "description": "Analyze data"
+      }
+    }
+  ]
+}

@@ -1,0 +1,330 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/discovery-query.json",
+  "title": "Service Discovery Query",
+  "description": "Schema for agent service discovery query messages",
+  "type": "object",
+  "properties": {
+    "filters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/registryFilter"
+      },
+      "description": "Filter criteria for discovery"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Required capabilities"
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["initializing", "idle", "busy", "waiting", "error", "shutting_down", "offline"]
+      },
+      "description": "Filter by agent states"
+    },
+    "healthStatuses": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["healthy", "degraded", "unhealthy"]
+      },
+      "description": "Filter by health status"
+    },
+    "minAvailableSlots": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Minimum available task slots"
+    },
+    "maxLoad": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Maximum load (0.0 to 1.0)"
+    },
+    "maxLatencyMs": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Maximum acceptable latency in milliseconds"
+    },
+    "minSuccessRate": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Minimum success rate (0.0 to 1.0)"
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "description": "Maximum results to return"
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Result offset for pagination"
+    },
+    "sortBy": {
+      "type": "string",
+      "enum": [
+        "registeredAt",
+        "lastHeartbeat",
+        "currentLoad",
+        "availableSlots",
+        "metrics.avgLatency",
+        "metrics.successRate",
+        "priority",
+        "weight"
+      ],
+      "description": "Sort field"
+    },
+    "sortOrder": {
+      "type": "string",
+      "enum": ["asc", "desc"],
+      "description": "Sort order"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "registryFilter": {
+      "type": "object",
+      "required": ["field", "operator", "value"],
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Field to filter (supports dot notation)"
+        },
+        "operator": {
+          "type": "string",
+          "enum": ["eq", "ne", "gt", "gte", "lt", "lte", "in", "not_in", "contains", "not_contains", "matches", "exists"],
+          "description": "Filter operator"
+        },
+        "value": {
+          "description": "Filter value"
+        }
+      },
+      "additionalProperties": false
+    },
+    "registryQueryResponse": {
+      "type": "object",
+      "required": ["entries", "total", "limit", "offset", "hasMore", "executedAt"],
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/agentRegistryEntry"
+          },
+          "description": "Matching agent entries"
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total matching entries"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Limit used in query"
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Offset used in query"
+        },
+        "hasMore": {
+          "type": "boolean",
+          "description": "More results available"
+        },
+        "executedAt": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Query execution timestamp"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "agentRegistryEntry": {
+      "type": "object",
+      "required": ["address", "metadata", "capabilities", "state", "health", "registeredAt", "lastHeartbeat", "lastUpdated", "availableSlots", "currentLoad"],
+      "properties": {
+        "address": {
+          "type": "object",
+          "required": ["agentId"],
+          "properties": {
+            "agentId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "swarmId": {
+              "type": "string"
+            },
+            "nodeId": {
+              "type": "string"
+            },
+            "namespace": {
+              "type": "string"
+            }
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "required": ["agentId", "agentType", "name", "version"],
+          "properties": {
+            "agentId": {
+              "type": "string"
+            },
+            "agentType": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "version": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "tags": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "version"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "version": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "state": {
+          "type": "string",
+          "enum": ["initializing", "idle", "busy", "waiting", "error", "shutting_down", "offline"]
+        },
+        "health": {
+          "type": "object",
+          "required": ["healthy", "status", "lastCheckAt"],
+          "properties": {
+            "healthy": {
+              "type": "boolean"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["healthy", "degraded", "unhealthy", "unknown"]
+            },
+            "lastCheckAt": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "registeredAt": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lastHeartbeat": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lastUpdated": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "availableSlots": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "currentLoad": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "query": {
+        "requiredCapabilities": ["research", "analysis"],
+        "states": ["idle", "busy"],
+        "healthStatuses": ["healthy"],
+        "minAvailableSlots": 1,
+        "maxLoad": 0.8,
+        "maxLatencyMs": 10000,
+        "minSuccessRate": 0.9,
+        "sortBy": "availableSlots",
+        "sortOrder": "desc",
+        "limit": 10,
+        "offset": 0
+      },
+      "response": {
+        "entries": [
+          {
+            "address": {
+              "agentId": "agent-001",
+              "swarmId": "swarm-alpha",
+              "namespace": "production"
+            },
+            "metadata": {
+              "agentId": "agent-001",
+              "agentType": "researcher",
+              "name": "Research Agent Alpha",
+              "version": "2.5.0"
+            },
+            "capabilities": [
+              {
+                "name": "research",
+                "version": "1.0.0"
+              }
+            ],
+            "state": "idle",
+            "health": {
+              "healthy": true,
+              "status": "healthy",
+              "lastCheckAt": 1696118400000
+            },
+            "registeredAt": 1696100000000,
+            "lastHeartbeat": 1696118395000,
+            "lastUpdated": 1696118400000,
+            "availableSlots": 5,
+            "currentLoad": 0.2
+          }
+        ],
+        "total": 1,
+        "limit": 10,
+        "offset": 0,
+        "hasMore": false,
+        "executedAt": 1696118400000
+      }
+    }
+  ]
+}

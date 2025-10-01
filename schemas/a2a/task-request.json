@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/task-request.json",
+  "title": "Task Request Message",
+  "description": "Schema for agent task request messages",
+  "type": "object",
+  "required": ["taskId", "taskType", "description", "requiredCapabilities", "priority", "input"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique task identifier"
+    },
+    "taskType": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Type of task to execute",
+      "examples": ["research", "code", "review", "test", "analyze"]
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable task description"
+    },
+    "requiredCapabilities": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1,
+      "description": "List of required capabilities"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "description": "Task priority (0=CRITICAL, 1=HIGH, 2=MEDIUM, 3=LOW, 4=BULK)"
+    },
+    "input": {
+      "description": "Task input data (type varies by task)"
+    },
+    "context": {
+      "$ref": "#/$defs/taskContext",
+      "description": "Task execution context"
+    },
+    "timeoutMs": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Task timeout in milliseconds"
+    },
+    "maxRetries": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Maximum number of retry attempts"
+    },
+    "progressCallback": {
+      "type": "boolean",
+      "description": "Request progress updates",
+      "default": false
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "taskContext": {
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "Session identifier"
+        },
+        "userId": {
+          "type": "string",
+          "description": "User identifier"
+        },
+        "parentTaskId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Parent task identifier"
+        },
+        "workflowId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Workflow identifier"
+        },
+        "memoryNamespace": {
+          "type": "string",
+          "description": "Memory namespace for shared state"
+        },
+        "sharedState": {
+          "type": "object",
+          "description": "Shared state data",
+          "additionalProperties": true
+        },
+        "environment": {
+          "type": "string",
+          "enum": ["development", "staging", "production"],
+          "description": "Execution environment"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional context metadata",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "examples": [
+    {
+      "taskId": "550e8400-e29b-41d4-a716-446655440000",
+      "taskType": "research",
+      "description": "Research machine learning optimization techniques for 2025",
+      "requiredCapabilities": ["research", "analysis"],
+      "priority": 1,
+      "input": {
+        "query": "latest ML optimization algorithms 2025",
+        "depth": "comprehensive",
+        "maxResults": 50
+      },
+      "context": {
+        "sessionId": "session-001",
+        "userId": "user-123",
+        "workflowId": "660e8400-e29b-41d4-a716-446655440001",
+        "memoryNamespace": "project/ml-research",
+        "environment": "production"
+      },
+      "timeoutMs": 300000,
+      "maxRetries": 3,
+      "progressCallback": true,
+      "metadata": {
+        "projectId": "proj-ml-001",
+        "priority": "high"
+      }
+    }
+  ]
+}

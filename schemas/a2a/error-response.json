@@ -1,0 +1,255 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://a2a-protocol.org/schemas/v1/error-response.json",
+  "title": "Error Response Message",
+  "description": "Schema for A2A protocol error messages",
+  "type": "object",
+  "required": ["errorCode", "errorType", "message"],
+  "properties": {
+    "errorCode": {
+      "type": "string",
+      "pattern": "^A2A-[A-Z]-\\d{3}$",
+      "description": "Standardized error code (e.g., A2A-P-001, A2A-R-404)",
+      "examples": [
+        "A2A-P-001",
+        "A2A-P-002",
+        "A2A-R-404",
+        "A2A-R-500",
+        "A2A-S-401",
+        "A2A-S-403",
+        "A2A-M-001",
+        "A2A-M-409"
+      ]
+    },
+    "errorType": {
+      "type": "string",
+      "enum": [
+        "validation",
+        "authentication",
+        "authorization",
+        "not_found",
+        "conflict",
+        "rate_limit",
+        "timeout",
+        "internal",
+        "unavailable",
+        "unimplemented"
+      ],
+      "description": "Error type category"
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable error message"
+    },
+    "details": {
+      "$ref": "#/$defs/errorDetail",
+      "description": "Detailed error information"
+    },
+    "originalMessageId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "ID of message that caused the error"
+    },
+    "failedOperation": {
+      "type": "string",
+      "description": "Operation that failed"
+    },
+    "retryable": {
+      "type": "boolean",
+      "description": "Whether the operation can be retried",
+      "default": false
+    },
+    "retryAfterMs": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Milliseconds to wait before retry"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional error metadata",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "errorDetail": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Internal error code"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Detailed error message"
+        },
+        "field": {
+          "type": "string",
+          "description": "Field that caused the error"
+        },
+        "stack": {
+          "type": "string",
+          "description": "Stack trace (for debugging)"
+        },
+        "cause": {
+          "$ref": "#/$defs/errorDetail",
+          "description": "Underlying error cause (recursive)"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional detail metadata",
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "errorCodeRanges": {
+      "description": "Error code ranges by category",
+      "type": "object",
+      "properties": {
+        "protocol": {
+          "description": "A2A-P-xxx: Protocol-level errors",
+          "examples": [
+            "A2A-P-001: Invalid message format",
+            "A2A-P-002: Unsupported protocol version",
+            "A2A-P-003: Missing required field"
+          ]
+        },
+        "routing": {
+          "description": "A2A-R-xxx: Routing and addressing errors",
+          "examples": [
+            "A2A-R-404: Agent not found",
+            "A2A-R-503: Agent unavailable",
+            "A2A-R-500: Internal routing error"
+          ]
+        },
+        "security": {
+          "description": "A2A-S-xxx: Security and authentication errors",
+          "examples": [
+            "A2A-S-401: Authentication required",
+            "A2A-S-403: Permission denied",
+            "A2A-S-498: Token expired"
+          ]
+        },
+        "memory": {
+          "description": "A2A-M-xxx: Memory protocol errors",
+          "examples": [
+            "A2A-M-001: Namespace not found",
+            "A2A-M-002: Key not found",
+            "A2A-M-409: Version conflict"
+          ]
+        },
+        "task": {
+          "description": "A2A-T-xxx: Task execution errors",
+          "examples": [
+            "A2A-T-408: Task timeout",
+            "A2A-T-409: Task conflict",
+            "A2A-T-500: Task execution failed"
+          ]
+        },
+        "capability": {
+          "description": "A2A-C-xxx: Capability errors",
+          "examples": [
+            "A2A-C-404: Capability not found",
+            "A2A-C-501: Capability not implemented"
+          ]
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "validationError": {
+        "errorCode": "A2A-P-001",
+        "errorType": "validation",
+        "message": "Invalid message format",
+        "details": {
+          "code": "INVALID_FORMAT",
+          "message": "Missing required field 'taskId'",
+          "field": "taskId"
+        },
+        "originalMessageId": "550e8400-e29b-41d4-a716-446655440000",
+        "failedOperation": "task.request",
+        "retryable": false
+      },
+      "agentNotFoundError": {
+        "errorCode": "A2A-R-404",
+        "errorType": "not_found",
+        "message": "Target agent not available",
+        "details": {
+          "code": "AGENT_NOT_FOUND",
+          "message": "Agent 'agent-001' is not registered",
+          "metadata": {
+            "requestedAgentId": "agent-001",
+            "platform": "claude-flow"
+          }
+        },
+        "originalMessageId": "660e8400-e29b-41d4-a716-446655440001",
+        "failedOperation": "route_message",
+        "retryable": true,
+        "retryAfterMs": 30000
+      },
+      "authenticationError": {
+        "errorCode": "A2A-S-401",
+        "errorType": "authentication",
+        "message": "Authentication required",
+        "details": {
+          "code": "AUTH_REQUIRED",
+          "message": "Valid authentication token required"
+        },
+        "retryable": false
+      },
+      "versionConflictError": {
+        "errorCode": "A2A-M-409",
+        "errorType": "conflict",
+        "message": "Memory version conflict",
+        "details": {
+          "code": "VERSION_MISMATCH",
+          "message": "Expected version 3, found version 5",
+          "metadata": {
+            "namespace": "project/ml-optimization",
+            "key": "research/findings",
+            "expectedVersion": 3,
+            "actualVersion": 5
+          }
+        },
+        "retryable": true,
+        "retryAfterMs": 1000
+      },
+      "rateLimitError": {
+        "errorCode": "A2A-R-429",
+        "errorType": "rate_limit",
+        "message": "Rate limit exceeded",
+        "details": {
+          "code": "RATE_LIMIT",
+          "message": "Maximum 100 requests per minute exceeded",
+          "metadata": {
+            "limit": 100,
+            "window": "1m",
+            "resetAt": 1696118460000
+          }
+        },
+        "retryable": true,
+        "retryAfterMs": 60000
+      },
+      "internalError": {
+        "errorCode": "A2A-R-500",
+        "errorType": "internal",
+        "message": "Internal server error",
+        "details": {
+          "code": "INTERNAL_ERROR",
+          "message": "Unexpected error occurred during task execution",
+          "stack": "Error: Database connection failed\n  at TaskExecutor.run (executor.ts:42)\n  ..."
+        },
+        "originalMessageId": "770e8400-e29b-41d4-a716-446655440002",
+        "failedOperation": "execute_task",
+        "retryable": true,
+        "retryAfterMs": 5000
+      }
+    }
+  ]
+}
