@@ -11,11 +11,23 @@ Phase 1: Core Protocol Foundation (2-3 weeks)
     ├── Version negotiation
     └── Basic security
 
+Phase 1.5: CLI Foundation (2 weeks) **NEW**
+    ├── Base CLI adapter framework
+    ├── Process manager implementation
+    ├── Context builder system
+    └── Stdio protocol translator
+
 Phase 2: Agent Adapter Framework (2-3 weeks)
     ├── Abstract agent interface
     ├── Claude Flow adapter (dogfooding)
     ├── Capability mapping system
     └── Lifecycle management
+
+Phase 2.5: CLI Integration (2-3 weeks) **NEW**
+    ├── Gemini-CLI adapter
+    ├── Codex-CLI adapter (if available)
+    ├── CLI session management
+    └── CLI testing and validation
 
 Phase 3: Shared Infrastructure (3-4 weeks)
     ├── Unified memory protocol
@@ -50,7 +62,7 @@ Phase 7: Production Hardening (2-3 weeks)
     └── Production deployment
 ```
 
-**Total Timeline**: 16-22 weeks (4-5.5 months)
+**Total Timeline**: 20-26 weeks (5-6.5 months) with CLI support
 
 ### 1.2 Parallel Development Tracks
 
@@ -201,6 +213,108 @@ src/a2a/protocol/
 - Basic security infrastructure
 - Comprehensive test suite (>90% coverage)
 
+## 2.5 Phase 1.5: CLI Foundation
+
+### 2.5.1 Objectives
+- Create base CLI adapter framework
+- Implement process manager
+- Build context builder system
+- Establish stdio protocol
+
+### 2.5.2 Tasks
+
+#### Week 3.5-4: Base CLI Adapter Framework
+
+**Tasks**:
+1. Create `CLIAdapterBase` abstract class
+2. Define CLI-specific interfaces
+3. Implement CLI error types
+4. Create CLI message extensions
+5. Write framework tests
+
+**Files to Create**:
+```
+src/a2a/adapters/cli/
+├── cli-adapter-base.ts
+├── cli-interfaces.ts
+├── cli-errors.ts
+├── cli-message-extensions.ts
+└── __tests__/
+    └── cli-adapter-base.test.ts
+```
+
+**Acceptance Criteria**:
+- ✅ CLIAdapterBase extends AgentBase
+- ✅ All CLI error types defined
+- ✅ Message extensions documented
+- ✅ Framework tests pass
+
+#### Week 4-4.5: Process Manager
+
+**Tasks**:
+1. Implement `CLIProcessManager` class
+2. Create process pooling system
+3. Add resource monitoring
+4. Implement cleanup mechanisms
+5. Write process manager tests
+
+**Files to Create**:
+```
+src/a2a/adapters/cli/
+├── process-manager.ts
+├── process-pool.ts
+├── resource-monitor.ts
+└── __tests__/
+    ├── process-manager.test.ts
+    └── process-pool.test.ts
+```
+
+**Acceptance Criteria**:
+- ✅ Process manager spawns/kills processes
+- ✅ Process pooling reduces spawn overhead
+- ✅ Resource monitoring tracks CPU/memory
+- ✅ Cleanup handles zombie processes
+- ✅ Tests cover lifecycle scenarios
+
+#### Week 4.5-5: Context Builder & Stdio Protocol
+
+**Tasks**:
+1. Implement `ContextBuilder` class
+2. Create serialization strategies
+3. Build stdio protocol parser
+4. Add stream handling
+5. Write context and protocol tests
+
+**Files to Create**:
+```
+src/a2a/adapters/cli/
+├── context-builder.ts
+├── serializers/
+│   ├── json-serializer.ts
+│   ├── yaml-serializer.ts
+│   └── text-serializer.ts
+├── stdio-protocol.ts
+├── stream-handler.ts
+└── __tests__/
+    ├── context-builder.test.ts
+    ├── stdio-protocol.test.ts
+    └── stream-handler.test.ts
+```
+
+**Acceptance Criteria**:
+- ✅ Context builder supports all strategies
+- ✅ Serialization handles large payloads
+- ✅ Stdio protocol parses NDJSON
+- ✅ Stream handling supports backpressure
+- ✅ Tests cover all context strategies
+
+### 2.5.3 Deliverables
+- Complete CLI adapter framework
+- Working process manager with pooling
+- Context builder with multiple strategies
+- Stdio protocol implementation
+- Comprehensive tests (>85% coverage)
+
 ## 3. Phase 2: Agent Adapter Framework
 
 ### 3.1 Objectives
@@ -339,6 +453,148 @@ src/a2a/adapters/
 - Capability mapping system
 - Lifecycle management infrastructure
 - Integration tests demonstrating cross-platform capability
+
+## 3.5 Phase 2.5: CLI Integration
+
+### 3.5.1 Objectives
+- Implement Gemini-CLI adapter
+- Implement Codex-CLI adapter (if available)
+- Add CLI session management
+- Conduct CLI testing and validation
+
+### 3.5.2 Tasks
+
+#### Week 7.5-8.5: Gemini-CLI Adapter
+
+**Tasks**:
+1. Research Gemini CLI interface
+2. Implement `GeminiCLIAdapter` class
+3. Map Gemini capabilities to A2A
+4. Create prompt building system
+5. Add response parsing
+6. Write Gemini adapter tests
+
+**Files to Create**:
+```
+src/a2a/adapters/
+├── gemini-cli-adapter.ts
+├── gemini-cli/
+│   ├── capability-mapper.ts
+│   ├── prompt-builder.ts
+│   ├── response-parser.ts
+│   └── context-manager.ts
+└── __tests__/
+    ├── gemini-cli-adapter.test.ts
+    └── gemini-cli-integration.test.ts
+```
+
+**Acceptance Criteria**:
+- ✅ GeminiCLIAdapter extends CLIAdapterBase
+- ✅ All gemini-cli commands mapped
+- ✅ Prompt generation creates valid inputs
+- ✅ Response parsing extracts results
+- ✅ Tests verify end-to-end operations
+- ✅ Error handling for CLI failures
+
+#### Week 8.5-9.5: Additional CLI Adapters
+
+**Tasks**:
+1. Research other CLI tools (codex-cli, cursor, aider)
+2. Implement additional adapters as available
+3. Create adapter template for custom CLIs
+4. Document adapter development process
+5. Write adapter tests
+
+**Files to Create**:
+```
+src/a2a/adapters/
+├── codex-cli-adapter.ts (if available)
+├── cursor-cli-adapter.ts (if available)
+├── template-cli-adapter.ts
+└── __tests__/
+    ├── codex-cli-adapter.test.ts
+    └── template-cli-adapter.test.ts
+
+docs/
+└── guides/
+    └── custom-cli-adapter-guide.md
+```
+
+**Acceptance Criteria**:
+- ✅ At least 2 CLI adapters working
+- ✅ Template adapter documented
+- ✅ Adapter development guide complete
+- ✅ Tests cover common scenarios
+- ✅ Performance benchmarks completed
+
+#### Week 9.5-10: CLI Session Management
+
+**Tasks**:
+1. Implement `CLISessionManager` class
+2. Create session pooling system
+3. Add session persistence
+4. Implement session recovery
+5. Write session tests
+
+**Files to Create**:
+```
+src/a2a/adapters/cli/
+├── session-manager.ts
+├── session-pool.ts
+├── session-persistence.ts
+├── session-recovery.ts
+└── __tests__/
+    ├── session-manager.test.ts
+    └── session-pool.test.ts
+```
+
+**Acceptance Criteria**:
+- ✅ Session manager tracks all CLI sessions
+- ✅ Session pooling reuses idle sessions
+- ✅ Persistence saves/restores session state
+- ✅ Recovery handles process crashes
+- ✅ Tests verify session lifecycle
+
+#### Week 10: CLI Testing and Validation
+
+**Tasks**:
+1. Create comprehensive CLI test suite
+2. Test all context passing strategies
+3. Benchmark CLI performance
+4. Stress test process manager
+5. Validate error handling
+6. Document CLI best practices
+
+**Files to Create**:
+```
+tests/cli/
+├── context-strategies.test.ts
+├── performance.test.ts
+├── stress.test.ts
+├── error-handling.test.ts
+└── integration/
+    ├── multi-cli-workflow.test.ts
+    └── cli-to-api-delegation.test.ts
+
+docs/
+└── guides/
+    └── cli-best-practices.md
+```
+
+**Acceptance Criteria**:
+- ✅ All context strategies tested
+- ✅ Performance meets requirements (<500ms spawn)
+- ✅ Process manager handles 50+ concurrent processes
+- ✅ Error scenarios handled gracefully
+- ✅ Best practices documented
+
+### 3.5.3 Deliverables
+- Working Gemini-CLI adapter
+- Additional CLI adapters (2+)
+- CLI session management system
+- Template and guide for custom adapters
+- Comprehensive CLI test suite
+- Performance benchmarks
 
 ## 4. Phase 3: Shared Infrastructure
 

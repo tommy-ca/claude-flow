@@ -680,36 +680,523 @@ All A2A messages MUST include:
 - **Messages**: Handle 1M+ messages/hour
 - **Memory**: Scale to 100GB+ shared memory
 
-## 9. Compliance and Standards
+## 9. CLI Agent Communication
 
-### 9.1 Protocol Standards
+### 9.1 CLI Invocation Patterns
+
+#### 9.1.1 Direct Invocation
+```bash
+# Execute CLI agent directly
+codex-cli agent create --type researcher --name "Research Agent"
+
+# Pass task via stdin
+echo '{"task": "research", "query": "ML algorithms"}' | gemini-cli execute
+
+# Pass task via arguments
+cursor-cli run --task "write function" --language typescript
+```
+
+#### 9.1.2 Subprocess Management
+CLI agents are spawned as child processes with controlled lifecycle:
+
+```typescript
+interface CLIProcessConfig {
+  command: string;                    // CLI executable path
+  args: string[];                     // Command arguments
+  cwd: string;                        // Working directory
+  env: Record<string, string>;        // Environment variables
+  timeout: number;                    // Execution timeout (ms)
+  maxMemory: number;                  // Memory limit (MB)
+  shell: boolean;                     // Use shell execution
+}
+```
+
+#### 9.1.3 Process Lifecycle
+```
+1. Spawn Process
+   ├── Validate executable exists
+   ├── Set working directory
+   ├── Configure environment
+   └── Start process with stdio pipes
+
+2. Monitor Process
+   ├── Track PID
+   ├── Monitor resource usage
+   ├── Handle stdout/stderr streams
+   └── Watch for exit events
+
+3. Terminate Process
+   ├── Send SIGTERM (graceful)
+   ├── Wait for exit (timeout)
+   ├── Send SIGKILL if needed
+   └── Clean up resources
+```
+
+### 9.2 Stdio Protocol Specifications
+
+#### 9.2.1 Communication Channels
+- **stdin**: Send commands and data to CLI agent
+- **stdout**: Receive results and responses
+- **stderr**: Capture errors and diagnostics
+
+#### 9.2.2 Message Formats
+```typescript
+// JSON Lines (NDJSON) Protocol
+interface StdioMessage {
+  type: 'request' | 'response' | 'event' | 'error';
+  id: string;                         // Message correlation ID
+  timestamp: string;                  // ISO 8601
+  payload: unknown;                   // Message content
+}
+
+// Streaming format (one JSON object per line)
+{"type":"request","id":"msg-1","payload":{"task":"research"}}\n
+{"type":"response","id":"msg-1","payload":{"result":"..."}}\n
+```
+
+#### 9.2.3 Error Handling
+```typescript
+// CLI-specific error codes
+enum CLIErrorCode {
+  PROCESS_SPAWN_FAILED = 'CLI_ERR_SPAWN',
+  PROCESS_TIMEOUT = 'CLI_ERR_TIMEOUT',
+  PROCESS_CRASHED = 'CLI_ERR_CRASH',
+  INVALID_OUTPUT = 'CLI_ERR_OUTPUT',
+  RESOURCE_EXCEEDED = 'CLI_ERR_RESOURCE',
+}
+```
+
+### 9.3 Context Passing Strategies
+
+#### 9.3.1 Stdin Context (Recommended)
+Pass context as JSON via stdin for most operations:
+
+```typescript
+interface StdinContext {
+  method: 'stdin';
+  format: 'json' | 'ndjson';
+  streaming: boolean;
+}
+
+// Example
+const context = {
+  agent: { id: 'agent-123', platform: 'claude-flow' },
+  task: { id: 'task-456', type: 'research' },
+  memory: { projectId: 'proj-789' }
+};
+process.stdin.write(JSON.stringify(context) + '\n');
+```
+
+#### 9.3.2 Temporary File Context
+Use for large payloads (>1MB):
+
+```typescript
+interface TempFileContext {
+  method: 'tempfile';
+  path: string;                      // Temp file path
+  format: 'json' | 'yaml';
+  cleanup: boolean;                  // Auto-delete after use
+}
+
+// Example
+const contextFile = '/tmp/a2a-context-abc123.json';
+await fs.writeFile(contextFile, JSON.stringify(context));
+spawn('gemini-cli', ['--context-file', contextFile]);
+```
+
+#### 9.3.3 Working Directory Context
+Place context files in working directory:
+
+```typescript
+interface WorkingDirContext {
+  method: 'workingdir';
+  files: {
+    context: '.a2a/context.json';
+    memory: '.a2a/memory/';
+    artifacts: '.a2a/artifacts/';
+  };
+}
+
+// Example directory structure
+project/
+  .a2a/
+    context.json          # Task and agent context
+    memory/               # Shared memory entries
+    artifacts/            # Task artifacts
+```
+
+#### 9.3.4 Environment Variable Context
+Pass small metadata via environment:
+
+```typescript
+interface EnvContext {
+  method: 'env';
+  prefix: 'A2A_';
+  variables: {
+    A2A_AGENT_ID: string;
+    A2A_PLATFORM: string;
+    A2A_TASK_ID: string;
+    A2A_SESSION_ID: string;
+  };
+}
+
+// Example
+const env = {
+  A2A_AGENT_ID: 'agent-123',
+  A2A_PLATFORM: 'gemini-cli',
+  A2A_TASK_ID: 'task-456',
+  A2A_SESSION_ID: 'session-789'
+};
+spawn('codex-cli', args, { env });
+```
+
+#### 9.3.5 Command Argument Context
+Pass simple parameters as CLI arguments:
+
+```typescript
+interface ArgContext {
+  method: 'args';
+  mapping: Record<string, string>;
+}
+
+// Example
+codex-cli execute \
+  --agent-id agent-123 \
+  --task-type research \
+  --project proj-789
+```
+
+### 9.4 Session Management for CLI Agents
+
+#### 9.4.1 Session Lifecycle
+```typescript
+interface CLISession {
+  id: string;
+  agentId: string;
+  processId: number;
+  startTime: string;
+  lastActivity: string;
+  state: 'active' | 'idle' | 'suspended';
+  context: SessionContext;
+}
+
+interface SessionContext {
+  memory: Map<string, unknown>;      // Session-scoped memory
+  workingDir: string;                // Session workspace
+  artifacts: string[];               // Generated artifacts
+  metrics: SessionMetrics;           // Resource usage
+}
+```
+
+#### 9.4.2 Session Persistence
+```typescript
+// Save session state for resume
+interface SessionSnapshot {
+  sessionId: string;
+  timestamp: string;
+  context: SessionContext;
+  processState?: {
+    cwd: string;
+    env: Record<string, string>;
+    checkpoint?: string;             // Application-level checkpoint
+  };
+}
+
+// Restore session
+async function resumeSession(snapshot: SessionSnapshot): Promise<CLISession> {
+  // Restore working directory
+  // Reinitialize environment
+  // Resume or restart process
+  // Restore context
+}
+```
+
+#### 9.4.3 Session Pooling
+```typescript
+class CLISessionPool {
+  private sessions: Map<string, CLISession>;
+  private maxSessions: number = 10;
+
+  async acquire(agentType: string): Promise<CLISession> {
+    // Reuse idle session if available
+    // Or spawn new session
+    // Track in pool
+  }
+
+  async release(sessionId: string): Promise<void> {
+    // Mark session as idle
+    // Keep alive for reuse
+    // Or terminate if pool full
+  }
+
+  async cleanup(): Promise<void> {
+    // Terminate idle sessions after timeout
+    // Preserve active sessions
+  }
+}
+```
+
+### 9.5 CLI-Specific Message Extensions
+
+#### 9.5.1 Process Metadata
+Add CLI process information to message envelope:
+
+```json
+{
+  "$schema": "https://a2a-protocol.org/schemas/v1/task-request.json",
+  "type": "task.request",
+  "source": {
+    "agentId": "agent-uuid",
+    "platform": "gemini-cli",
+    "cliMetadata": {
+      "executable": "/usr/local/bin/gemini-cli",
+      "version": "1.2.3",
+      "processId": 12345,
+      "sessionId": "session-uuid",
+      "spawnedAt": "2025-10-01T00:00:00Z"
+    }
+  }
+}
+```
+
+#### 9.5.2 Context Serialization Format
+```json
+{
+  "contextStrategy": {
+    "primary": "stdin",
+    "fallback": "tempfile",
+    "format": "json",
+    "streaming": true,
+    "compression": false
+  },
+  "contextData": {
+    "inline": { /* data if small */ },
+    "reference": "/tmp/context-abc.json" /* if large */
+  }
+}
+```
+
+#### 9.5.3 CLI Error Codes
+```json
+{
+  "error": {
+    "code": "CLI_ERR_PROCESS_TIMEOUT",
+    "message": "CLI process exceeded 300s timeout",
+    "details": {
+      "processId": 12345,
+      "command": "gemini-cli execute",
+      "timeout": 300000,
+      "elapsed": 300124,
+      "lastOutput": "Processing request..."
+    },
+    "recoverable": true,
+    "suggestedActions": [
+      {
+        "action": "retry",
+        "parameters": { "timeout": 600000 }
+      },
+      {
+        "action": "restart",
+        "description": "Restart with increased timeout"
+      }
+    ]
+  }
+}
+```
+
+## 10. MCP Integration
+
+### 10.1 MCP as A2A Transport Layer
+
+#### 10.1.1 MCP Server as A2A Gateway
+MCP servers can act as A2A protocol gateways, allowing agents to communicate via standardized MCP tools:
+
+```typescript
+// MCP tool for A2A agent discovery
+{
+  name: 'a2a_discover_agents',
+  description: 'Discover agents across A2A-compatible platforms',
+  parameters: {
+    capabilities: ['research', 'coding'],
+    platforms: ['codex', 'gemini-cli']
+  }
+}
+
+// MCP tool for A2A task delegation
+{
+  name: 'a2a_delegate_task',
+  description: 'Delegate task to discovered A2A agent',
+  parameters: {
+    agentId: 'agent-uuid',
+    task: { type: 'research', description: '...' }
+  }
+}
+```
+
+#### 10.1.2 MCP Transport Implementation
+```typescript
+class MCPTransport implements ITransport {
+  private mcpClient: MCPClient;
+
+  async send(message: A2AMessage, destination: Destination): Promise<void> {
+    // Convert A2A message to MCP tool call
+    const toolCall = this.messageToToolCall(message);
+
+    // Execute via MCP
+    const result = await this.mcpClient.callTool(
+      'a2a_send_message',
+      toolCall
+    );
+
+    return result;
+  }
+
+  subscribe(filter: MessageFilter, handler: MessageHandler): Subscription {
+    // Subscribe to MCP notifications
+    return this.mcpClient.subscribeResource(
+      `a2a://messages/${filter.eventTypes.join(',')}`,
+      (message) => handler(this.toolCallToMessage(message))
+    );
+  }
+}
+```
+
+#### 10.1.3 Benefits of MCP Integration
+- **Standardization**: Leverage MCP's tool-calling conventions
+- **Compatibility**: Work with existing MCP infrastructure
+- **Simplicity**: No need for separate A2A server
+- **Security**: Use MCP's authentication and authorization
+- **Observability**: Benefit from MCP's logging and tracing
+
+### 10.2 MCP Tools for A2A Operations
+
+#### 10.2.1 Core A2A Tools
+```typescript
+// Agent discovery
+mcp__claude-flow__a2a_discover
+mcp__claude-flow__a2a_advertise
+
+// Task delegation
+mcp__claude-flow__a2a_delegate
+mcp__claude-flow__a2a_task_status
+
+// Memory operations
+mcp__claude-flow__a2a_memory_read
+mcp__claude-flow__a2a_memory_write
+mcp__claude-flow__a2a_memory_sync
+
+// Event operations
+mcp__claude-flow__a2a_publish_event
+mcp__claude-flow__a2a_subscribe_events
+```
+
+#### 10.2.2 CLI-Specific MCP Tools
+```typescript
+// CLI process management
+mcp__claude-flow__cli_spawn_agent
+mcp__claude-flow__cli_list_processes
+mcp__claude-flow__cli_terminate
+
+// CLI session management
+mcp__claude-flow__cli_create_session
+mcp__claude-flow__cli_resume_session
+mcp__claude-flow__cli_cleanup_sessions
+```
+
+### 10.3 Use Cases
+
+#### 10.3.1 When to Use MCP Transport
+✅ **Use MCP when**:
+- Working within claude-flow ecosystem
+- Need rapid prototyping
+- Want unified tool interface
+- Require existing MCP features
+
+❌ **Don't use MCP when**:
+- Need maximum performance (use direct transport)
+- Working with non-MCP platforms
+- Require protocol-level control
+- Need custom transport features
+
+#### 10.3.2 Hybrid Approach
+```typescript
+// Use MCP for coordination, direct transport for data
+class HybridTransport implements ITransport {
+  private mcpTransport: MCPTransport;
+  private directTransport: WebSocketTransport;
+
+  async send(message: A2AMessage, destination: Destination): Promise<void> {
+    if (message.payload.size < 1024 * 1024) { // 1MB
+      // Small messages via MCP
+      return this.mcpTransport.send(message, destination);
+    } else {
+      // Large messages via direct transport
+      return this.directTransport.send(message, destination);
+    }
+  }
+}
+```
+
+## 11. Compliance and Standards
+
+### 11.1 Protocol Standards
 - JSON Schema for message validation
 - OpenAPI 3.0 for REST APIs
 - gRPC for high-performance communication
 - WebSocket for real-time bidirectional communication
+- MCP protocol for tool-based communication
 
-### 9.2 Data Standards
+### 11.2 Data Standards
 - ISO 8601 for timestamps
 - UUID v4 for identifiers
 - UTF-8 for text encoding
 - Semantic versioning for protocol versions
+- NDJSON for streaming CLI communication
 
-## 10. Non-Functional Requirements
+### 11.3 CLI Standards
+- POSIX-compliant process management
+- Standard exit codes (0=success, 1=error, 2=misuse)
+- Graceful signal handling (SIGTERM, SIGINT)
+- Resource limit enforcement (ulimit, cgroups)
 
-### 10.1 Observability
+## 12. Non-Functional Requirements
+
+### 12.1 Observability
 - Distributed tracing (OpenTelemetry)
 - Metrics collection (Prometheus format)
 - Structured logging (JSON logs)
 - Health check endpoints
 
-### 10.2 Extensibility
+### 12.2 Extensibility
 - Plugin architecture for new platforms
 - Custom message types support
 - Extensible capability model
 - Hook system for customization
+- Custom CLI adapter templates
 
-### 10.3 Backward Compatibility
+### 12.3 Backward Compatibility
 - Protocol versioning support
 - Graceful degradation
 - Feature negotiation
 - Migration paths between versions
+- CLI interface versioning
+
+### 12.4 CLI-Specific Requirements
+
+#### 12.4.1 Performance
+- Process spawn time: <500ms
+- Context serialization: <100ms for <1MB
+- Stdio throughput: >10MB/s
+- Maximum concurrent CLI processes: 50
+
+#### 12.4.2 Reliability
+- Process crash detection: <5s
+- Automatic restart on failure
+- Resource leak prevention
+- Zombie process cleanup
+
+#### 12.4.3 Security
+- Sandboxed CLI execution (optional)
+- Environment variable filtering
+- Command injection prevention
+- Resource limit enforcement (CPU, memory, disk)

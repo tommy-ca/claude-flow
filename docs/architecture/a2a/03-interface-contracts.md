@@ -1528,7 +1528,315 @@ class AuthorizationError extends A2AError {
 }
 ```
 
-## 6. Constants and Enumerations
+## 6. CLI-Specific Types
+
+### 6.1 Process Management Types
+
+```typescript
+// CLI Process Configuration
+interface CLIProcessConfig {
+  command: string;                    // CLI executable path
+  args: string[];                     // Command arguments
+  cwd: string;                        // Working directory
+  env: Record<string, string>;        // Environment variables
+  timeout: number;                    // Execution timeout (ms)
+  maxMemory: number;                  // Memory limit (MB)
+  shell: boolean;                     // Use shell execution
+}
+
+// CLI Communication Protocol
+interface CLIProtocol {
+  type: 'stdio' | 'http' | 'mcp';
+  format: 'json' | 'ndjson' | 'text';
+  streaming: boolean;
+}
+
+// Context Serialization
+interface SerializedContext {
+  strategy: 'stdin' | 'tempfile' | 'workingdir' | 'env' | 'args';
+  format: 'json' | 'yaml' | 'text';
+  data: string | Buffer;
+  cleanup?: () => Promise<void>;
+}
+
+// CLI Session
+interface CLISession {
+  id: string;
+  agentId: string;
+  processId: number;
+  startTime: string;
+  lastActivity: string;
+  state: 'active' | 'idle' | 'suspended';
+  context: SessionContext;
+}
+
+interface SessionContext {
+  memory: Map<string, unknown>;
+  workingDir: string;
+  artifacts: string[];
+  metrics: SessionMetrics;
+}
+
+interface SessionMetrics {
+  requestCount: number;
+  errorCount: number;
+  avgResponseTime: number;
+  memoryUsage: number;
+  cpuUsage: number;
+}
+
+// Managed Process
+interface ManagedProcess {
+  id: string;
+  pid: number;
+  config: CLIProcessConfig;
+  status: 'starting' | 'running' | 'idle' | 'terminating';
+  stdin: Writable;
+  stdout: Readable;
+  stderr: Readable;
+  kill: () => Promise<void>;
+  metrics: ProcessMetrics;
+}
+
+interface ProcessMetrics {
+  startTime: Date;
+  lastActivity: Date;
+  requestCount: number;
+  errorCount: number;
+  memoryUsage: number;
+  cpuUsage: number;
+}
+```
+
+### 6.2 CLI Adapter Interfaces
+
+```typescript
+// Process Manager Interface
+interface ICLIProcessManager {
+  /**
+   * Initialize the process manager
+   */
+  initialize(): Promise<void>;
+
+  /**
+   * Acquire a process from the pool or spawn new
+   */
+  acquire(config: CLIProcessConfig): Promise<ManagedProcess>;
+
+  /**
+   * Release a process back to the pool
+   */
+  release(process: ManagedProcess): Promise<void>;
+
+  /**
+   * Get list of all managed processes
+   */
+  list(): ManagedProcess[];
+
+  /**
+   * Clean up idle processes
+   */
+  cleanup(): Promise<void>;
+
+  /**
+   * Shutdown all processes
+   */
+  shutdown(): Promise<void>;
+
+  /**
+   * Get process manager metrics
+   */
+  getMetrics(): ProcessManagerMetrics;
+}
+
+interface ProcessManagerMetrics {
+  totalProcesses: number;
+  activeProcesses: number;
+  idleProcesses: number;
+  totalSpawned: number;
+  totalKilled: number;
+  avgSpawnTime: number;
+  avgIdleTime: number;
+}
+
+// Context Builder Interface
+interface IContextBuilder {
+  /**
+   * Build context for CLI invocation
+   */
+  build(context: unknown): Promise<BuiltContext>;
+
+  /**
+   * Serialize context data
+   */
+  serialize(context: unknown): string | Buffer;
+
+  /**
+   * Choose best strategy for given context size
+   */
+  selectStrategy(contextSize: number): ContextStrategy;
+}
+
+interface BuiltContext {
+  type: 'stdin' | 'tempfile' | 'workingdir' | 'env' | 'args';
+  data?: string;
+  path?: string;
+  env?: Record<string, string>;
+  args?: string[];
+  cleanup: () => Promise<void>;
+}
+
+interface ContextStrategy {
+  primary: 'stdin' | 'tempfile' | 'workingdir' | 'env' | 'args';
+  fallback?: 'stdin' | 'tempfile' | 'workingdir';
+  format: 'json' | 'yaml' | 'text';
+  streaming: boolean;
+  compression: boolean;
+}
+
+// CLI Adapter Base
+interface ICLIAdapter extends IAgent {
+  /**
+   * CLI-specific properties
+   */
+  readonly cliCommand: string;
+  readonly cliVersion: string;
+  readonly processManager: ICLIProcessManager;
+  readonly contextBuilder: IContextBuilder;
+
+  /**
+   * Validate CLI is available
+   */
+  validateCLI(): Promise<boolean>;
+
+  /**
+   * Get CLI capabilities via command
+   */
+  queryCLICapabilities(): Promise<Capability[]>;
+
+  /**
+   * Parse CLI output to standard format
+   */
+  parseOutput(output: string): TaskResult;
+
+  /**
+   * Handle CLI errors
+   */
+  handleCLIError(error: CLIError): Promise<void>;
+}
+```
+
+### 6.3 CLI Error Types
+
+```typescript
+// Base CLI error
+class CLIError extends A2AError {
+  constructor(
+    public code: CLIErrorCode,
+    public message: string,
+    public processId?: number,
+    public command?: string,
+    public details?: unknown
+  ) {
+    super(code, message, details, true);
+    this.name = 'CLIError';
+  }
+}
+
+// CLI error codes
+enum CLIErrorCode {
+  PROCESS_SPAWN_FAILED = 'CLI_ERR_SPAWN',
+  PROCESS_TIMEOUT = 'CLI_ERR_TIMEOUT',
+  PROCESS_CRASHED = 'CLI_ERR_CRASH',
+  PROCESS_KILLED = 'CLI_ERR_KILLED',
+  INVALID_OUTPUT = 'CLI_ERR_OUTPUT',
+  RESOURCE_EXCEEDED = 'CLI_ERR_RESOURCE',
+  CONTEXT_TOO_LARGE = 'CLI_ERR_CONTEXT_SIZE',
+  CLI_NOT_FOUND = 'CLI_ERR_NOT_FOUND',
+  CLI_VERSION_MISMATCH = 'CLI_ERR_VERSION',
+}
+
+// Specific error classes
+class ProcessSpawnError extends CLIError {
+  constructor(command: string, reason: string) {
+    super(
+      CLIErrorCode.PROCESS_SPAWN_FAILED,
+      `Failed to spawn process: ${command}`,
+      undefined,
+      command,
+      { reason }
+    );
+  }
+}
+
+class ProcessTimeoutError extends CLIError {
+  constructor(processId: number, timeout: number, elapsed: number) {
+    super(
+      CLIErrorCode.PROCESS_TIMEOUT,
+      `Process ${processId} exceeded ${timeout}ms timeout`,
+      processId,
+      undefined,
+      { timeout, elapsed }
+    );
+  }
+}
+
+class ProcessCrashedError extends CLIError {
+  constructor(processId: number, exitCode: number, signal?: string) {
+    super(
+      CLIErrorCode.PROCESS_CRASHED,
+      `Process ${processId} crashed with code ${exitCode}`,
+      processId,
+      undefined,
+      { exitCode, signal }
+    );
+  }
+}
+
+class InvalidOutputError extends CLIError {
+  constructor(output: string, parseError: Error) {
+    super(
+      CLIErrorCode.INVALID_OUTPUT,
+      'Failed to parse CLI output',
+      undefined,
+      undefined,
+      { output, parseError: parseError.message }
+    );
+  }
+}
+```
+
+### 6.4 CLI Message Extensions
+
+```typescript
+// CLI metadata in message source
+interface MessageSourceCLI extends MessageSource {
+  cliMetadata?: {
+    executable: string;
+    version: string;
+    processId: number;
+    sessionId: string;
+    spawnedAt: string;
+  };
+}
+
+// Context strategy in message
+interface MessageContext {
+  contextStrategy?: {
+    primary: string;
+    fallback?: string;
+    format: string;
+    streaming: boolean;
+    compression: boolean;
+  };
+  contextData?: {
+    inline?: unknown;
+    reference?: string;
+  };
+}
+```
+
+## 7. Constants and Enumerations
 
 ```typescript
 // Protocol constants
@@ -1537,6 +1845,15 @@ export const A2A_SCHEMA_BASE_URL = 'https://a2a-protocol.org/schemas/v1';
 export const DEFAULT_MESSAGE_TIMEOUT = 30000; // 30 seconds
 export const DEFAULT_HEARTBEAT_INTERVAL = 30000; // 30 seconds
 export const DEFAULT_MEMORY_TTL = 3600; // 1 hour
+
+// CLI-specific constants
+export const DEFAULT_PROCESS_SPAWN_TIMEOUT = 10000; // 10 seconds
+export const DEFAULT_PROCESS_IDLE_TIMEOUT = 300000; // 5 minutes
+export const DEFAULT_PROCESS_KILL_TIMEOUT = 5000; // 5 seconds
+export const DEFAULT_MAX_PROCESSES = 50;
+export const DEFAULT_CONTEXT_SIZE_LIMIT = 1048576; // 1MB
+export const CONTEXT_STRATEGY_STDIN_LIMIT = 1048576; // 1MB
+export const CONTEXT_STRATEGY_ENV_LIMIT = 4096; // 4KB
 
 // Message types
 export const MESSAGE_TYPES = {

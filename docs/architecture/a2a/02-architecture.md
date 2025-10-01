@@ -13,6 +13,7 @@
 ┌───────────────┐            ┌───────────────┐            ┌───────────────┐
 │  Claude Flow  │            │     Codex     │            │  Gemini-CLI   │
 │   Platform    │            │   Platform    │            │   Platform    │
+│    (MCP)      │            │   (HTTP API)  │            │   (CLI/Proc)  │
 └───────┬───────┘            └───────┬───────┘            └───────┬───────┘
         │                            │                            │
         │                            │                            │
@@ -33,6 +34,43 @@
             │     Shared      │      │   Integration   │
             │ Infrastructure  │◄────►│     Points      │
             └─────────────────┘      └─────────────────┘
+
+## 1.1 CLI Adapter Layer Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│         A2A Coordinator                     │
+└──────────────┬──────────────────────────────┘
+               │
+       ┌───────┴────────┐
+       │                │
+   HTTP/WS           CLI/Process
+   Adapters          Adapters
+       │                │
+   ┌───┴───┐        ┌───┴────────┐
+   │ Codex │        │ codex-cli  │
+   │ API   │        │ gemini-cli │
+   │       │        │ cursor-cli │
+   └───────┘        └────┬───────┘
+                         │
+              ┌──────────┴─────────────┐
+              │                        │
+              ▼                        ▼
+    ┌──────────────────┐     ┌────────────────┐
+    │  Process Manager │     │ Context Builder│
+    │  - Spawn/Kill    │     │ - Stdin/File   │
+    │  - Pool Mgmt     │     │ - Env Vars     │
+    │  - Monitoring    │     │ - Serialization│
+    └──────┬───────────┘     └────────┬───────┘
+           │                          │
+           └──────────┬───────────────┘
+                      │
+           ┌──────────▼──────────┐
+           │  Stdio Protocol     │
+           │  - NDJSON Parser    │
+           │  - Stream Handler   │
+           │  - Error Detection  │
+           └─────────────────────┘
 ```
 
 ## 2. Component Architecture
