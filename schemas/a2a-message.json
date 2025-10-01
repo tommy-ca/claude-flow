@@ -1,0 +1,231 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://a2a-protocol.org/schemas/message.json",
+  "title": "A2A Message Schema",
+  "description": "JSON Schema for A2A Protocol messages (JSON-RPC 2.0 with A2A extensions)",
+  "oneOf": [
+    { "$ref": "#/definitions/request" },
+    { "$ref": "#/definitions/response" },
+    { "$ref": "#/definitions/notification" }
+  ],
+  "definitions": {
+    "request": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "method",
+        "id",
+        "from",
+        "to",
+        "conversation_id",
+        "timestamp",
+        "a2a_version"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Method name to invoke"
+        },
+        "params": {
+          "oneOf": [
+            { "type": "object" },
+            { "type": "array" }
+          ],
+          "description": "Method parameters"
+        },
+        "id": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" }
+          ],
+          "description": "Request identifier"
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source agent identifier"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target agent identifier"
+        },
+        "conversation_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Conversation thread identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Message timestamp in ISO 8601 format"
+        },
+        "a2a_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "description": "A2A protocol version"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "normal", "high", "critical"],
+          "description": "Message priority level"
+        },
+        "ttl": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Time-to-live in seconds"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional metadata"
+        }
+      },
+      "additionalProperties": false
+    },
+    "response": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "id",
+        "from",
+        "to",
+        "conversation_id",
+        "timestamp",
+        "a2a_version"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version"
+        },
+        "result": {
+          "description": "Method result (mutually exclusive with error)"
+        },
+        "error": {
+          "type": "object",
+          "required": ["code", "message"],
+          "properties": {
+            "code": {
+              "type": "integer",
+              "description": "Error code"
+            },
+            "message": {
+              "type": "string",
+              "description": "Error message"
+            },
+            "data": {
+              "description": "Additional error data"
+            }
+          },
+          "description": "Error object (mutually exclusive with result)"
+        },
+        "id": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" }
+          ],
+          "description": "Request identifier"
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source agent identifier"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target agent identifier"
+        },
+        "conversation_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Conversation thread identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Message timestamp in ISO 8601 format"
+        },
+        "a2a_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "description": "A2A protocol version"
+        }
+      },
+      "oneOf": [
+        { "required": ["result"] },
+        { "required": ["error"] }
+      ],
+      "additionalProperties": false
+    },
+    "notification": {
+      "type": "object",
+      "required": [
+        "jsonrpc",
+        "method",
+        "from",
+        "conversation_id",
+        "timestamp",
+        "a2a_version"
+      ],
+      "properties": {
+        "jsonrpc": {
+          "const": "2.0",
+          "description": "JSON-RPC version"
+        },
+        "method": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Method name"
+        },
+        "params": {
+          "oneOf": [
+            { "type": "object" },
+            { "type": "array" }
+          ],
+          "description": "Method parameters"
+        },
+        "from": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Source agent identifier"
+        },
+        "to": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Target agent identifier (optional for broadcast)"
+        },
+        "conversation_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Conversation thread identifier"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Message timestamp in ISO 8601 format"
+        },
+        "a2a_version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$",
+          "description": "A2A protocol version"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["low", "normal", "high", "critical"],
+          "description": "Message priority level"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Additional metadata"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
