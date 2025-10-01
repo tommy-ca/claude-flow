@@ -69,12 +69,27 @@ export class CapabilityDetector {
 
     // Platform-specific introspection
     switch (platform) {
-      case AgentPlatform.CLAUDE_FLOW:
-        return this.introspectClaudeFlowAgent(agentId);
+      case AgentPlatform.OPENAI_CODEX:
+      case AgentPlatform.OPENAI_GPT4:
       case AgentPlatform.OPENAI_SWARM:
-        return this.introspectOpenAISwarmAgent(agentId);
+        return this.introspectOpenAIAgent(agentId, platform);
+      case AgentPlatform.GOOGLE_GEMINI:
+      case AgentPlatform.GOOGLE_GEMINI_CLI:
+        return this.introspectGeminiAgent(agentId, platform);
+      case AgentPlatform.CURSOR:
+      case AgentPlatform.CURSOR_AGENT:
+        return this.introspectCursorAgent(agentId);
+      case AgentPlatform.AIDER:
+        return this.introspectAiderAgent(agentId);
+      case AgentPlatform.CONTINUE_DEV:
+        return this.introspectContinueAgent(agentId);
+      case AgentPlatform.CODY:
+        return this.introspectCodyAgent(agentId);
       case AgentPlatform.AUTOGEN:
         return this.introspectAutoGenAgent(agentId);
+      case AgentPlatform.LANGCHAIN:
+      case AgentPlatform.LANGGRAPH:
+        return this.introspectLangChainAgent(agentId, platform);
       default:
         return this.genericIntrospection(agentId, platform);
     }
@@ -184,50 +199,98 @@ export class CapabilityDetector {
   }
 
   /**
-   * Claude Flow agent introspection
+   * OpenAI agent introspection (Codex, GPT-4, Swarm)
    */
-  private async introspectClaudeFlowAgent(agentId: string): Promise<Capability[]> {
-    // Use claude-flow's agent introspection API
-    const capabilities: Capability[] = [];
-
-    // Standard claude-flow capabilities
-    const standardCapabilities = [
-      'task_orchestration',
-      'swarm_coordination',
-      'neural_processing',
-      'memory_management',
+  private async introspectOpenAIAgent(agentId: string, platform: AgentPlatform): Promise<Capability[]> {
+    const baseCapabilities = [
       'code_generation',
-      'code_analysis'
+      'code_completion',
+      'chat',
+      'function_calling'
     ];
 
-    for (const capName of standardCapabilities) {
-      capabilities.push(await this.buildCapabilityFromIntrospection(
-        agentId,
-        capName,
-        AgentPlatform.CLAUDE_FLOW
-      ));
+    if (platform === AgentPlatform.OPENAI_SWARM) {
+      baseCapabilities.push('handoff', 'context_variables');
     }
 
-    return capabilities;
+    return Promise.all(baseCapabilities.map(cap =>
+      this.buildCapabilityFromIntrospection(agentId, cap, platform)
+    ));
   }
 
   /**
-   * OpenAI Swarm agent introspection
+   * Google Gemini agent introspection
    */
-  private async introspectOpenAISwarmAgent(agentId: string): Promise<Capability[]> {
-    // Introspect OpenAI Swarm agents
-    return [
-      await this.buildCapabilityFromIntrospection(
-        agentId,
-        'function_calling',
-        AgentPlatform.OPENAI_SWARM
-      ),
-      await this.buildCapabilityFromIntrospection(
-        agentId,
-        'handoff',
-        AgentPlatform.OPENAI_SWARM
-      )
-    ];
+  private async introspectGeminiAgent(agentId: string, platform: AgentPlatform): Promise<Capability[]> {
+    return Promise.all([
+      'code_generation',
+      'research',
+      'reasoning',
+      'multimodal_input'
+    ].map(cap => this.buildCapabilityFromIntrospection(agentId, cap, platform)));
+  }
+
+  /**
+   * Cursor agent introspection
+   */
+  private async introspectCursorAgent(agentId: string): Promise<Capability[]> {
+    return Promise.all([
+      'inline_editing',
+      'code_completion',
+      'lsp_integration',
+      'codebase_context'
+    ].map(cap => this.buildCapabilityFromIntrospection(agentId, cap, AgentPlatform.CURSOR)));
+  }
+
+  /**
+   * Aider agent introspection
+   */
+  private async introspectAiderAgent(agentId: string): Promise<Capability[]> {
+    return Promise.all([
+      'git_operations',
+      'code_generation',
+      'file_editing',
+      'repository_context'
+    ].map(cap => this.buildCapabilityFromIntrospection(agentId, cap, AgentPlatform.AIDER)));
+  }
+
+  /**
+   * Continue.dev agent introspection
+   */
+  private async introspectContinueAgent(agentId: string): Promise<Capability[]> {
+    return Promise.all([
+      'inline_editing',
+      'slash_commands',
+      'context_providers',
+      'code_completion'
+    ].map(cap => this.buildCapabilityFromIntrospection(agentId, cap, AgentPlatform.CONTINUE_DEV)));
+  }
+
+  /**
+   * Cody agent introspection
+   */
+  private async introspectCodyAgent(agentId: string): Promise<Capability[]> {
+    return Promise.all([
+      'code_search',
+      'semantic_search',
+      'code_intelligence',
+      'context_retrieval'
+    ].map(cap => this.buildCapabilityFromIntrospection(agentId, cap, AgentPlatform.CODY)));
+  }
+
+  /**
+   * LangChain/LangGraph agent introspection
+   */
+  private async introspectLangChainAgent(agentId: string, platform: AgentPlatform): Promise<Capability[]> {
+    const capabilities = ['chain_execution', 'tool_calling', 'memory_management'];
+
+    if (platform === AgentPlatform.LANGGRAPH) {
+      capabilities.push('graph_execution', 'state_management');
+    }
+
+    return Promise.all(capabilities.map(cap =>
+      this.buildCapabilityFromIntrospection(agentId, cap, platform)
+    ));
   }
 
   /**

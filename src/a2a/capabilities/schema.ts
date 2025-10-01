@@ -110,14 +110,41 @@ export enum CapabilityCategory {
   CUSTOM = 'custom'
 }
 
+/**
+ * Agent Platform Types
+ *
+ * NOTE: Claude Flow is the COORDINATOR, not an agent platform.
+ * These are the BACKEND agent platforms that Claude Flow coordinates.
+ */
 export enum AgentPlatform {
-  CLAUDE_FLOW = 'claude-flow',
+  // OpenAI platforms
+  OPENAI_CODEX = 'openai-codex',
+  OPENAI_GPT4 = 'openai-gpt4',
   OPENAI_SWARM = 'openai-swarm',
+
+  // Google platforms
+  GOOGLE_GEMINI = 'google-gemini',
+  GOOGLE_GEMINI_CLI = 'google-gemini-cli',
+
+  // IDE/Editor agents
+  CURSOR = 'cursor',
+  CURSOR_AGENT = 'cursor-agent',
+  GITHUB_COPILOT = 'github-copilot',
+  CONTINUE_DEV = 'continue-dev',
+  CODY = 'cody',
+
+  // CLI coding agents
+  AIDER = 'aider',
+
+  // Agent frameworks
   AUTOGEN = 'autogen',
   LANGCHAIN = 'langchain',
+  LANGGRAPH = 'langgraph',
   CREWAI = 'crewai',
   SEMANTIC_KERNEL = 'semantic-kernel',
   HAYSTACK = 'haystack',
+
+  // Other
   CUSTOM = 'custom'
 }
 
